@@ -18,5 +18,5 @@ class Suspended(Base):
     report = Column(Boolean, default=False, nullable=False)
     delete = Column(Boolean, default=False, nullable=False)  # perhaps handle deleted facts differently
 
-    suspender = relationship("User", back_populates="suspended_facts")
-    suspended_fact = relationship("Fact", back_populates="users_who_suspended")
+    suspender = relationship("User", backref="suspensions", cascade="all")
+    suspended_fact = relationship("Fact", backref="suspensions", cascade="all")
