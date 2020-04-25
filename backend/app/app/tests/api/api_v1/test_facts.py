@@ -2,10 +2,10 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.tests.utils.item import create_random_item
+from app.tests.utils.fact import create_random_fact
 
 
-def test_create_item(
+def test_create_fact(
     client: TestClient, superuser_token_headers: dict, db: Session
 ) -> None:
     data = {"title": "Foo", "description": "Fighters"}
@@ -20,16 +20,16 @@ def test_create_item(
     assert "owner_id" in content
 
 
-def test_read_item(
+def test_read_fact(
     client: TestClient, superuser_token_headers: dict, db: Session
 ) -> None:
-    item = create_random_item(db)
+    fact = create_random_fact(db)
     response = client.get(
-        f"{settings.API_V1_STR}/items/{item.id}", headers=superuser_token_headers,
+        f"{settings.API_V1_STR}/items/{fact.id}", headers=superuser_token_headers,
     )
     assert response.status_code == 200
     content = response.json()
-    assert content["title"] == item.title
-    assert content["description"] == item.description
-    assert content["id"] == item.id
-    assert content["owner_id"] == item.owner_id
+    assert content["title"] == fact.title
+    assert content["description"] == fact.description
+    assert content["id"] == fact.id
+    assert content["owner_id"] == fact.owner_id

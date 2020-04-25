@@ -9,8 +9,8 @@ from app.api import deps
 router = APIRouter()
 
 
-@router.get("/", response_model=List[schemas.Item])
-def read_items(
+@router.get("/", response_model=List[schemas.Fact])
+def read_facts(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 100,
@@ -20,50 +20,50 @@ def read_items(
     Retrieve items.
     """
     if crud.user.is_superuser(current_user):
-        items = crud.item.get_multi(db, skip=skip, limit=limit)
+        facts = crud.fact.get_multi(db, skip=skip, limit=limit)
     else:
-        items = crud.item.get_multi_by_owner(
+        facts = crud.fact.get_multi_by_owner(
             db=db, owner_id=current_user.id, skip=skip, limit=limit
         )
-    return items
+    return facts
 
 
-@router.post("/", response_model=schemas.Item)
-def create_item(
+@router.post("/", response_model=schemas.Fact)
+def create_fact(
     *,
     db: Session = Depends(deps.get_db),
-    item_in: schemas.ItemCreate,
+    fact_in: schemas.FactCreate,
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Create new item.
     """
-    item = crud.item.create_with_owner(db=db, obj_in=item_in, owner_id=current_user.id)
-    return item
+    fact = crud.fact.create_with_owner(db=db, obj_in=fact_in, owner_id=current_user.id)
+    return fact
 
 
-@router.put("/{id}", response_model=schemas.Item)
-def update_item(
+@router.put("/{id}", response_model=schemas.Fact)
+def update_fact(
     *,
     db: Session = Depends(deps.get_db),
     id: int,
-    item_in: schemas.ItemUpdate,
+    fact_in: schemas.FactUpdate,
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Update an item.
     """
-    item = crud.item.get(db=db, id=id)
-    if not item:
+    fact = crud.fact.get(db=db, id=id)
+    if not fact:
         raise HTTPException(status_code=404, detail="Item not found")
-    if not crud.user.is_superuser(current_user) and (item.owner_id != current_user.id):
+    if not crud.user.is_superuser(current_user) and (fact.owner_id != current_user.id):
         raise HTTPException(status_code=400, detail="Not enough permissions")
-    item = crud.item.update(db=db, db_obj=item, obj_in=item_in)
-    return item
+    fact = crud.fact.update(db=db, db_obj=fact, obj_in=fact_in)
+    return fact
 
 
-@router.get("/{id}", response_model=schemas.Item)
-def read_item(
+@router.get("/{id}", response_model=schemas.Fact)
+def read_fact(
     *,
     db: Session = Depends(deps.get_db),
     id: int,
@@ -72,16 +72,16 @@ def read_item(
     """
     Get item by ID.
     """
-    item = crud.item.get(db=db, id=id)
-    if not item:
+    fact = crud.fact.get(db=db, id=id)
+    if not fact:
         raise HTTPException(status_code=404, detail="Item not found")
-    if not crud.user.is_superuser(current_user) and (item.owner_id != current_user.id):
+    if not crud.user.is_superuser(current_user) and (fact.owner_id != current_user.id):
         raise HTTPException(status_code=400, detail="Not enough permissions")
-    return item
+    return fact
 
 
-@router.delete("/{id}", response_model=schemas.Item)
-def delete_item(
+@router.delete("/{id}", response_model=schemas.Fact)
+def delete_fact(
     *,
     db: Session = Depends(deps.get_db),
     id: int,
@@ -90,10 +90,10 @@ def delete_item(
     """
     Delete an item.
     """
-    item = crud.item.get(db=db, id=id)
-    if not item:
+    fact = crud.fact.get(db=db, id=id)
+    if not fact:
         raise HTTPException(status_code=404, detail="Item not found")
-    if not crud.user.is_superuser(current_user) and (item.owner_id != current_user.id):
+    if not crud.user.is_superuser(current_user) and (fact.owner_id != current_user.id):
         raise HTTPException(status_code=400, detail="Not enough permissions")
-    item = crud.item.remove(db=db, id=id)
-    return item
+    fact = crud.fact.remove(db=db, id=id)
+    return fact
