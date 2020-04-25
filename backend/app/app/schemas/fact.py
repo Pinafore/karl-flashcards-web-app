@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 
 from pydantic import BaseModel, Json
 
@@ -14,7 +15,7 @@ class FactBase(BaseModel):
     answer: str = None
     category: str = None
     identifier: str = None
-    answer_lines: [str] = None
+    answer_lines: List[str] = None
     extra: Json = None
 
 
@@ -44,7 +45,7 @@ class FactInDBBase(FactBase):
     answer: str
     create_date: datetime
     update_date: datetime
-    answer_lines: [str]
+    answer_lines: List[str]
     public: bool
 
     class Config:

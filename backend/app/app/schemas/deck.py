@@ -2,8 +2,6 @@ from typing import List
 
 from pydantic import BaseModel
 
-from .user import UserInDBBase
-
 
 class DeckBase(BaseModel):
     title: str = None
@@ -38,4 +36,4 @@ class Deck(DeckInDBBase):
 
 # Properties properties stored in DB
 class DeckInDB(DeckInDBBase):
-    owners: List[UserInDBBase]
+    pass

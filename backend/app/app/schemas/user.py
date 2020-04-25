@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel, EmailStr
 
@@ -38,13 +38,10 @@ class UserInDBBase(UserBase):
 # Additional properties to return via API
 class User(UserInDBBase):
     default_deck: Deck
-    decks: [Deck]
-    suspended: [Fact]
+    decks: List[Deck]
+    suspended: List[Fact]
 
 
 # Additional properties stored in DB
 class UserInDB(UserInDBBase):
     hashed_password: str
-    default_deck: DeckInDB
-    decks: [DeckInDB]
-    suspended: [FactInDB]
