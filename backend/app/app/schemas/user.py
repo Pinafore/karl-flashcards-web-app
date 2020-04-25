@@ -2,28 +2,34 @@ from typing import Optional
 
 from pydantic import BaseModel, EmailStr
 
+from .repetition import Repetition
+from .deck import DeckInDB, Deck
+from .fact import FactInDB, Fact
+
 
 # Shared properties
 class UserBase(BaseModel):
-    email: Optional[EmailStr] = None
-    is_active: Optional[bool] = True
+    email: EmailStr = None
+    username: str = None
+    is_active: bool = True
     is_superuser: bool = False
-    username: Optional[str] = None
+    repetition_model: Repetition = None
 
 
 # Properties to receive via API on creation
 class UserCreate(UserBase):
     email: EmailStr
     password: str
+    repetition_model: Repetition = Repetition.leitner
 
 
 # Properties to receive via API on update
 class UserUpdate(UserBase):
-    password: Optional[str] = None
+    password: str = None
 
 
 class UserInDBBase(UserBase):
-    id: Optional[int] = None
+    id: int
 
     class Config:
         orm_mode = True
@@ -31,9 +37,14 @@ class UserInDBBase(UserBase):
 
 # Additional properties to return via API
 class User(UserInDBBase):
-    pass
+    default_deck: Deck
+    decks: [Deck]
+    suspended: [Fact]
 
 
 # Additional properties stored in DB
 class UserInDB(UserInDBBase):
     hashed_password: str
+    default_deck: DeckInDB
+    decks: [DeckInDB]
+    suspended: [FactInDB]
