@@ -28,5 +28,5 @@ class Fact(Base):
 
     deck = relationship("Deck", back_populates="facts")
     history = relationship("History", back_populates="fact")
-    suspenders = association_proxy('suspended', 'suspender')
+    suspenders = association_proxy('suspensions', 'suspender')
 

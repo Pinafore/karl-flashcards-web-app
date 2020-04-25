@@ -28,4 +28,5 @@ class User(Base):
     default_deck = relationship("Deck", foreign_keys=default_deck_id)
     decks = relationship("Deck", secondary=user_deck, back_populates="users")
     history = relationship("History", back_populates="user")
-    suspended_facts = association_proxy('suspended', 'suspended_fact')
+    suspended_facts = association_proxy('suspensions', 'suspended_fact')
+
