@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 class Suspended(Base):
     id = Column(Integer, primary_key=True, index=True)
-    fact_id = Column(Integer, ForeignKey("fact.id"), nullable=False)
+    fact_id = Column(Integer, ForeignKey("fact.card_id"), nullable=False)
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     date_suspended = Column(TIMESTAMP(timezone=True), nullable=False)
     report = Column(Boolean, default=False, nullable=False)

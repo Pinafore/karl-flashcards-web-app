@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 class Fact(Base):
-    id = Column(Integer, primary_key=True, index=True)
+    card_id = Column(Integer, primary_key=True, index=True)
     deck_id = Column(Integer, ForeignKey("deck.id"), nullable=False)
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     text = Column(String, index=True, nullable=False)
@@ -25,7 +25,7 @@ class Fact(Base):
     identifier = Column(String)
     answer_lines = Column(ARRAY(String), nullable=False)
     extra = Column(JSON)
-    public = Column(Boolean, nullable=False)
+    public = Column(Boolean, nullable=False, default=False)
 
     owner = relationship("User", back_populates="facts")
     deck = relationship("Deck", back_populates="facts")

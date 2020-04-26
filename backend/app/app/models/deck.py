@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 class Deck(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, index=True, nullable=False)
-    public = Column(Boolean, nullable=False)
+    public = Column(Boolean, nullable=False, default=False)
 
     facts = relationship("Fact", back_populates="deck")
     users = relationship("User", secondary=user_deck, back_populates="decks")

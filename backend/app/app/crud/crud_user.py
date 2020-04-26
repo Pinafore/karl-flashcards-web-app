@@ -5,19 +5,40 @@ from sqlalchemy.orm import Session
 from app.core.security import get_password_hash, verify_password
 from app.crud.base import CRUDBase
 from app.models.user import User
-from app.schemas.user import UserCreate, UserUpdate
+from app.schemas.user import UserCreate, UserUpdate, SuperUserCreate
+from app import crud
 
 
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     def get_by_email(self, db: Session, *, email: str) -> Optional[User]:
         return db.query(User).filter(User.email == email).first()
 
+    def get_by_username(self, db: Session, *, username: str) -> Optional[User]:
+        return db.query(User).filter(User.username == username).first()
+
     def create(self, db: Session, *, obj_in: UserCreate) -> User:
         db_obj = User(
             email=obj_in.email,
             hashed_password=get_password_hash(obj_in.password),
             username=obj_in.username,
+            is_active=obj_in.is_active,
+            repetition_model=obj_in.repetition_model
+        )
+        deck = crud.deck.get(db=db, id=1)
+        db_obj.decks.append(deck)
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+        return db_obj
+
+    def super_user_create(self, db: Session, *, obj_in: SuperUserCreate) -> User:
+        db_obj = User(
+            email=obj_in.email,
+            hashed_password=get_password_hash(obj_in.password),
+            username=obj_in.username,
             is_superuser=obj_in.is_superuser,
+            is_active=obj_in.is_active,
+            repetition_model=obj_in.repetition_model
         )
         db.add(db_obj)
         db.commit()

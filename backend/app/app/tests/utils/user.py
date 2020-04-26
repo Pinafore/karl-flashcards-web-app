@@ -32,7 +32,7 @@ def create_random_user(db: Session) -> User:
 
 def authentication_token_from_email(
     *, client: TestClient, email: str, db: Session
-) -> Dict[str, str]:
+) -> (Dict[str, str], User):
     """
     Return a valid token for the user with given email.
 
@@ -47,4 +47,4 @@ def authentication_token_from_email(
         user_in_update = UserUpdate(password=password)
         user = crud.user.update(db, db_obj=user, obj_in=user_in_update)
 
-    return user_authentication_headers(client=client, email=email, password=password)
+    return user_authentication_headers(client=client, email=email, password=password), user

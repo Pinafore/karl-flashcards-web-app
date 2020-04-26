@@ -9,18 +9,32 @@ from app.schemas.deck import Deck
 
 
 class FactBase(BaseModel):
-    deck_id: int = None
     user_id: int = None
+    text: str = None
+    answer: str = None
+    category: str = None
+    extra: Json = None
+
+
+class KarlFact(FactBase):
+    card_id: str
+    text: str
+    answer: str
+    label: str
+    history_id: str
+
+
+class InternalFactBase(FactBase):
+    deck_id: int = None
     text: str = None
     answer: str = None
     category: str = None
     identifier: str = None
     answer_lines: List[str] = None
-    extra: Json = None
 
 
 # Properties to receive on fact creation
-class FactCreate(FactBase):
+class FactCreate(InternalFactBase):
     text: str
     answer: str
     deck_id = int
@@ -32,13 +46,18 @@ class SuperUserFactCreate(FactCreate):
 
 
 # Properties to receive on fact update
-class FactUpdate(FactBase):
+class FactUpdate(InternalFactBase):
     pass
 
 
+# Properties to receive on fact update
+class SuperUserFactUpdate(FactUpdate):
+    public: bool = False
+
+
 # Properties shared by models stored in DB
-class FactInDBBase(FactBase):
-    id: int
+class FactInDBBase(InternalFactBase):
+    card_id: int
     deck_id: int
     user_id: int
     text: str

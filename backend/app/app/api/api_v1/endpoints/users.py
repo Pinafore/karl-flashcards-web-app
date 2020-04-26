@@ -31,19 +31,26 @@ def read_users(
 def create_user(
     *,
     db: Session = Depends(deps.get_db),
-    user_in: schemas.UserCreate,
+    user_in: schemas.SuperUserCreate,
     current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """
     Create new user.
     """
+
     user = crud.user.get_by_email(db, email=user_in.email)
     if user:
         raise HTTPException(
             status_code=400,
-            detail="The user with this username already exists in the system.",
+            detail="A user with this email already exists in the system",
         )
-    user = crud.user.create(db, obj_in=user_in)
+    user = crud.user.get_by_username(db, username=user_in.username)
+    if user:
+        raise HTTPException(
+            status_code=400,
+            detail="A user with this username already exists in the system.",
+        )
+    user = crud.user.super_user_create(db, obj_in=user_in)
     if settings.EMAILS_ENABLED and user_in.email:
         send_new_account_email(
             email_to=user_in.email, username=user_in.email, password=user_in.password
@@ -55,22 +62,28 @@ def create_user(
 def update_user_me(
     *,
     db: Session = Depends(deps.get_db),
-    password: str = Body(None),
-    username: str = Body(None),
-    email: EmailStr = Body(None),
+    user_in: schemas.UserUpdate,
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Update own user.
     """
-    current_user_data = jsonable_encoder(current_user)
-    user_in = schemas.UserUpdate(**current_user_data)
-    if password is not None:
-        user_in.password = password
-    if username is not None:
-        user_in.username = username
-    if email is not None:
-        user_in.email = email
+    if user_in.email:
+        user = crud.user.get_by_email(db, email=user_in.email)
+        if user:
+            raise HTTPException(
+                status_code=400,
+                detail="A user with this email already exists in the system.",
+            )
+
+    if user_in.username:
+        user = crud.user.get_by_username(db, username=user_in.username)
+        if user:
+            raise HTTPException(
+                status_code=400,
+                detail="A user with this username already exists in the system.",
+            )
+
     user = crud.user.update(db, db_obj=current_user, obj_in=user_in)
     return user
 
@@ -90,9 +103,7 @@ def read_user_me(
 def create_user_open(
     *,
     db: Session = Depends(deps.get_db),
-    password: str = Body(...),
-    email: EmailStr = Body(...),
-    username: str = Body(None),
+    user_in: schemas.UserCreate,
 ) -> Any:
     """
     Create new user without the need to be logged in.
@@ -102,14 +113,27 @@ def create_user_open(
             status_code=403,
             detail="Open user registration is forbidden on this server",
         )
-    user = crud.user.get_by_email(db, email=email)
+
+    user = crud.user.get_by_email(db, email=user_in.email)
     if user:
         raise HTTPException(
             status_code=400,
-            detail="The user with this username already exists in the system",
+            detail="A user with this email already exists in the system",
         )
-    user_in = schemas.UserCreate(password=password, email=email, username=username)
+    user = crud.user.get_by_username(db, email=user_in.username)
+    if user:
+        raise HTTPException(
+            status_code=400,
+            detail="A user with this username already exists in the system.",
+        )
+
+    user_in = schemas.UserCreate(password=user_in.password, email=user_in.email, username=user_in.username)
     user = crud.user.create(db, obj_in=user_in)
+
+    if settings.EMAILS_ENABLED and user_in.email:
+        send_new_account_email(
+            email_to=user_in.email, username=user_in.email, password=user_in.password
+        )
     return user
 
 
@@ -137,12 +161,16 @@ def update_user(
     *,
     db: Session = Depends(deps.get_db),
     user_id: int,
-    user_in: schemas.UserUpdate,
+    user_in: schemas.SuperUserUpdate,
     current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """
     Update a user.
     """
+    if not crud.user.is_superuser(current_user):
+        raise HTTPException(
+            status_code=400, detail="The user doesn't have enough privileges"
+        )
     user = crud.user.get(db, id=user_id)
     if not user:
         raise HTTPException(
@@ -151,3 +179,4 @@ def update_user(
         )
     user = crud.user.update(db, db_obj=user, obj_in=user_in)
     return user
+

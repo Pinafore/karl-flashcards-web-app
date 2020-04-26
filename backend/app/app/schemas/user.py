@@ -12,15 +12,20 @@ class UserBase(BaseModel):
     email: EmailStr = None
     username: str = None
     is_active: bool = True
-    is_superuser: bool = False
     repetition_model: Repetition = None
 
 
 # Properties to receive via API on creation
 class UserCreate(UserBase):
     email: EmailStr
+    username: str
     password: str
-    repetition_model: Repetition = Repetition.leitner
+    repetition_model: Repetition = Repetition.select_model()
+
+
+# Properties to receive on fact creation
+class SuperUserCreate(UserCreate):
+    is_superuser: bool = False
 
 
 # Properties to receive via API on update
@@ -28,8 +33,13 @@ class UserUpdate(UserBase):
     password: str = None
 
 
+class SuperUserUpdate(UserBase):
+    is_superuser: bool = None
+
+
 class UserInDBBase(UserBase):
     id: int
+    is_superuser: bool
 
     class Config:
         orm_mode = True
@@ -39,7 +49,7 @@ class UserInDBBase(UserBase):
 class User(UserInDBBase):
     default_deck: Deck
     decks: List[Deck]
-    suspended: List[Fact]
+    suspended: List[Fact] = None
 
 
 # Additional properties stored in DB

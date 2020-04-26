@@ -59,3 +59,12 @@ def get_current_active_superuser(
             status_code=400, detail="The user doesn't have enough privileges"
         )
     return current_user
+
+class SkipLimit:
+    def __init__(self, skip: int = None, limit: int = None):
+        self.skip = skip
+        self.limit = limit
+def skip_limit(
+    skip: int = None, limit: int = None
+):
+    return
