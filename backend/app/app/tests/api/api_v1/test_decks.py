@@ -58,20 +58,26 @@ def test_assign_deck(
 ) -> None:
     data = DeckCreate(title="Public", public=True)
     deck = crud.deck.create(db=db, obj_in=data)
+    data2 = DeckCreate(title="Public2", public=True)
+    deck2 = crud.deck.create(db=db, obj_in=data2)
     response = client.put(
-        f"{settings.API_V1_STR}/decks/?deck_ids={deck.id}", headers=normal_user_token_headers[0], json=data.json(),
+        f"{settings.API_V1_STR}/decks/?deck_ids={deck.id}&deck_ids={deck2.id}",
+        headers=normal_user_token_headers[0],
+        json=data.json(),
     )
     content = assert_success(response)
+    user = normal_user_token_headers[1]
+    db.refresh(user)
     assert content[0]["title"] == deck.title
+    assert content[1]["title"] == deck2.title
+    assert deck in user.decks
+    assert deck2 in user.decks
 
 
 def test_update_deck(
     client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
 ) -> None:
-    # data = DeckCreate(title="Public", public=True)
-    # deck = crud.deck.create(data)
     deck = create_random_deck(db, normal_user_token_headers[1])
-    print(deck.title)
     old_title = deck.title
     new_title = random_lower_string()
     data = {"title": new_title}
@@ -80,10 +86,6 @@ def test_update_deck(
     )
     content = assert_success(response)
     db.refresh(deck)
-    print("Deck:", deck.title)
-    print("content:", content)
-    print("old_title:", old_title)
-    print("new_title:", new_title)
     assert old_title != content["title"]
     assert new_title == content["title"]
     assert content["title"] == deck.title

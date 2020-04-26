@@ -12,7 +12,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         self, db: Session, *, obj_in: schemas.FactCreate, owner_id: int
     ) -> models.Fact:
         obj_in_data = jsonable_encoder(obj_in)
-        db_obj = self.model(**obj_in_data, owner_id=owner_id)
+        db_obj = self.model(**obj_in_data, user_id=owner_id)
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)

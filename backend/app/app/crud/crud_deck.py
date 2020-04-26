@@ -61,12 +61,10 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
             self, db: Session, *, db_obj: Deck, user: User
     ) -> Deck:
         if user in db_obj.users:
-            print("in db_obj users")
             db_obj.users.remove(user)
             db.add(db_obj)
             db.commit()
             db.refresh(db_obj)
-            print(db_obj.users)
         return db_obj
 
 

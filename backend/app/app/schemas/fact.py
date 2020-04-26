@@ -37,12 +37,12 @@ class InternalFactBase(FactBase):
 class FactCreate(InternalFactBase):
     text: str
     answer: str
-    deck_id = int
+    deck_id: int
 
 
 # Properties to receive on fact creation
 class SuperUserFactCreate(FactCreate):
-    public: bool
+    public: bool = False
 
 
 # Properties to receive on fact update

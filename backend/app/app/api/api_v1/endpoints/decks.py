@@ -65,7 +65,6 @@ def assign_decks(
         Assign an existing deck to a new user.
     """
 
-    print("CALLING ASSIGNED DECKS")
     decks = []
     for deck_id in deck_ids:
         deck = crud.deck.get(db=db, id=deck_id)
@@ -93,7 +92,6 @@ def update_deck(
     """
     Update an deck.
     """
-    print("DO YOU SEE ME")
     deck = crud.deck.get(db=db, id=deck_id)
     if not deck:
         raise HTTPException(status_code=404, detail="Deck not found")
