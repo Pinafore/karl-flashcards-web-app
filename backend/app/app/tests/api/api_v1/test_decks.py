@@ -79,14 +79,14 @@ def test_update_deck(
         f"{settings.API_V1_STR}/decks/{deck.id}", headers=normal_user_token_headers[0], json=data,
     )
     content = assert_success(response)
-    new_deck = crud.deck.get(db=db, id=deck.id)
-    print("Deck:", new_deck.title)
+    db.refresh(deck)
+    print("Deck:", deck.title)
     print("content:", content)
     print("old_title:", old_title)
     print("new_title:", new_title)
     assert old_title != content["title"]
     assert new_title == content["title"]
-    assert content["title"] == new_deck.title
+    assert content["title"] == deck.title
 
 
 def test_delete_deck(
@@ -100,10 +100,8 @@ def test_delete_deck(
     )
     content = assert_success(response)
     assert content["title"] == deck.title
-    new_deck = crud.deck.get(db=db, id=deck.id)
-    print(deck.users)
-    print(new_deck.users)
-    assert user not in new_deck.users
+    db.refresh(deck)
+    assert user not in deck.users
 
 
 def assert_success(response):
