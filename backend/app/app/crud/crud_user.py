@@ -58,13 +58,21 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             update_data["hashed_password"] = hashed_password
         return super().update(db, db_obj=db_obj, obj_in=update_data)
 
-    def authenticate(self, db: Session, *, email: str, password: str) -> Optional[User]:
-        user = self.get_by_email(db, email=email)
-        if not user:
+    def authenticate(self, db_session: Session, *, email: str, username: str, password: str) -> Optional[User]:
+        user1 = self.get_by_email(db_session, email=email)
+
+        if not user1:
+            user2 = self.get_by_username(db_session, username=username)
+            if not user2:
+                return None
+            elif not verify_password(password, user2.hashed_password):
+                return None
+            else:
+                return user2
+        elif not verify_password(password, user1.hashed_password):
             return None
-        if not verify_password(password, user.hashed_password):
-            return None
-        return user
+        else:
+            return user1
 
     def is_active(self, user: User) -> bool:
         return user.is_active
