@@ -12,7 +12,7 @@ class DeckBase(BaseModel):
 class DeckCreate(DeckBase):
     title: str
     public: bool = False
-
+# TODO: Add SuperDeckCreate and move public there
 
 # Properties to receive on deck update
 class DeckUpdate(DeckBase):
@@ -25,13 +25,11 @@ class DeckInDBBase(DeckBase):
     title: str
     public: bool
 
-    class Config:
-        orm_mode = True
-
 
 # Properties to return to client
 class Deck(DeckInDBBase):
-    pass
+    class Config:
+        orm_mode = True
 
 
 # Properties properties stored in DB

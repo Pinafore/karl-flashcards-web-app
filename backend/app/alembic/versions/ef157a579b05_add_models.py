@@ -1,8 +1,8 @@
 """add models
 
-Revision ID: fd9da255793e
+Revision ID: ef157a579b05
 Revises: 
-Create Date: 2020-04-25 23:33:31.461937
+Create Date: 2020-04-27 01:11:02.135055
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'fd9da255793e'
+revision = 'ef157a579b05'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -53,7 +53,6 @@ def upgrade():
     sa.Column('identifier', sa.String(), nullable=True),
     sa.Column('answer_lines', sa.ARRAY(sa.String()), nullable=False),
     sa.Column('extra', sa.JSON(), nullable=True),
-    sa.Column('public', sa.Boolean(), nullable=False),
     sa.ForeignKeyConstraint(['deck_id'], ['deck.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('card_id')
@@ -62,11 +61,12 @@ def upgrade():
     op.create_index(op.f('ix_fact_card_id'), 'fact', ['card_id'], unique=False)
     op.create_index(op.f('ix_fact_text'), 'fact', ['text'], unique=False)
     op.create_table('user_deck',
-    sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('deck_id', sa.Integer(), nullable=False),
+    sa.Column('owner_id', sa.Integer(), nullable=False),
+    sa.Column('permissions', sa.Enum('owner', 'viewer', name='permission'), nullable=False),
     sa.ForeignKeyConstraint(['deck_id'], ['deck.id'], ),
-    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
-    sa.PrimaryKeyConstraint('user_id', 'deck_id')
+    sa.ForeignKeyConstraint(['owner_id'], ['user.id'], ),
+    sa.PrimaryKeyConstraint('deck_id', 'owner_id')
     )
     op.create_table('history',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -86,8 +86,7 @@ def upgrade():
     sa.Column('fact_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('date_suspended', sa.TIMESTAMP(timezone=True), nullable=False),
-    sa.Column('report', sa.Boolean(), nullable=False),
-    sa.Column('delete', sa.Boolean(), nullable=False),
+    sa.Column('type', sa.Enum('delete', 'suspend', 'report', name='suspendtype'), nullable=False),
     sa.ForeignKeyConstraint(['fact_id'], ['fact.card_id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')

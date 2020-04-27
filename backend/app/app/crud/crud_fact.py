@@ -5,14 +5,34 @@ from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
 from app import crud, models, schemas
+from datetime import datetime
+from pytz import timezone
 
 
 class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
-    def create_with_owner(
-        self, db: Session, *, obj_in: schemas.FactCreate, owner_id: int
+    # def create(
+    #     self, db: Session, *, obj_in: schemas.FactCreate
+    # ) -> models.Fact:
+    #     obj_in_data = jsonable_encoder(obj_in)
+    #     now = datetime.now(timezone('UTC')).isoformat()
+    #     db_obj = self.model(**obj_in_data,
+    #                         user_id=user.id,
+    #                         create_date=now,
+    #                         update_date=now)
+    #     db.add(db_obj)
+    #     db.commit()
+    #     db.refresh(db_obj)
+    #     return db_obj
+
+    def create(
+        self, db: Session, *, obj_in: schemas.FactCreate, user: models.User
     ) -> models.Fact:
         obj_in_data = jsonable_encoder(obj_in)
-        db_obj = self.model(**obj_in_data, user_id=owner_id)
+        now = datetime.now(timezone('UTC')).isoformat()
+        db_obj = self.model(**obj_in_data,
+                            user_id=user.id,
+                            create_date=now,
+                            update_date=now)
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)

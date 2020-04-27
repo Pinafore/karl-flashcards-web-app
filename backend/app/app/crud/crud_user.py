@@ -5,9 +5,14 @@ from sqlalchemy.orm import Session
 from app.core.security import get_password_hash, verify_password
 from app.crud.base import CRUDBase
 from app.models.user import User
-from app.schemas.user import UserCreate, UserUpdate, SuperUserCreate
+from app.schemas.user import UserCreate, UserUpdate, SuperUserCreate, SuperUserUpdate
 from app import crud
 
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+import sys
+sys.setrecursionlimit(1500)
 
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     def get_by_email(self, db: Session, *, email: str) -> Optional[User]:
@@ -24,10 +29,10 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             is_active=obj_in.is_active,
             repetition_model=obj_in.repetition_model
         )
-        deck = crud.deck.get(db=db, id=1)
-        db_obj.decks.append(deck)
         db.add(db_obj)
         db.commit()
+        deck = crud.deck.get(db=db, id=1)
+        crud.deck.assign_owner(db=db, db_obj=deck, user=db_obj)
         db.refresh(db_obj)
         return db_obj
 
@@ -46,21 +51,21 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         return db_obj
 
     def update(
-        self, db: Session, *, db_obj: User, obj_in: Union[UserUpdate, Dict[str, Any]]
+        self, db: Session, *, db_obj: User, obj_in: Union[UserUpdate, SuperUserUpdate, Dict[str, Any]]
     ) -> User:
         if isinstance(obj_in, dict):
             update_data = obj_in
         else:
             update_data = obj_in.dict(exclude_unset=True)
-        if update_data["password"]:
-            hashed_password = get_password_hash(update_data["password"])
-            del update_data["password"]
-            update_data["hashed_password"] = hashed_password
+        if obj_in.password:
+            if update_data["password"]:
+                hashed_password = get_password_hash(update_data["password"])
+                del update_data["password"]
+                update_data["hashed_password"] = hashed_password
         return super().update(db, db_obj=db_obj, obj_in=update_data)
 
     def authenticate(self, db_session: Session, *, email: str, username: str, password: str) -> Optional[User]:
         user1 = self.get_by_email(db_session, email=email)
-
         if not user1:
             user2 = self.get_by_username(db_session, username=username)
             if not user2:

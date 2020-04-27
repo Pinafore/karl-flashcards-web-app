@@ -1,14 +1,16 @@
 from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, Column, Integer, String
+from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
 
 from app.db.base_class import Base
-from .user_deck import user_deck
+# from .user_deck import user_deck
 
 if TYPE_CHECKING:
     from .fact import Fact  # noqa: F401
     from .user import User  # noqa: F401
+    from .user_deck import User_Deck  # noqa: F401
 
 
 class Deck(Base):
@@ -17,4 +19,5 @@ class Deck(Base):
     public = Column(Boolean, nullable=False, default=False)
 
     facts = relationship("Fact", back_populates="deck")
-    users = relationship("User", secondary=user_deck, back_populates="decks")
+    users = association_proxy('user_decks', 'user')
+    user_decks = relationship("User_Deck", back_populates="deck", cascade="all, delete-orphan")

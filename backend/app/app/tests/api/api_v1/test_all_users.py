@@ -6,10 +6,13 @@ from sqlalchemy.orm import Session
 from app import crud
 from app.core.config import settings
 from app.models import User
-from app.schemas.user import UserCreate
-from app.tests.utils.utils import random_email, random_lower_string
+from app.schemas import UserCreate
+from app.tests.utils.deck import create_random_deck
+from app.schemas.deck import DeckCreate
+from app.tests.utils.utils import random_lower_string, random_email
 
 
+#
 def test_get_users_superuser_me(
     client: TestClient, superuser_token_headers: Dict[str, str]
 ) -> None:

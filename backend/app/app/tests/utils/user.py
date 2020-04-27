@@ -8,7 +8,9 @@ from app.core.config import settings
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
 from app.tests.utils.utils import random_email, random_lower_string
-
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def user_authentication_headers(
     *, client: TestClient, email: str, password: str

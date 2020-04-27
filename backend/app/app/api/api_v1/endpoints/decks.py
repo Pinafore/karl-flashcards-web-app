@@ -71,9 +71,9 @@ def assign_decks(
         if not deck:
             raise HTTPException(status_code=404, detail="Deck not found")
 
-        if deck.public or crud.user.is_superuser(current_user):
+        if deck.public:
             if deck not in current_user.decks:
-                deck = crud.deck.assign(db=db, db_obj=deck, user=current_user)
+                deck = crud.deck.assign_viewer(db=db, db_obj=deck, user=current_user)
                 decks.append(deck)
         else:
             raise HTTPException(status_code=404, detail="User does not have permission to add one of the specified "

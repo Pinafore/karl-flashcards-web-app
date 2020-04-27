@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 from sqlalchemy import Column, Integer, ForeignKey, TIMESTAMP, Enum
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 
 from app.db.base_class import Base
 from app.schemas.suspend_type import SuspendType
@@ -18,5 +18,5 @@ class Suspended(Base):
     date_suspended = Column(TIMESTAMP(timezone=True), nullable=False)
     type = Column(Enum(SuspendType), nullable=False)
 
-    suspender = relationship("User", backref="suspensions", cascade="all")
-    suspended_fact = relationship("Fact", backref="suspensions", cascade="all")
+    suspender = relationship("User", backref=backref("suspensions", cascade="all, delete-orphan"))
+    suspended_fact = relationship("Fact", backref=backref("suspensions", cascade="all, delete-orphan"))

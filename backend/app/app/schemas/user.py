@@ -1,6 +1,7 @@
-from typing import Optional, List
+from typing import Optional, List, Collection, Any, Type
 
 from pydantic import BaseModel, EmailStr
+from pydantic.utils import GetterDict
 
 from .repetition import Repetition
 from .deck import DeckInDB, Deck
@@ -31,9 +32,10 @@ class SuperUserCreate(UserCreate):
 # Properties to receive via API on update
 class UserUpdate(UserBase):
     password: str = None
+    default_deck_id: int = None
 
 
-class SuperUserUpdate(UserBase):
+class SuperUserUpdate(UserUpdate):
     is_superuser: bool = None
 
 
@@ -48,8 +50,27 @@ class UserInDBBase(UserBase):
 # Additional properties to return via API
 class User(UserInDBBase):
     default_deck: Deck
-    decks: List[Deck]
-    suspended: List[Fact] = None
+    decks: List[Deck] = []
+    suspended_facts: List[Fact] = []
+
+
+    class Config:
+        orm_mode = True
+
+    # Done to work with association proxies, which return Collections
+    # See here: https://github.com/samuelcolvin/pydantic/issues/380#issuecomment-535112498
+    class CustomGetterDict(GetterDict):
+        def get(self, item: Any, default: Any) -> Any:
+            attribute = getattr(self._obj, item, default)
+            if item == "decks":
+                attribute = list(attribute)
+            if item == "suspended_facts":
+                attribute = list(attribute)
+            return attribute
+
+    @classmethod
+    def _decompose_class(cls: Type['Model'], obj: Any) -> GetterDict:
+        return User.CustomGetterDict(obj)
 
 
 # Additional properties stored in DB

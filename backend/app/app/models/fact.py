@@ -25,7 +25,6 @@ class Fact(Base):
     identifier = Column(String)
     answer_lines = Column(ARRAY(String), nullable=False)
     extra = Column(JSON)
-    public = Column(Boolean, nullable=False, default=False)
 
     owner = relationship("User", back_populates="facts")
     deck = relationship("Deck", back_populates="facts")

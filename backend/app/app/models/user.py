@@ -6,13 +6,14 @@ from sqlalchemy.orm import relationship
 
 from app.db.base_class import Base
 from app.schemas.repetition import Repetition
-from .user_deck import user_deck
+# from .user_deck import user_deck
 
 if TYPE_CHECKING:
     from .suspended import Suspended  # noqa: F401
     from .history import History  # noqa: F401
     from .deck import Deck  # noqa: F401
     from .fact import Fact  # noqa: F401
+    from .user_deck import User_Deck  # noqa: F401
 
 
 class User(Base):
@@ -26,8 +27,10 @@ class User(Base):
     default_deck_id = Column(Integer, ForeignKey("deck.id"), default=1)
 
     default_deck = relationship("Deck", foreign_keys=default_deck_id)
-    decks = relationship("Deck", secondary=user_deck, back_populates="users")
     facts = relationship("Fact", back_populates="owner")
     history = relationship("History", back_populates="user")
     suspended_facts = association_proxy('suspensions', 'suspended_fact')
+    user_decks = relationship("User_Deck", back_populates="user", cascade="all, delete-orphan")
+    decks = association_proxy('user_decks', 'deck')
+
 
