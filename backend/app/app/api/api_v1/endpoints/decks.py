@@ -12,17 +12,17 @@ router = APIRouter()
 @router.get("/", response_model=List[schemas.Deck])
 def read_decks(
     db: Session = Depends(deps.get_db),
-    common: deps.SkipLimit = Depends(),
+    paginate: deps.Paginate = Depends(),
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Retrieve decks.
     """
     if crud.user.is_superuser(current_user):
-        decks = crud.deck.get_multi(db, skip=common.skip, limit=common.limit)
+        decks = crud.deck.get_multi(db, skip=paginate.skip, limit=paginate.limit)
     else:
         decks = crud.deck.get_multi_by_owner(
-            user=current_user, skip=common.skip, limit=common.limit
+            user=current_user, skip=paginate.skip, limit=paginate.limit
         )
     return decks
 
@@ -96,7 +96,7 @@ def update_deck(
     if not deck:
         raise HTTPException(status_code=404, detail="Deck not found")
     if not crud.user.is_superuser(current_user) and deck.public:
-        raise HTTPException(status_code=400, detail="Not enough permissions")
+        raise HTTPException(status_code=401, detail="Not enough permissions")
     deck = crud.deck.update(db=db, db_obj=deck, obj_in=deck_in)
     return deck
 
@@ -117,7 +117,7 @@ def read_deck(
     if crud.user.is_superuser(current_user) or deck in current_user.decks or deck.public:
         return deck
     else:
-        raise HTTPException(status_code=400, detail="Not enough permissions")
+        raise HTTPException(status_code=401, detail="Not enough permissions")
 
 
 @router.delete("/{deck_id}", response_model=schemas.Deck)

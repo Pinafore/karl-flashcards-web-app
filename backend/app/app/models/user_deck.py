@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import Column, Integer, ForeignKey, Enum
 from sqlalchemy.orm import relationship
@@ -6,9 +6,10 @@ from sqlalchemy.orm import relationship
 from app.db.base_class import Base
 from app.schemas.permission import Permission
 
-if TYPE_CHECKING:
-    from .user import User  # noqa: F401
-    from .deck import Deck  # noqa: F401
+from .user import User
+from .deck import Deck
+
+
 
 # user_deck = Table("user_deck", Base.metadata,
 #                   Column("user_id", Integer, ForeignKey("user.id"), primary_key=True),
@@ -22,7 +23,7 @@ class User_Deck(Base):
     user = relationship("User", back_populates="user_decks")
     deck = relationship("Deck", back_populates="user_decks")
 
-    def __init__(self, deck=None, user=None, permissions=None):
+    def __init__(self, deck: Deck, user: User, permissions: Permission):
         self.deck = deck
         self.user = user
         self.permissions = permissions

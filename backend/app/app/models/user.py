@@ -27,7 +27,7 @@ class User(Base):
     default_deck_id = Column(Integer, ForeignKey("deck.id"), default=1)
 
     default_deck = relationship("Deck", foreign_keys=default_deck_id)
-    facts = relationship("Fact", back_populates="owner")
+    owned_facts = relationship("Fact", back_populates="owner")
     history = relationship("History", back_populates="user")
     suspended_facts = association_proxy('suspensions', 'suspended_fact')
     user_decks = relationship("User_Deck", back_populates="user", cascade="all, delete-orphan")

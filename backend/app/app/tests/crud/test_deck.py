@@ -39,9 +39,9 @@ def test_find_or_create(db: Session) -> None:
 #     deck_in = DeckCreate(title=title, description=description)
 #     user = create_random_user(db)
 #     deck = crud.deck.create_with_owner(db=db, obj_in=deck_in, owner_id=user.id)
-#     stored_deck = crud.deck.get(db=db, id=deck.card_id)
+#     stored_deck = crud.deck.get(db=db, id=deck.fact_id)
 #     assert stored_deck
-#     assert deck.card_id == stored_deck.card_id
+#     assert deck.fact_id == stored_deck.fact_id
 #     assert deck.title == stored_deck.title
 #     assert deck.description == stored_deck.description
 #     assert deck.owner_id == stored_deck.owner_id
@@ -56,7 +56,7 @@ def test_find_or_create(db: Session) -> None:
 #     description2 = random_lower_string()
 #     deck_update = DeckUpdate(description=description2)
 #     deck2 = crud.deck.update(db=db, db_obj=deck, obj_in=deck_update)
-#     assert deck.card_id == deck2.id
+#     assert deck.fact_id == deck2.id
 #     assert deck.title == deck2.title
 #     assert deck2.description == description2
 #     assert deck.owner_id == deck2.owner_id
@@ -68,10 +68,10 @@ def test_find_or_create(db: Session) -> None:
 #     deck_in = DeckCreate(title=title, description=description)
 #     user = create_random_user(db)
 #     deck = crud.deck.create_with_owner(db=db, obj_in=deck_in, owner_id=user.id)
-#     deck2 = crud.deck.remove(db=db, id=deck.card_id)
-#     deck3 = crud.deck.get(db=db, id=deck.card_id)
+#     deck2 = crud.deck.remove(db=db, id=deck.fact_id)
+#     deck3 = crud.deck.get(db=db, id=deck.fact_id)
 #     assert deck3 is None
-#     assert deck2.id == deck.card_id
+#     assert deck2.id == deck.fact_id
 #     assert deck2.title == title
 #     assert deck2.description == description
 #     assert deck2.owner_id == user.id

@@ -9,15 +9,14 @@ from app.schemas.deck import Deck
 
 
 class FactBase(BaseModel):
-    user_id: int = None
     text: str = None
     answer: str = None
     category: str = None
-    extra: Json = None
+    extra: dict = None
 
 
 class KarlFact(FactBase):
-    card_id: str
+    fact_id: str
     text: str
     answer: str
     label: str
@@ -45,7 +44,7 @@ class FactUpdate(InternalFactBase):
 
 # Properties shared by models stored in DB
 class FactInDBBase(InternalFactBase):
-    card_id: int
+    fact_id: int
     deck_id: int
     user_id: int
     text: str

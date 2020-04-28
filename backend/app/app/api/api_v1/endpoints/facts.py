@@ -12,18 +12,17 @@ router = APIRouter()
 @router.get("/", response_model=List[schemas.Fact])
 def read_facts(
     db: Session = Depends(deps.get_db),
-    skip: int = 0,
-    limit: int = 100,
+    paginate: deps.Paginate = Depends(),
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
-    Retrieve items.
+    Retrieve facts.
     """
     if crud.user.is_superuser(current_user):
-        facts = crud.fact.get_multi(db, skip=skip, limit=limit)
+        facts = crud.fact.get_multi(db=db, skip=paginate.skip, limit=paginate.limit)
     else:
         facts = crud.fact.get_multi_by_owner(
-            db=db, owner_id=current_user.id, skip=skip, limit=limit
+            db=db, user=current_user, skip=paginate.skip, limit=paginate.limit
         )
     return facts
 
@@ -36,64 +35,80 @@ def create_fact(
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
-    Create new item.
+    Create new fact.
     """
-    fact = crud.fact.create_with_owner(db=db, obj_in=fact_in, owner_id=current_user.id)
+    fact = crud.fact.create_with_owner(db=db, obj_in=fact_in, user=current_user)
     return fact
 
 
-@router.put("/{id}", response_model=schemas.Fact)
+@router.put("/{fact_id}", response_model=schemas.Fact)
 def update_fact(
     *,
-    db: Session = Depends(deps.get_db),
-    id: int,
     fact_in: schemas.FactUpdate,
-    current_user: models.User = Depends(deps.get_current_active_user),
+    perms: deps.CheckFactPerms = Depends(),
 ) -> Any:
     """
-    Update an item.
+    Update a fact.
     """
-    fact = crud.fact.get(db=db, id=id)
-    if not fact:
-        raise HTTPException(status_code=404, detail="Item not found")
-    if not crud.user.is_superuser(current_user) and (fact.owner_id != current_user.id):
-        raise HTTPException(status_code=400, detail="Not enough permissions")
-    fact = crud.fact.update(db=db, db_obj=fact, obj_in=fact_in)
+    fact = crud.fact.update(db=perms.db, db_obj=perms.fact, obj_in=fact_in)
     return fact
 
 
-@router.get("/{id}", response_model=schemas.Fact)
+@router.get("/{fact_id}", response_model=schemas.Fact)
 def read_fact(
     *,
-    db: Session = Depends(deps.get_db),
-    id: int,
-    current_user: models.User = Depends(deps.get_current_active_user),
+    perms: deps.CheckFactPerms = Depends(),
+    undo: bool = False,
 ) -> Any:
     """
-    Get item by ID.
+    Get fact by ID.
     """
-    fact = crud.fact.get(db=db, id=id)
-    if not fact:
-        raise HTTPException(status_code=404, detail="Item not found")
-    if not crud.user.is_superuser(current_user) and (fact.owner_id != current_user.id):
-        raise HTTPException(status_code=400, detail="Not enough permissions")
+    return perms.fact
+
+
+@router.delete("/{fact_id}", response_model=schemas.Fact)
+def delete_fact(
+    *,
+    perms: deps.CheckFactPerms = Depends(),
+    undo: bool = False,
+) -> Any:
+    """
+    Delete a fact.
+    """
+    if undo:
+        fact = crud.fact.undo_remove(db=perms.db, db_obj=perms.fact, user=perms.current_user)
+    else:
+        fact = crud.fact.remove(db=perms.db, db_obj=perms.fact, user=perms.current_user)
     return fact
 
 
-@router.delete("/{id}", response_model=schemas.Fact)
-def delete_fact(
+@router.put("/suspend/{fact_id}", response_model=schemas.Fact)
+def suspend_fact(
     *,
-    db: Session = Depends(deps.get_db),
-    id: int,
-    current_user: models.User = Depends(deps.get_current_active_user),
+    perms: deps.CheckFactPerms = Depends(),
+    undo: bool = False,
 ) -> Any:
     """
-    Delete an item.
+    Suspend a fact.
     """
-    fact = crud.fact.get(db=db, id=id)
-    if not fact:
-        raise HTTPException(status_code=404, detail="Item not found")
-    if not crud.user.is_superuser(current_user) and (fact.owner_id != current_user.id):
-        raise HTTPException(status_code=400, detail="Not enough permissions")
-    fact = crud.fact.remove(db=db, id=id)
+    if undo:
+        fact = crud.fact.undo_suspend(db=perms.db, db_obj=perms.fact, user=perms.current_user)
+    else:
+        fact = crud.fact.suspend(db=perms.db, db_obj=perms.fact, user=perms.current_user)
+    return fact
+
+
+@router.put("/report/{fact_id}", response_model=schemas.Fact)
+def report_fact(
+    *,
+    perms: deps.CheckFactPerms = Depends(),
+    undo: bool = False,
+) -> Any:
+    """
+    Report a fact.
+    """
+    if undo:
+        fact = crud.fact.undo_report(db=perms.db, db_obj=perms.fact, user=perms.current_user)
+    else:
+        fact = crud.fact.report(db=perms.db, db_obj=perms.fact, user=perms.current_user)
     return fact

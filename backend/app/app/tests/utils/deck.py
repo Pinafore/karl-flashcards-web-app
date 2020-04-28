@@ -1,10 +1,7 @@
-from typing import Optional
-
 from sqlalchemy.orm import Session
 
 from app import crud, models
 from app.schemas.deck import DeckCreate
-from app.tests.utils.user import create_random_user
 from app.tests.utils.utils import random_lower_string
 
 

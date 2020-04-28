@@ -60,7 +60,8 @@ def get_current_active_superuser(
         )
     return current_user
 
-class SkipLimit:
+
+class Paginate:
     def __init__(self, skip: int = None, limit: int = None):
         self.skip = skip
         self.limit = limit
