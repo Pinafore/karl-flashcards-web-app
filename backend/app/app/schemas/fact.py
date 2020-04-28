@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, Json
 
@@ -19,8 +19,8 @@ class KarlFact(FactBase):
     fact_id: str
     text: str
     answer: str
-    label: str
-    history_id: str
+    label: str = None
+    history_id: str = None
 
 
 class InternalFactBase(FactBase):
@@ -41,6 +41,13 @@ class FactCreate(InternalFactBase):
 class FactUpdate(InternalFactBase):
     pass
 
+# Properties to receive when updating fact schedule
+class FactScheduleUpdate(InternalFactBase):
+    typed: str
+    response: str
+    review_datetime: datetime
+    elapsed_seconds_front: int
+    elapsed_seconds_back: int
 
 # Properties shared by models stored in DB
 class FactInDBBase(InternalFactBase):
@@ -52,6 +59,7 @@ class FactInDBBase(InternalFactBase):
     create_date: datetime
     update_date: datetime
     answer_lines: List[str]
+    deck: Deck
 
     class Config:
         orm_mode = True
@@ -59,7 +67,7 @@ class FactInDBBase(InternalFactBase):
 
 # Properties to return to client
 class Fact(FactInDBBase):
-    deck: Deck
+    rationale: Optional[str] = None
 
 
 # Additional properties stored in DB

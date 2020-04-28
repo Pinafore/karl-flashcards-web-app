@@ -65,7 +65,23 @@ class Paginate:
     def __init__(self, skip: int = None, limit: int = None):
         self.skip = skip
         self.limit = limit
-def skip_limit(
-    skip: int = None, limit: int = None
-):
-    return
+
+class CheckFactPerms():
+    def __init__(self, fact_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_active_user)):
+        fact = crud.fact.get(db=db, id=fact_id)
+        if not fact:
+            raise HTTPException(status_code=404, detail="Fact not found")
+        if not crud.user.is_superuser(current_user) and (fact.user_id != current_user.id):
+            raise HTTPException(status_code=401, detail="Not enough permissions")
+        self.fact = fact
+        self.db = db
+        self.current_user = current_user
+        self.fact_id = fact_id
+
+# def check_fact_and_perms(fact_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_active_user)) -> models.Fact:
+#     fact = crud.fact.get(db=db, id=fact_id)
+#     if not fact:
+#         raise HTTPException(status_code=404, detail="Fact not found")
+#     if not crud.user.is_superuser(current_user) and (fact.user_id != current_user.id):
+#         raise HTTPException(status_code=401, detail="Not enough permissions")
+#     return fact

@@ -1,4 +1,4 @@
-from .fact import Fact, FactCreate, FactInDB, FactUpdate, KarlFact
+from .fact import Fact, FactCreate, FactInDB, FactUpdate, KarlFact, FactScheduleUpdate
 from .msg import Msg
 from .token import Token, TokenPayload
 from .user import User, UserCreate, UserInDB, UserUpdate, SuperUserCreate, SuperUserUpdate
