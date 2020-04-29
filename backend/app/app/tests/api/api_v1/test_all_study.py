@@ -62,7 +62,6 @@ def test_update_schedule_set(
     assert_success(response=r)
 
 
-
 def test_evaluate_answer(
     client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
 ) -> None:

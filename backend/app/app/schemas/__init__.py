@@ -9,3 +9,4 @@ from .suspend_type import SuspendType
 from .permission import Permission
 from .log import Log
 from .schedule import Schedule
+from .statistics import Statistics
