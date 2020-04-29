@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app import crud, schemas, models
 from app.core.config import settings
 from app.db import base  # noqa: F401
+from app.core.celery_app import celery_app
 import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -35,3 +36,5 @@ def init_db(db: Session) -> None:
         user = crud.user.super_user_create(db, obj_in=user_in)  # noqa: F841
 
         crud.deck.assign_owner(db, db_obj=deck, user=user)
+
+        celery_app.send_task("app.worker.load_quizbowl_facts")
