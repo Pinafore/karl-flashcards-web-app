@@ -10,10 +10,10 @@ from .fact import FactInDB, Fact
 
 # Shared properties
 class UserBase(BaseModel):
-    email: EmailStr = None
-    username: str = None
+    email: Optional[EmailStr] = None
+    username: Optional[str] = None
     is_active: bool = True
-    repetition_model: Repetition = None
+    repetition_model: Optional[Repetition] = None
 
 
 # Properties to receive via API on creation
@@ -31,12 +31,12 @@ class SuperUserCreate(UserCreate):
 
 # Properties to receive via API on update
 class UserUpdate(UserBase):
-    password: str = None
+    password: Optional[str] = None
     default_deck_id: int = None
 
 
 class SuperUserUpdate(UserUpdate):
-    is_superuser: bool = None
+    is_superuser: Optional[bool] = None
 
 
 class UserInDBBase(UserBase):

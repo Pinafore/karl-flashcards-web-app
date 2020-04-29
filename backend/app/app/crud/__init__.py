@@ -1,6 +1,7 @@
 from .crud_fact import fact
 from .crud_user import user
 from .crud_deck import deck
+from .crud_history import history
 
 # For a new basic set of CRUD operations you could just do
 

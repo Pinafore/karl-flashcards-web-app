@@ -9,24 +9,25 @@ from app.schemas.deck import Deck
 
 
 class FactBase(BaseModel):
-    text: str = None
-    answer: str = None
-    category: str = None
-    extra: dict = None
+    text: Optional[str] = None
+    answer: Optional[str] = None
+    category: Optional[str] = None
 
 
 class KarlFact(FactBase):
-    fact_id: str
+    user_id: int
+    fact_id: int
     text: str
     answer: str
-    label: str = None
-    history_id: str = None
+    label: Optional[str] = None
+    history_id: int = None
 
 
 class InternalFactBase(FactBase):
     deck_id: int = None
-    identifier: str = None
+    identifier: Optional[str] = None
     answer_lines: List[str] = None
+    extra: dict = None
 
 
 # Properties to receive on fact creation
@@ -41,13 +42,6 @@ class FactCreate(InternalFactBase):
 class FactUpdate(InternalFactBase):
     pass
 
-# Properties to receive when updating fact schedule
-class FactScheduleUpdate(InternalFactBase):
-    typed: str
-    response: str
-    review_datetime: datetime
-    elapsed_seconds_front: int
-    elapsed_seconds_back: int
 
 # Properties shared by models stored in DB
 class FactInDBBase(InternalFactBase):

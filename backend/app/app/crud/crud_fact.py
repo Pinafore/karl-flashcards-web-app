@@ -1,3 +1,4 @@
+import json
 from typing import List, Union, Dict, Any, Optional
 
 from fastapi.encoders import jsonable_encoder
@@ -5,7 +6,7 @@ from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
-from app import crud, models, schemas
+from app import crud, models, schemas, evaluate
 from datetime import datetime
 from pytz import timezone
 import time
@@ -34,7 +35,6 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                             update_date=now)
         db.add(db_obj)
         db.commit()
-        print(db_obj)
         return db_obj
 
     def get_multi_by_owner(
@@ -48,7 +48,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         return query.all()
 
     def update(
-        self, db: Session, *, db_obj: models.Fact, obj_in: Union[schemas.FactCreate, Dict[str, Any]]
+        self, db: Session, *, db_obj: models.Fact, obj_in: Union[schemas.FactUpdate, Dict[str, Any]]
     ) -> models.Fact:
         update_data = obj_in.dict(exclude_unset=True)
         update_data["update_date"] = datetime.now(timezone('UTC')).isoformat()
@@ -160,7 +160,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
 
     def get_study_set(
             self, db: Session, *, user: models.User, deck_ids: List[int] = None, limit: int = None
-    ) -> List[models.Fact]:
+    ) -> List[schemas.Fact]:
         eligible_facts = self.get_eligible_facts(db, user=user, deck_ids=deck_ids, limit=limit)
 
         karl_list = []
@@ -168,40 +168,66 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         for each_card in eligible_facts:
             karl_list.append(schemas.KarlFact(
                 text=each_card.text,
-                user_id=user.id,
-                fact_id=each_card.fact_id,
+                answer=each_card.answer,
                 category=each_card.category,
-                answer=each_card.answer
+                user_id=user.id,
+                fact_id=each_card.fact_id
             ).dict())
-        karl_list_end_time = time.time()
-        overall_karl_list_time = karl_list_end_time - karl_list_start
-        logger.info("eligible fact time: " + str(overall_karl_list_time))
+        logger.info("eligible fact time: " + str(time.time() - karl_list_start))
 
         karl_query_start = time.time()
-        scheduler_response = requests.post("http://172.17.0.1:4000/api/karl/schedule", json=karl_list)
-        logger.info(scheduler_response.text)
+        scheduler_response = requests.post("http://host.docker.internal:4000/api/karl/schedule", json=karl_list)
+        logger.info(scheduler_response.json())
         response_json = scheduler_response.json()
         card_order = response_json["order"]
         rationale = response_json["rationale"]
-        karl_query_end_time = time.time()
-        overall_karl_query_time = karl_query_end_time - karl_query_start
-        logger.info("query time: " + str(overall_karl_query_time))
+        logger.info("query time: " + str(time.time() - karl_query_start))
 
         reordered_karl_list = [karl_list[x] for x in card_order]
 
         facts = []
         for _, each_karl_fact in zip(range(limit), reordered_karl_list):
-            retrieved_fact = self.get(db=db, id=int(each_karl_fact["card_id"]))
-            fact = schemas.Fact.from_orm(retrieved_fact)
-            fact.rationale = rationale
-            facts.append(fact)
+            retrieved_fact = self.get(db=db, id=int(each_karl_fact["fact_id"]))
+            fact_schema = schemas.Fact.from_orm(retrieved_fact)
+            fact_schema.rationale = rationale
+            facts.append(fact_schema)
         return facts
 
     def update_schedule(
-            self, db: Session, *, user: models.User, fact: models.Fact, fact_in: schemas.FactScheduleUpdate
-    ) -> List[models.Fact]:
-        facts = []
-        return facts
+            self, db: Session, *, user: models.User, db_obj: models.Fact, schedule: schemas.Schedule
+    ) -> bool:
+        response = schedule.response
+        date_studied = datetime.now(timezone('UTC')).isoformat()
+        details = {
+            "study_system": "karl",
+            "typed": schedule.typed,
+            "response": schedule.response,
+            "elapsed_seconds_text": schedule.elapsed_seconds_text,
+            "elapsed_seconds_answer": schedule.elapsed_seconds_answer
+        }
+        history_in = schemas.HistoryCreate(
+            time=date_studied,
+            user_id=user.id,
+            fact_id=db_obj.fact_id,
+            log_type=schemas.Log.study,
+            details=details
+
+        )
+        history = crud.history.create(db=db, obj_in=history_in)
+        payload_update = schemas.KarlFact(
+            text=db_obj.text,
+            user_id=user.id,
+            fact_id=db_obj.fact_id,
+            history_id=history.id,
+            category=db_obj.category,
+            answer=db_obj.answer,
+            label=response).dict()
+        request = requests.post("http://host.docker.internal:4000/api/karl/update", json=payload_update)
+        if 200 <= request.status_code < 300:
+            return True
+        else:
+            return False
+
 
 
 fact = CRUDFact(models.Fact)

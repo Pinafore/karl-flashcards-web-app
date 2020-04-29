@@ -4,7 +4,6 @@ from sqlalchemy import Boolean, Column, Integer, ForeignKey, TIMESTAMP, Enum, JS
 from sqlalchemy.orm import relationship
 
 from app.db.base_class import Base
-from app.schemas.repetition import Repetition
 from app.schemas.log import Log
 
 if TYPE_CHECKING:
@@ -18,8 +17,8 @@ class History(Base):
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     fact_id = Column(Integer, ForeignKey("fact.fact_id"), nullable=False)
     log_type = Column(Enum(Log), nullable=False)
-    repetition_model = Column(Enum(Repetition), default=Repetition.leitner, nullable=False)
     details = Column(JSON)
+    # repetition_model = Column(Enum(Repetition), default=Repetition.leitner, nullable=False)
     # typed = Column(String, nullable=False)
     # response = Column(String, nullable=False)
     # front_seconds_elapsed = Column(Integer, nullable=False)

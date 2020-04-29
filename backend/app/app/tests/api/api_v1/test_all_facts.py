@@ -105,7 +105,5 @@ def test_delete_fact(
 
 
 def assert_success(response):
-    print(response)
-    print(response.json())
     assert response.status_code == 200
     return response.json()

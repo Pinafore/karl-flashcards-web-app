@@ -1,11 +1,11 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 
 
 class DeckBase(BaseModel):
-    title: str = None
-    public: bool = None
+    title: Optional[str] = None
+    public: Optional[bool] = None
 
 
 # Properties to receive on deck creation
