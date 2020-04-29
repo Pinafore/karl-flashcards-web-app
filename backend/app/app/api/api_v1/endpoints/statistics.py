@@ -22,7 +22,8 @@ def read_statistics(
 ):
     return schemas.Statistics(user_id=1, new_facts=0, reviewed_facts=0, total_seen=0, total_seconds=0)
 
-@router.get("/leaderboard", response_model=List[models.User])
+
+@router.get("/leaderboard", response_model=List[schemas.User])
 def read_leaderboard(
     *,
     db: Session = Depends(deps.get_db),
