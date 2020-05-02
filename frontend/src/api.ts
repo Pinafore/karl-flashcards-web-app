@@ -16,32 +16,32 @@ export const api = {
     params.append("username", username);
     params.append("password", password);
 
-    return axios.post(`${apiUrl}/api/v1/login/access-token`, params);
+    return axios.post(`${apiUrl}/api/login/access-token`, params);
   },
   async getMe(token: string) {
-    return axios.get<IUserProfile>(`${apiUrl}/api/v1/users/me`, authHeaders(token));
+    return axios.get<IUserProfile>(`${apiUrl}/api/users/me`, authHeaders(token));
   },
   async updateMe(token: string, data: IUserProfileUpdate) {
     return axios.put<IUserProfile>(
-      `${apiUrl}/api/v1/users/me`,
+      `${apiUrl}/api/users/me`,
       data,
       authHeaders(token),
     );
   },
   async getUsers(token: string) {
-    return axios.get<IUserProfile[]>(`${apiUrl}/api/v1/users/`, authHeaders(token));
+    return axios.get<IUserProfile[]>(`${apiUrl}/api/users/`, authHeaders(token));
   },
   async updateUser(token: string, userId: number, data: IUserProfileUpdate) {
-    return axios.put(`${apiUrl}/api/v1/users/${userId}`, data, authHeaders(token));
+    return axios.put(`${apiUrl}/api/users/${userId}`, data, authHeaders(token));
   },
   async createUser(token: string, data: IUserProfileCreate) {
-    return axios.post(`${apiUrl}/api/v1/users/`, data, authHeaders(token));
+    return axios.post(`${apiUrl}/api/users/`, data, authHeaders(token));
   },
   async passwordRecovery(email: string) {
-    return axios.post(`${apiUrl}/api/v1/password-recovery/${email}`);
+    return axios.post(`${apiUrl}/api/password-recovery/${email}`);
   },
   async resetPassword(password: string, token: string) {
-    return axios.post(`${apiUrl}/api/v1/reset-password/`, {
+    return axios.post(`${apiUrl}/api/reset-password/`, {
       new_password: password, // eslint-disable-line @typescript-eslint/camelcase
       token,
     });
