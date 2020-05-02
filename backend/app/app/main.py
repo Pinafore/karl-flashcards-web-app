@@ -5,6 +5,7 @@ from app.api.api_v1.api import api_router
 from app.core.config import settings
 import sentry_sdk
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
+from fastapi.routing import APIRoute
 
 sentry_sdk.init(settings.SENTRY_DSN)
 
@@ -23,3 +24,17 @@ if settings.BACKEND_CORS_ORIGINS:
     )
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+def use_route_names_as_operation_ids(app: FastAPI) -> None:
+    """
+    Simplify operation IDs so that generated API clients have simpler function
+    names.
+
+    Should be called only after all routes have been added.
+    """
+    for route in app.routes:
+        if isinstance(route, APIRoute):
+            route.operation_id = route.name  # in this case, 'read_items'
+
+
+use_route_names_as_operation_ids(app)
