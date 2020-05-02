@@ -22,11 +22,7 @@ export const api = {
     return axios.get<IUserProfile>(`${apiUrl}/api/users/me`, authHeaders(token));
   },
   async updateMe(token: string, data: IUserProfileUpdate) {
-    return axios.put<IUserProfile>(
-      `${apiUrl}/api/users/me`,
-      data,
-      authHeaders(token),
-    );
+    return axios.put<IUserProfile>(`${apiUrl}/api/users/me`, data, authHeaders(token));
   },
   async getUsers(token: string) {
     return axios.get<IUserProfile[]>(`${apiUrl}/api/users/`, authHeaders(token));
