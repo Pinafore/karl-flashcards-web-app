@@ -67,7 +67,7 @@
 
 <script lang="ts">
   import { Component, Vue } from "vue-property-decorator";
-  import { IUserProfileUpdate } from "@/interfaces";
+  import { IComponents } from "@/interfaces";
   import { mainStore } from "@/store";
   import { required, confirmed, email } from "vee-validate/dist/rules";
   import { ValidationProvider, ValidationObserver, extend } from "vee-validate";
@@ -112,7 +112,7 @@
         return;
       }
 
-      const updatedProfile: IUserProfileUpdate = {};
+      const updatedProfile: IComponents["SuperUserUpdate"] = {};
       updatedProfile.password = this.password1;
       await mainStore.updateUserProfile(updatedProfile);
       this.$router.push("/main/profile");

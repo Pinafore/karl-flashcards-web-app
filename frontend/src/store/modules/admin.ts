@@ -1,11 +1,11 @@
 import { api } from "@/api";
 import { VuexModule, Module, Mutation, Action } from "vuex-module-decorators";
-import { IUserProfile, IUserProfileUpdate, IUserProfileCreate } from "@/interfaces";
+import { IComponents } from "@/interfaces";
 import { mainStore } from "@/utils/store-accessor";
 
 @Module({ name: "admin" })
 export default class AdminModule extends VuexModule {
-  users: IUserProfile[] = [];
+  users: IComponents["User"][] = [];
 
   get adminOneUser() {
     return (userId: number) => {
@@ -17,13 +17,13 @@ export default class AdminModule extends VuexModule {
   }
 
   @Mutation
-  setUsers(payload: IUserProfile[]) {
+  setUsers(payload: IComponents["User"][]) {
     this.users = payload;
   }
 
   @Mutation
-  setUser(payload: IUserProfile) {
-    const users = this.users.filter((user: IUserProfile) => user.id !== payload.id);
+  setUser(payload: IComponents["User"]) {
+    const users = this.users.filter((user: IComponents["User"]) => user.id !== payload.id);
     users.push(payload);
     this.users = users;
   }
@@ -41,7 +41,7 @@ export default class AdminModule extends VuexModule {
   }
 
   @Action
-  async updateUser(payload: { id: number; user: IUserProfileUpdate }) {
+  async updateUser(payload: { id: number; user: IComponents["SuperUserUpdate"] }) {
     try {
       const loadingNotification = { content: "saving", showProgress: true };
       mainStore.addNotification(loadingNotification);
@@ -63,7 +63,7 @@ export default class AdminModule extends VuexModule {
   }
 
   @Action
-  async createUser(payload: IUserProfileCreate) {
+  async createUser(payload: IComponents["SuperUserCreate"]) {
     try {
       const loadingNotification = { content: "saving", showProgress: true };
       mainStore.addNotification(loadingNotification);

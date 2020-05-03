@@ -1,29 +1,109 @@
-export interface IUserProfile {
-  email: string;
-  is_active: boolean;
-  is_superuser: boolean;
-  username: string;
-  id: number;
-}
-
-export interface IUserProfileUpdate {
-  email?: string;
-  username?: string;
-  password?: string;
-  is_active?: boolean;
-  is_superuser?: boolean;
-}
-
-export interface IUserProfileCreate {
-  email: string;
-  username?: string;
-  password?: string;
-  is_active?: boolean;
-  is_superuser?: boolean;
-}
-
 export interface IAppNotification {
   content: string;
   color?: string;
   showProgress?: boolean;
+}
+
+export interface IComponents {
+  Deck: { title: string; public: boolean; id: number };
+  DeckCreate: { title: string; public?: boolean };
+  DeckUpdate: { title?: string; public?: boolean };
+  Fact: {
+    text: string;
+    answer: string;
+    category?: string;
+    deck_id: number;
+    identifier?: string;
+    answer_lines: string[];
+    extra?: { [key: string]: any };
+    fact_id: number;
+    user_id: number;
+    create_date: string;
+    update_date: string;
+    deck: IComponents["Deck"];
+    rationale?: string;
+  };
+  FactCreate: {
+    text: string;
+    answer: string;
+    category?: string;
+    deck_id: number;
+    identifier?: string;
+    answer_lines: string[];
+    extra?: { [key: string]: any };
+  };
+  FactUpdate: {
+    text?: string;
+    answer?: string;
+    category?: string;
+    deck_id?: number;
+    identifier?: string;
+    answer_lines?: string[];
+    extra?: { [key: string]: any };
+  };
+  HTTPValidationError: {
+    detail?: IComponents["ValidationError"][];
+  };
+  Msg: { msg: string };
+  Schedule: {
+    fact_id: number;
+    typed: string;
+    response: boolean;
+    elapsed_seconds_text: number;
+    elapsed_seconds_answer: number;
+  };
+  Statistics: {
+    new_known_rate?: number;
+    review_known_rate?: number;
+    new_facts: number;
+    reviewed_facts: number;
+    total_seen: number;
+    total_seconds: number;
+    user: IComponents["User"];
+  };
+  SuperUserCreate: {
+    email: string;
+    username: string;
+    is_active?: boolean;
+    repetition_model?: "leitner" | "sm-2" | "karl";
+    password: string;
+    is_superuser?: boolean;
+  };
+  SuperUserUpdate: {
+    email?: string;
+    username?: string;
+    is_active?: boolean;
+    repetition_model?: "leitner" | "sm-2" | "karl";
+    password?: string;
+    default_deck_id?: number;
+    is_superuser?: boolean;
+  };
+  Token: { access_token: string; token_type: string };
+  User: {
+    email: string;
+    username: string;
+    is_active: boolean;
+    repetition_model?: "leitner" | "sm-2" | "karl";
+    id: number;
+    is_superuser: boolean;
+    default_deck: IComponents["Deck"];
+    decks?: IComponents["Deck"][];
+    suspended_facts?: IComponents["Fact"][];
+  };
+  UserCreate: {
+    email: string;
+    username: string;
+    is_active?: boolean;
+    repetition_model?: "leitner" | "sm-2" | "karl";
+    password: string;
+  };
+  UserUpdate: {
+    email?: string;
+    username?: string;
+    is_active?: boolean;
+    repetition_model?: "leitner" | "sm-2" | "karl";
+    password?: string;
+    default_deck_id?: number;
+  };
+  ValidationError: { loc: string[]; msg: string; type: string };
 }

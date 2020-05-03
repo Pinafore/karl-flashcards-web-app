@@ -48,7 +48,7 @@
 
 <script lang="ts">
   import { Component, Vue } from "vue-property-decorator";
-  import { IUserProfileUpdate } from "@/interfaces";
+  import { IComponents } from "@/interfaces";
   import { mainStore } from "@/store";
   import { required, email } from "vee-validate/dist/rules";
   import { ValidationProvider, ValidationObserver, extend } from "vee-validate";
@@ -105,7 +105,7 @@
       }
 
       const userProfile = mainStore.userProfile;
-      const updatedProfile: IUserProfileUpdate = {};
+      const updatedProfile: IComponents["SuperUserUpdate"] = {};
       if (userProfile && this.fullName != userProfile.username) {
         // eslint-disable-next-line @typescript-eslint/camelcase
         updatedProfile.username = this.fullName;

@@ -3,7 +3,7 @@ import { getLocalToken, removeLocalToken, saveLocalToken } from "@/utils";
 import router from "@/router";
 import { AxiosError } from "axios";
 import { VuexModule, Module, Mutation, Action } from "vuex-module-decorators";
-import { IUserProfile, IUserProfileUpdate, IAppNotification } from "@/interfaces";
+import { IComponents, IAppNotification } from "@/interfaces";
 import { UNAUTHORIZED } from "http-status-codes";
 
 @Module({ name: "main" })
@@ -11,7 +11,7 @@ export default class MainModule extends VuexModule {
   token = "";
   isLoggedIn: boolean | null = null;
   logInError = false;
-  userProfile: IUserProfile | null = null;
+  userProfile: IComponents["User"] | null = null;
   dashboardMiniDrawer = false;
   dashboardShowDrawer = true;
   notifications: IAppNotification[] = [];
@@ -42,7 +42,7 @@ export default class MainModule extends VuexModule {
   }
 
   @Mutation
-  setUserProfile(payload: IUserProfile) {
+  setUserProfile(payload: IComponents["User"]) {
     this.userProfile = payload;
   }
 
@@ -103,7 +103,7 @@ export default class MainModule extends VuexModule {
   }
 
   @Action
-  async updateUserProfile(payload: IUserProfileUpdate) {
+  async updateUserProfile(payload: IComponents["SuperUserUpdate"]) {
     try {
       const loadingNotification = { content: "saving", showProgress: true };
       this.addNotification(loadingNotification);

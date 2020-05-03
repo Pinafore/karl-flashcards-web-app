@@ -103,7 +103,7 @@
 
 <script lang="ts">
   import { Component, Vue } from "vue-property-decorator";
-  import { IUserProfileCreate } from "@/interfaces";
+  import { IComponents } from "@/interfaces";
   import { adminStore } from "@/store";
   import { required, confirmed, email } from "vee-validate/dist/rules";
   import { ValidationProvider, ValidationObserver, extend } from "vee-validate";
@@ -158,7 +158,7 @@
         return;
       }
 
-      const updatedProfile: IUserProfileCreate = {
+      const updatedProfile: IComponents["SuperUserCreate"] = {
         email: this.email,
       };
       /* eslint-disable @typescript-eslint/camelcase */

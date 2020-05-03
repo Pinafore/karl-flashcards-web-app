@@ -117,7 +117,7 @@
 
 <script lang="ts">
   import { Component, Vue } from "vue-property-decorator";
-  import { IUserProfileUpdate } from "@/interfaces";
+  import { IComponents } from "@/interfaces";
   import { adminStore, mainStore } from "@/store";
   import { required, confirmed, email } from "vee-validate/dist/rules";
   import { ValidationProvider, ValidationObserver, extend } from "vee-validate";
@@ -181,7 +181,7 @@
       }
 
       const userProfile = mainStore.userProfile;
-      const updatedProfile: IUserProfileUpdate = {};
+      const updatedProfile: IComponents["SuperUserUpdate"] = {};
       /* eslint-disable @typescript-eslint/camelcase */
       if (userProfile && this.fullName != userProfile.username) {
         updatedProfile.username = this.fullName;
