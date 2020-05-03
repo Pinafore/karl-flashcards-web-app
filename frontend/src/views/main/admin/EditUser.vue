@@ -16,11 +16,7 @@
                 <div v-else class="title primary--text text--darken-2">-----</div>
               </div>
               <!-- username -->
-              <validation-provider
-                v-slot="{ errors }"
-                name="Username"
-                rules="required"
-              >
+              <validation-provider v-slot="{ errors }" name="Username" rules="required">
                 <v-text-field
                   v-model="username"
                   label="Username"

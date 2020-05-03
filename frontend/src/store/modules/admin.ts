@@ -23,7 +23,9 @@ export default class AdminModule extends VuexModule {
 
   @Mutation
   setUser(payload: IComponents["User"]) {
-    const users = this.users.filter((user: IComponents["User"]) => user.id !== payload.id);
+    const users = this.users.filter(
+      (user: IComponents["User"]) => user.id !== payload.id,
+    );
     users.push(payload);
     this.users = users;
   }
