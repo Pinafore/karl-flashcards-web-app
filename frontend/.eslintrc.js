@@ -14,6 +14,7 @@ module.exports = {
     "shims-tsx.d.ts",
     "shims-vue.d.ts",
   ],
+  plugins: ["vuetify"],
   extends: [
     "plugin:vue/recommended",
     "eslint:recommended",
@@ -34,12 +35,17 @@ module.exports = {
       },
     ],
     "@typescript-eslint/no-unused-vars": [
-      ERROR,
+      WARN,
       {
         argsIgnorePattern: "^_",
         varsIgnorePattern: "^_",
       },
     ],
+    "vuetify/no-deprecated-classes": ERROR,
+    "vuetify/grid-unknown-attributes": ERROR,
+    "vuetify/no-legacy-grid": ERROR,
+    "vue/no-unused-vars": OFF,
+    "@typescript-eslint/camelcase": OFF,
   },
   overrides: [
     {
