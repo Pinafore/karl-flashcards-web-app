@@ -120,7 +120,6 @@
       observer: InstanceType<typeof ValidationObserver>;
     };
 
-    valid = false;
     username = "";
     email = "";
     isActive = true;
@@ -156,20 +155,13 @@
 
       const updatedProfile: IComponents["SuperUserCreate"] = {
         email: this.email,
+        username: this.username,
+        is_active: this.isActive,
+        is_superuser: this.isSuperuser,
+        password: this.password1,
       };
-      /* eslint-disable @typescript-eslint/camelcase */
-      if (this.username) {
-        updatedProfile.username = this.username;
-      }
-      if (this.email) {
-        updatedProfile.email = this.email;
-      }
-      updatedProfile.is_active = this.isActive;
-      updatedProfile.is_superuser = this.isSuperuser;
-      /* eslint-enable @typescript-eslint/camelcase */
-      updatedProfile.password = this.password1;
       await adminStore.createUser(updatedProfile);
-      this.$router.push("/main/admin/users");
+      await this.$router.push("/main/admin/users");
     }
   }
 </script>
