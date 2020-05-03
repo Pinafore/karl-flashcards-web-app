@@ -49,6 +49,10 @@ class UserInDBBase(UserBase):
 
 # Additional properties to return via API
 class User(UserInDBBase):
+    email: EmailStr
+    username: str
+    is_active: bool
+    is_superuser: bool
     default_deck: Deck
     decks: List[Deck] = []
     suspended_facts: List[Fact] = []
