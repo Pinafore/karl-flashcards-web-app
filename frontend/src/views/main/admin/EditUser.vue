@@ -118,7 +118,7 @@
 <script lang="ts">
   import { Component, Vue } from "vue-property-decorator";
   import { IUserProfileUpdate } from "@/interfaces";
-  import { adminStore } from "@/store";
+  import { adminStore, mainStore } from "@/store";
   import { required, confirmed, email } from "vee-validate/dist/rules";
   import { ValidationProvider, ValidationObserver, extend } from "vee-validate";
 
@@ -180,12 +180,13 @@
         return;
       }
 
+      const userProfile = mainStore.userProfile;
       const updatedProfile: IUserProfileUpdate = {};
       /* eslint-disable @typescript-eslint/camelcase */
-      if (this.fullName) {
+      if (userProfile && this.fullName != userProfile.username) {
         updatedProfile.username = this.fullName;
       }
-      if (this.email) {
+      if (userProfile && this.email != userProfile.email) {
         updatedProfile.email = this.email;
       }
       updatedProfile.is_active = this.isActive;

@@ -104,12 +104,13 @@
         return;
       }
 
+      const userProfile = mainStore.userProfile;
       const updatedProfile: IUserProfileUpdate = {};
-      if (this.fullName) {
+      if (userProfile && this.fullName != userProfile.username) {
         // eslint-disable-next-line @typescript-eslint/camelcase
         updatedProfile.username = this.fullName;
       }
-      if (this.email) {
+      if (userProfile && this.email != userProfile.email) {
         updatedProfile.email = this.email;
       }
       await mainStore.updateUserProfile(updatedProfile);
