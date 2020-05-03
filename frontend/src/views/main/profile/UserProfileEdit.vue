@@ -75,7 +75,7 @@
     created() {
       const userProfile = mainStore.userProfile;
       if (userProfile) {
-        this.fullName = userProfile.full_name;
+        this.fullName = userProfile.username;
         this.email = userProfile.email;
       }
     }
@@ -87,7 +87,7 @@
     onReset() {
       const userProfile = mainStore.userProfile;
       if (userProfile) {
-        this.fullName = userProfile.full_name;
+        this.fullName = userProfile.username;
         this.email = userProfile.email;
       }
       this.$refs.observer.reset();
@@ -107,7 +107,7 @@
       const updatedProfile: IUserProfileUpdate = {};
       if (this.fullName) {
         // eslint-disable-next-line @typescript-eslint/camelcase
-        updatedProfile.full_name = this.fullName;
+        updatedProfile.username = this.fullName;
       }
       if (this.email) {
         updatedProfile.email = this.email;

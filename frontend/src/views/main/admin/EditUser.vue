@@ -158,7 +158,7 @@
       this.password2 = "";
       this.$refs.observer.reset();
       if (this.user) {
-        this.fullName = this.user.full_name;
+        this.fullName = this.user.username;
         this.email = this.user.email;
         this.isActive = this.user.is_active;
         this.isSuperuser = this.user.is_superuser;
@@ -183,7 +183,7 @@
       const updatedProfile: IUserProfileUpdate = {};
       /* eslint-disable @typescript-eslint/camelcase */
       if (this.fullName) {
-        updatedProfile.full_name = this.fullName;
+        updatedProfile.username = this.fullName;
       }
       if (this.email) {
         updatedProfile.email = this.email;

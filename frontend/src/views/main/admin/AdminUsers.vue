@@ -45,7 +45,7 @@
       {
         text: "Full Name",
         sortable: true,
-        value: "full_name",
+        value: "username",
         align: "left",
       },
       {

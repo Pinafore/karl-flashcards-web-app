@@ -11,10 +11,10 @@
               <div class="my-3">
                 <div class="subheading secondary--text text--lighten-2">User</div>
                 <div
-                  v-if="userProfile.full_name"
+                  v-if="userProfile.username"
                   class="title primary--text text--darken-2"
                 >
-                  {{ userProfile.full_name }}
+                  {{ userProfile.username }}
                 </div>
                 <div v-else class="title primary--text text--darken-2">
                   {{ userProfile.email }}

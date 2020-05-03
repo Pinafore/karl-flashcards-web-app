@@ -163,7 +163,7 @@
       };
       /* eslint-disable @typescript-eslint/camelcase */
       if (this.fullName) {
-        updatedProfile.full_name = this.fullName;
+        updatedProfile.username = this.fullName;
       }
       if (this.email) {
         updatedProfile.email = this.email;

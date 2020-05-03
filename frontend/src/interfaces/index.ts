@@ -2,13 +2,13 @@ export interface IUserProfile {
   email: string;
   is_active: boolean;
   is_superuser: boolean;
-  full_name: string;
+  username: string;
   id: number;
 }
 
 export interface IUserProfileUpdate {
   email?: string;
-  full_name?: string;
+  username?: string;
   password?: string;
   is_active?: boolean;
   is_superuser?: boolean;
@@ -16,7 +16,7 @@ export interface IUserProfileUpdate {
 
 export interface IUserProfileCreate {
   email: string;
-  full_name?: string;
+  username?: string;
   password?: string;
   is_active?: boolean;
   is_superuser?: boolean;
