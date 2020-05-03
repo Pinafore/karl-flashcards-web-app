@@ -43,7 +43,7 @@
         align: "left",
       },
       {
-        text: "Full Name",
+        text: "Username",
         sortable: true,
         value: "username",
         align: "left",

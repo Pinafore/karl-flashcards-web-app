@@ -8,15 +8,15 @@
           </v-card-title>
           <v-card-text>
             <template>
-              <!-- full name -->
+              <!-- username -->
               <validation-provider
                 v-slot="{ errors }"
-                name="Full Name"
+                name="Username"
                 rules="required"
               >
                 <v-text-field
-                  v-model="fullName"
-                  label="Full Name"
+                  v-model="username"
+                  label="Username"
                   :error-messages="errors[0]"
                   required
                 ></v-text-field>
@@ -125,7 +125,7 @@
     };
 
     valid = false;
-    fullName = "";
+    username = "";
     email = "";
     isActive = true;
     isSuperuser = false;
@@ -140,7 +140,7 @@
     onReset() {
       this.password1 = "";
       this.password2 = "";
-      this.fullName = "";
+      this.username = "";
       this.email = "";
       this.isActive = true;
       this.isSuperuser = false;
@@ -162,8 +162,8 @@
         email: this.email,
       };
       /* eslint-disable @typescript-eslint/camelcase */
-      if (this.fullName) {
-        updatedProfile.username = this.fullName;
+      if (this.username) {
+        updatedProfile.username = this.username;
       }
       if (this.email) {
         updatedProfile.email = this.email;

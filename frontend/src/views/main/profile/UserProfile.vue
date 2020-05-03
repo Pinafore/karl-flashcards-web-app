@@ -6,7 +6,7 @@
       </v-card-title>
       <v-card-text>
         <div class="my-4">
-          <div class="subheading secondary--text text--lighten-3">Full Name</div>
+          <div class="subheading secondary--text text--lighten-3">Username</div>
           <div
             v-if="userProfile && userProfile.username"
             class="title primary--text text--darken-2"

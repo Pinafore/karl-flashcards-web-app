@@ -15,15 +15,15 @@
                 </div>
                 <div v-else class="title primary--text text--darken-2">-----</div>
               </div>
-              <!-- full name -->
+              <!-- username -->
               <validation-provider
                 v-slot="{ errors }"
-                name="Full Name"
+                name="Username"
                 rules="required"
               >
                 <v-text-field
-                  v-model="fullName"
-                  label="Full Name"
+                  v-model="username"
+                  label="Username"
                   :error-messages="errors[0]"
                   required
                 ></v-text-field>
@@ -139,7 +139,7 @@
     };
 
     valid = true;
-    fullName = "";
+    username = "";
     email = "";
     isActive = true;
     isSuperuser = false;
@@ -158,7 +158,7 @@
       this.password2 = "";
       this.$refs.observer.reset();
       if (this.user) {
-        this.fullName = this.user.username;
+        this.username = this.user.username;
         this.email = this.user.email;
         this.isActive = this.user.is_active;
         this.isSuperuser = this.user.is_superuser;
@@ -183,8 +183,8 @@
       const userProfile = mainStore.userProfile;
       const updatedProfile: IComponents["SuperUserUpdate"] = {};
       /* eslint-disable @typescript-eslint/camelcase */
-      if (userProfile && this.fullName != userProfile.username) {
-        updatedProfile.username = this.fullName;
+      if (userProfile && this.username != userProfile.username) {
+        updatedProfile.username = this.username;
       }
       if (userProfile && this.email != userProfile.email) {
         updatedProfile.email = this.email;

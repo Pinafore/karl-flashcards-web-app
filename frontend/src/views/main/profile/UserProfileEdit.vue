@@ -7,11 +7,11 @@
             <div class="headline primary--text">Edit User Profile</div>
           </v-card-title>
           <v-card-text>
-            <!-- full name -->
-            <validation-provider v-slot="{ errors }" name="Full Name" rules="required">
+            <!-- username -->
+            <validation-provider v-slot="{ errors }" name="Username" rules="required">
               <v-text-field
-                v-model="fullName"
-                label="Full Name"
+                v-model="username"
+                label="Username"
                 :error-messages="errors[0]"
                 required
               ></v-text-field>
@@ -69,13 +69,13 @@
     };
 
     valid = true;
-    fullName = "";
+    username = "";
     email = "";
 
     created() {
       const userProfile = mainStore.userProfile;
       if (userProfile) {
-        this.fullName = userProfile.username;
+        this.username = userProfile.username;
         this.email = userProfile.email;
       }
     }
@@ -87,7 +87,7 @@
     onReset() {
       const userProfile = mainStore.userProfile;
       if (userProfile) {
-        this.fullName = userProfile.username;
+        this.username = userProfile.username;
         this.email = userProfile.email;
       }
       this.$refs.observer.reset();
@@ -106,9 +106,9 @@
 
       const userProfile = mainStore.userProfile;
       const updatedProfile: IComponents["UserUpdate"] = {};
-      if (userProfile && this.fullName != userProfile.username) {
+      if (userProfile && this.username != userProfile.username) {
         // eslint-disable-next-line @typescript-eslint/camelcase
-        updatedProfile.username = this.fullName;
+        updatedProfile.username = this.username;
       }
       if (userProfile && this.email != userProfile.email) {
         updatedProfile.email = this.email;
