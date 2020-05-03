@@ -11,6 +11,7 @@ export default class MainModule extends VuexModule {
   token = "";
   isLoggedIn: boolean | null = null;
   logInError = false;
+  signUpError = false;
   userProfile: IComponents["User"] | null = null;
   dashboardMiniDrawer = false;
   dashboardShowDrawer = true;
@@ -39,6 +40,11 @@ export default class MainModule extends VuexModule {
   @Mutation
   setLogInError(payload: boolean) {
     this.logInError = payload;
+  }
+
+  @Mutation
+  setSignUpError(payload: boolean) {
+    this.signUpError = payload;
   }
 
   @Mutation
@@ -171,7 +177,7 @@ export default class MainModule extends VuexModule {
   @Action
   async routeLogOut() {
     if (router.currentRoute.path !== "/login") {
-      router.push("/login");
+      await router.push("/login");
     }
   }
 
@@ -184,7 +190,7 @@ export default class MainModule extends VuexModule {
 
   @Action
   async routeLoggedIn() {
-    if (router.currentRoute.path === "/login" || router.currentRoute.path === "/") {
+    if (router.currentRoute.path === "/sign-up" || router.currentRoute.path === "/login" || router.currentRoute.path === "/") {
       router.push("/main");
     }
   }
@@ -247,6 +253,30 @@ export default class MainModule extends VuexModule {
         color: "error",
         content: "Error resetting password",
       });
+    }
+  }
+
+  @Action
+  async createUserOpen(payload: IComponents["UserCreate"]) {
+    const loadingNotification = { content: "Creating account", showProgress: true };
+    try {
+      this.addNotification(loadingNotification);
+      const response = (
+        await Promise.all([
+          api.createUserOpen(this.token, payload),
+          await new Promise((resolve, _reject) => setTimeout(() => resolve(), 500)),
+        ])
+      )[0];
+      this.removeNotification(loadingNotification);
+      this.setSignUpError(false);
+      this.addNotification({ content: "User successfully created", color: "success" });
+      this.setUserProfile(response.data);
+      return true;
+    } catch (error) {
+      this.removeNotification(loadingNotification);
+      this.setSignUpError(true);
+      this.addNotification({ content: "An error occurred", color: "error" });
+      await this.checkApiError(error);
     }
   }
 }

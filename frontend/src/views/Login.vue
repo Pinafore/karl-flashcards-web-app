@@ -33,13 +33,14 @@
                   Incorrect email or password
                 </v-alert>
               </div>
-              <v-col class="caption text-xs-right"
+              <v-col class="caption text-right"
                 ><router-link to="/recover-password"
                   >Forgot your password?</router-link
                 ></v-col
               >
             </v-card-text>
             <v-card-actions>
+              <v-btn @click="signup">Sign Up</v-btn>
               <v-spacer></v-spacer>
               <v-btn @click.prevent="submit">Login</v-btn>
             </v-card-actions>
@@ -63,6 +64,10 @@
 
     public get loginError() {
       return mainStore.logInError;
+    }
+
+    public signup() {
+      this.$router.push("/sign-up");
     }
 
     public async submit() {

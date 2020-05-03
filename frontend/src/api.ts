@@ -41,6 +41,9 @@ export const api = {
   async createUser(token: string, data: IComponents["SuperUserCreate"]) {
     return axios.post(`${apiUrl}/api/users/`, data, authHeaders(token));
   },
+  async createUserOpen(token: string, data: IComponents["UserCreate"]) {
+    return axios.post(`${apiUrl}/api/users/open`, data, authHeaders(token));
+  },
   async passwordRecovery(email: string) {
     return axios.post(`${apiUrl}/api/password-recovery/${email}`);
   },
