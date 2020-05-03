@@ -5,7 +5,7 @@
         <v-container class="fill-height">
           <v-row align="center" justify="center">
             <v-col>
-              <div class="text-xs-center">
+              <div class="text-center">
                 <div class="headline my-5">Loading...</div>
                 <v-progress-circular
                   size="100"

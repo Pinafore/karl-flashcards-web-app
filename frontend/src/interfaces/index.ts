@@ -15,7 +15,7 @@ export interface IComponents {
     deck_id: number;
     identifier?: string;
     answer_lines: string[];
-    extra?: { [key: string]: any };
+    extra?: { [key: string]: any }; // eslint-disable-line @typescript-eslint/no-explicit-any
     fact_id: number;
     user_id: number;
     create_date: string;
@@ -30,7 +30,7 @@ export interface IComponents {
     deck_id: number;
     identifier?: string;
     answer_lines: string[];
-    extra?: { [key: string]: any };
+    extra?: { [key: string]: any }; // eslint-disable-line @typescript-eslint/no-explicit-any
   };
   FactUpdate: {
     text?: string;
@@ -39,7 +39,7 @@ export interface IComponents {
     deck_id?: number;
     identifier?: string;
     answer_lines?: string[];
-    extra?: { [key: string]: any };
+    extra?: { [key: string]: any }; // eslint-disable-line @typescript-eslint/no-explicit-any
   };
   HTTPValidationError: {
     detail?: IComponents["ValidationError"][];
