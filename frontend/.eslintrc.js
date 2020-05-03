@@ -7,7 +7,13 @@ module.exports = {
   env: {
     node: true,
   },
-  ignorePatterns: ["!.eslintrc.js", "!.prettierrc.js", "node_modules/"],
+  ignorePatterns: [
+    "!.eslintrc.js",
+    "!.prettierrc.js",
+    "node_modules/",
+    "shims-tsx.d.ts",
+    "shims-vue.d.ts",
+  ],
   extends: [
     "plugin:vue/recommended",
     "eslint:recommended",
