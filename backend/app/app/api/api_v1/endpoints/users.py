@@ -120,7 +120,7 @@ def create_user_open(
             status_code=400,
             detail="A user with this email already exists in the system",
         )
-    user = crud.user.get_by_username(db, email=user_in.username)
+    user = crud.user.get_by_username(db, username=user_in.username)
     if user:
         raise HTTPException(
             status_code=400,
