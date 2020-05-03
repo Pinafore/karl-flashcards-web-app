@@ -21,7 +21,7 @@ export const api = {
   async getMe(token: string) {
     return axios.get<IComponents["User"]>(`${apiUrl}/api/users/me`, authHeaders(token));
   },
-  async updateMe(token: string, data: IComponents["SuperUserUpdate"]) {
+  async updateMe(token: string, data: IComponents["UserUpdate"]) {
     return axios.put<IComponents["User"]>(`${apiUrl}/api/users/me`, data, authHeaders(token));
   },
   async getUsers(token: string) {

@@ -103,7 +103,7 @@ export default class MainModule extends VuexModule {
   }
 
   @Action
-  async updateUserProfile(payload: IComponents["SuperUserUpdate"]) {
+  async updateUserProfile(payload: IComponents["UserUpdate"]) {
     try {
       const loadingNotification = { content: "saving", showProgress: true };
       this.addNotification(loadingNotification);

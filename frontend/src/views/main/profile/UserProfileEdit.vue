@@ -105,7 +105,7 @@
       }
 
       const userProfile = mainStore.userProfile;
-      const updatedProfile: IComponents["SuperUserUpdate"] = {};
+      const updatedProfile: IComponents["UserUpdate"] = {};
       if (userProfile && this.fullName != userProfile.username) {
         // eslint-disable-next-line @typescript-eslint/camelcase
         updatedProfile.username = this.fullName;
