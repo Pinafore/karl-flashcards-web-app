@@ -6,7 +6,6 @@
       dark
       app
       :expand-on-hover="$vuetify.breakpoint.smAndUp"
-      open-delay="1000"
       clipped
       elevation="20"
       mobile-break-point="600"
