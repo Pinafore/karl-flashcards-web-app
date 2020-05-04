@@ -26,7 +26,7 @@ module.exports = {
     ecmaVersion: 2020,
   },
   rules: {
-    "no-console": process.env.NODE_ENV === "production" ? ERROR : OFF,
+    "no-console": process.env.NODE_ENV === "production" ? WARN : OFF,
     "no-debugger": process.env.NODE_ENV === "production" ? ERROR : OFF,
     "@typescript-eslint/interface-name-prefix": [
       WARN,
