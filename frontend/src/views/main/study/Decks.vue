@@ -21,17 +21,6 @@
       :style="{ cursor: 'pointer' }"
       @click:row="openDeck"
     >
-      <!--      <template slot="items" slot-scope="props">-->
-      <!--        <td width="30px">-->
-      <!--          <v-checkbox v-model="props.selected" primary hide-details></v-checkbox>-->
-      <!--        </td>-->
-      <!--        &lt;!&ndash;        <template v-slot:item.title="{ item }">&ndash;&gt;-->
-      <!--        &lt;!&ndash;          <v-icon v-if="item.title">mdi-check</v-icon>&ndash;&gt;-->
-      <!--        &lt;!&ndash;        </template>&ndash;&gt;-->
-      <!--        &lt;!&ndash;        <td :style="{ cursor: 'pointer' }" @click="openDeck(props.item.id)">&ndash;&gt;-->
-      <!--        &lt;!&ndash;          {{ props.item.title }}&ndash;&gt;-->
-      <!--        &lt;!&ndash;        </td>&ndash;&gt;-->
-      <!--      </template>-->
     </v-data-table>
   </div>
 </template>
@@ -76,8 +65,6 @@
 
     public openDeck(deck) {
       this.$router.push({ path: "/main/study/learn", query: { deck: deck.id } });
-      // this.$router.push({ name: 'main-study-users-decks-learn', params: { deck: id } })
-      // this.$router.push(pathname:'main-study-users-decks-learn', params: {deck: id});
     }
   }
 </script>
