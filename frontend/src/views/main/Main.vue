@@ -44,6 +44,26 @@
         </v-list-item>
       </v-list>
       <v-divider></v-divider>
+      <v-list>
+        <v-subheader>Study</v-subheader>
+        <v-list-item to="/main/study/decks">
+          <v-list-item-action>
+            <v-icon>mdi-format-list-bulleted</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Decks</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item to="/main/study/learn">
+          <v-list-item-action>
+            <v-icon>mdi-lightbulb-on</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Learn</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
+      <v-divider></v-divider>
       <v-list v-show="hasAdminAccess" subheader>
         <v-subheader>Admin</v-subheader>
         <v-list-item to="/main/admin/users/all">

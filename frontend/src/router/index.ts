@@ -83,6 +83,27 @@ export default new VueRouter({
               ],
             },
             {
+              path: "study",
+              component: RouterComponent,
+              redirect: "study/decks",
+              children: [
+                {
+                  path: "decks",
+                  name: "main-study-users-decks",
+                  component: () =>
+                    import(
+                      /* webpackChunkName: "main-profile" */ "@/views/main/study/Decks.vue"
+                    ),
+                },
+                {
+                  path: "learn",
+                  name: "main-study-users-learn",
+                  component: () =>
+                    import(
+                      /* webpackChunkName: "main-profile" */ "@/views/main/study/Learn.vue"
+                    ),
+                },
+            {
               path: "admin",
               component: () =>
                 import(
