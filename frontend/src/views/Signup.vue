@@ -3,14 +3,14 @@
     <v-container fluid class="fill-height">
       <validation-observer ref="observer" v-slot="{ invalid }">
         <form @submit.prevent="onSubmit" @reset.prevent="onReset">
-        <v-card class="elevation-24">
-          <v-toolbar dark color="primary">
-            <v-toolbar-title
-              >Sign Up — {{ appName }} (IRB Form, Scroll Down To Sign Up!)
-            </v-toolbar-title>
-            <v-spacer></v-spacer>
-          </v-toolbar>
-          <v-card-text>
+          <v-card class="elevation-24">
+            <v-toolbar dark color="primary">
+              <v-toolbar-title
+                >Sign Up — {{ appName }} (IRB Form, Scroll Down To Sign Up!)
+              </v-toolbar-title>
+              <v-spacer></v-spacer>
+            </v-toolbar>
+            <v-card-text>
               <div id="consent_form">
                 <h2>
                   Project: Streamlining Knowledge Acquisition Through A Novel
@@ -193,24 +193,24 @@
                 ></v-text-field>
               </validation-provider>
 
-            <div v-if="signUpError">
-              <v-alert :value="signUpError" transition="fade-transition" type="error">
-                A user with this email or username already exists
-              </v-alert>
-            </div>
-            <v-col class="caption text-right"
-              ><router-link to="/recover-password"
-                >Forgot your password?</router-link
-              ></v-col
-            >
-          </v-card-text>
-          <v-card-actions>
-            <v-btn @click="login">Login</v-btn>
-            <v-spacer></v-spacer>
+              <div v-if="signUpError">
+                <v-alert :value="signUpError" transition="fade-transition" type="error">
+                  A user with this email or username already exists
+                </v-alert>
+              </div>
+              <v-col class="caption text-right"
+                ><router-link to="/recover-password"
+                  >Forgot your password?</router-link
+                ></v-col
+              >
+            </v-card-text>
+            <v-card-actions>
+              <v-btn @click="login">Login</v-btn>
+              <v-spacer></v-spacer>
               <v-btn type="reset">Reset</v-btn>
-            <v-btn type="submit" :disabled="invalid">Sign Up</v-btn>
-          </v-card-actions>
-        </v-card>
+              <v-btn type="submit" :disabled="invalid">Sign Up</v-btn>
+            </v-card-actions>
+          </v-card>
         </form>
       </validation-observer>
     </v-container>
