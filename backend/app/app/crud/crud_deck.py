@@ -1,5 +1,5 @@
 from datetime import datetime, time
-from typing import List
+from typing import List, Optional
 
 from fastapi.encoders import jsonable_encoder
 from pytz import timezone
@@ -45,7 +45,7 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
         return db_obj
 
     def get_multi_by_owner(
-        self, *, user: User, skip: int = None, limit: int = None
+        self, *, user: User, skip: Optional[int] = None, limit: Optional[int] = None
     ) -> List[Deck]:
         if skip and limit:
             return user.decks[skip:skip+limit]

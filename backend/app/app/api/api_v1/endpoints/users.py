@@ -16,8 +16,8 @@ router = APIRouter()
 @router.get("/", response_model=List[schemas.User])
 def read_users(
     db: Session = Depends(deps.get_db),
-    skip: int = None,
-    limit: int = None,
+    skip: Optional[int] = None,
+    limit: Optional[int] = None,
     current_user: models.User = Depends(deps.get_current_active_superuser),  # noqa
 ) -> Any:
     """

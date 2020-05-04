@@ -31,7 +31,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         return db_obj
 
     def get_multi(
-        self, db: Session, *, skip: int = None, limit: int = None
+        self, db: Session, *, skip: Optional[int] = None, limit: Optional[int] = None
     ) -> List[ModelType]:
         query = db.query(self.model)
         if skip:

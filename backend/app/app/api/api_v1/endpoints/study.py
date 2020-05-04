@@ -13,7 +13,7 @@ router = APIRouter()
 @router.get("/", response_model=List[schemas.Fact])
 def get_next_set(
     db: Session = Depends(deps.get_db),
-    user_id: int = None,
+    user_id: Optional[int] = None,
     deck_ids: List[int] = None,
     limit: int = 20,
     current_user: models.User = Depends(deps.get_current_active_user),
@@ -68,7 +68,7 @@ def evaluate_answer(
     *,
     db: Session = Depends(deps.get_db),
     fact_id: int,
-    typed: str = None,
+    typed: Optional[str] = None,
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     fact = crud.fact.get(db=db, id=fact_id)

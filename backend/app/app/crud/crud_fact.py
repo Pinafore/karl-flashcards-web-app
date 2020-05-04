@@ -38,7 +38,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         return db_obj
 
     def get_multi_by_owner(
-        self, db: Session, *, user: models.User, skip: int = None, limit: int = None
+        self, db: Session, *, user: models.User, skip: Optional[int] = None, limit: Optional[int] = None
     ) -> List[models.Fact]:
         query = db.query(self.model).filter(models.Fact.user_id == user.id)
         if skip:
@@ -159,7 +159,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         return facts
 
     def get_study_set(
-            self, db: Session, *, user: models.User, deck_ids: List[int] = None, limit: int = None
+            self, db: Session, *, user: models.User, deck_ids: List[int] = None, limit: Optional[int] = None
     ) -> List[schemas.Fact]:
         eligible_facts = self.get_eligible_facts(db, user=user, deck_ids=deck_ids, limit=limit)
 

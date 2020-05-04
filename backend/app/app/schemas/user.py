@@ -32,7 +32,7 @@ class SuperUserCreate(UserCreate):
 # Properties to receive via API on update
 class UserUpdate(UserBase):
     password: Optional[str] = None
-    default_deck_id: int = None
+    default_deck_id: Optional[int] = None
 
 
 class SuperUserUpdate(UserUpdate):

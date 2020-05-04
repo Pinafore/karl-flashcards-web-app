@@ -1,4 +1,4 @@
-from typing import Generator
+from typing import Generator, Optional
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -62,7 +62,7 @@ def get_current_active_superuser(
 
 
 class Paginate:
-    def __init__(self, skip: int = None, limit: int = None):
+    def __init__(self, skip: Optional[int] = None, limit: Optional[int] = None):
         self.skip = skip
         self.limit = limit
 

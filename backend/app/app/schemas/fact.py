@@ -20,14 +20,14 @@ class KarlFact(FactBase):
     text: str
     answer: str
     label: Optional[str] = None
-    history_id: int = None
+    history_id: Optional[int] = None
 
 
 class InternalFactBase(FactBase):
-    deck_id: int = None
+    deck_id: Optional[int] = None
     identifier: Optional[str] = None
     answer_lines: List[str] = None
-    extra: dict = None
+    extra: Optional[dict] = None
 
 
 # Properties to receive on fact creation
