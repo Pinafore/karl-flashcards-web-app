@@ -12,7 +12,6 @@ export default class StudyModule extends VuexModule {
     this.facts = payload;
   }
 
-
   @Action
   async getFacts(deckIds: number[]) {
     try {

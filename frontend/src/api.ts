@@ -54,16 +54,13 @@ export const api = {
     });
   },
   async getStudyFacts(token: string, deckIds: number[]) {
-    let url = `${apiUrl}/api/study/`
+    let url = `${apiUrl}/api/study/`;
     if (deckIds.length > 0) {
-      url += `?`
+      url += `?`;
       for (const eachId in deckIds) {
         url += `&deck_ids=${deckIds[eachId]}`;
       }
     }
-    return axios.get<IComponents["Fact"][]>(
-      url,
-      authHeaders(token)
-    );
+    return axios.get<IComponents["Fact"][]>(url, authHeaders(token));
   },
 };
