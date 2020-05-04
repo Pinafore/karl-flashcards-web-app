@@ -4,31 +4,31 @@
       <v-card-title primary-title class="mx-3 my-0 pa-0">
         <v-col class="headline primary--text ma-0 pa-0">Learn</v-col>
         <v-btn v-if="$vuetify.breakpoint.xsOnly" text icon @click="dialog = true">
-          <v-icon>info</v-icon>
+          <v-icon>mdi-information</v-icon>
         </v-btn>
         <v-btn v-else class="ma-1 pa-2" @click="dialog = true">
-          <v-icon>info</v-icon>Debug (Alt-/)
+          <v-icon>mdi-information</v-icon>Debug (Alt-/)
         </v-btn>
         <v-btn v-if="$vuetify.breakpoint.xsOnly" text icon @click="suspend()">
-          <v-icon>pause</v-icon>
+          <v-icon>mdi-pause</v-icon>
         </v-btn>
         <v-btn v-else class="ma-1 pa-2" @click="suspend()">
-          <v-icon left>pause</v-icon>Suspend (Alt-S)
+          <v-icon left>mdi-pause</v-icon>Suspend (Alt-S)
         </v-btn>
         <div v-if="fact && fact.public">
           <v-btn v-if="$vuetify.breakpoint.xsOnly" text icon @click="deleteOrReport()">
-            <v-icon>report</v-icon>
+            <v-icon>mdi-alert-octagon</v-icon>
           </v-btn>
           <v-btn v-else class="ma-1 pa-2" @click="deleteOrReport()">
-            <v-icon left>report</v-icon>Report (Alt-R)
+            <v-icon left>mdi-alert-octagon</v-icon>Report (Alt-R)
           </v-btn>
         </div>
         <div>
           <v-btn v-if="$vuetify.breakpoint.xsOnly" text icon @click="deleteOrReport()">
-            <v-icon>delete</v-icon>
+            <v-icon>mdi-delete</v-icon>
           </v-btn>
           <v-btn v-else class="ma-1 pa-2" @click="deleteOrReport()">
-            <v-icon left>delete</v-icon>Delete (Alt-R)
+            <v-icon left>mdi-delete</v-icon>Delete (Alt-R)
           </v-btn>
         </div>
       </v-card-title>
@@ -336,7 +336,7 @@
       this.checkEmpty();
     }
 
-    public async response(responseButtonText) {
+    public async response(_responseButtonText) {
       //   const oldFact = this.fact;
       //   const typed = this.answer;
       //   this.backTime = this.time - this.frontTime;
