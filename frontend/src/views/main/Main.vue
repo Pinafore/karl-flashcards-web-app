@@ -171,10 +171,6 @@
       routeGuardMain(to, from, next);
     }
 
-    get miniDrawer() {
-      return mainStore.dashboardMiniDrawer;
-    }
-
     get showDrawer() {
       return mainStore.dashboardShowDrawer;
     }

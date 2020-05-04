@@ -13,7 +13,6 @@ export default class MainModule extends VuexModule {
   logInError = false;
   signUpError = false;
   userProfile: IComponents["User"] | null = null;
-  dashboardMiniDrawer = false;
   dashboardShowDrawer = true;
   notifications: IAppNotification[] = [];
 
@@ -50,11 +49,6 @@ export default class MainModule extends VuexModule {
   @Mutation
   setUserProfile(payload: IComponents["User"]) {
     this.userProfile = payload;
-  }
-
-  @Mutation
-  setDashboardMiniDrawer(payload: boolean) {
-    this.dashboardMiniDrawer = payload;
   }
 
   @Mutation
