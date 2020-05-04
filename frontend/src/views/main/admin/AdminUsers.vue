@@ -31,12 +31,6 @@
   export default class AdminUsers extends Vue {
     public headers = [
       {
-        text: "Name",
-        sortable: true,
-        value: "name",
-        align: "left",
-      },
-      {
         text: "Email",
         sortable: true,
         value: "email",
