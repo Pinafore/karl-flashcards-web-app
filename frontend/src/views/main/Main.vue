@@ -6,6 +6,7 @@
       dark
       app
       :expand-on-hover="$vuetify.breakpoint.smAndUp"
+      open-delay="1000"
       clipped
       elevation="20"
       mobile-break-point="600"
@@ -81,11 +82,11 @@
 
           <v-divider></v-divider>
 
-          <v-list-item v-show="$vuetify.breakpoint.smAndUp" @click="switchShowDrawer">
+          <v-list-item @click="switchShowDrawer">
             <v-list-item-action>
               <v-icon>
                 {{
-                  $vuetify.breakpoint.smAndUp ? "mdi-chevron-right" : "mdi-chevron-left"
+                  $vuetify.breakpoint.smAndUp ? "mdi-chevron-left" : "mdi-chevron-down"
                 }}
               </v-icon>
             </v-list-item-action>
