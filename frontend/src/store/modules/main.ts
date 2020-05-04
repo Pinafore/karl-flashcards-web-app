@@ -190,7 +190,11 @@ export default class MainModule extends VuexModule {
 
   @Action
   async routeLoggedIn() {
-    if (router.currentRoute.path === "/sign-up" || router.currentRoute.path === "/login" || router.currentRoute.path === "/") {
+    if (
+      router.currentRoute.path === "/sign-up" ||
+      router.currentRoute.path === "/login" ||
+      router.currentRoute.path === "/"
+    ) {
       router.push("/main");
     }
   }
