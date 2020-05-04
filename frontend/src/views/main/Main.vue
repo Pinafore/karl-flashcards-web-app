@@ -2,14 +2,16 @@
   <div>
     <v-navigation-drawer
       v-model="showDrawer"
-      persistent
-      :mini-variant="miniDrawer"
-      fixed
+      color="primary darken-1"
       dark
       app
+      :expand-on-hover="$vuetify.breakpoint.smAndUp"
+      clipped
+      elevation="20"
+      mobile-break-point="600"
+      bottom
     >
       <v-list>
-        <v-subheader>Main menu</v-subheader>
         <v-list-item to="/main/dashboard">
           <v-list-item-action>
             <v-icon>mdi-web</v-icon>
@@ -26,26 +28,9 @@
             <v-list-item-title>Profile</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        <v-list-item to="/main/profile/edit">
-          <v-list-item-action>
-            <v-icon>mdi-pencil</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>Edit Profile</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <v-list-item to="/main/profile/password">
-          <v-list-item-action>
-            <v-icon>mdi-key</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>Change Password</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
       </v-list>
       <v-divider></v-divider>
-      <v-list>
-        <v-subheader>Study</v-subheader>
+      <v-list subheader>
         <v-list-item to="/main/study/decks">
           <v-list-item-action>
             <v-icon>mdi-format-list-bulleted</v-icon>
@@ -65,7 +50,6 @@
       </v-list>
       <v-divider></v-divider>
       <v-list v-show="hasAdminAccess" subheader>
-        <v-subheader>Admin</v-subheader>
         <v-list-item to="/main/admin/users/all">
           <v-list-item-action>
             <v-icon>mdi-account-multiple</v-icon>
@@ -97,10 +81,12 @@
 
           <v-divider></v-divider>
 
-          <v-list-item @click="switchMiniDrawer">
+          <v-list-item v-show="$vuetify.breakpoint.smAndUp" @click="switchShowDrawer">
             <v-list-item-action>
               <v-icon>
-                {{ miniDrawer ? "mdi-chevron-right" : "mdi-chevron-left" }}
+                {{
+                  $vuetify.breakpoint.smAndUp ? "mdi-chevron-right" : "mdi-chevron-left"
+                }}
               </v-icon>
             </v-list-item-action>
             <v-list-item-content>
@@ -111,7 +97,13 @@
       </template>
     </v-navigation-drawer>
 
-    <v-app-bar dark color="primary" app>
+    <v-app-bar
+      :clipped-left="$vuetify.breakpoint.smAndUp"
+      elevation="1"
+      dark
+      color="primary darken-2"
+      app
+    >
       <v-app-bar-nav-icon @click.stop="switchShowDrawer"></v-app-bar-nav-icon>
       <v-toolbar-title v-text="appName"></v-toolbar-title>
 
@@ -193,10 +185,6 @@
 
     public switchShowDrawer() {
       mainStore.setDashboardShowDrawer(!mainStore.dashboardShowDrawer);
-    }
-
-    public switchMiniDrawer() {
-      mainStore.setDashboardMiniDrawer(!mainStore.dashboardMiniDrawer);
     }
 
     public get hasAdminAccess() {
