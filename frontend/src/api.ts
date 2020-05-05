@@ -58,8 +58,9 @@ export const api = {
     if (deckIds.length > 0) {
       url += `?`;
       for (const eachId in deckIds) {
-        url += `&deck_ids=${deckIds[eachId]}`;
+        url += `deck_ids=${deckIds[eachId]}&`;
       }
+      url = url.slice(0, -1);
     }
     return axios.get<IComponents["Fact"][]>(url, authHeaders(token));
   },
@@ -101,8 +102,9 @@ export const api = {
     if (deckIds.length > 0) {
       url += `?`;
       for (const eachId in deckIds) {
-        url += `&deck_ids=${deckIds[eachId]}`;
+        url += `deck_ids=${deckIds[eachId]}&`;
       }
+      url = url.slice(0, -1);
     }
     return axios.put(url, null, authHeaders(token));
   },
