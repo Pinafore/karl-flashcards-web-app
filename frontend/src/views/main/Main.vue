@@ -147,7 +147,6 @@
 
 <script lang="ts">
   import { Vue, Component } from "vue-property-decorator";
-
   import { appName } from "@/env";
   import { mainStore } from "@/store";
 
@@ -190,5 +189,6 @@
     public async logout() {
       await mainStore.userLogOut();
     }
+    // TODO: Don't show bottom for small screen on reload
   }
 </script>
