@@ -32,14 +32,14 @@ def get_next_set(
         user = current_user
 
     if deck_ids is None:
-        facts = crud.fact.get_study_set(db=db, user=user, limit=limit)
+        facts = crud.fact.get_study_set(db=db, user=user, return_limit=limit)
     else:
         for deck_id in deck_ids:
             deck = crud.deck.get(db=db, id=deck_id)
             if not deck:
                 raise HTTPException(status_code=404, detail="One or more of the specified decks does not exist")
 
-        facts = crud.fact.get_study_set(db=db, user=user, deck_ids=deck_ids, limit=limit)
+        facts = crud.fact.get_study_set(db=db, user=user, deck_ids=deck_ids, return_limit=limit)
     return facts
 
 @router.put("/", response_model=List[bool], summary="Update Fact Set with the correct schedule")

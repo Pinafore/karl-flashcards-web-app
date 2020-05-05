@@ -127,7 +127,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         return db_obj
 
     def get_eligible_facts(
-            self, db: Session, *, user: models.User, deck_ids: List[int] = None, limit: int
+            self, db: Session, *, user: models.User, deck_ids: List[int] = None, limit: Optional[int] = None
     ) -> List[models.Fact]:
         begin_overall_start = time.time()
 
@@ -159,9 +159,15 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         return facts
 
     def get_study_set(
-            self, db: Session, *, user: models.User, deck_ids: List[int] = None, limit: Optional[int] = None
+            self,
+            db: Session,
+            *,
+            user: models.User,
+            deck_ids: List[int] = None,
+            return_limit: Optional[int] = None,
+            send_limit: Optional[int] = None,
     ) -> List[schemas.Fact]:
-        eligible_facts = self.get_eligible_facts(db, user=user, deck_ids=deck_ids, limit=limit)
+        eligible_facts = self.get_eligible_facts(db, user=user, deck_ids=deck_ids, limit=send_limit)
 
         karl_list = []
         karl_list_start = time.time()
@@ -175,6 +181,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             ).dict())
         logger.info("eligible fact time: " + str(time.time() - karl_list_start))
 
+        logger.info(karl_list)
         karl_query_start = time.time()
         scheduler_response = requests.post("http://host.docker.internal:4000/api/karl/schedule", json=karl_list)
         logger.info(scheduler_response.json())
@@ -186,11 +193,18 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         reordered_karl_list = [karl_list[x] for x in card_order]
 
         facts = []
-        for _, each_karl_fact in zip(range(limit), reordered_karl_list):
-            retrieved_fact = self.get(db=db, id=int(each_karl_fact["fact_id"]))
-            fact_schema = schemas.Fact.from_orm(retrieved_fact)
-            fact_schema.rationale = rationale
-            facts.append(fact_schema)
+        if return_limit:
+            for _, each_karl_fact in zip(range(return_limit), reordered_karl_list):
+                retrieved_fact = self.get(db=db, id=int(each_karl_fact["fact_id"]))
+                fact_schema = schemas.Fact.from_orm(retrieved_fact)
+                fact_schema.rationale = rationale
+                facts.append(fact_schema)
+        else:
+            for each_karl_fact in reordered_karl_list:
+                retrieved_fact = self.get(db=db, id=int(each_karl_fact["fact_id"]))
+                fact_schema = schemas.Fact.from_orm(retrieved_fact)
+                fact_schema.rationale = rationale
+                facts.append(fact_schema)
         return facts
 
     def update_schedule(
