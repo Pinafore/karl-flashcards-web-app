@@ -44,8 +44,6 @@
 
     get decks() {
       const userProfile = mainStore.userProfile;
-      console.log("DECKS");
-      console.log(userProfile && userProfile.decks ? userProfile.decks : []);
       return userProfile && userProfile.decks ? userProfile.decks : [];
     }
 
@@ -54,7 +52,6 @@
     }
 
     public openDecks() {
-      console.log(this.selected);
       // Vue router takes in arrays only as strings
       const selectedIds = this.selected.map((a) => String(a.id));
       this.$router.push({
