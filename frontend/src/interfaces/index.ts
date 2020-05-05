@@ -4,6 +4,13 @@ export interface IAppNotification {
   showProgress?: boolean;
 }
 
+export interface IStudyShow {
+  text: string;
+  fact?: IComponents["Fact"];
+  enable_report: boolean;
+  enable_actions: boolean;
+}
+
 export interface IComponents {
   Deck: { title: string; public: boolean; id: number };
   DeckCreate: { title: string; public?: boolean };
