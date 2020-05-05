@@ -1,33 +1,75 @@
 <template>
   <v-container fluid>
     <v-card class="mx-3 my-1 py-1 px-3">
-      <v-card-title v-show="show.enable_actions" primary-title class="mx-3 my-0 pa-0">
-        <div class="headline primary--text ma-0 pa-0">Learn</div>
+      <v-card-title primary-title class="mx-3 my-0 pa-0">
+        <div class="headline primary--text">Learn</div>
         <v-spacer></v-spacer>
-        <v-btn v-if="$vuetify.breakpoint.smAndDown" text icon @click="dialog = true">
+        <v-btn
+          v-if="$vuetify.breakpoint.smAndDown"
+          :disabled="!show.enable_actions"
+          text
+          icon
+          @click="dialog = true"
+        >
           <v-icon>mdi-information</v-icon>
         </v-btn>
-        <v-btn v-else class="ma-1 pa-2" @click="dialog = true">
+        <v-btn
+          v-else
+          :disabled="!show.enable_actions"
+          class="ma-1 pa-2"
+          @click="dialog = true"
+        >
           <v-icon>mdi-information</v-icon>Debug (Alt-/)
         </v-btn>
-        <v-btn v-if="$vuetify.breakpoint.smAndDown" text icon @click="suspend()">
+        <v-btn
+          v-if="$vuetify.breakpoint.smAndDown"
+          :disabled="!show.enable_actions"
+          text
+          icon
+          @click="suspend()"
+        >
           <v-icon>mdi-pause</v-icon>
         </v-btn>
-        <v-btn v-else class="ma-1 pa-2" @click="suspend()">
+        <v-btn
+          v-else
+          :disabled="!show.enable_actions"
+          class="ma-1 pa-2"
+          @click="suspend()"
+        >
           <v-icon left>mdi-pause</v-icon>Suspend (Alt-S)
         </v-btn>
-        <div v-if="show.enable_report">
-          <v-btn v-if="$vuetify.breakpoint.smAndDown" text icon @click="report()">
-            <v-icon>mdi-alert-octagon</v-icon>
-          </v-btn>
-          <v-btn v-else class="ma-1 pa-2" @click="report()">
-            <v-icon left>mdi-alert-octagon</v-icon>Report (Alt-R)
-          </v-btn>
-        </div>
-        <v-btn v-if="$vuetify.breakpoint.smAndDown" text icon @click="remove()">
+        <v-btn
+          v-if="$vuetify.breakpoint.smAndDown"
+          :disabled="!show.enable_report"
+          text
+          icon
+          @click="report()"
+        >
+          <v-icon>mdi-alert-octagon</v-icon>
+        </v-btn>
+        <v-btn
+          v-else
+          class="ma-1 pa-2"
+          :disabled="!show.enable_report"
+          @click="report()"
+        >
+          <v-icon left>mdi-alert-octagon</v-icon>Report (Alt-R)
+        </v-btn>
+        <v-btn
+          v-if="$vuetify.breakpoint.smAndDown"
+          :disabled="!show.enable_actions"
+          text
+          icon
+          @click="remove()"
+        >
           <v-icon>mdi-delete</v-icon>
         </v-btn>
-        <v-btn v-else class="ma-1 pa-2" @click="remove()">
+        <v-btn
+          v-else
+          class="ma-1 pa-2"
+          :disabled="!show.enable_actions"
+          @click="remove()"
+        >
           <v-icon left>mdi-delete</v-icon>Delete (Alt-R)
         </v-btn>
       </v-card-title>
@@ -264,8 +306,8 @@
           elapsed_seconds_text: this.frontTime,
           elapsed_seconds_answer: this.backTime,
         });
-        await studyStore.updateSchedule();
         this.resetCard();
+        await studyStore.updateSchedule();
       }
     }
   }
