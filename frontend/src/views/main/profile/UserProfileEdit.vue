@@ -7,7 +7,6 @@
             <div class="headline primary--text">Edit User Profile</div>
           </v-card-title>
           <v-card-text>
-            <!-- username -->
             <validation-provider v-slot="{ errors }" name="Username" rules="required">
               <v-text-field
                 v-model="username"
@@ -16,8 +15,6 @@
                 required
               ></v-text-field>
             </validation-provider>
-
-            <!-- email -->
             <validation-provider
               v-slot="{ errors }"
               rules="required|email"
@@ -114,7 +111,7 @@
         updatedProfile.email = this.email;
       }
       await mainStore.updateUserProfile(updatedProfile);
-      this.$router.push("/main/profile");
+      await this.$router.push("/main/profile");
     }
   }
 </script>
