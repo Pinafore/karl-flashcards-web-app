@@ -214,14 +214,14 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
 
         )
         history = crud.history.create(db=db, obj_in=history_in)
-        payload_update = schemas.KarlFact(
+        payload_update = [schemas.KarlFact(
             text=db_obj.text,
             user_id=user.id,
             fact_id=db_obj.fact_id,
             history_id=history.id,
             category=db_obj.category,
             answer=db_obj.answer,
-            label=response).dict()
+            label=response).dict()]
         request = requests.post("http://host.docker.internal:4000/api/karl/update", json=payload_update)
         if 200 <= request.status_code < 300:
             return True
