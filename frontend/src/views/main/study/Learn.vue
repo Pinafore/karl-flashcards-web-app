@@ -175,6 +175,12 @@
     }
 
     public async mounted() {
+      const deckIds = this.$router.currentRoute.query.deck;
+      if (typeof deckIds === "string") {
+        studyStore.setDeckIds([Number(deckIds)]);
+      } else {
+        studyStore.setDeckIds(deckIds.map(Number));
+      }
       await studyStore.getNextShow();
       window.addEventListener("keydown", this.handleKeyPress);
     }
@@ -224,7 +230,6 @@
     }
 
     public async showAnswer() {
-      console.log("SHOWING ANSWER");
       await studyStore.evaluateAnswer(this.typed);
       this.showBack = true;
     }
@@ -252,14 +257,13 @@
 
     public async response(response) {
       if (this.show.fact) {
-        studyStore.markBackTime();
-        studyStore.addToSchedule(
-          this.show.fact.fact_id,
-          this.typed,
-          response,
-          this.frontTime,
-          this.backTime,
-        );
+        await studyStore.addToSchedule({
+          fact_id: this.show.fact.fact_id,
+          typed: this.typed,
+          response: response,
+          elapsed_seconds_text: this.frontTime,
+          elapsed_seconds_answer: this.backTime,
+        });
         await studyStore.updateSchedule();
         this.resetCard();
       }

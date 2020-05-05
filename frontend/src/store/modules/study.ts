@@ -6,7 +6,7 @@ import { mainStore } from "@/utils/store-accessor";
 @Module({ name: "study" })
 export default class StudyModule extends VuexModule {
   facts: IComponents["Fact"][] = [];
-  decks: IComponents["Deck"][] = [];
+  deckIds: number[] = [];
   schedule: IComponents["Schedule"][] = [];
   recommendation = false;
   show: IStudyShow = { text: "loading", enable_report: false, enable_actions: false };
@@ -15,25 +15,14 @@ export default class StudyModule extends VuexModule {
   timer: number | undefined;
   backTime = 0;
 
-  get deckIds() {
-    return this.decks.map((deck) => deck.id);
+  @Mutation
+  setDeckIds(payload) {
+    this.deckIds = payload
   }
 
   @Mutation
-  addToSchedule(
-    fact_id: number,
-    typed: string,
-    response: boolean,
-    elapsed_seconds_text: number,
-    elapsed_seconds_answer: number,
-  ) {
-    this.schedule.push({
-      fact_id: fact_id,
-      typed: typed,
-      response: response,
-      elapsed_seconds_text: elapsed_seconds_text,
-      elapsed_seconds_answer: elapsed_seconds_answer,
-    });
+  addToSchedule(payload) {
+    this.schedule.push(payload);
   }
 
   @Mutation
@@ -54,7 +43,6 @@ export default class StudyModule extends VuexModule {
       enable_report: true,
       enable_actions: true,
     };
-    this.startTimer();
   }
 
   @Mutation
@@ -106,7 +94,7 @@ export default class StudyModule extends VuexModule {
     this.time = 0;
   }
 
-  @Mutation
+  @Action
   startTimer() {
     this.timer = setInterval(() => this.updateTimer(), 1000);
   }
@@ -114,20 +102,20 @@ export default class StudyModule extends VuexModule {
   @Mutation
   markFrontTime() {
     this.frontTime = this.time;
-    this.resetTimer();
+
   }
 
   @Mutation
   markBackTime() {
     this.backTime = this.time;
-    this.resetTimer();
   }
 
   @Action
   async getNextShow() {
-    this.resetTimer();
+    this.resetTimer()
     if (this.facts.length > 0) {
       this.setShow(this.facts[0]);
+      this.startTimer();
       this.removeFirstFact();
     } else {
       await this.getFacts();
@@ -149,14 +137,13 @@ export default class StudyModule extends VuexModule {
       }
     } catch (error) {
       await mainStore.checkApiError(error);
-      console.log(error)
       this.setShowError();
     }
   }
 
   @Action
   async suspendFact() {
-    this.resetTimer();
+    this.resetTimer()
     if (this.show.fact && this.show.enable_actions) {
       try {
         await api.suspendFact(mainStore.token, this.show.fact.fact_id);
@@ -169,7 +156,7 @@ export default class StudyModule extends VuexModule {
 
   @Action
   async reportFact() {
-    this.resetTimer();
+    this.resetTimer()
     if (this.show.fact && this.show.enable_report) {
       try {
         await api.reportFact(mainStore.token, this.show.fact.fact_id);
@@ -182,7 +169,7 @@ export default class StudyModule extends VuexModule {
 
   @Action
   async deleteFact() {
-    this.resetTimer();
+    this.resetTimer()
     if (this.show.fact && this.show.enable_actions) {
       try {
         await api.deleteFact(mainStore.token, this.show.fact.fact_id);
@@ -195,10 +182,10 @@ export default class StudyModule extends VuexModule {
 
   @Action
   async evaluateAnswer(typed: string) {
-    console.log("Evaluate ANSWER");
     if (this.show.fact && this.show.enable_actions) {
       try {
         this.markFrontTime();
+        this.resetTimer();
         const response = await api.evalAnswer(
           mainStore.token,
           this.show.fact.fact_id,
@@ -216,6 +203,8 @@ export default class StudyModule extends VuexModule {
   async updateSchedule() {
     if (this.show.fact && this.show.enable_actions) {
       try {
+        this.markBackTime();
+        this.resetTimer();
         await api.updateSchedule(mainStore.token, this.schedule);
         this.emptySchedule();
         await this.getNextShow();
