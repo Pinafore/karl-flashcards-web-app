@@ -1,15 +1,15 @@
 <template>
   <div>
-    <v-toolbar light>
+    <v-toolbar>
       <v-toolbar-title>
         Decks
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn color="primary" to="/main/add/deck">Add New Deck</v-btn>
-      <v-btn v-if="checkAllDecks()" color="primary" to="/main/study/learn"
-        >Study All</v-btn
-      >
-      <v-btn v-else color="primary" @click="openDecks()">Study Selected</v-btn>
+      <v-btn to="/main/add/deck">Add New Deck</v-btn>
+      <v-card-actions>
+        <v-btn v-if="checkAllDecks()" to="/main/study/learn">Study All</v-btn>
+        <v-btn v-else color="primary" @click="openDecks()">Study Selected</v-btn>
+      </v-card-actions>
     </v-toolbar>
     <v-data-table
       v-model="selected"

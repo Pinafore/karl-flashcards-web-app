@@ -6,24 +6,18 @@
       </v-card-title>
       <v-card-text>
         <div class="my-4">
-          <div class="subheading secondary--text text--lighten-3">Username</div>
-          <div
-            v-if="userProfile && userProfile.username"
-            class="title primary--text text--darken-2"
-          >
+          <div class="subheading secondary--text">Username</div>
+          <div v-if="userProfile && userProfile.username" class="title primary--text">
             {{ userProfile.username }}
           </div>
-          <div v-else class="title primary--text text--darken-2">-----</div>
+          <div v-else class="title primary--text">-----</div>
         </div>
         <div class="my-3">
-          <div class="subheading secondary--text text--lighten-3">Email</div>
-          <div
-            v-if="userProfile && userProfile.email"
-            class="title primary--text text--darken-2"
-          >
+          <div class="subheading secondary--text">Email</div>
+          <div v-if="userProfile && userProfile.email" class="title primary--text">
             {{ userProfile.email }}
           </div>
-          <div v-else class="title primary--text text--darken-2">-----</div>
+          <div v-else class="title primary--text">-----</div>
         </div>
       </v-card-text>
       <v-card-actions>

@@ -2,9 +2,9 @@
   <div>
     <v-navigation-drawer
       v-model="showDrawer"
-      color="primary darken-1"
-      dark
+      color="navigation"
       app
+      dark
       :expand-on-hover="$vuetify.breakpoint.smAndUp"
       clipped
       elevation="20"
@@ -99,16 +99,16 @@
 
     <v-app-bar
       :clipped-left="$vuetify.breakpoint.smAndUp"
-      elevation="1"
+      color="navigation"
       dark
-      color="primary darken-2"
+      elevation="1"
       app
     >
       <v-app-bar-nav-icon @click.stop="switchShowDrawer"></v-app-bar-nav-icon>
       <v-toolbar-title v-text="appName"></v-toolbar-title>
 
       <v-spacer></v-spacer>
-
+      <v-switch v-model="$vuetify.theme.dark" label="Dark Mode" hide-details></v-switch>
       <v-menu bottom left offset-y>
         <template v-slot:activator="{ on }">
           <v-btn icon v-on="on">
