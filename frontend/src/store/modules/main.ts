@@ -189,7 +189,7 @@ export default class MainModule extends VuexModule {
       router.currentRoute.path === "/login" ||
       router.currentRoute.path === "/"
     ) {
-      router.push("/main");
+      await router.push("/main");
     }
   }
 
