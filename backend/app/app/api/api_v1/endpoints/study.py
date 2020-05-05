@@ -14,7 +14,7 @@ router = APIRouter()
 def get_next_set(
     db: Session = Depends(deps.get_db),
     user_id: Optional[int] = None,
-    deck_ids: List[int] = None,
+    deck_ids: Optional[List[int]] = Query(None),
     limit: int = 20,
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
