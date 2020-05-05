@@ -103,6 +103,8 @@ export default new VueRouter({
                       /* webpackChunkName: "main-profile" */ "@/views/main/study/Learn.vue"
                     ),
                 },
+              ],
+            },
             {
               path: "admin",
               component: () =>
