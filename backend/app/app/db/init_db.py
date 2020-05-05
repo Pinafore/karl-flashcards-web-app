@@ -37,5 +37,5 @@ def init_db(db: Session) -> None:
 
         crud.deck.assign_owner(db, db_obj=deck, user=user)
         logger.info("Sending celery task")
-        celery_app.send_task("app.worker.load_quizbowl_facts")
         celery_app.send_task("app.worker.load_jeopardy_facts")
+        celery_app.send_task("app.worker.load_quizbowl_facts")
