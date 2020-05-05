@@ -165,7 +165,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             user: models.User,
             deck_ids: List[int] = None,
             return_limit: Optional[int] = None,
-            send_limit: Optional[int] = None,
+            send_limit: Optional[int] = 100,
     ) -> List[schemas.Fact]:
         eligible_facts = self.get_eligible_facts(db, user=user, deck_ids=deck_ids, limit=send_limit)
 
