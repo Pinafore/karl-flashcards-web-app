@@ -229,5 +229,4 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             return False
 
 
-
 fact = CRUDFact(models.Fact)
