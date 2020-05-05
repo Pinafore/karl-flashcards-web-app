@@ -2,7 +2,7 @@ import json
 from typing import List, Union, Dict, Any, Optional
 
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, or_, not_
 from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
@@ -141,10 +141,10 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                     models.Fact.user_id == user.id,
                     models.Deck.user_decks.any(permissions=schemas.Permission.owner),
                 ),
-                or_(
+                not_(or_(
                     models.Fact.suspensions.any(suspend_type=schemas.SuspendType.report),
                     models.Fact.suspenders.any(id=user.id)
-                )
+                ))
             )
         )
 
