@@ -5,7 +5,7 @@
         Decks
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn to="/main/add/deck">Add New Deck</v-btn>
+      <v-btn to="/main/add/deck">Add Deck</v-btn>
       <v-card-actions>
         <v-btn v-if="checkAllDecks()" to="/main/study/learn">Study All</v-btn>
         <v-btn v-else color="primary" @click="openDecks()">Study Selected</v-btn>
@@ -16,8 +16,8 @@
       :headers="headers"
       item-key="id"
       :items="decks"
+      :items-per-page="15"
       show-select
-      hide-default-footer
       :style="{ cursor: 'pointer' }"
       @click:row="openDeck"
     >
@@ -35,12 +35,16 @@
     public headers = [
       {
         text: "Deck",
-        sortable: false,
+        sortable: true,
         value: "title",
         align: "left",
       },
     ];
     selected: IComponents["Deck"][] = [];
+
+    async mounted() {
+      await mainStore.getUserProfile();
+    }
 
     get decks() {
       const userProfile = mainStore.userProfile;
