@@ -38,6 +38,10 @@ def get_next_set(
             deck = crud.deck.get(db=db, id=deck_id)
             if not deck:
                 raise HTTPException(status_code=404, detail="One or more of the specified decks does not exist")
+            if user not in deck.users:
+                raise HTTPException(status_code=450,
+                                    detail="This user does not have the necessary permission to access one or more"
+                                           " of the specified decks")
 
         facts = crud.fact.get_study_set(db=db, user=user, deck_ids=deck_ids, return_limit=limit)
     return facts
