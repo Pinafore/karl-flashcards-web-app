@@ -230,7 +230,6 @@
     }
 
     public async destroyed() {
-      // commitResetFacts(this.$store);
       studyStore.setShowLoading();
       studyStore.emptySchedule();
       window.removeEventListener("keydown", this.handleKeyPress);

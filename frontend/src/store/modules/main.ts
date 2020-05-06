@@ -91,15 +91,12 @@ export default class MainModule extends VuexModule {
         this.setLoggedIn(true);
         this.setLogInError(false);
         await this.getUserProfile();
-        console.log("got user profile");
         await this.routeLoggedIn();
-        console.log("route logged in");
         this.addNotification({ content: "Logged in", color: "success" });
       } else {
         await this.logOut();
       }
     } catch (err) {
-      console.log(err);
       this.setLogInError(true);
       await this.logOut();
     }
