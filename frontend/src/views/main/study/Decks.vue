@@ -65,7 +65,10 @@
     }
 
     public openDeck(deck) {
-      this.$router.push({ path: "/main/study/learn", query: { deck: deck.id } });
+      this.$router.push({
+        path: "/main/study/learn",
+        query: { deck: String(deck.id) },
+      });
     }
   }
 </script>
