@@ -62,7 +62,7 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
     ) -> List[Deck]:
         query = db.query(self.model).filter(Deck.public == true(), Deck.id != 1) # Don't return "default"
         if unowned:
-            query = query.filter(not_(Deck.users.any(user)))
+            query = query.filter(not_(Deck.users.any(id=user.id)))
         return query.all()
 
     def find_or_create(
