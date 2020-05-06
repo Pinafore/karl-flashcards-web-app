@@ -21,6 +21,7 @@ def get_next_set(
     """
     Get next set of facts for review using user's schedule.
     Allows superusers to view anyone's future schedule.
+    A user's deck ids can be provided for filtering.
     """
     if user_id:
         user = crud.user.get(db=db, id=user_id)
