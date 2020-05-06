@@ -15,6 +15,8 @@ export default class MainModule extends VuexModule {
   userProfile: IComponents["User"] | null = null;
   dashboardShowDrawer = true;
   notifications: IAppNotification[] = [];
+  publicDecks: IComponents["Deck"][] = [];
+  facts: IComponents["Fact"][] = [];
 
   get hasAdminAccess() {
     return (
@@ -68,6 +70,16 @@ export default class MainModule extends VuexModule {
     );
   }
 
+  @Mutation
+  setFacts(payload: IComponents["Fact"][]) {
+    this.facts = payload;
+  }
+
+  @Mutation
+  setPublicDecks(payload: IComponents["Deck"][]) {
+    this.publicDecks = payload;
+  }
+
   @Action
   async logIn(payload: { username: string; password: string }) {
     try {
@@ -79,12 +91,15 @@ export default class MainModule extends VuexModule {
         this.setLoggedIn(true);
         this.setLogInError(false);
         await this.getUserProfile();
+        console.log("got user profile");
         await this.routeLoggedIn();
+        console.log("route logged in");
         this.addNotification({ content: "Logged in", color: "success" });
       } else {
         await this.logOut();
       }
     } catch (err) {
+      console.log(err);
       this.setLogInError(true);
       await this.logOut();
     }
@@ -274,6 +289,96 @@ export default class MainModule extends VuexModule {
       this.removeNotification(loadingNotification);
       this.setSignUpError(true);
       this.addNotification({ content: "An error occurred", color: "error" });
+      await this.checkApiError(error);
+    }
+  }
+
+  @Action
+  async createDeck(payload: IComponents["DeckCreate"]) {
+    try {
+      const loadingNotification = { content: "saving", showProgress: true };
+      this.addNotification(loadingNotification);
+      const response = (
+        await Promise.all([
+          api.createDeck(this.token, payload),
+          await new Promise((resolve, _reject) => setTimeout(() => resolve(), 500)),
+        ])
+      )[0];
+      this.setUserProfile(response.data);
+      this.removeNotification(loadingNotification);
+      this.addNotification({
+        content: "Deck successfully created",
+        color: "success",
+      });
+    } catch (error) {
+      await this.checkApiError(error);
+    }
+  }
+
+  @Action
+  async createFact(payload: IComponents["FactCreate"]) {
+    try {
+      const loadingNotification = { content: "saving", showProgress: true };
+      this.addNotification(loadingNotification);
+      const response = (
+        await Promise.all([
+          api.createFact(this.token, payload),
+          await new Promise((resolve, _reject) => setTimeout(() => resolve(), 500)),
+        ])
+      )[0];
+      this.setUserProfile(response.data);
+      this.removeNotification(loadingNotification);
+      this.addNotification({
+        content: "Fact successfully created",
+        color: "success",
+      });
+    } catch (error) {
+      await this.checkApiError(error);
+    }
+  }
+
+  @Action
+  async getFacts() {
+    try {
+      const response = await api.getFacts(this.token);
+      if (response) {
+        this.setFacts(response.data);
+      }
+    } catch (error) {
+      await this.checkApiError(error);
+    }
+  }
+
+  @Action
+  async getPublicDecks() {
+    try {
+      const response = await api.getPublicDecks(this.token);
+      if (response) {
+        this.setPublicDecks(response.data);
+      }
+    } catch (error) {
+      await this.checkApiError(error);
+    }
+  }
+
+  @Action
+  async assignDecks(payload: number[]) {
+    try {
+      const loadingNotification = { content: "saving", showProgress: true };
+      this.addNotification(loadingNotification);
+      const response = (
+        await Promise.all([
+          api.assignDecks(this.token, payload),
+          await new Promise((resolve, _reject) => setTimeout(() => resolve(), 500)),
+        ])
+      )[0];
+      this.setUserProfile(response.data);
+      this.removeNotification(loadingNotification);
+      this.addNotification({
+        content: "Decks assigned",
+        color: "success",
+      });
+    } catch (error) {
       await this.checkApiError(error);
     }
   }

@@ -33,7 +33,7 @@
       <v-list subheader>
         <v-list-item to="/main/study/decks">
           <v-list-item-action>
-            <v-icon>mdi-format-list-bulleted</v-icon>
+            <v-icon>{{ mdiBookMultiple }}</v-icon>
           </v-list-item-action>
           <v-list-item-content>
             <v-list-item-title>Decks</v-list-item-title>
@@ -49,6 +49,32 @@
         </v-list-item>
       </v-list>
       <v-divider></v-divider>
+      <v-list>
+        <v-list-item to="/main/add/fact">
+          <v-list-item-action>
+            <v-icon>{{ mdiTextBoxPlus }}</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Add Fact</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item to="/main/add/deck">
+          <v-list-item-action>
+            <v-icon>mdi-book-plus</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Add Deck</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item to="/main/add/public-decks">
+          <v-list-item-action>
+            <v-icon>{{ mdiEarthPlus }}</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Add Public Decks</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
       <v-list v-show="hasAdminAccess" subheader>
         <v-list-item to="/main/admin/users/all">
           <v-list-item-action>
@@ -149,6 +175,7 @@
   import { Vue, Component } from "vue-property-decorator";
   import { appName } from "@/env";
   import { mainStore } from "@/store";
+  import { mdiEarthPlus, mdiTextBoxPlus, mdiBookMultiple } from "@mdi/js";
 
   const routeGuardMain = async (to, _from, next) => {
     if (to.path === "/main") {
@@ -161,6 +188,9 @@
   @Component
   export default class Main extends Vue {
     public appName = appName;
+    mdiEarthPlus = mdiEarthPlus;
+    mdiTextBoxPlus = mdiTextBoxPlus;
+    mdiBookMultiple = mdiBookMultiple;
 
     public beforeRouteEnter(to, from, next) {
       routeGuardMain(to, from, next);

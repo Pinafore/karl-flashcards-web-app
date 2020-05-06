@@ -53,6 +53,12 @@ export const api = {
       token,
     });
   },
+  async getFacts(token: string) {
+    return axios.get<IComponents["Fact"][]>(
+      `${apiUrl}/api/facts/`,
+      authHeaders(token)
+    );
+  },
   async getStudyFacts(token: string, deckIds: number[]) {
     let url = `${apiUrl}/api/study/`;
     if (deckIds.length > 0) {

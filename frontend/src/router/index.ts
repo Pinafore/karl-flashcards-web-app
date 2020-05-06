@@ -83,6 +83,34 @@ export default new VueRouter({
               ],
             },
             {
+              path: "add",
+              component: RouterComponent,
+              redirect: "add/fact",
+              children: [
+                {
+                  path: "fact",
+                  component: () =>
+                    import(
+                      /* webpackChunkName: "main-dashboard" */ "@/views/main/add/AddFact.vue"
+                    ),
+                },
+                {
+                  path: "deck",
+                  component: () =>
+                    import(
+                      /* webpackChunkName: "main-dashboard" */ "@/views/main/add/AddDeck.vue"
+                    ),
+                },
+                {
+                  path: "public-decks",
+                  component: () =>
+                    import(
+                      /* webpackChunkName: "main-choose-decks" */ "@/views/main/add/ChooseDecks.vue"
+                    ),
+                },
+              ],
+            },
+            {
               path: "study",
               component: RouterComponent,
               redirect: "study/decks",
