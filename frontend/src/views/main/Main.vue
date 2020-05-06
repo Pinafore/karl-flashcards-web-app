@@ -131,8 +131,7 @@
       app
     >
       <v-app-bar-nav-icon @click.stop="switchShowDrawer"></v-app-bar-nav-icon>
-      <v-toolbar-title v-text="appName"></v-toolbar-title>
-
+      <v-btn text x-large @click.stop="goHome">{{ appName }}</v-btn>
       <v-spacer></v-spacer>
       <v-switch v-model="$vuetify.theme.dark" label="Dark Mode" hide-details></v-switch>
       <v-menu bottom left offset-y>
@@ -206,6 +205,10 @@
 
     set showDrawer(value) {
       mainStore.setDashboardShowDrawer(value);
+    }
+
+    public goHome() {
+      this.$router.push("/main");
     }
 
     public switchShowDrawer() {
