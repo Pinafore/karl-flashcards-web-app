@@ -183,7 +183,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
 
         logger.info(karl_list)
         karl_query_start = time.time()
-        scheduler_response = requests.post("http://host.docker.internal:4000/api/karl/schedule", json=karl_list)
+        scheduler_response = requests.post("http://172.17.0.1:4000/api/karl/schedule", json=karl_list)
         logger.info(scheduler_response.json())
         response_json = scheduler_response.json()
         card_order = response_json["order"]
@@ -236,7 +236,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             category=db_obj.category,
             answer=db_obj.answer,
             label=response).dict()]
-        request = requests.post("http://host.docker.internal:4000/api/karl/update", json=payload_update)
+        request = requests.post("http://172.17.0.1:4000/api/karl/update", json=payload_update)
         if 200 <= request.status_code < 300:
             return True
         else:
