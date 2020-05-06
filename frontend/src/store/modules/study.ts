@@ -118,12 +118,12 @@ export default class StudyModule extends VuexModule {
       this.startTimer();
       this.removeFirstFact();
     } else {
-      await this.getFacts();
+      await this.getStudyFacts();
     }
   }
 
   @Action
-  async getFacts() {
+  async getStudyFacts() {
     this.resetTimer();
     try {
       this.setShowLoading();

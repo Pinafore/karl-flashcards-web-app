@@ -31,11 +31,12 @@ def read_decks(
 def read_open_decks(
     db: Session = Depends(deps.get_db),
     current_user: models.User = Depends(deps.get_current_active_user),  # noqa
-):
+    unowned: bool = True,
+) -> Any:
     """
     Retrieve decks.
     """
-    decks = crud.deck.get_public(db)
+    decks = crud.deck.get_public(db, unowned=unowned, user=current_user)
 
     return decks
 

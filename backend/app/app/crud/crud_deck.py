@@ -3,6 +3,7 @@ from typing import List, Optional
 
 from fastapi.encoders import jsonable_encoder
 from pytz import timezone
+from sqlalchemy import not_
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import true
 
@@ -57,13 +58,12 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
             return user.decks
 
     def get_public(
-            self, db: Session
+            self, db: Session, unowned: bool, user: User
     ) -> List[Deck]:
-        return (db.query(self.model)
-                .filter(Deck.public == true())
-                .offset(1)  # don't show Default
-                .all()
-                )
+        query = db.query(self.model).filter(Deck.public == true(), Deck.id != 1) # Don't return "default"
+        if unowned:
+            query = query.filter(not_(Deck.users.any(user)))
+        return query.all()
 
     def find_or_create(
             self, db: Session, *, proposed_deck: str, user: User, public: bool = False
