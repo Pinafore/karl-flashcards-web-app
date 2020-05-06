@@ -56,6 +56,9 @@
     },
   })
   export default class CreateNewDeck extends Vue {
+    $refs!: {
+      observer: InstanceType<typeof ValidationObserver>;
+    };
     public title = "";
 
     public async mounted() {
@@ -71,6 +74,7 @@
 
     onReset() {
       this.title = "";
+      this.$refs.observer.reset();
     }
 
     public cancel() {
@@ -78,7 +82,12 @@
     }
 
     async onSubmit() {
-      console.log(this.title);
+      const success = await this.$refs.observer.validate();
+
+      if (!success) {
+        return;
+      }
+
       await mainStore.createDeck({
         title: this.title,
       });
