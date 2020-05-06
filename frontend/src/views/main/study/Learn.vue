@@ -218,10 +218,12 @@
 
     public async mounted() {
       const deckIds = this.$router.currentRoute.query.deck;
-      if (typeof deckIds === "string") {
-        studyStore.setDeckIds([Number(deckIds)]);
-      } else {
-        studyStore.setDeckIds(deckIds.map(Number));
+      if (deckIds) {
+        if (typeof deckIds === "string") {
+          studyStore.setDeckIds([Number(deckIds)]);
+        } else {
+          studyStore.setDeckIds(deckIds.map(Number));
+        }
       }
       await studyStore.getNextShow();
       window.addEventListener("keydown", this.handleKeyPress);
