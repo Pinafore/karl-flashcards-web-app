@@ -99,7 +99,7 @@ export const api = {
   },
   async getPublicDecks(token: string) {
     return axios.get<IComponents["Deck"][]>(
-      `${apiUrl}/api/decks/public/`,
+      `${apiUrl}/api/decks/public`,
       authHeaders(token),
     );
   },
