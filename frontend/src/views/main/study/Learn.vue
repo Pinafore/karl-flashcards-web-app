@@ -97,7 +97,7 @@
         </div>
       </v-card-title>
       <v-card-text class="pb-2">
-        <div class="title primary--text text--darken-2">
+        <div class="title primary--text">
           {{ show.text }}
         </div>
       </v-card-text>
@@ -120,20 +120,20 @@
         <div class="title">Back</div>
       </v-card-title>
       <v-card-text class="pt-2 pb-0">
-        <div class="title text--darken-2 pb-2">You typed: '{{ typed }}'</div>
-        <div class="title primary--text text--darken-2 py-2">
+        <div class="title pb-2">You typed: '{{ typed }}'</div>
+        <div class="title primary--text py-2">
           Answer: {{ show.fact && show.fact.answer }}
         </div>
         <div
           v-if="recommendation"
-          class="title primary--text text--darken-2 py-2"
+          class="title primary--text py-2"
           :style="{ color: 'green !important' }"
         >
           KAR³L Suggests: Right (Enter to Accept)
         </div>
         <div
           v-else
-          class="title primary--text text--darken-2 py-2"
+          class="title primary--text py-2"
           :style="{ color: 'red !important' }"
         >
           KAR³L Suggests: Wrong (Enter to Accept)
