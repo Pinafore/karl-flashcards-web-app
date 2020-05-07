@@ -8,31 +8,14 @@ from app import schemas
 
 
 class StatisticsBase(BaseModel):
-    new_known_rate: Optional[float] = None
-    review_known_rate: Optional[float] = None
     new_facts: int
     reviewed_facts: int
     total_seen: int
     total_seconds: int
-
-
-# Used in call to internal API
-class StatisticsCall(StatisticsBase):
-    user_id: int
-    new_known_rate: Optional[float] = None
-    review_known_rate: Optional[float] = None
-    new_facts: int
-    reviewed_facts: int
-    total_seen: int
-    total_seconds: int
+    new_known_rate: float
+    review_known_rate: float
 
 
 # Used to return statistics to users
 class Statistics(StatisticsBase):
-    user: schemas.User
-    new_known_rate: Optional[float] = None
-    review_known_rate: Optional[float] = None
-    new_facts: int
-    reviewed_facts: int
-    total_seen: int
-    total_seconds: int
+    username: str

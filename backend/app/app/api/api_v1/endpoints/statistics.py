@@ -6,7 +6,7 @@ from typing import Any, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from sqlalchemy.orm import Session
 
-from app import crud, models, schemas, evaluate
+from app import crud, models, schemas, evaluate, interface
 from app.api import deps
 
 router = APIRouter()
@@ -20,7 +20,8 @@ def read_statistics(
     end_date: Optional[datetime] = None,
     current_user: models.User = Depends(deps.get_current_active_user),
 ):
-    return schemas.Statistics(user_id=1, new_facts=0, reviewed_facts=0, total_seen=0, total_seconds=0)
+    statistics = interface.statistics.get_user_stats(user=current_user)
+    return statistics
 
 
 @router.get("/leaderboard", response_model=List[schemas.User])
