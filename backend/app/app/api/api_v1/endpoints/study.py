@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app import crud, models, schemas, evaluate
 from app.api import deps
+from app.core.config import settings
 
 router = APIRouter()
 
@@ -89,8 +90,9 @@ def evaluate_answer(
 @router.get("/status", response_model=bool, summary="Checks status of connection to scheduler")
 def scheduler_status() -> Any:
     try:
-        r = requests.post("http://172.17.0.1:4000/api/karl/status", json=[])
+        r = requests.get("http://host.docker.internal:4000/api/karl/status")
         r.raise_for_status()  # Raises a HTTPError if the status is 4xx, 5xxx
         return True
-    except (requests.exceptions.ConnectionError, requests.exceptions.Timeout, requests.exceptions.HTTPError):
+    except (requests.exceptions.ConnectionError, requests.exceptions.Timeout, requests.exceptions.HTTPError) as e:
+        logger.info(e)
         raise HTTPException(status_code=555, detail="Connection to scheduler is down")
