@@ -20,8 +20,6 @@ def get_user_stats(user: models.user, *, start_date: datetime = None, end_date: 
     request = requests.get(f"{settings.INTERFACE}api/karl/get_user_stats/{user.id}")
     result = request.json()
     result_dict = json.loads(result)
-    print(result_dict)
-    user_schema = schemas.User.from_orm(user)
     statistics = schemas.Statistics(**result_dict, username=user.username)
     return statistics
 
