@@ -140,7 +140,10 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             and_(
                 or_(
                     models.Fact.user_id == user.id,
-                    models.Deck.user_decks.any(permissions=schemas.Permission.owner),
+                    and_(
+                        models.Deck.user_decks.any(permissions=schemas.Permission.owner),
+                        models.Deck.user_decks.any(owner_id=user.id),
+                    )
                 ),
                 not_(or_(
                     models.Fact.suspensions.any(suspend_type=schemas.SuspendType.report),
