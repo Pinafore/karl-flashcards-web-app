@@ -1,4 +1,3 @@
-import json
 from typing import List, Union, Dict, Any, Optional
 
 from fastapi.encoders import jsonable_encoder
@@ -6,7 +5,7 @@ from sqlalchemy import and_, or_, not_
 from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
-from app import crud, models, schemas, evaluate
+from app import crud, models, schemas
 from datetime import datetime
 from pytz import timezone
 import time
@@ -14,7 +13,6 @@ import requests
 
 import logging
 
-from app.schemas import Permission
 from app.core.config import settings
 
 logging.basicConfig(level=logging.INFO)
@@ -38,10 +36,23 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         db.commit()
         return db_obj
 
-    def get_multi_by_owner(
-        self, db: Session, *, user: models.User, skip: Optional[int] = None, limit: Optional[int] = None
+    def get_multi_by_conditions(
+        self,
+            db: Session,
+            *,
+            user: Optional[models.User] = None,
+            skip: Optional[int] = None,
+            limit: Optional[int] = None,
+            search: Optional[schemas.Search] = None
     ) -> List[models.Fact]:
-        query = db.query(self.model).filter(models.Fact.user_id == user.id)
+        query = db.query(self.model)
+        if user:
+            query = query.filter(models.Fact.user_id == user.id)
+        if search:
+            if search.text:
+                pass
+            if search.deck_ids:
+                query = query.join(models.Fact.deck).filter(models.Deck.user_decks.any(owner_id=user.id))
         if skip:
             query = query.offset(skip)
         if limit:
@@ -134,8 +145,6 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
 
         # Queries for suspended cards
         logger.info("Get eligible fact start: " + str(datetime.now(timezone('UTC'))))
-        # suspended_subquery = db.query(models.Suspended.suspended_fact)
-        # owner_subquery = db.query(models.User_Deck.owner_id).join(models.Fact).filter()
         facts_query = db.query(models.Fact).join(models.Fact.deck).filter(
             and_(
                 or_(

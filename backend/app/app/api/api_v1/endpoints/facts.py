@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -13,16 +13,19 @@ router = APIRouter()
 def read_facts(
     db: Session = Depends(deps.get_db),
     paginate: deps.Paginate = Depends(),
+    text: Optional[str] = None,
+    deck_ids: Optional[List[int]] = None,
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Retrieve facts.
     """
+    search = schemas.Search(text=text, deck_ids=deck_ids)
     if crud.user.is_superuser(current_user):
-        facts = crud.fact.get_multi(db=db, skip=paginate.skip, limit=paginate.limit)
+        facts = crud.fact.get_multi_by_conditions(db=db, skip=paginate.skip, limit=paginate.limit, search=search)
     else:
-        facts = crud.fact.get_multi_by_owner(
-            db=db, user=current_user, skip=paginate.skip, limit=paginate.limit
+        facts = crud.fact.get_multi_by_conditions(
+            db=db, user=current_user, skip=paginate.skip, limit=paginate.limit, search=search
         )
     return facts
 
