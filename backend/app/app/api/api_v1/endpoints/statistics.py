@@ -1,12 +1,10 @@
 from datetime import datetime
 
-import requests
-
 from typing import Any, List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, Body
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app import crud, models, schemas, evaluate, interface
+from app import models, schemas, interface
 from app.api import deps
 
 router = APIRouter()
