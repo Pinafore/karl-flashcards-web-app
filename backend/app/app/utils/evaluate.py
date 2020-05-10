@@ -12,7 +12,7 @@ import pickle
 
 corpus: List[str] = []
 dirname = os.path.dirname(os.path.abspath(__file__))
-filename = os.path.join(dirname, 'data/tfidf.pkl')
+filename = os.path.join(dirname, '../data/tfidf.pkl')
 with open(filename, "rb") as pickleFile:
     tfidf = pickle.load(pickleFile)
 
