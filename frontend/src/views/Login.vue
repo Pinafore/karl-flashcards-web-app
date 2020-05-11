@@ -40,7 +40,7 @@
               >
             </v-card-text>
             <v-card-actions>
-              <v-btn @click="signup">Sign Up</v-btn>
+              <v-btn @click="signup">Create Account</v-btn>
               <v-spacer></v-spacer>
               <v-btn @click.prevent="submit">Login</v-btn>
             </v-card-actions>
