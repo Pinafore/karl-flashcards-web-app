@@ -44,7 +44,7 @@
             <v-icon>mdi-lightbulb-on</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title>Learn</v-list-item-title>
+            <v-list-item-title>Study All</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>
