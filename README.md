@@ -3,10 +3,8 @@
 ## Before release
 
 - [x] Sentry backend environments
-- [ ] Figure out emails
 - [ ] System for updating current card metadata/correcting grammar errors
 - [ ] Flashcard browser
-- [ ] Stats page
 - [ ] Tutorial
 - [ ] Send deck field information to scheduler
 - [ ] Add max-length to field so that it centers itself
@@ -22,7 +20,10 @@
 - [ ] Don't redirect to textbox when non alphanumeric characters are typed (or just exclude cmd/opt/ctrl/shift/fn keys)
 - [ ] Get rid of Jeopardy cards that have <a> links
 
+#### Waiting
 
+- [ ] Stats page
+- [ ] Figure out emails
 
 ## Further Features
 
