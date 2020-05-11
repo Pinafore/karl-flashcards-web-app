@@ -1,5 +1,36 @@
 # KARL
 
+## Before release
+
+- [ ] Figure out emails
+
+- [ ] System for updating current card metadata/correcting grammar errors
+- [ ] Flashcard browser
+- [ ] Stats page
+- [ ] Tutorial
+- [ ] Send deck field information to scheduler
+- [ ] Add max-length to field so that it centers itself
+- [ ] Add favicon
+- [ ] Sticky Decks/Add Deck/Study All (Sticky Header)
+
+### Bug Fixes
+
+- [ ] Sentry backend environments
+- [ ] Sentry add frontend
+- [ ] Workbox cache issues
+- [ ] Report/Suspend/Delete are not working correctly
+- [ ] Don't redirect to textbox when non alphanumeric characters are typed (or just exclude cmd/opt/ctrl/shift/fn keys)
+- [ ] Get rid of Jeopardy cards that have <a> links
+
+
+
+## Further Features
+
+- [ ] iOS password file
+- [ ] Upload cards
+- [ ] Share facts
+- [ ] CI & CD, improved deployment
+
 ## Backend Requirements
 
 * [Docker](https://www.docker.com/).
