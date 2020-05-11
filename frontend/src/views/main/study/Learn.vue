@@ -120,23 +120,23 @@
         <div class="title">Back</div>
       </v-card-title>
       <v-card-text class="pt-2 pb-0">
-        <div class="title pb-2">You typed: '{{ typed }}'</div>
         <div class="title primary--text py-2">
           Answer: {{ show.fact && show.fact.answer }}
         </div>
+        <div class="title pb-2">You typed: '{{ typed }}'</div>
         <div
           v-if="recommendation"
           class="title primary--text py-2"
           :style="{ color: 'green !important' }"
         >
-          KAR³L Suggests: Right (Enter to Accept)
+          KAR³L Believes Your Answer Was Right (Enter to Accept)
         </div>
         <div
           v-else
           class="title primary--text py-2"
           :style="{ color: 'red !important' }"
         >
-          KAR³L Suggests: Wrong (Enter to Accept)
+          KAR³L Believes Your Answer Was Wrong (Enter to Accept)
         </div>
         <v-text-field
           id="retype_answer"
