@@ -56,7 +56,6 @@ class User(UserInDBBase):
     decks: List[Deck] = []
     suspended_facts: List[Fact] = []
 
-
     class Config:
         orm_mode = True
 
