@@ -112,6 +112,7 @@ services:
       - SERVER_HOST=https://${DOMAIN}
       # Allow explicit env var override for tests
       - SMTP_HOST=${SMTP_HOST}
+      - ENVIRONMENT=${TAG}
     build:
       context: ./backend
       dockerfile: backend.dockerfile

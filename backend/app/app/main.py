@@ -7,11 +7,13 @@ import sentry_sdk
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from fastapi.routing import APIRoute
 
-sentry_sdk.init(settings.SENTRY_DSN)
-
 app = FastAPI(
     title=settings.PROJECT_NAME, openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
+
+if settings.SENTRY_DSN:
+    sentry_sdk.init(dsn=settings.SENTRY_DSN, environment=settings.ENVIRONMENT)
+    app.add_middleware(SentryAsgiMiddleware)
 
 # Set all CORS enabled origins
 if settings.BACKEND_CORS_ORIGINS:
@@ -25,6 +27,7 @@ if settings.BACKEND_CORS_ORIGINS:
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
+
 def use_route_names_as_operation_ids(app: FastAPI) -> None:
     """
     Simplify operation IDs so that generated API clients have simpler function
@@ -34,7 +37,7 @@ def use_route_names_as_operation_ids(app: FastAPI) -> None:
     """
     for route in app.routes:
         if isinstance(route, APIRoute):
-            route.operation_id = route.name  # in this case, 'read_items'
+            route.operation_id = route.name
 
 
 use_route_names_as_operation_ids(app)

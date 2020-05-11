@@ -2,8 +2,8 @@
 
 ## Before release
 
+- [x] Sentry backend environments
 - [ ] Figure out emails
-
 - [ ] System for updating current card metadata/correcting grammar errors
 - [ ] Flashcard browser
 - [ ] Stats page
@@ -12,10 +12,10 @@
 - [ ] Add max-length to field so that it centers itself
 - [ ] Add favicon
 - [ ] Sticky Decks/Add Deck/Study All (Sticky Header)
+- [ ] Scroll down to back side on show answer
 
 ### Bug Fixes
 
-- [ ] Sentry backend environments
 - [ ] Sentry add frontend
 - [ ] Workbox cache issues
 - [ ] Report/Suspend/Delete are not working correctly
