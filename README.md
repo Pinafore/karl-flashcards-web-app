@@ -14,6 +14,8 @@
 - [ ] Add option for "marked/favorited" facts (viewable through browser)
 - [ ] Refactor some functions to be SQLAlchemy class methods
   - https://stackoverflow.com/questions/8933877/sqlalchemy-search-function-on-table-as-classmethod
+- [ ] Add stronger test cases in study.py
+- [ ] Change Suspended to User_Fact (but only add special facts)
 
 ### Bug Fixes
 
