@@ -32,7 +32,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         db.add(db_obj)
         db.commit()
         deck = crud.deck.get(db=db, id=1)
-        crud.deck.assign_owner(db=db, db_obj=deck, user=db_obj)
+        crud.deck.assign_viewer(db=db, db_obj=deck, user=db_obj)
         db.refresh(db_obj)
         return db_obj
 
