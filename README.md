@@ -11,6 +11,9 @@
 - [ ] Add favicon
 - [ ] Sticky Decks/Add Deck/Study All (Sticky Header)
 - [ ] Scroll down to back side on show answer
+- [ ] Add option for "marked/favorited" facts (viewable through browser)
+- [ ] Refactor some functions to be SQLAlchemy class methods
+  - https://stackoverflow.com/questions/8933877/sqlalchemy-search-function-on-table-as-classmethod
 
 ### Bug Fixes
 
