@@ -154,10 +154,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                         models.Deck.user_decks.any(owner_id=user.id),
                     )
                 ),
-                not_(or_(
-                    models.Fact.suspensions.any(suspend_type=schemas.SuspendType.report),
-                    models.Fact.suspenders.any(id=user.id)
-                ))
+                not_(models.Fact.suspenders.any(id=user.id))
             )
         )
 
