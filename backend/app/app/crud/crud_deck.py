@@ -39,7 +39,7 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
         self, db: Session, *, db_obj: Deck, user: User
     ) -> Deck:
         # db_obj.user_decks.append(User_Deck(db_obj, user, Permission.viewer))
-        user_deck = User_Deck(db_obj, user, Permission.owner)
+        user_deck = User_Deck(db_obj, user, Permission.viewer)
         db.add(user_deck)
         db.commit()
         db.refresh(db_obj)
