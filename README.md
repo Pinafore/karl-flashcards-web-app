@@ -39,6 +39,7 @@
 - [ ] Upload cards
 - [ ] Share facts
 - [ ] CI & CD, improved deployment
+- [ ] Rewrite get_eligible_facts to be fully sqlaclhemy orm
 
 ## Backend Requirements
 
