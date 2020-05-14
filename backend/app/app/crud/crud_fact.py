@@ -237,17 +237,21 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             ).dict())
         logger.info("eligible fact time: " + str(time.time() - karl_list_start))
 
-        logger.info(karl_list)
+
         karl_query_start = time.time()
         scheduler_response = requests.post(settings.INTERFACE + "api/karl/schedule", json=karl_list)
-        logger.info(scheduler_response.json())
         response_json = scheduler_response.json()
         card_order = response_json["order"]
         rationale = response_json["rationale"]
         logger.info("query time: " + str(time.time() - karl_query_start))
 
+        if settings.ENVIRONMENT == "dev":
+            logger.info(karl_list)
+            logger.info(scheduler_response.json())
+            logger.info("First order: ", card_order[0])
+            logger.info("First card: ", karl_list[card_order[0]])
+            logger.info("rationale:" + str(rationale))
         reordered_karl_list = [karl_list[x] for x in card_order]
-
         facts = []
         if return_limit:
             for _, each_karl_fact in zip(range(return_limit), reordered_karl_list):
