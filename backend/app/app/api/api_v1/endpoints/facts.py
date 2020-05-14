@@ -48,7 +48,7 @@ def create_fact(
 def update_fact(
     *,
     fact_in: schemas.FactUpdate,
-    perms: deps.CheckFactPerms = Depends(),
+    perms: deps.OwnerFactPerms = Depends(),
 ) -> Any:
     """
     Update a fact.

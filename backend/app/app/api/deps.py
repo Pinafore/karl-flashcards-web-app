@@ -66,22 +66,44 @@ class Paginate:
         self.skip = skip
         self.limit = limit
 
-class CheckFactPerms():
+
+class OwnerFactPerms:
     def __init__(self, fact_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_active_user)):
         fact = crud.fact.get(db=db, id=fact_id)
         if not fact:
             raise HTTPException(status_code=404, detail="Fact not found")
         if not crud.user.is_superuser(current_user) and (fact.user_id != current_user.id):
-            raise HTTPException(status_code=401, detail="Not enough permissions")
+            user_deck = (db.query(models.User_Deck)
+                         .filter(models.User_Deck.owner_id == current_user.id)
+                         .filter(models.User_Deck.deck_id == fact.deck_id)
+                         .filter(models.User_Deck.permissions == schemas.Permission.owner)
+                         .first())
+
+            if not user_deck:
+                raise HTTPException(status_code=401, detail="Not enough permissions")
         self.fact = fact
         self.db = db
         self.current_user = current_user
         self.fact_id = fact_id
 
-# def check_fact_and_perms(fact_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_active_user)) -> models.Fact:
-#     fact = crud.fact.get(db=db, id=fact_id)
-#     if not fact:
-#         raise HTTPException(status_code=404, detail="Fact not found")
-#     if not crud.user.is_superuser(current_user) and (fact.user_id != current_user.id):
-#         raise HTTPException(status_code=401, detail="Not enough permissions")
-#     return fact
+
+class CheckFactPerms:
+    def __init__(self, fact_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_active_user)):
+        fact = crud.fact.get(db=db, id=fact_id)
+        if not fact:
+            raise HTTPException(status_code=404, detail="Fact not found")
+        if not crud.user.is_superuser(current_user) and fact.user_id != current_user.id:
+            # If the user doesn't own this fact then the fact owner must be an owner of the fact's deck
+            # in order for the fact to be viewable/actionable by the current user
+            user_deck = (db.query(models.User_Deck)
+                         .filter(models.User_Deck.owner_id == fact.user_id)
+                         .filter(models.User_Deck.deck_id == fact.deck_id)
+                         .filter(models.User_Deck.permissions == schemas.Permission.owner)
+                         .first())
+
+            if not user_deck:
+                raise HTTPException(status_code=401, detail="Not enough permissions")
+        self.fact = fact
+        self.db = db
+        self.current_user = current_user
+        self.fact_id = fact_id

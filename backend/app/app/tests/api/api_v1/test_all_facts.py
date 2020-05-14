@@ -7,8 +7,11 @@ from sqlalchemy.orm import Session
 from app import crud
 from app.core.config import settings
 from app.models import User
-from app.tests.utils.fact import create_random_fact
+from app.schemas import SuperUserCreate
+from app.tests.utils.deck import create_random_deck
+from app.tests.utils.fact import create_random_fact, create_random_fact_with_deck
 from app.schemas.fact import FactCreate
+from app.tests.utils.user import create_random_user
 from app.tests.utils.utils import random_lower_string, random_email
 
 
@@ -89,12 +92,69 @@ def test_update_fact(
     assert content["text"] == fact.text
 
 
+def test_update_unowned_fact_when_deck_viewer(
+    client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+) -> None:
+    other_user = create_random_user(db)
+    deck = create_random_deck(db, user=other_user)
+    fact = create_random_fact_with_deck(db=db, user=other_user, deck=deck)
+    user = normal_user_token_headers[1]
+    crud.deck.assign_viewer(db=db, db_obj=deck, user=user)
+    assert user is not fact.owner
+    new_text = random_lower_string()
+    data = {"text": new_text}
+    response = client.put(
+        f"{settings.API_V1_STR}/facts/{fact.fact_id}", headers=normal_user_token_headers[0], json=data,
+    )
+    assert response.status_code == 401
+
+
+def test_update_unowned_fact_when_deck_owner(
+    client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+) -> None:
+    other_user = create_random_user(db)
+    deck = create_random_deck(db, user=other_user)
+    fact = create_random_fact_with_deck(db=db, user=other_user, deck=deck)
+    user = normal_user_token_headers[1]
+    crud.deck.assign_owner(db=db, db_obj=deck, user=user)
+    assert user is not fact.owner
+    old_text = fact.text
+    new_text = random_lower_string()
+    data = {"text": new_text}
+    response = client.put(
+        f"{settings.API_V1_STR}/facts/{fact.fact_id}", headers=normal_user_token_headers[0], json=data,
+    )
+    content = assert_success(response)
+    db.refresh(fact)
+    assert old_text != content["text"]
+    assert new_text == content["text"]
+    assert content["text"] == fact.text
+
+
 def test_delete_fact(
     client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
 ) -> None:
     fact = create_random_fact(db, normal_user_token_headers[1])
     user = normal_user_token_headers[1]
     assert user is fact.owner
+    response = client.delete(
+        f"{settings.API_V1_STR}/facts/{fact.fact_id}", headers=normal_user_token_headers[0]
+    )
+    content = assert_success(response)
+    assert content["text"] == fact.text
+    db.refresh(fact)
+    assert user in fact.suspenders
+
+
+def test_delete_unowned_fact(
+    client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+) -> None:
+    other_user = create_random_user(db)
+    deck = create_random_deck(db, user=other_user)
+    fact = create_random_fact_with_deck(db=db, user=other_user, deck=deck)
+    user = normal_user_token_headers[1]
+    crud.deck.assign_viewer(db=db, db_obj=deck, user=user)
+    assert user is not fact.owner
     response = client.delete(
         f"{settings.API_V1_STR}/facts/{fact.fact_id}", headers=normal_user_token_headers[0]
     )
