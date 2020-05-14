@@ -27,6 +27,7 @@
 - [ ] Don't redirect to textbox when non alphanumeric characters are typed (or just exclude cmd/opt/ctrl/shift/fn keys)
 - [ ] Get rid of Jeopardy cards that have <a> links
 - [ ] Fix "Choose Deck" after adding fact. reset fields
+- [x] Fix issues with scheduler/study ids (by passing in an env)
 
 #### Waiting
 
