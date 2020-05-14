@@ -14,16 +14,19 @@
 - [ ] Add option for "marked/favorited" facts (viewable through browser)
 - [ ] Refactor some functions to be SQLAlchemy class methods
   - https://stackoverflow.com/questions/8933877/sqlalchemy-search-function-on-table-as-classmethod
-- [ ] Add stronger test cases in study.py
+- [x] Add stronger test cases in study.py
 - [ ] Change Suspended to User_Fact (but only add special facts)
+- [ ] Add SuperDeckCreate and move "public" there
 
 ### Bug Fixes
 
+- [x] Fix study bugs
 - [ ] Sentry add frontend
 - [ ] Workbox cache issues
-- [ ] Report/Suspend/Delete are not working correctly
+- [x] Report/Suspend/Delete are not working correctly
 - [ ] Don't redirect to textbox when non alphanumeric characters are typed (or just exclude cmd/opt/ctrl/shift/fn keys)
 - [ ] Get rid of Jeopardy cards that have <a> links
+- [ ] Fix "Choose Deck" after adding fact. reset fields
 
 #### Waiting
 
