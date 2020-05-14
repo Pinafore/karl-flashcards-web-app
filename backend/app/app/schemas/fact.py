@@ -19,6 +19,7 @@ class KarlFact(FactBase):
     fact_id: int
     text: str
     answer: str
+    deck_name: str
     label: Optional[str] = None
     history_id: Optional[int] = None
 
