@@ -22,6 +22,7 @@ class KarlFact(FactBase):
     deck_name: str
     label: Optional[str] = None
     history_id: Optional[int] = None
+    env: str
 
 
 class InternalFactBase(FactBase):

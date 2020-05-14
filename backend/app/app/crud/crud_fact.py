@@ -233,10 +233,10 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 category=each_card.category,
                 deck_name=each_card.deck.title,
                 user_id=user.id,
-                fact_id=each_card.fact_id
+                fact_id=each_card.fact_id,
+                env=settings.ENVIRONMENT
             ).dict())
         logger.info("eligible fact time: " + str(time.time() - karl_list_start))
-
 
         karl_query_start = time.time()
         scheduler_response = requests.post(settings.INTERFACE + "api/karl/schedule", json=karl_list)
@@ -296,6 +296,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             category=db_obj.category,
             deck_name=db_obj.deck.title,
             answer=db_obj.answer,
+            env=settings.ENVIRONMENT,
             label=response).dict()]
         request = requests.post(settings.INTERFACE + "api/karl/update", json=payload_update)
         if 200 <= request.status_code < 300:
