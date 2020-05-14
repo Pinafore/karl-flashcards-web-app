@@ -231,6 +231,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 text=each_card.text,
                 answer=each_card.answer,
                 category=each_card.category,
+                deck_name=each_card.deck.title,
                 user_id=user.id,
                 fact_id=each_card.fact_id
             ).dict())
@@ -289,6 +290,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             fact_id=db_obj.fact_id,
             history_id=history.id,
             category=db_obj.category,
+            deck_name=db_obj.deck.title,
             answer=db_obj.answer,
             label=response).dict()]
         request = requests.post(settings.INTERFACE + "api/karl/update", json=payload_update)
