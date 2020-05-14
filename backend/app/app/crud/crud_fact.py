@@ -2,7 +2,7 @@ from typing import List, Union, Dict, Any, Optional
 
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import and_, or_, not_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, aliased
 
 from app.crud.base import CRUDBase
 from app import crud, models, schemas
@@ -18,13 +18,14 @@ from app.core.config import settings
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
     def get(self, db: Session, id: Any) -> Optional[models.Fact]:
         db_obj = db.query(self.model).filter(models.Fact.fact_id == id).first()
         return db_obj
 
     def create_with_owner(
-        self, db: Session, *, obj_in: schemas.FactCreate, user: models.User
+            self, db: Session, *, obj_in: schemas.FactCreate, user: models.User
     ) -> models.Fact:
         obj_in_data = jsonable_encoder(obj_in)
         now = datetime.now(timezone('UTC')).isoformat()
@@ -37,7 +38,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         return db_obj
 
     def get_multi_by_conditions(
-        self,
+            self,
             db: Session,
             *,
             user: Optional[models.User] = None,
@@ -60,7 +61,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         return query.all()
 
     def update(
-        self, db: Session, *, db_obj: models.Fact, obj_in: Union[schemas.FactUpdate, Dict[str, Any]]
+            self, db: Session, *, db_obj: models.Fact, obj_in: Union[schemas.FactUpdate, Dict[str, Any]]
     ) -> models.Fact:
         update_data = obj_in.dict(exclude_unset=True)
         update_data["update_date"] = datetime.now(timezone('UTC')).isoformat()
@@ -102,7 +103,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
     def undo_remove(
             self, db: Session, *, db_obj: models.Fact, user: models.User
     ) -> models.Fact:
-        db.query(models.Suspended)\
+        db.query(models.Suspended) \
             .filter(and_(models.Suspended.suspended_fact.is_(db_obj),
                          models.Suspended.suspend_type.is_(schemas.SuspendType.delete),
                          models.Suspended.suspender.is_(user))).delete(synchronize_session=False)
@@ -134,7 +135,8 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
     ) -> models.Fact:
         db.query(models.Suspended) \
             .filter(and_(models.Suspended.suspended_fact.is_(db_obj),
-                         models.Suspended.suspend_type.is_(schemas.SuspendType.report))).delete(synchronize_session=False)
+                         models.Suspended.suspend_type.is_(schemas.SuspendType.report))).delete(
+            synchronize_session=False)
         db.commit()
         return db_obj
 
@@ -143,20 +145,66 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
     ) -> List[models.Fact]:
         begin_overall_start = time.time()
 
+        # decks_owned = db.query(models.Deck).join().filter(models.User_Deck.permissions == schemas.Permission.owner)
+        # fact_user_decks_deck = (db.query(models.Deck)
+        #                    .filter(models.Deck.user_decks.any(permissions=schemas.Permission.owner))).subquery()
+        # fact_user_decks_user = (db.query(models.User)
+        #                    .filter(models.User.user_decks.any(permissions=schemas.Permission.owner))).subquery()
+        # fact_alias_decks = aliased(models.Fact, fact_user_decks_deck)
+        # fact_alias_user = aliased(models.Fact, fact_user_decks_user)
         # Queries for suspended cards
         logger.info("Get eligible fact start: " + str(datetime.now(timezone('UTC'))))
-        facts_query = db.query(models.Fact).join(models.Fact.deck).filter(
-            and_(
-                or_(
-                    models.Fact.user_id == user.id,
-                    models.Deck.user_decks.any(owner_id=user.id),
-                ),
-                not_(models.Fact.suspenders.any(id=user.id))
-            )
-        )
+        # facts_query = db.query(models.Fact).join(fact_user_decks_user).join(fact_user_decks_deck).filter(
+        #     and_(
+        #         not_(models.Fact.suspenders.any(id=user.id))
+        #     )
+        # )
+
+        sql_string = """with user_facts as (
+                        select fact_id, deck_id
+                        from fact
+                        where fact.user_id = :param
+                    ),
+                    visible_decks as (
+                        select distinct deck_id
+                        from user_deck
+                        where user_deck.owner_id = :param
+                    ),
+                    deck_owners as (
+                        select user_deck.deck_id, owner_id -- deck_id can occur multiple times
+                        from user_deck
+                        left join visible_decks -- Left join important to get all pairs, not distinct by deck_id
+                            on user_deck.deck_id = visible_decks.deck_id
+                        where user_deck.permissions = 'owner'
+                    ),
+                    candidate_facts as (
+                        select fact_id, fact.deck_id, fact.user_id
+                        from fact
+                        inner join visible_decks on fact.deck_id = visible_decks.deck_id
+                    ),
+                    filtered_facts as (
+                        select fact_id, candidate_facts.deck_id
+                        from candidate_facts
+                        inner join deck_owners -- for each fact, search for an owner, if there is none toss it
+                            on
+                                candidate_facts.deck_id = deck_owners.deck_id -- Find a deck this fact belongs to
+                                and candidate_facts.user_id = deck_owners.owner_id -- see if the facts owner is in this set
+                    )
+                    select fact_id from filtered_facts union select fact_id from user_facts"""
+
+        eligible_facts_resultproxy = db.execute(sql_string, {"param": user.id})
+        db_execution = time.time()
+        logger.info("Finished DB Execution: " + str(db_execution - begin_overall_start))
+        eligible_facts = [row[0] for row in eligible_facts_resultproxy]
+        logger.info("Finished rows: " + str(time.time() - db_execution))
+        facts_query = (db.query(models.Fact)
+            .filter(
+            and_(models.Fact.fact_id.in_(eligible_facts),
+                 not_(models.Fact.suspenders.any(id=user.id)))
+        ))
 
         if deck_ids:
-            facts_query = facts_query.filter(models.Deck.id.in_(deck_ids))
+            facts_query = facts_query.filter(models.Fact.deck_id.in_(deck_ids))
         if limit:
             facts_query = facts_query.limit(limit)
         facts = facts_query.all()
@@ -190,7 +238,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
 
         logger.info(karl_list)
         karl_query_start = time.time()
-        scheduler_response = requests.post(settings.INTERFACE+"api/karl/schedule", json=karl_list)
+        scheduler_response = requests.post(settings.INTERFACE + "api/karl/schedule", json=karl_list)
         logger.info(scheduler_response.json())
         response_json = scheduler_response.json()
         card_order = response_json["order"]
@@ -243,7 +291,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             category=db_obj.category,
             answer=db_obj.answer,
             label=response).dict()]
-        request = requests.post(settings.INTERFACE+"api/karl/update", json=payload_update)
+        request = requests.post(settings.INTERFACE + "api/karl/update", json=payload_update)
         if 200 <= request.status_code < 300:
             return True
         else:
