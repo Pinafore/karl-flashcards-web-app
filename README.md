@@ -21,6 +21,7 @@
 ### Bug Fixes
 
 - [x] Fix study bugs
+  - [ ] Maybe try using from_statement
 - [ ] Sentry add frontend
 - [ ] Workbox cache issues
 - [x] Report/Suspend/Delete are not working correctly

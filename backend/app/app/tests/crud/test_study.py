@@ -84,7 +84,7 @@ def test_get_eligible_facts_stress_test(db: Session) -> None:
     user1_facts = []
     user2_facts = []
     user3_facts = []
-    multiplier = 10
+    multiplier = 1
     for _ in tqdm(range(100*multiplier)):
         user1_facts.append(create_random_fact_with_deck(db, user=user1, deck=deck))
         user2_facts.append(create_random_fact_with_deck(db, user=user2, deck=deck))
