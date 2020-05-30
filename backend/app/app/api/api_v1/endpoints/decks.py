@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Union
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -45,7 +45,7 @@ def read_open_decks(
 def create_deck(
     *,
     db: Session = Depends(deps.get_db),
-    deck_in: schemas.DeckCreate,
+    deck_in: Union[schemas.DeckCreate, schemas.SuperDeckCreate],
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
@@ -77,7 +77,7 @@ def assign_decks(
                 deck = crud.deck.assign_viewer(db=db, db_obj=deck, user=current_user)
                 decks.append(deck)
         else:
-            raise HTTPException(status_code=404, detail="User does not have permission to add one of the specified "
+            raise HTTPException(status_code=401, detail="User does not have permission to add one of the specified "
                                                         "decks")
     return decks
 
@@ -87,7 +87,7 @@ def update_deck(
     *,
     db: Session = Depends(deps.get_db),
     deck_id: int,
-    deck_in: schemas.DeckUpdate,
+    deck_in: Union[schemas.DeckUpdate, schemas.SuperDeckUpdate],
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """

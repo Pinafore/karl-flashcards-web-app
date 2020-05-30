@@ -1,5 +1,5 @@
 from datetime import datetime, time
-from typing import List, Optional
+from typing import List, Optional, Union, Dict, Any
 
 from fastapi.encoders import jsonable_encoder
 from pytz import timezone
@@ -11,14 +11,14 @@ from app.crud.base import CRUDBase
 from app.models import User, Deck
 from app.models.user_deck import User_Deck
 from app.schemas import Permission
-from app.schemas.deck import DeckCreate, DeckUpdate
+from app.schemas.deck import DeckCreate, DeckUpdate, SuperDeckCreate, SuperDeckUpdate
 import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
     def create_with_owner(
-        self, db: Session, *, obj_in: DeckCreate, user: User
+        self, db: Session, *, obj_in: Union[DeckCreate, SuperDeckCreate], user: User
     ) -> Deck:
         db_obj = self.create(db, obj_in=obj_in)
         db_obj = self.assign_owner(db, db_obj=db_obj, user=user)
@@ -73,8 +73,17 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
         if owned_deck:
             user_deck = owned_deck[0]
         else:
-            user_deck = self.create_with_owner(db=db, obj_in=DeckCreate(title=proposed_deck, public=public), user=user)
+            user_deck = self.create_with_owner(db=db, obj_in=SuperDeckCreate(title=proposed_deck, public=public), user=user)
         return user_deck
+
+    def update(
+            self, db: Session, *, db_obj: User, obj_in: Union[DeckUpdate, SuperDeckUpdate, Dict[str, Any]]
+    ) -> Deck:
+        if isinstance(obj_in, dict):
+            update_data = obj_in
+        else:
+            update_data = obj_in.dict(exclude_unset=True)
+        return super().update(db, db_obj=db_obj, obj_in=update_data)
 
     def remove_for_user(
             self, db: Session, *, db_obj: Deck, user: User

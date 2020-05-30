@@ -22,7 +22,7 @@ def init_db(db: Session) -> None:
 
     user = crud.user.get_by_email(db, email=settings.FIRST_SUPERUSER)
     if not user:
-        deck = crud.deck.create(db, obj_in=schemas.DeckCreate(title="Default", public=True))
+        deck = crud.deck.create(db, obj_in=schemas.SuperDeckCreate(title="Default", public=True))
         # deck = models.Deck(id=1, title="Default")
         # db.add(deck)
         # db.commit()

@@ -24,7 +24,7 @@ class UserCreate(UserBase):
     repetition_model: Repetition = Repetition.select_model()
 
 
-# Properties to receive on fact creation
+# Properties to receive on creation from super users
 class SuperUserCreate(UserCreate):
     is_superuser: bool = False
 

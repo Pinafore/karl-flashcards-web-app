@@ -13,8 +13,10 @@ export interface IStudyShow {
 
 export interface IComponents {
   Deck: { title: string; public: boolean; id: number };
-  DeckCreate: { title: string; public?: boolean };
-  DeckUpdate: { title?: string; public?: boolean };
+  DeckCreate: { title: string };
+  SuperDeckCreate: { title: string; public?: boolean };
+  DeckUpdate: { title?: string };
+  SuperDeckUpdate: { title?: string; public?: boolean };
   Fact: {
     text: string;
     answer: string;

@@ -6,7 +6,7 @@
 - [ ] System for updating current card metadata/correcting grammar errors
 - [ ] Flashcard browser
 - [ ] Tutorial
-- [ ] Send deck field information to scheduler
+- [x] Send deck field information to scheduler
 - [ ] Add max-length to field so that it centers itself
 - [ ] Add favicon
 - [ ] Sticky Decks/Add Deck/Study All (Sticky Header)
@@ -16,7 +16,7 @@
   - https://stackoverflow.com/questions/8933877/sqlalchemy-search-function-on-table-as-classmethod
 - [x] Add stronger test cases in study.py
 - [ ] Change Suspended to User_Fact (but only add special facts)
-- [ ] Add SuperDeckCreate and move "public" there
+- [x] Add SuperDeckCreate and move "public" there
 
 ### Bug Fixes
 

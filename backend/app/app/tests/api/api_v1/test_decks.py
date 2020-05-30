@@ -7,7 +7,7 @@ from app import crud
 from app.core.config import settings
 from app.models import User
 from app.tests.utils.deck import create_random_deck
-from app.schemas.deck import DeckCreate
+from app.schemas.deck import DeckCreate, SuperDeckCreate
 from app.tests.utils.utils import random_lower_string, random_email
 
 
@@ -55,9 +55,9 @@ def test_read_open_decks(
 def test_assign_deck(
     client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
 ) -> None:
-    data = DeckCreate(title="Public", public=True)
+    data = SuperDeckCreate(title="Public", public=True)
     deck = crud.deck.create(db=db, obj_in=data)
-    data2 = DeckCreate(title="Public2", public=True)
+    data2 = SuperDeckCreate(title="Public2", public=True)
     deck2 = crud.deck.create(db=db, obj_in=data2)
     response = client.put(
         f"{settings.API_V1_STR}/decks/?deck_ids={deck.id}&deck_ids={deck2.id}",
