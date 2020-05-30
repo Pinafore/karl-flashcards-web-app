@@ -85,15 +85,15 @@ def test_get_eligible_facts_stress_test(db: Session) -> None:
     user2_facts = []
     user3_facts = []
     multiplier = 1
-    for _ in tqdm(range(100*multiplier)):
+    for _ in tqdm(range(10*multiplier)):
         user1_facts.append(create_random_fact_with_deck(db, user=user1, deck=deck))
         user2_facts.append(create_random_fact_with_deck(db, user=user2, deck=deck))
-    for _ in tqdm(range(1000 * multiplier)):
+    for _ in tqdm(range(100 * multiplier)):
         user3_facts.append(create_random_fact_with_deck(db, user=user3, deck=deck))
     user1_study = crud.fact.get_eligible_facts(db=db, user=user1)
     user2_study = crud.fact.get_eligible_facts(db=db, user=user2)
     user3_study = crud.fact.get_eligible_facts(db=db, user=user3)
-    assert len(user1_study) == 200*multiplier
-    assert len(user2_study) == 200*multiplier
-    assert len(user3_study) == 1200*multiplier
+    assert len(user1_study) == 20*multiplier
+    assert len(user2_study) == 20*multiplier
+    assert len(user3_study) == 120*multiplier
 
