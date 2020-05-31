@@ -28,7 +28,24 @@
           icon
           @click="suspend()"
         >
-          <v-icon>mdi-pause</v-icon>
+          <v-icon>mdi-star</v-icon>
+        </v-btn>
+        <v-btn
+          v-else
+          :disabled="!show.enable_actions"
+          class="ma-1 pa-2"
+          @click="mark()"
+        >
+          <v-icon left>mdi-star</v-icon>Mark (Alt-M)
+        </v-btn>
+        <v-btn
+          v-if="$vuetify.breakpoint.smAndDown"
+          :disabled="!show.enable_actions"
+          text
+          icon
+          @click="mark()"
+        >
+          <v-icon>mdi-star</v-icon>
         </v-btn>
         <v-btn
           v-else
@@ -95,6 +112,7 @@
         >
           &nbsp; — Identify {{ show.fact.identifier }}
         </div>
+        <div v-show="show.marked" style="margin-left: auto;">&#11088;&nbsp;</div>
       </v-card-title>
       <v-card-text class="pb-2">
         <div class="title primary--text">
@@ -296,6 +314,10 @@
     public async remove() {
       await studyStore.deleteFact();
       this.resetCard();
+    }
+
+    public async mark() {
+      await studyStore.markFact();
     }
 
     public async response(response) {

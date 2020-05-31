@@ -64,6 +64,7 @@ class FactInDBBase(InternalFactBase):
 # Properties to return to client
 class Fact(FactInDBBase):
     rationale: Optional[str] = None
+    marked: Optional[bool] = None
 
 
 # Additional properties stored in DB

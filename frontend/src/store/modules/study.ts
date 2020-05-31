@@ -9,7 +9,7 @@ export default class StudyModule extends VuexModule {
   deckIds: number[] = [];
   schedule: IComponents["Schedule"][] = [];
   recommendation = false;
-  show: IStudyShow = { text: "loading", enable_report: false, enable_actions: false };
+  show: IStudyShow = { text: "loading", enable_report: false, enable_actions: false, marked: false };
   frontTime = 0;
   time = 0;
   timer: number | undefined;
@@ -42,12 +42,13 @@ export default class StudyModule extends VuexModule {
       fact: payload,
       enable_report: true,
       enable_actions: true,
+      marked: payload.marked ?? false,
     };
   }
 
   @Mutation
   setShowLoading() {
-    this.show = { text: "Loading...", enable_report: false, enable_actions: false };
+    this.show = { text: "Loading...", enable_report: false, enable_actions: false, marked: false };
   }
 
   @Mutation
@@ -56,6 +57,7 @@ export default class StudyModule extends VuexModule {
       text: "You have finished studying these decks for now, check back in later!",
       enable_report: false,
       enable_actions: false,
+      marked: false,
     };
   }
 
@@ -65,6 +67,7 @@ export default class StudyModule extends VuexModule {
       text: "A problem occurred, check back in later!",
       enable_report: false,
       enable_actions: false,
+      marked: false,
     };
   }
 
@@ -80,7 +83,7 @@ export default class StudyModule extends VuexModule {
 
   @Mutation
   loading() {
-    this.show = { text: "loading", enable_report: false, enable_actions: false };
+    this.show = { text: "loading", enable_report: false, enable_actions: false, marked: false };
   }
 
   @Mutation
@@ -108,6 +111,11 @@ export default class StudyModule extends VuexModule {
   @Mutation
   markBackTime() {
     this.backTime = this.time;
+  }
+
+  @Mutation
+  changeMarked() {
+    this.show.marked = !this.show.marked;
   }
 
   @Action
@@ -138,6 +146,22 @@ export default class StudyModule extends VuexModule {
     } catch (error) {
       await mainStore.checkApiError(error);
       this.setShowError();
+    }
+  }
+
+  @Action
+  async markFact() {
+    if (this.show.fact && this.show.enable_actions) {
+      try {
+        await api.markFact(mainStore.token, this.show.fact.fact_id);
+        mainStore.addNotification({
+          content: "Fact successfully marked",
+          color: "success",
+        });
+        this.changeMarked();
+      } catch (error) {
+        await mainStore.checkApiError(error);
+      }
     }
   }
 

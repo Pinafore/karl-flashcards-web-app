@@ -164,6 +164,104 @@ def test_delete_unowned_fact(
     assert user in fact.suspenders
 
 
+def test_suspend_fact(
+    client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+) -> None:
+    fact = create_random_fact(db, normal_user_token_headers[1])
+    user = normal_user_token_headers[1]
+    assert user is fact.owner
+    response = client.put(
+        f"{settings.API_V1_STR}/facts/suspend/{fact.fact_id}", headers=normal_user_token_headers[0]
+    )
+    content = assert_success(response)
+    assert content["text"] == fact.text
+    db.refresh(fact)
+    assert user in fact.suspenders
+
+
+def test_suspend_unowned_fact(
+    client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+) -> None:
+    other_user = create_random_user(db)
+    deck = create_random_deck(db, user=other_user)
+    fact = create_random_fact_with_deck(db=db, user=other_user, deck=deck)
+    user = normal_user_token_headers[1]
+    crud.deck.assign_viewer(db=db, db_obj=deck, user=user)
+    assert user is not fact.owner
+    response = client.put(
+        f"{settings.API_V1_STR}/facts/suspend/{fact.fact_id}", headers=normal_user_token_headers[0]
+    )
+    content = assert_success(response)
+    assert content["text"] == fact.text
+    db.refresh(fact)
+    assert user in fact.suspenders
+
+
+def test_report_fact(
+    client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+) -> None:
+    fact = create_random_fact(db, normal_user_token_headers[1])
+    user = normal_user_token_headers[1]
+    assert user is fact.owner
+    response = client.put(
+        f"{settings.API_V1_STR}/facts/report/{fact.fact_id}", headers=normal_user_token_headers[0]
+    )
+    content = assert_success(response)
+    assert content["text"] == fact.text
+    db.refresh(fact)
+    assert user in fact.suspenders
+
+
+def test_report_unowned_fact(
+    client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+) -> None:
+    other_user = create_random_user(db)
+    deck = create_random_deck(db, user=other_user)
+    fact = create_random_fact_with_deck(db=db, user=other_user, deck=deck)
+    user = normal_user_token_headers[1]
+    crud.deck.assign_viewer(db=db, db_obj=deck, user=user)
+    assert user is not fact.owner
+    response = client.put(
+        f"{settings.API_V1_STR}/facts/report/{fact.fact_id}", headers=normal_user_token_headers[0]
+    )
+    content = assert_success(response)
+    assert content["text"] == fact.text
+    db.refresh(fact)
+    assert user in fact.suspenders
+
+def test_mark_fact(
+    client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+) -> None:
+    fact = create_random_fact(db, normal_user_token_headers[1])
+    user = normal_user_token_headers[1]
+    assert user is fact.owner
+    response = client.put(
+        f"{settings.API_V1_STR}/facts/mark/{fact.fact_id}", headers=normal_user_token_headers[0]
+    )
+    content = assert_success(response)
+    assert content["text"] == fact.text
+    db.refresh(fact)
+    assert user in fact.markers
+
+
+def test_mark_unowned_fact(
+    client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+) -> None:
+    other_user = create_random_user(db)
+    deck = create_random_deck(db, user=other_user)
+    fact = create_random_fact_with_deck(db=db, user=other_user, deck=deck)
+    user = normal_user_token_headers[1]
+    crud.deck.assign_viewer(db=db, db_obj=deck, user=user)
+    assert user is not fact.owner
+    response = client.put(
+        f"{settings.API_V1_STR}/facts/mark/{fact.fact_id}", headers=normal_user_token_headers[0]
+    )
+    content = assert_success(response)
+    assert content["text"] == fact.text
+    db.refresh(fact)
+    assert user in fact.markers
+
+
 def assert_success(response):
     assert response.status_code == 200
     return response.json()

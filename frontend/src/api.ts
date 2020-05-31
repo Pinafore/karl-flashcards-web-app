@@ -76,25 +76,20 @@ export const api = {
   async createDeck(token: string, data: IComponents["DeckCreate"]) {
     return axios.post(`${apiUrl}/api/decks/`, data, authHeaders(token));
   },
-  async suspendFact(token: string, factId: number, undo?: boolean) {
-    let url = `${apiUrl}/api/facts/suspend/${factId}`;
-    if (undo) {
-      url += undo;
-    }
+  async suspendFact(token: string, factId: number) {
+    const url = `${apiUrl}/api/facts/suspend/${factId}`;
     return axios.put<IComponents["Fact"]>(url, null, authHeaders(token));
   },
-  async reportFact(token: string, factId: number, undo?: boolean) {
-    let url = `${apiUrl}/api/facts/report/${factId}`;
-    if (undo) {
-      url += undo;
-    }
+  async reportFact(token: string, factId: number) {
+    const url = `${apiUrl}/api/facts/report/${factId}`;
     return axios.put<IComponents["Fact"]>(url, null, authHeaders(token));
   },
-  async deleteFact(token: string, factId: number, undo?: boolean) {
-    let url = `${apiUrl}/api/facts/${factId}`;
-    if (undo) {
-      url += undo;
-    }
+  async markFact(token: string, factId: number) {
+    const url = `${apiUrl}/api/facts/mark/${factId}`;
+    return axios.put<IComponents["Fact"]>(url, null, authHeaders(token));
+  },
+  async deleteFact(token: string, factId: number) {
+    const url = `${apiUrl}/api/facts/${factId}`;
     return axios.delete<IComponents["Fact"]>(url, authHeaders(token));
   },
   async getPublicDecks(token: string) {

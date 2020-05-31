@@ -100,13 +100,22 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         db.commit()
         return db_obj
 
+    def mark(
+            self, db: Session, *, db_obj: models.Fact, user: models.User
+    ) -> models.Fact:
+
+        mark = models.Marked(marker=user, marked_fact=db_obj, date_marked=datetime.now(timezone('UTC')))
+        db.add(mark)
+        db.commit()
+        return db_obj
+
     def undo_remove(
             self, db: Session, *, db_obj: models.Fact, user: models.User
     ) -> models.Fact:
         db.query(models.Suspended) \
-            .filter(and_(models.Suspended.suspended_fact.is_(db_obj),
-                         models.Suspended.suspend_type.is_(schemas.SuspendType.delete),
-                         models.Suspended.suspender.is_(user))).delete(synchronize_session=False)
+            .filter(and_(models.Suspended.suspended_fact == db_obj,
+                         models.Suspended.suspend_type == schemas.SuspendType.delete,
+                         models.Suspended.suspender == user)).delete(synchronize_session=False)
         db.commit()
         return db_obj
 
@@ -114,9 +123,9 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             self, db: Session, *, db_obj: models.Fact, user: models.User
     ) -> models.Fact:
         db.query(models.Suspended) \
-            .filter(and_(models.Suspended.suspended_fact.is_(db_obj),
-                         models.Suspended.suspend_type.is_(schemas.SuspendType.suspend),
-                         models.Suspended.suspender.is_(user))).delete(synchronize_session=False)
+            .filter(and_(models.Suspended.suspended_fact == db_obj,
+                         models.Suspended.suspend_type == schemas.SuspendType.suspend,
+                         models.Suspended.suspender== user)).delete(synchronize_session=False)
         db.commit()
         return db_obj
 
@@ -124,9 +133,9 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             self, db: Session, *, db_obj: models.Fact, user: models.User
     ) -> models.Fact:
         db.query(models.Suspended) \
-            .filter(and_(models.Suspended.suspended_fact.is_(db_obj),
-                         models.Suspended.suspend_type.is_(schemas.SuspendType.report),
-                         models.Suspended.suspender.is_(user))).delete(synchronize_session=False)
+            .filter(and_(models.Suspended.suspended_fact == db_obj,
+                         models.Suspended.suspend_type == schemas.SuspendType.report,
+                         models.Suspended.suspender == user)).delete(synchronize_session=False)
         db.commit()
         return db_obj
 
@@ -134,9 +143,18 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             self, db: Session, *, db_obj: models.Fact
     ) -> models.Fact:
         db.query(models.Suspended) \
-            .filter(and_(models.Suspended.suspended_fact.is_(db_obj),
-                         models.Suspended.suspend_type.is_(schemas.SuspendType.report))).delete(
+            .filter(and_(models.Suspended.suspended_fact == db_obj,
+                         models.Suspended.suspend_type == schemas.SuspendType.report)).delete(
             synchronize_session=False)
+        db.commit()
+        return db_obj
+
+    def undo_mark(
+            self, db: Session, *, db_obj: models.Fact, user: models.User
+    ) -> models.Fact:
+        db.query(models.Marked) \
+            .filter(and_(models.Marked.marked_fact == db_obj,
+                         models.Marked.marker == user)).delete(synchronize_session=False)
         db.commit()
         return db_obj
 
@@ -248,8 +266,8 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         if settings.ENVIRONMENT == "dev":
             logger.info(karl_list)
             logger.info(scheduler_response.json())
-            logger.info("First order: ", card_order[0])
-            logger.info("First card: ", karl_list[card_order[0]])
+            logger.info("First order: " + str(card_order[0]))
+            logger.info("First card: " + str(karl_list[card_order[0]]))
             logger.info("rationale:" + str(rationale))
         reordered_karl_list = [karl_list[x] for x in card_order]
         facts = []
@@ -258,12 +276,15 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 retrieved_fact = self.get(db=db, id=int(each_karl_fact["fact_id"]))
                 fact_schema = schemas.Fact.from_orm(retrieved_fact)
                 fact_schema.rationale = rationale
+                fact_schema.marked = True if user in retrieved_fact.markers else False
                 facts.append(fact_schema)
         else:
             for each_karl_fact in reordered_karl_list:
                 retrieved_fact = self.get(db=db, id=int(each_karl_fact["fact_id"]))
                 fact_schema = schemas.Fact.from_orm(retrieved_fact)
                 fact_schema.rationale = rationale
+                # MARK: maybe not the most efficient solution for determining if user has marked a fact
+                fact_schema.marked = True if user in retrieved_fact.markers else False
                 facts.append(fact_schema)
         return facts
 

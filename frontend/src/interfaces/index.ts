@@ -9,6 +9,7 @@ export interface IStudyShow {
   fact?: IComponents["Fact"];
   enable_report: boolean;
   enable_actions: boolean;
+  marked: boolean;
 }
 
 export interface IComponents {
@@ -31,6 +32,7 @@ export interface IComponents {
     update_date: string;
     deck: IComponents["Deck"];
     rationale?: string;
+    marked?: boolean;
   };
   FactCreate: {
     text: string;

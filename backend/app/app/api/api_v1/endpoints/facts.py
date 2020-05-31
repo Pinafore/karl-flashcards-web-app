@@ -61,7 +61,6 @@ def update_fact(
 def read_fact(
     *,
     perms: deps.CheckFactPerms = Depends(),
-    undo: bool = False,
 ) -> Any:
     """
     Get fact by ID.
@@ -73,12 +72,11 @@ def read_fact(
 def delete_fact(
     *,
     perms: deps.CheckFactPerms = Depends(),
-    undo: bool = False,
 ) -> Any:
     """
     Delete a fact.
     """
-    if undo:
+    if perms.current_user in perms.fact.markers:
         fact = crud.fact.undo_remove(db=perms.db, db_obj=perms.fact, user=perms.current_user)
     else:
         fact = crud.fact.remove(db=perms.db, db_obj=perms.fact, user=perms.current_user)
@@ -89,12 +87,11 @@ def delete_fact(
 def suspend_fact(
     *,
     perms: deps.CheckFactPerms = Depends(),
-    undo: bool = False,
 ) -> Any:
     """
     Suspend a fact.
     """
-    if undo:
+    if perms.current_user in perms.fact.markers:
         fact = crud.fact.undo_suspend(db=perms.db, db_obj=perms.fact, user=perms.current_user)
     else:
         fact = crud.fact.suspend(db=perms.db, db_obj=perms.fact, user=perms.current_user)
@@ -105,13 +102,27 @@ def suspend_fact(
 def report_fact(
     *,
     perms: deps.CheckFactPerms = Depends(),
-    undo: bool = False,
 ) -> Any:
     """
     Report a fact.
     """
-    if undo:
+    if perms.current_user in perms.fact.markers:
         fact = crud.fact.undo_report(db=perms.db, db_obj=perms.fact, user=perms.current_user)
     else:
         fact = crud.fact.report(db=perms.db, db_obj=perms.fact, user=perms.current_user)
+    return fact
+
+
+@router.put("/mark/{fact_id}", response_model=schemas.Fact)
+def mark_fact(
+    *,
+    perms: deps.CheckFactPerms = Depends(),
+) -> Any:
+    """
+    Report a fact.
+    """
+    if perms.current_user in perms.fact.markers:
+        fact = crud.fact.undo_mark(db=perms.db, db_obj=perms.fact, user=perms.current_user)
+    else:
+        fact = crud.fact.mark(db=perms.db, db_obj=perms.fact, user=perms.current_user)
     return fact
