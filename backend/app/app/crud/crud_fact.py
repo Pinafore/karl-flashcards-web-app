@@ -178,48 +178,28 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         #     )
         # )
 
-        sql_string = """with user_facts as (
-                        select fact_id, deck_id
-                        from fact
-                        where fact.user_id = :param
-                    ),
-                    visible_decks as (
-                        select distinct deck_id
-                        from user_deck
-                        where user_deck.owner_id = :param
-                    ),
-                    deck_owners as (
-                        select user_deck.deck_id, owner_id -- deck_id can occur multiple times
-                        from user_deck
-                        left join visible_decks -- Left join important to get all pairs, not distinct by deck_id
-                            on user_deck.deck_id = visible_decks.deck_id
-                        where user_deck.permissions = 'owner'
-                    ),
-                    candidate_facts as (
-                        select fact_id, fact.deck_id, fact.user_id
-                        from fact
-                        inner join visible_decks on fact.deck_id = visible_decks.deck_id
-                    ),
-                    filtered_facts as (
-                        select fact_id, candidate_facts.deck_id
-                        from candidate_facts
-                        inner join deck_owners -- for each fact, search for an owner, if there is none toss it
-                            on
-                                candidate_facts.deck_id = deck_owners.deck_id -- Find a deck this fact belongs to
-                                and candidate_facts.user_id = deck_owners.owner_id -- see if the facts owner is in this set
-                    )
-                    select fact_id from filtered_facts union select fact_id from user_facts"""
-
-        eligible_facts_resultproxy = db.execute(sql_string, {"param": user.id})
         db_execution = time.time()
         logger.info("Finished DB Execution: " + str(db_execution - begin_overall_start))
-        eligible_facts = [row[0] for row in eligible_facts_resultproxy]
+        # eligible_facts = [row[0] for row in eligible_facts_resultproxy]
+        user_facts = (db.query(models.Fact).filter(models.Fact.user_id == user.id))
+        visible_decks = (db.query(models.Deck.id).join(models.User_Deck).filter(models.User_Deck.owner_id == user.id).subquery())
+        deck_owners = (db.query(models.User_Deck.deck_id, models.User_Deck.owner_id)
+                       .outerjoin(visible_decks)
+                       .filter(models.User_Deck.permissions == schemas.Permission.owner).subquery())
+        # candidate_facts = (db.query(models.Fact.deck_id, models.Fact.user_id)
+        #                    .join(visible_decks).subquery())
+        filtered_facts = (db.query(models.Fact)
+                          .join(visible_decks, models.Fact.deck_id == visible_decks.c.id)
+                          .join(deck_owners,
+                                and_(models.Fact.deck_id == deck_owners.c.deck_id,
+                                     models.Fact.user_id == deck_owners.c.owner_id)))
+        facts_query = (user_facts.union(filtered_facts))
         logger.info("Finished rows: " + str(time.time() - db_execution))
-        facts_query = (db.query(models.Fact)
-            .filter(
-            and_(models.Fact.fact_id.in_(eligible_facts),
-                 not_(models.Fact.suspenders.any(id=user.id)))
-        ))
+        # facts_query = (db.query(models.Fact)
+        #     .filter(
+        #     and_(models.Fact.fact_id.in_(eligible_facts),
+        #          not_(models.Fact.suspenders.any(id=user.id)))
+        # ))
 
         if deck_ids:
             facts_query = facts_query.filter(models.Fact.deck_id.in_(deck_ids))

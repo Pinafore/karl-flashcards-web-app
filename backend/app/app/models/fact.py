@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, ForeignKey, Integer, String, TIMESTAMP, JSON, ARRAY, Boolean
+from sqlalchemy import Column, ForeignKey, Integer, String, TIMESTAMP, ARRAY, Boolean
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
 
@@ -25,7 +26,7 @@ class Fact(Base):
     category = Column(String)
     identifier = Column(String)
     answer_lines = Column(ARRAY(String), nullable=False)
-    extra = Column(JSON)
+    extra = Column(JSONB)
 
     owner = relationship("User", back_populates="owned_facts")
     deck = relationship("Deck", back_populates="facts")

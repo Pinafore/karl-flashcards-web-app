@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, Column, Integer, ForeignKey, TIMESTAMP, Enum, JSON
+from sqlalchemy import Boolean, Column, Integer, ForeignKey, TIMESTAMP, Enum
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
 from app.db.base_class import Base
@@ -17,7 +18,7 @@ class History(Base):
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     fact_id = Column(Integer, ForeignKey("fact.fact_id"), nullable=False)
     log_type = Column(Enum(Log), nullable=False)
-    details = Column(JSON)
+    details = Column(JSONB)
     # repetition_model = Column(Enum(Repetition), default=Repetition.leitner, nullable=False)
     # typed = Column(String, nullable=False)
     # response = Column(String, nullable=False)
