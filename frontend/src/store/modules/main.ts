@@ -299,7 +299,6 @@ export default class MainModule extends VuexModule {
           await new Promise((resolve, _reject) => setTimeout(() => resolve(), 500)),
         ])
       )[0];
-      this.setUserProfile(response.data);
       this.removeNotification(loadingNotification);
       this.addNotification({
         content: "Deck successfully created",
@@ -321,7 +320,6 @@ export default class MainModule extends VuexModule {
           await new Promise((resolve, _reject) => setTimeout(() => resolve(), 500)),
         ])
       )[0];
-      this.setUserProfile(response.data);
       this.removeNotification(loadingNotification);
       this.addNotification({
         content: "Fact successfully created",

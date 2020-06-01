@@ -108,12 +108,11 @@
     category = "";
     identifier = "";
     deck_id = 1;
-    password2 = "";
 
     async mounted() {
       await mainStore.getUserProfile();
       const userProfile = mainStore.userProfile;
-      if (userProfile) {
+      if (userProfile && userProfile.default_deck) {
         this.deck_id = userProfile.default_deck.id;
       }
       this.onReset();
@@ -130,9 +129,16 @@
     }
 
     onReset() {
+      this.$refs.observer.reset();
+
       this.front = "";
       this.back = "";
-      this.$refs.observer.reset();
+      this.identifier = "";
+      this.category = "";
+      const userProfile = mainStore.userProfile;
+      if (userProfile && userProfile.default_deck) {
+        this.deck_id = userProfile.default_deck.id;
+      }
     }
 
     cancel() {
@@ -156,6 +162,11 @@
         extra: { type: "user created" },
       };
       await mainStore.createFact(fact);
+      this.front = "";
+      this.back = "";
+      this.identifier = "";
+      this.category = "";
+      this.$refs.observer.reset();
     }
   }
 </script>
