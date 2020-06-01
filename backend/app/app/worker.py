@@ -61,21 +61,22 @@ def load_jeopardy_facts() -> str:
         with open(filename, "r") as file:
             json_data = json.load(file)
             for count, fact in enumerate(itertools.islice(json_data, 0, 20000)):
-                extra = {
-                    "type": "Jeopardy",
-                    "air_date": fact["air_date"],
-                    "value": fact["value"],
-                    "round": fact["round"],
-                    "show_number": fact["show_number"]
-                }
-                fact_in = schemas.FactCreate(
-                        text=fact["question"],
-                        answer=fact["answer"],
-                        deck_id=deck.id,
-                        answer_lines=[fact["answer"]],
-                        category=fact["category"],
-                        extra=extra
-                    )
-                crud.fact.create_with_owner(db, obj_in=fact_in, user=user)
+                if "<" not in fact["question"]:
+                    extra = {
+                        "type": "Jeopardy",
+                        "air_date": fact["air_date"],
+                        "value": fact["value"],
+                        "round": fact["round"],
+                        "show_number": fact["show_number"]
+                    }
+                    fact_in = schemas.FactCreate(
+                            text=fact["question"],
+                            answer=fact["answer"],
+                            deck_id=deck.id,
+                            answer_lines=[fact["answer"]],
+                            category=fact["category"],
+                            extra=extra
+                        )
+                    crud.fact.create_with_owner(db, obj_in=fact_in, user=user)
         return f"{count+1} quizbowl questions loaded"
     return f"superuser does not exist yet"
