@@ -268,7 +268,7 @@
         this.showAnswer();
       } else if (
         65 <= e.keyCode <= 90 &&
-        e.altKey &&
+        !e.altKey &&
         !e.metaKey &&
         !e.shiftKey &&
         !e.ctrlKey
