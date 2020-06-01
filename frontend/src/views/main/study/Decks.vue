@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-toolbar>
+    <v-toolbar style="position: sticky; top: 0; z-index: 10;">
       <v-toolbar-title>
         Decks
       </v-toolbar-title>

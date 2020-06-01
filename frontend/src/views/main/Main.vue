@@ -10,6 +10,7 @@
       elevation="20"
       mobile-break-point="600"
       bottom
+      style="z-index: 11;"
     >
       <v-list>
         <v-list-item to="/main/dashboard">
