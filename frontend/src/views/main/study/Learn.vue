@@ -270,11 +270,11 @@
       } else if (KeyBoardCode == "Enter") {
         this.showAnswer();
       } else if (
-        65 <= e.keyCode <= 90 &&
+        65 <= e.keyCode <= 90 && // eslint-disable-line
         !e.altKey &&
         !e.metaKey &&
         !e.shiftKey &&
-        !e.ctrlKey // eslint-disable-line
+        !e.ctrlKey
       ) {
         //this.$ref.typed.$el.focus() doesn't work some reason
         document.getElementById("answer")!.focus(); // eslint-disable-line
