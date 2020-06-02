@@ -263,6 +263,8 @@
         this.dialog = !this.dialog;
       } else if (e.altKey && KeyBoardCode == "KeyR") {
         this.report();
+      } else if (e.altKey && KeyBoardCode == "KeyM") {
+        this.mark();
       } else if (this.showBack) {
         this.determineResponse(KeyBoardCode);
       } else if (KeyBoardCode == "Enter") {
