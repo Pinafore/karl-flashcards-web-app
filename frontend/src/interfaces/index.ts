@@ -100,6 +100,7 @@ export interface IComponents {
     default_deck: IComponents["Deck"];
     decks?: IComponents["Deck"][];
     suspended_facts?: IComponents["Fact"][];
+    facts?: IComponents["Fact"][];
   };
   UserCreate: {
     email: string;

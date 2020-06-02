@@ -55,6 +55,13 @@ export default new VueRouter({
                 ),
             },
             {
+              path: "browse",
+              component: () =>
+                import(
+                  /* webpackChunkName: "main-dashboard" */ "@/views/main/Browser.vue"
+                  ),
+            },
+            {
               path: "profile",
               component: RouterComponent,
               redirect: "profile/view",
