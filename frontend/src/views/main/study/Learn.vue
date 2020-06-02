@@ -274,7 +274,7 @@
         !e.altKey &&
         !e.metaKey &&
         !e.shiftKey &&
-        !e.ctrlKey
+        !e.ctrlKey // eslint-disable-line
       ) {
         //this.$ref.typed.$el.focus() doesn't work some reason
         document.getElementById("answer")!.focus(); // eslint-disable-line
