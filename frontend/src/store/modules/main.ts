@@ -293,7 +293,7 @@ export default class MainModule extends VuexModule {
     try {
       const loadingNotification = { content: "saving", showProgress: true };
       this.addNotification(loadingNotification);
-      const response = (
+      const _response = (
         await Promise.all([
           api.createDeck(this.token, payload),
           await new Promise((resolve, _reject) => setTimeout(() => resolve(), 500)),
@@ -314,7 +314,7 @@ export default class MainModule extends VuexModule {
     try {
       const loadingNotification = { content: "saving", showProgress: true };
       this.addNotification(loadingNotification);
-      const response = (
+      const _response = (
         await Promise.all([
           api.createFact(this.token, payload),
           await new Promise((resolve, _reject) => setTimeout(() => resolve(), 500)),
