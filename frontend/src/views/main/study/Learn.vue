@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid>
+  <v-container fluid style="max-width:1200px">
     <v-card class="mx-3 my-1 py-1 px-3">
       <v-card-title primary-title class="mx-3 my-0 pa-0">
         <div class="headline primary--text">Learn</div>
