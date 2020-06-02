@@ -5,7 +5,7 @@
         <div class="headline primary--text">Dashboard</div>
       </v-card-title>
       <v-card-text>
-        <div class="headline font-weight-light ma-5">Welcome {{ greetedUser }}!</div>
+        <div class="headline font-weight-light ma-5">Hello {{ greetedUser }}!</div>
       </v-card-text>
       <v-card-actions>
         <v-btn to="/main/study/learn">Study All</v-btn>
