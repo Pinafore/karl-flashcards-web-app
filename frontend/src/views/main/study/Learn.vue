@@ -346,7 +346,9 @@
 
     public scrollToResponseButtons() {
       const container = this.$el.querySelector("#response");
-      container.scrollIntoView();
+      if (container) {
+        container.scrollIntoView();
+      }
     }
   }
 </script>

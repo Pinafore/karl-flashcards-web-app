@@ -9,7 +9,12 @@ export default class StudyModule extends VuexModule {
   deckIds: number[] = [];
   schedule: IComponents["Schedule"][] = [];
   recommendation = false;
-  show: IStudyShow = { text: "loading", enable_report: false, enable_actions: false, marked: false };
+  show: IStudyShow = {
+    text: "loading",
+    enable_report: false,
+    enable_actions: false,
+    marked: false,
+  };
   frontTime = 0;
   time = 0;
   timer: number | undefined;
@@ -17,7 +22,7 @@ export default class StudyModule extends VuexModule {
 
   @Mutation
   setDeckIds(payload) {
-    this.deckIds = payload
+    this.deckIds = payload;
   }
 
   @Mutation
@@ -48,7 +53,12 @@ export default class StudyModule extends VuexModule {
 
   @Mutation
   setShowLoading() {
-    this.show = { text: "Loading...", enable_report: false, enable_actions: false, marked: false };
+    this.show = {
+      text: "Loading...",
+      enable_report: false,
+      enable_actions: false,
+      marked: false,
+    };
   }
 
   @Mutation
@@ -83,7 +93,12 @@ export default class StudyModule extends VuexModule {
 
   @Mutation
   loading() {
-    this.show = { text: "loading", enable_report: false, enable_actions: false, marked: false };
+    this.show = {
+      text: "loading",
+      enable_report: false,
+      enable_actions: false,
+      marked: false,
+    };
   }
 
   @Mutation
@@ -105,7 +120,6 @@ export default class StudyModule extends VuexModule {
   @Mutation
   markFrontTime() {
     this.frontTime = this.time;
-
   }
 
   @Mutation
@@ -120,7 +134,7 @@ export default class StudyModule extends VuexModule {
 
   @Action
   async getNextShow() {
-    this.resetTimer()
+    this.resetTimer();
     if (this.facts.length > 0) {
       this.setShow(this.facts[0]);
       this.startTimer();
@@ -167,7 +181,7 @@ export default class StudyModule extends VuexModule {
 
   @Action
   async suspendFact() {
-    this.resetTimer()
+    this.resetTimer();
     if (this.show.fact && this.show.enable_actions) {
       try {
         await api.suspendFact(mainStore.token, this.show.fact.fact_id);
@@ -180,7 +194,7 @@ export default class StudyModule extends VuexModule {
 
   @Action
   async reportFact() {
-    this.resetTimer()
+    this.resetTimer();
     if (this.show.fact && this.show.enable_report) {
       try {
         await api.reportFact(mainStore.token, this.show.fact.fact_id);
@@ -193,7 +207,7 @@ export default class StudyModule extends VuexModule {
 
   @Action
   async deleteFact() {
-    this.resetTimer()
+    this.resetTimer();
     if (this.show.fact && this.show.enable_actions) {
       try {
         await api.deleteFact(mainStore.token, this.show.fact.fact_id);
