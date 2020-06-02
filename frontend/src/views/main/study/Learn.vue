@@ -256,7 +256,7 @@
 
     public handleKeyPress(e) {
       const KeyBoardCode = String(e.code);
-
+      const KeyBoardInt = e.keyCode;
       if (e.altKey && KeyBoardCode == "KeyS") {
         this.suspend();
       } else if (e.altKey && KeyBoardCode == "Slash") {
@@ -270,7 +270,8 @@
       } else if (KeyBoardCode == "Enter") {
         this.showAnswer();
       } else if (
-        65 <= e.keyCode <= 90 && // eslint-disable-line
+        65 <= KeyBoardInt &&
+        KeyBoardInt <= 90 &&
         !e.altKey &&
         !e.metaKey &&
         !e.shiftKey &&
