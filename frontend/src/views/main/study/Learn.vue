@@ -5,7 +5,7 @@
         <div class="headline primary--text">Learn</div>
         <v-spacer></v-spacer>
         <v-btn
-          v-if="$vuetify.breakpoint.smAndDown"
+          v-if="$vuetify.breakpoint.mdAndDown"
           :disabled="!show.enable_actions"
           text
           icon
@@ -22,7 +22,7 @@
           <v-icon>mdi-information</v-icon>Debug (Alt-/)
         </v-btn>
         <v-btn
-          v-if="$vuetify.breakpoint.smAndDown"
+          v-if="$vuetify.breakpoint.mdAndDown"
           :disabled="!show.enable_actions"
           text
           icon
@@ -39,7 +39,7 @@
           <v-icon left>mdi-star</v-icon>Mark (Alt-M)
         </v-btn>
         <v-btn
-          v-if="$vuetify.breakpoint.smAndDown"
+          v-if="$vuetify.breakpoint.mdAndDown"
           :disabled="!show.enable_actions"
           text
           icon
@@ -56,7 +56,7 @@
           <v-icon left>mdi-pause</v-icon>Suspend (Alt-S)
         </v-btn>
         <v-btn
-          v-if="$vuetify.breakpoint.smAndDown"
+          v-if="$vuetify.breakpoint.mdAndDown"
           :disabled="!show.enable_report"
           text
           icon
@@ -73,7 +73,7 @@
           <v-icon left>mdi-alert-octagon</v-icon>Report (Alt-R)
         </v-btn>
         <v-btn
-          v-if="$vuetify.breakpoint.smAndDown"
+          v-if="$vuetify.breakpoint.mdAndDown"
           :disabled="!show.enable_actions"
           text
           icon
