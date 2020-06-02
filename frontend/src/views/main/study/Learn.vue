@@ -186,6 +186,7 @@
         </v-row>
       </v-card-actions>
     </v-card>
+    <div id="response"></div>
     <v-dialog v-model="dialog" scrollable>
       <v-card>
         <v-card-title>
@@ -299,6 +300,7 @@
     public async showAnswer() {
       await studyStore.evaluateAnswer(this.typed);
       this.showBack = true;
+      this.scrollToResponseButtons();
     }
 
     public resetCard() {
@@ -338,6 +340,11 @@
         this.resetCard();
         await studyStore.updateSchedule();
       }
+    }
+
+    public scrollToResponseButtons() {
+      const container = this.$el.querySelector("#response");
+      container.scrollIntoView();
     }
   }
 </script>
