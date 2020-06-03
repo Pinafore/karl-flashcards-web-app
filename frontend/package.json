@@ -55,7 +55,4 @@
     "vuex-module-decorators": "^0.16.1",
     "webpack": "^4.42.1"
   }
-  "vue": {
-
-  }
 }
