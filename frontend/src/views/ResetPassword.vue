@@ -11,40 +11,40 @@
                 </v-toolbar>
                 <v-card-text>
                   <p class="subheading">Enter your new password below</p>
+                  <!-- password -->
+                  <validation-provider
+                    v-slot="{ errors }"
+                    :debounce="100"
+                    name="Password"
+                    vid="password1"
+                    rules="required"
+                  >
+                    <v-text-field
+                      v-model="password1"
+                      prepend-icon="mdi-lock"
+                      type="password"
+                      label="Password"
+                      :error-messages="errors"
+                    ></v-text-field>
+                  </validation-provider>
+
+                  <!-- password confirmation -->
+                  <validation-provider
+                    v-slot="{ errors }"
+                    debounce="100"
+                    name="Password confirmation"
+                    vid="password2"
+                    rules="required|confirmed:password1"
+                  >
+                    <v-text-field
+                      v-model="password2"
+                      prepend-icon="mdi-lock"
+                      type="password"
+                      label="Confirm Password"
+                      :error-messages="errors"
+                    ></v-text-field>
+                  </validation-provider>
                 </v-card-text>
-
-                <!-- password -->
-                <validation-provider
-                  v-slot="{ errors }"
-                  :debounce="100"
-                  name="Password"
-                  vid="password1"
-                  rules="required"
-                >
-                  <v-text-field
-                    v-model="password1"
-                    type="password"
-                    label="Password"
-                    :error-messages="errors"
-                  ></v-text-field>
-                </validation-provider>
-
-                <!-- password confirmation -->
-                <validation-provider
-                  v-slot="{ errors }"
-                  debounce="100"
-                  name="Password confirmation"
-                  vid="password2"
-                  rules="required|confirmed:password1"
-                >
-                  <v-text-field
-                    v-model="password2"
-                    type="password"
-                    label="Confirm Password"
-                    :error-messages="errors"
-                  ></v-text-field>
-                </validation-provider>
-
                 <v-card-actions>
                   <v-spacer></v-spacer>
                   <v-btn @click="cancel">Cancel</v-btn>
