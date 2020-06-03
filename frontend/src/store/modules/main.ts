@@ -217,7 +217,7 @@ export default class MainModule extends VuexModule {
   }
 
   @Action
-  async recoverPassword(payload: { username: string }) {
+  async recoverPassword(payload: { email: string }) {
     const loadingNotification = {
       content: "Sending password recovery email",
       showProgress: true,
@@ -225,7 +225,7 @@ export default class MainModule extends VuexModule {
     try {
       this.addNotification(loadingNotification);
       await Promise.all([
-        api.passwordRecovery(payload.username),
+        api.passwordRecovery(payload.email),
         await new Promise((resolve, _reject) => setTimeout(() => resolve(), 500)),
       ]);
       this.removeNotification(loadingNotification);
