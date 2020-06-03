@@ -13,16 +13,15 @@
                   <p class="subheading">
                     A password recovery email will be sent to the registered account
                   </p>
-                  <!-- username field -->
+                  <!-- email field -->
                   <validation-provider
                     v-slot="{ errors }"
                     rules="required"
-                    name="Username"
-                    mode="lazy"
+                    name="email"
                   >
                     <v-text-field
-                      v-model="username"
-                      label="Username"
+                      v-model="email"
+                      label="email"
                       type="text"
                       prepend-icon="mdi-account"
                       :error-messages="errors[0]"
@@ -70,7 +69,7 @@
     };
 
     public valid = true;
-    public username = "";
+    public email = "";
     public appName = appName;
 
     public cancel() {
@@ -84,7 +83,7 @@
         return;
       }
 
-      mainStore.recoverPassword({ username: this.username });
+      mainStore.recoverPassword({ email: this.email });
     }
   }
 </script>
