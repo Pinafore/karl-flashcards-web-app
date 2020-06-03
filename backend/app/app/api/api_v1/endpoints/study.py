@@ -8,6 +8,9 @@ from app import crud, models, schemas
 from app.utils import evaluate
 from app.api import deps
 
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
