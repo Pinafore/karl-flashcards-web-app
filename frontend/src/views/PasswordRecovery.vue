@@ -83,7 +83,7 @@
         return;
       }
 
-      mainStore.recoverPassword({ username: this.email });
+      mainStore.recoverPassword({ email: this.email });
     }
   }
 </script>
