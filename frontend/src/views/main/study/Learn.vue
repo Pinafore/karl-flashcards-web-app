@@ -45,7 +45,7 @@
           icon
           @click="mark()"
         >
-          <v-icon>mdi-star</v-icon>
+          <v-icon>mdi-pause</v-icon>
         </v-btn>
         <v-btn
           v-else
