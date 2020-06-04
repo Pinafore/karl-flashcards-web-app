@@ -1,4 +1,4 @@
-from .fact import Fact, FactCreate, FactInDB, FactUpdate, KarlFact
+from .fact import Fact, FactCreate, FactInDB, FactUpdate, KarlFact, FactSearch
 from .msg import Msg
 from .token import Token, TokenPayload
 from .user import User, UserCreate, UserInDB, UserUpdate, SuperUserCreate, SuperUserUpdate
@@ -10,4 +10,3 @@ from .permission import Permission
 from .log import Log
 from .schedule import Schedule
 from .statistics import Statistics
-from .search import Search

@@ -1,7 +1,7 @@
 from typing import List, Union, Dict, Any, Optional
 
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import and_, or_, not_
+from sqlalchemy import and_, or_, not_, func
 from sqlalchemy.orm import Session, aliased
 
 from app.crud.base import CRUDBase
@@ -44,7 +44,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             user: Optional[models.User] = None,
             skip: Optional[int] = None,
             limit: Optional[int] = None,
-            search: Optional[schemas.Search] = None
+            search: Optional[schemas.FactSearch] = None
     ) -> List[models.Fact]:
         query = db.query(self.model)
         if user:
@@ -125,7 +125,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         db.query(models.Suspended) \
             .filter(and_(models.Suspended.suspended_fact == db_obj,
                          models.Suspended.suspend_type == schemas.SuspendType.suspend,
-                         models.Suspended.suspender== user)).delete(synchronize_session=False)
+                         models.Suspended.suspender == user)).delete(synchronize_session=False)
         db.commit()
         return db_obj
 
@@ -159,52 +159,52 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         return db_obj
 
     def get_eligible_facts(
-            self, db: Session, *, user: models.User, deck_ids: List[int] = None, limit: Optional[int] = None
+            self, db: Session, *, user: models.User, filters: schemas.FactSearch = schemas.FactSearch()
     ) -> List[models.Fact]:
         begin_overall_start = time.time()
-
-        # decks_owned = db.query(models.Deck).join().filter(models.User_Deck.permissions == schemas.Permission.owner)
-        # fact_user_decks_deck = (db.query(models.Deck)
-        #                    .filter(models.Deck.user_decks.any(permissions=schemas.Permission.owner))).subquery()
-        # fact_user_decks_user = (db.query(models.User)
-        #                    .filter(models.User.user_decks.any(permissions=schemas.Permission.owner))).subquery()
-        # fact_alias_decks = aliased(models.Fact, fact_user_decks_deck)
-        # fact_alias_user = aliased(models.Fact, fact_user_decks_user)
-        # Queries for suspended cards
-        logger.info("Get eligible fact start: " + str(datetime.now(timezone('UTC'))))
-        # facts_query = db.query(models.Fact).join(fact_user_decks_user).join(fact_user_decks_deck).filter(
-        #     and_(
-        #         not_(models.Fact.suspenders.any(id=user.id))
-        #     )
-        # )
-
-        db_execution = time.time()
-        logger.info("Finished DB Execution: " + str(db_execution - begin_overall_start))
-        # eligible_facts = [row[0] for row in eligible_facts_resultproxy]
         user_facts = (db.query(models.Fact).filter(models.Fact.user_id == user.id))
-        visible_decks = (db.query(models.Deck.id).join(models.User_Deck).filter(models.User_Deck.owner_id == user.id).subquery())
+        visible_decks = (
+            db.query(models.Deck.id).join(models.User_Deck).filter(models.User_Deck.owner_id == user.id).subquery())
         deck_owners = (db.query(models.User_Deck.deck_id, models.User_Deck.owner_id)
                        .outerjoin(visible_decks)
                        .filter(models.User_Deck.permissions == schemas.Permission.owner).subquery())
-        # candidate_facts = (db.query(models.Fact.deck_id, models.Fact.user_id)
-        #                    .join(visible_decks).subquery())
         filtered_facts = (db.query(models.Fact)
                           .join(visible_decks, models.Fact.deck_id == visible_decks.c.id)
                           .join(deck_owners,
                                 and_(models.Fact.deck_id == deck_owners.c.deck_id,
                                      models.Fact.user_id == deck_owners.c.owner_id)))
         facts_query = (user_facts.union(filtered_facts))
-        logger.info("Finished rows: " + str(time.time() - db_execution))
-        # facts_query = (db.query(models.Fact)
-        #     .filter(
-        #     and_(models.Fact.fact_id.in_(eligible_facts),
-        #          not_(models.Fact.suspenders.any(id=user.id)))
-        # ))
-
-        if deck_ids:
-            facts_query = facts_query.filter(models.Fact.deck_id.in_(deck_ids))
-        if limit:
-            facts_query = facts_query.limit(limit)
+        if filters.all_suspended:
+            facts_query = facts_query.filter(not_(models.Fact.suspenders.any(id=user.id)))
+        else:
+            facts_query = facts_query.outerjoin(models.Suspended)
+            if filters.suspended:
+                facts_query = facts_query.filter(models.Suspended.suspend_type == schemas.SuspendType.suspend)
+            elif filters.reported:
+                facts_query = facts_query.filter(models.Suspended.suspend_type == schemas.SuspendType.report)
+            else:
+                facts_query = facts_query.filter(models.Suspended.suspend_type != schemas.SuspendType.delete)
+        if filters.text:
+            facts_query = facts_query.filter(models.Fact.text.ilike(filters.text))
+        if filters.answer:
+            facts_query = facts_query.filter(models.Fact.answer.ilike(filters.answer))
+        if filters.category:
+            facts_query = facts_query.filter(models.Fact.category.ilike(filters.category))
+        if filters.identifier:
+            facts_query = facts_query.filter(models.Fact.identifier.ilike(filters.identifier))
+        if filters.deck_ids:
+            facts_query = facts_query.filter(models.Fact.deck_id.in_(filters.deck_ids))
+        if filters.deck_id:
+            facts_query = facts_query.filter(models.Fact.deck_id == filters.deck_id)
+        if filters.marked:
+            facts_query = facts_query.filter(models.Fact.markers.any(id=user.id))
+        if filters.randomize:
+            facts_query = facts_query.order_by(func.random())
+        if filters.skip:
+            facts_query = facts_query.skip(filters.skip)
+        if filters.limit:
+            facts_query = facts_query.limit(filters.limit)
+        logger.info("Finished writing queries: " + str(time.time() - begin_overall_start))
         facts = facts_query.all()
         overall_end_time = time.time()
         overall_total_time = overall_end_time - begin_overall_start
@@ -220,7 +220,8 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             return_limit: Optional[int] = None,
             send_limit: Optional[int] = 100,
     ) -> List[schemas.Fact]:
-        eligible_facts = self.get_eligible_facts(db, user=user, deck_ids=deck_ids, limit=send_limit)
+        filters = schemas.FactSearch(deck_ids=deck_ids, limit=send_limit, all_suspended=True)
+        eligible_facts = self.get_eligible_facts(db, user=user, filters=filters)
 
         karl_list = []
         karl_list_start = time.time()

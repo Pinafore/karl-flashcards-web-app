@@ -45,6 +45,18 @@ class FactUpdate(InternalFactBase):
     pass
 
 
+# Properties to receive on fact search
+class FactSearch(InternalFactBase):
+    deck_ids: Optional[List[int]] = None
+    marked: Optional[bool] = None
+    all_suspended: Optional[bool] = None
+    suspended: Optional[bool] = None
+    reported: Optional[bool] = None
+    skip: Optional[int] = None
+    limit: Optional[int] = None
+    randomize: bool = False
+
+
 # Properties shared by models stored in DB
 class FactInDBBase(InternalFactBase):
     fact_id: int

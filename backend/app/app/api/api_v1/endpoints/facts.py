@@ -20,7 +20,7 @@ def read_facts(
     """
     Retrieve facts.
     """
-    search = schemas.Search(text=text, deck_ids=deck_ids)
+    search = schemas.FactSearch(text=text, deck_ids=deck_ids)
     if crud.user.is_superuser(current_user):
         facts = crud.fact.get_multi_by_conditions(db=db, skip=paginate.skip, limit=paginate.limit, search=search)
     else:
