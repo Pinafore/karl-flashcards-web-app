@@ -21,14 +21,6 @@
             <v-list-item-title>Dashboard</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        <v-list-item to="/main/browse">
-          <v-list-item-action>
-            <v-icon>{{ mdiTextBoxMultiple }}</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>Browse Facts</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
         <v-list-item to="/main/profile/view">
           <v-list-item-action>
             <v-icon>mdi-account</v-icon>
@@ -54,6 +46,14 @@
           </v-list-item-action>
           <v-list-item-content>
             <v-list-item-title>Study All</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item to="/main/browse">
+          <v-list-item-action>
+            <v-icon>{{ mdiTextBoxMultiple }}</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Browse Facts</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>
