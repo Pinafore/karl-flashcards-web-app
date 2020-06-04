@@ -49,7 +49,7 @@ class FactUpdate(InternalFactBase):
 class FactSearch(InternalFactBase):
     deck_ids: Optional[List[int]] = None
     marked: Optional[bool] = None
-    all_suspended: Optional[bool] = None
+    studyable: Optional[bool] = None
     suspended: Optional[bool] = None
     reported: Optional[bool] = None
     skip: Optional[int] = None

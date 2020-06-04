@@ -174,16 +174,23 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                                 and_(models.Fact.deck_id == deck_owners.c.deck_id,
                                      models.Fact.user_id == deck_owners.c.owner_id)))
         facts_query = (user_facts.union(filtered_facts))
-        if filters.all_suspended:
+        if filters.studyable:
             facts_query = facts_query.filter(not_(models.Fact.suspenders.any(id=user.id)))
         else:
-            facts_query = facts_query.outerjoin(models.Suspended)
-            if filters.suspended:
-                facts_query = facts_query.filter(models.Suspended.suspend_type == schemas.SuspendType.suspend)
-            elif filters.reported:
-                facts_query = facts_query.filter(models.Suspended.suspend_type == schemas.SuspendType.report)
-            else:
-                facts_query = facts_query.filter(models.Suspended.suspend_type != schemas.SuspendType.delete)
+            pass
+            facts_query = (facts_query.outerjoin(models.Suspended, models.Fact.fact_id == models.Suspended.fact_id)
+                           .filter(or_(models.Suspended.suspend_type != schemas.SuspendType.delete, models.Suspended.suspend_type == None)))
+            if filters.suspended is not None:
+                if filters.suspended:
+                    facts_query = facts_query.filter(models.Suspended.suspend_type == schemas.SuspendType.suspend)
+                else:
+                    facts_query = facts_query.filter(models.Suspended.suspend_type != schemas.SuspendType.suspend)
+            if filters.reported is not None:
+                if filters.reported:
+                    facts_query = facts_query.filter(models.Suspended.suspend_type == schemas.SuspendType.report)
+                else:
+                    facts_query = facts_query.filter(models.Suspended.suspend_type != schemas.SuspendType.report)
+
         if filters.text:
             facts_query = facts_query.filter(models.Fact.text.ilike(filters.text))
         if filters.answer:
@@ -196,8 +203,11 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             facts_query = facts_query.filter(models.Fact.deck_id.in_(filters.deck_ids))
         if filters.deck_id:
             facts_query = facts_query.filter(models.Fact.deck_id == filters.deck_id)
-        if filters.marked:
-            facts_query = facts_query.filter(models.Fact.markers.any(id=user.id))
+        if filters.marked is not None:
+            if filters.marked:
+                facts_query = facts_query.filter(models.Fact.markers.any(id=user.id))
+            else:
+                facts_query = facts_query.filter(not_(models.Fact.markers.any(id=user.id)))
         if filters.randomize:
             facts_query = facts_query.order_by(func.random())
         if filters.skip:
@@ -220,7 +230,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             return_limit: Optional[int] = None,
             send_limit: Optional[int] = 100,
     ) -> List[schemas.Fact]:
-        filters = schemas.FactSearch(deck_ids=deck_ids, limit=send_limit, all_suspended=True)
+        filters = schemas.FactSearch(deck_ids=deck_ids, limit=send_limit, studyable=True)
         eligible_facts = self.get_eligible_facts(db, user=user, filters=filters)
 
         karl_list = []
