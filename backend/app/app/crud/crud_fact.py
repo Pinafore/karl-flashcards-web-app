@@ -244,29 +244,33 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         rationale = response_json["rationale"]
         logger.info("query time: " + str(time.time() - karl_query_start))
 
-        if settings.ENVIRONMENT == "dev":
-            logger.info(karl_list)
-            logger.info(scheduler_response.json())
-            logger.info("First order: " + str(card_order[0]))
-            logger.info("First card: " + str(karl_list[card_order[0]]))
-            logger.info("rationale:" + str(rationale))
-        reordered_karl_list = [karl_list[x] for x in card_order]
         facts = []
-        if return_limit:
-            for _, each_karl_fact in zip(range(return_limit), reordered_karl_list):
-                retrieved_fact = self.get(db=db, id=int(each_karl_fact["fact_id"]))
-                fact_schema = schemas.Fact.from_orm(retrieved_fact)
-                fact_schema.rationale = rationale
-                fact_schema.marked = True if user in retrieved_fact.markers else False
-                facts.append(fact_schema)
-        else:
-            for each_karl_fact in reordered_karl_list:
-                retrieved_fact = self.get(db=db, id=int(each_karl_fact["fact_id"]))
-                fact_schema = schemas.Fact.from_orm(retrieved_fact)
-                fact_schema.rationale = rationale
-                # MARK: maybe not the most efficient solution for determining if user has marked a fact
-                fact_schema.marked = True if user in retrieved_fact.markers else False
-                facts.append(fact_schema)
+        if rationale != "<p>no fact received</p>":
+            if settings.ENVIRONMENT == "dev":
+                logger.info(karl_list)
+                logger.info(scheduler_response.json())
+                logger.info("First order: " + str(card_order[0]))
+                logger.info("First card: " + str(karl_list[card_order[0]]))
+                logger.info("rationale:" + str(rationale))
+            reordered_karl_list = [karl_list[x] for x in card_order]
+            if return_limit:
+                for _, each_karl_fact in zip(range(return_limit), reordered_karl_list):
+                    retrieved_fact = self.get(db=db, id=int(each_karl_fact["fact_id"]))
+                    fact_schema = schemas.Fact.from_orm(retrieved_fact)
+                    fact_schema.rationale = rationale
+                    if retrieved_fact:
+                        fact_schema.marked = True if user in retrieved_fact.markers else False
+                    facts.append(fact_schema)
+            else:
+                for each_karl_fact in reordered_karl_list:
+                    retrieved_fact = self.get(db=db, id=int(each_karl_fact["fact_id"]))
+                    fact_schema = schemas.Fact.from_orm(retrieved_fact)
+                    fact_schema.rationale = rationale
+                    print(retrieved_fact)
+                    # MARK: maybe not the most efficient solution for determining if user has marked a fact
+                    if retrieved_fact:
+                        fact_schema.marked = True if user in retrieved_fact.markers else False
+                    facts.append(fact_schema)
         return facts
 
     def update_schedule(
