@@ -55,7 +55,7 @@
       {
         text: "Category",
         sortable: true,
-        value: "answer",
+        value: "category",
         align: "left",
       },
       {
