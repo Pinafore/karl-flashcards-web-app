@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from sqlalchemy.orm import Session
 
 from app import crud, models, schemas
+from app.core.config import settings
 from app.utils import evaluate
 from app.api import deps
 
@@ -93,7 +94,7 @@ def evaluate_answer(
 @router.get("/status", response_model=bool, summary="Checks status of connection to scheduler")
 def scheduler_status() -> Any:
     try:
-        r = requests.get("http://host.docker.internal:4000/api/karl/status")
+        r = requests.get(settings.INTERFACE + "api/karl/status")
         r.raise_for_status()  # Raises a HTTPError if the status is 4xx, 5xxx
         return True
     except (requests.exceptions.ConnectionError, requests.exceptions.Timeout, requests.exceptions.HTTPError) as e:
