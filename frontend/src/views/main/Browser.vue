@@ -48,7 +48,7 @@
       {
         text: "Deck",
         sortable: true,
-        value: "deck",
+        value: "deck.title",
         align: "left",
       },
       {

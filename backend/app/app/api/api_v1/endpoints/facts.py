@@ -42,8 +42,8 @@ def read_facts(
                                 suspended=suspended,
                                 reported=reported,
                                 studyable=studyable,
-                                skip=paginate.skip,
-                                limit=paginate.limit
+                                skip=skip,
+                                limit=limit
                                 )
     facts = crud.fact.get_eligible_facts(db=db, user=current_user, filters=search)
     return facts
