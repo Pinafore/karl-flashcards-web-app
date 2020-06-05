@@ -1,26 +1,38 @@
 <template>
   <div>
     <v-data-table
-      v-model="selected"
       :headers="headers"
-      item-key="id"
       :items="facts"
-      :items-per-page="15"
-      show-select
-      :style="{ cursor: 'pointer' }"
-      @click:row="openFact"
-    >
-    </v-data-table>
+      :options.sync="options"
+      :server-items-length="totalFacts"
+      :loading="loading"
+      class="elevation-1"
+    ></v-data-table>
   </div>
 </template>
 
 <script lang="ts">
-  import { Component, Vue } from "vue-property-decorator";
+  import { Component, Vue, Watch } from "vue-property-decorator";
   import { mainStore } from "@/utils/store-accessor";
+  import { DataOptions } from "vuetify";
+  import { IBrowser, IComponents } from "@/interfaces";
 
   @Component
   export default class Facts extends Vue {
-    public headers = [
+    loading = true;
+    totalFacts = 0;
+    options: DataOptions = {
+      groupBy: [],
+      groupDesc: [],
+      itemsPerPage: 0,
+      multiSort: false,
+      mustSort: false,
+      page: 0,
+      sortBy: [],
+      sortDesc: [],
+    };
+    facts: IComponents["Fact"][] = [];
+    headers = [
       {
         text: "Text",
         sortable: true,
@@ -51,33 +63,63 @@
         value: "identifier",
         align: "left",
       },
-      {
-        text: "Marked",
-        sortable: true,
-        value: "marked",
-        align: "left",
-      },
-      {
-        text: "Reported",
-        sortable: true,
-        value: "reported",
-        align: "left",
-      },
-      {
-        text: "Suspended",
-        sortable: true,
-        value: "reported",
-        align: "left",
-      },
     ];
 
     async mounted() {
-      await mainStore.getUserProfile();
+      // await mainStore.getFacts();
+      this.getDataFromApi().then((data) => {
+        this.facts = data.facts;
+        this.totalFacts = data.totalFacts;
+      });
     }
 
-    get facts() {
-      const userProfile = mainStore.userProfile;
-      return userProfile && userProfile.facts ? userProfile.facts : [];
+    async getDataFromApi() {
+      this.loading = true;
+      await mainStore.getFacts();
+      // eslint-disable-next-line
+      return new Promise<IBrowser>( (resolve, reject) => {
+        const { sortBy, sortDesc, page, itemsPerPage } = this.options;
+        let items: IComponents["Fact"][] = mainStore.facts;
+        const total: number = items.length;
+
+        if (sortBy.length === 1 && sortDesc.length === 1) {
+          items = items.sort((a, b) => {
+            const sortA = a[sortBy[0]];
+            const sortB = b[sortBy[0]];
+
+            if (sortDesc[0]) {
+              if (sortA < sortB) return 1;
+              if (sortA > sortB) return -1;
+              return 0;
+            } else {
+              if (sortA < sortB) return -1;
+              if (sortA > sortB) return 1;
+              return 0;
+            }
+          });
+        }
+
+        if (itemsPerPage > 0) {
+          items = items.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+        }
+
+        setTimeout(() => {
+          this.loading = false;
+          resolve({
+            facts: items,
+            totalFacts: total,
+          });
+        }, 1000);
+      });
+    }
+
+    @Watch("options", { deep: true })
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onOptionsChanged(value: DataOptions, oldValue: DataOptions) {
+      this.getDataFromApi().then((data) => {
+        this.facts = data.facts;
+        this.totalFacts = data.totalFacts;
+      });
     }
   }
 </script>

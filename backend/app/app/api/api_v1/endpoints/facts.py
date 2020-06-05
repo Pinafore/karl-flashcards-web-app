@@ -12,7 +12,8 @@ router = APIRouter()
 @router.get("/", response_model=List[schemas.Fact])
 def read_facts(
     db: Session = Depends(deps.get_db),
-    paginate: deps.Paginate = Depends(),
+    skip: int = 0,
+    limit: int = 100,
     text: Optional[str] = None,
     answer: Optional[str] = None,
     category: Optional[str] = None,

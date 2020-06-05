@@ -12,6 +12,11 @@ export interface IStudyShow {
   marked: boolean;
 }
 
+export interface IBrowser {
+  facts: IComponents["Fact"][];
+  totalFacts: number;
+}
+
 export interface IComponents {
   Deck: { title: string; public: boolean; id: number };
   DeckCreate: { title: string };

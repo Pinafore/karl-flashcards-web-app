@@ -336,6 +336,7 @@ export default class MainModule extends VuexModule {
       const response = await api.getFacts(this.token);
       if (response) {
         this.setFacts(response.data);
+        return response.data;
       }
     } catch (error) {
       await this.checkApiError(error);
