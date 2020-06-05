@@ -7,6 +7,7 @@
       :server-items-length="totalFacts"
       :loading="loading"
       class="elevation-1"
+      dense
     ></v-data-table>
   </div>
 </template>
@@ -24,10 +25,10 @@
     options: DataOptions = {
       groupBy: [],
       groupDesc: [],
-      itemsPerPage: 0,
+      itemsPerPage: 100,
       multiSort: false,
       mustSort: false,
-      page: 0,
+      page: 1,
       sortBy: [],
       sortDesc: [],
     };
@@ -66,7 +67,6 @@
     ];
 
     async mounted() {
-      // await mainStore.getFacts();
       this.getDataFromApi().then((data) => {
         this.facts = data.facts;
         this.totalFacts = data.totalFacts;
