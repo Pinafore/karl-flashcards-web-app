@@ -37,23 +37,17 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         db.commit()
         return db_obj
 
-    def get_multi_by_conditions(
+    def get_multi_by_owner(
             self,
             db: Session,
             *,
             user: Optional[models.User] = None,
             skip: Optional[int] = None,
             limit: Optional[int] = None,
-            search: Optional[schemas.FactSearch] = None
     ) -> List[models.Fact]:
         query = db.query(self.model)
         if user:
             query = query.filter(models.Fact.user_id == user.id)
-        if search:
-            if search.text:
-                pass
-            if search.deck_ids:
-                query = query.join(models.Fact.deck).filter(models.Deck.user_decks.any(owner_id=user.id))
         if skip:
             query = query.offset(skip)
         if limit:

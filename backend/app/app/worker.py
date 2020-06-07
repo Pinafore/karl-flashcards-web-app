@@ -1,6 +1,7 @@
 import itertools
 import json
 import os
+import re
 
 import sentry_sdk
 from sentry_sdk.integrations.celery import CeleryIntegration
@@ -9,7 +10,6 @@ from sqlalchemy.orm import Session
 from app.core.celery_app import celery_app
 from app.core.config import settings
 
-import logging
 from app import crud, schemas
 from app.db.session import SessionLocal
 
@@ -50,6 +50,7 @@ def load_quizbowl_facts() -> str:
         return f"{count} quizbowl questions loaded"
     return f"superuser does not exist yet"
 
+
 @celery_app.task()
 def load_jeopardy_facts() -> str:
     db: Session = SessionLocal()
@@ -80,3 +81,35 @@ def load_jeopardy_facts() -> str:
                     crud.fact.create_with_owner(db, obj_in=fact_in, user=user)
         return f"{count+1} quizbowl questions loaded"
     return f"superuser does not exist yet"
+
+
+@celery_app.task()
+def clean_up_preloaded_facts() -> str:
+    db: Session = SessionLocal()
+    user = crud.user.get_by_email(db, email=settings.FIRST_SUPERUSER)
+    if user:
+        count = 0
+        facts = crud.fact.get_multi_by_owner(db=db, user=user)
+        for fact in facts:
+            text = clean_up_text(fact.text)
+
+            fact_update = schemas.FactUpdate(
+                text=text,
+                answer=fact.answer,
+                deck_id=fact.deck_id,
+                category=fact.category,
+                answer_lines=fact.answer_lines,
+                identifier=fact.identifier,
+                extra=fact.extra
+            )
+            crud.fact.update(db, db_obj=fact, obj_in=fact_update)
+            count = count + 1
+        return f"{count} facts updated"
+    return f"superuser does not exist yet"
+
+
+def clean_up_text(text) -> str:
+    text = text.lstrip("\" ")
+    text = re.sub(" /$", "\"", text)
+    text = text.strip("'")
+    return text
