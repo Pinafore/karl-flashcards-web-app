@@ -36,7 +36,7 @@
           class="ma-1 pa-2"
           @click="mark()"
         >
-          <v-icon left>mdi-star</v-icon>Mark (Alt-M)
+          <v-icon left>mdi-star</v-icon>Favorite (Alt-M)
         </v-btn>
         <v-btn
           v-if="$vuetify.breakpoint.mdAndDown"
