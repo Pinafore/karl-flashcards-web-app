@@ -5,6 +5,7 @@ import { AxiosError } from "axios";
 import { VuexModule, Module, Mutation, Action } from "vuex-module-decorators";
 import { IComponents, IAppNotification } from "@/interfaces";
 import { UNAUTHORIZED } from "http-status-codes";
+import { mainStore } from "@/utils/store-accessor";
 
 @Module({ name: "main" })
 export default class MainModule extends VuexModule {
@@ -374,6 +375,28 @@ export default class MainModule extends VuexModule {
       });
     } catch (error) {
       await this.checkApiError(error);
+    }
+  }
+
+  @Action
+  async updateFact(payload: { id: number; data: IComponents["FactUpdate"] }) {
+    try {
+      const loadingNotification = { content: "saving", showProgress: true };
+      mainStore.addNotification(loadingNotification);
+      const response = (
+        await Promise.all([
+          api.updateFact(mainStore.token, payload.id, payload.data),
+          await new Promise((resolve, _reject) => setTimeout(() => resolve(), 500)),
+        ])
+      )[0];
+      mainStore.setUserProfile(response.data);
+      mainStore.removeNotification(loadingNotification);
+      mainStore.addNotification({
+        content: "Fact updated",
+        color: "success",
+      });
+    } catch (error) {
+      await mainStore.checkApiError(error);
     }
   }
 }

@@ -56,7 +56,7 @@ export default class AdminModule extends VuexModule {
       mainStore.setUserProfile(response.data);
       mainStore.removeNotification(loadingNotification);
       mainStore.addNotification({
-        content: "User successfully updated",
+        content: "User updated",
         color: "success",
       });
     } catch (error) {
