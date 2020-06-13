@@ -226,7 +226,8 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
     ) -> List[schemas.Fact]:
         filters = schemas.FactSearch(deck_ids=deck_ids, limit=send_limit, studyable=True)
         eligible_facts = self.get_eligible_facts(db, user=user, filters=filters)
-
+        if not eligible_facts:
+            return []
         karl_list = []
         karl_list_start = time.time()
         for each_card in eligible_facts:
@@ -240,7 +241,6 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 env=settings.ENVIRONMENT
             ).dict())
         logger.info("eligible fact time: " + str(time.time() - karl_list_start))
-
         karl_query_start = time.time()
         scheduler_response = requests.post(settings.INTERFACE + "api/karl/schedule", json=karl_list)
         response_json = scheduler_response.json()
