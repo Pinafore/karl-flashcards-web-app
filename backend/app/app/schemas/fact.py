@@ -5,6 +5,7 @@ from pydantic import BaseModel, Json
 
 
 # Shared properties
+from app.schemas.permission import Permission
 from app.schemas.deck import Deck
 
 
@@ -77,6 +78,7 @@ class FactInDBBase(InternalFactBase):
 class Fact(FactInDBBase):
     rationale: Optional[str] = None
     marked: Optional[bool] = None
+    permission: Optional[Permission] = None
 
 
 # Additional properties stored in DB

@@ -6,6 +6,9 @@ from sqlalchemy.orm import Session
 from app import crud, models, schemas
 from app.api import deps
 
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -23,6 +26,7 @@ def read_facts(
     marked: Optional[bool] = None,
     suspended: Optional[bool] = None,
     reported: Optional[bool] = None,
+    permissions: Optional[bool] = None,
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
@@ -46,7 +50,16 @@ def read_facts(
                                 limit=limit
                                 )
     facts = crud.fact.get_eligible_facts(db=db, user=current_user, filters=search)
-    return facts
+    logger.info("got facts")
+    if permissions:
+        new_facts = []
+        for fact in facts:
+            new_fact = schemas.Fact.from_orm(fact)
+            new_fact.permission = fact.permissions(current_user)
+            new_facts.append(new_fact)
+        return new_facts
+    else:
+        return facts
 
 
 @router.post("/", response_model=schemas.Fact)
