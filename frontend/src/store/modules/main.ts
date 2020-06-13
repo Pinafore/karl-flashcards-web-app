@@ -399,4 +399,52 @@ export default class MainModule extends VuexModule {
       await mainStore.checkApiError(error);
     }
   }
+
+  @Action
+  async markFact(id: number) {
+    try {
+      await api.markFact(mainStore.token, id);
+      mainStore.addNotification({
+        content: "Fact marked",
+        color: "success",
+      });
+    } catch (error) {
+      await mainStore.checkApiError(error);
+    }
+  }
+
+  @Action
+  async suspendFact(id: number) {
+    try {
+      await api.suspendFact(mainStore.token, id);
+      mainStore.addNotification({
+        content: "Fact suspended",
+        color: "success",
+      });
+    } catch (error) {
+      await mainStore.checkApiError(error);
+    }
+  }
+
+  @Action
+  async reportFact(id: number) {
+    try {
+      await api.reportFact(mainStore.token, id);
+      mainStore.addNotification({
+        content: "Fact reported",
+        color: "success",
+      });
+    } catch (error) {
+      await mainStore.checkApiError(error);
+    }
+  }
+
+  @Action
+  async deleteFact() {
+    try {
+      await api.deleteFact(mainStore.token, this.show.fact.fact_id);
+    } catch (error) {
+      await mainStore.checkApiError(error);
+    }
+  }
 }

@@ -8,20 +8,178 @@
       :loading="loading"
       class="elevation-1"
       dense
-    ></v-data-table>
+    >
+      <template v-slot:top>
+        <v-toolbar flat>
+          <v-toolbar-title>Facts</v-toolbar-title>
+          <v-divider class="mx-4" inset vertical></v-divider>
+          <v-spacer></v-spacer>
+          <v-dialog v-model="dialog" max-width="500px">
+            <template v-slot:activator="{ on }">
+              <v-btn color="primary" dark class="mb-2" v-on="on">New Fact</v-btn>
+            </template>
+            <v-card>
+              <v-card-title>
+                <span class="headline">{{ formTitle }}</span>
+              </v-card-title>
+
+              <v-card-text>
+                <!-- front -->
+                <validation-provider
+                  v-slot="{ errors }"
+                  name="Front"
+                  :rules="{
+                    required: true,
+                  }"
+                >
+                  <v-text-field
+                    v-model="editedFact.text"
+                    label="Front"
+                    :error-messages="errors[0]"
+                    required
+                  ></v-text-field>
+                </validation-provider>
+
+                <!-- back -->
+                <validation-provider v-slot="{ errors }" rules="required" name="Back">
+                  <v-text-field
+                    v-model="editedFact.answer"
+                    label="Back"
+                    type="back"
+                    :error-messages="errors[0]"
+                    required
+                  ></v-text-field>
+                </validation-provider>
+
+                <v-select
+                  v-model="editedFact.deck_id"
+                  :items="decks"
+                  item-text="title"
+                  item-value="id"
+                  label="Choose Deck"
+                >
+                </v-select>
+
+                <!-- category -->
+                <validation-provider v-slot="{ errors }" name="Category">
+                  <v-text-field
+                    v-model="editedFact.category"
+                    label="Category"
+                    type="category"
+                    :error-messages="errors[0]"
+                  ></v-text-field>
+                </validation-provider>
+
+                <!-- identifier -->
+                <validation-provider v-slot="{ errors }" name="Identifier">
+                  <v-text-field
+                    v-model="editedFact.identifier"
+                    label="Identifier"
+                    type="identifier"
+                    :error-messages="errors[0]"
+                  ></v-text-field>
+                </validation-provider>
+                <!--                <v-container>-->
+                <!--                  <v-row>-->
+                <!--                    <v-col cols="12" sm="6" md="4">-->
+                <!--                      <v-text-field-->
+                <!--                        v-model="editedFact.text"-->
+                <!--                        label="Front"-->
+                <!--                      ></v-text-field>-->
+                <!--                    </v-col>-->
+                <!--                    <v-col cols="12" sm="6" md="4">-->
+                <!--                      <v-text-field-->
+                <!--                        v-model="editedFact.answer"-->
+                <!--                        label="answer"-->
+                <!--                      ></v-text-field>-->
+                <!--                    </v-col>-->
+                <!--                    <v-col cols="12" sm="6" md="4">-->
+                <!--                      <v-select-->
+                <!--                        v-model="editedFact.deck_id"-->
+                <!--                        :items="decks"-->
+                <!--                        item-text="title"-->
+                <!--                        item-value="id"-->
+                <!--                        label="Choose Deck"-->
+                <!--                      >-->
+                <!--                      </v-select>-->
+                <!--                    </v-col>-->
+                <!--                    <v-col cols="12" sm="6" md="4">-->
+                <!--                      <v-text-field-->
+                <!--                        v-model="editedFact.category"-->
+                <!--                        label="Category (g)"-->
+                <!--                      ></v-text-field>-->
+                <!--                    </v-col>-->
+                <!--                    <v-col cols="12" sm="6" md="4">-->
+                <!--                      <v-text-field-->
+                <!--                        v-model="editedFact.identifier"-->
+                <!--                        label="Identifier (g)"-->
+                <!--                      ></v-text-field>-->
+                <!--                    </v-col>-->
+                <!--                  </v-row>-->
+                <!--                </v-container>-->
+              </v-card-text>
+
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="blue darken-1" text @click="close">Cancel</v-btn>
+                <v-btn color="blue darken-1" text @click="save">Save</v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+        </v-toolbar>
+      </template>
+
+      <template v-slot:item.actions="{ item }">
+        <v-icon
+          v-if="item.permission === 'owner'"
+          small
+          class="mr-2"
+          @click="editFact(item)"
+        >
+          mdi-pencil
+        </v-icon>
+        <v-icon small @click="markFact(item)">
+          mdi-star
+        </v-icon>
+        <v-icon v-if="item.permission === 'viewer'" small @click="reportFact(item)">
+          mdi-report
+        </v-icon>
+        <v-icon small @click="suspendFact(item)">
+          mdi-pause
+        </v-icon>
+        <v-icon small @click="deleteFact(item)">
+          mdi-delete
+        </v-icon>
+      </template>
+    </v-data-table>
   </div>
 </template>
 
 <script lang="ts">
   import { Component, Vue, Watch } from "vue-property-decorator";
-  import { mainStore } from "@/utils/store-accessor";
+  import { mainStore, studyStore } from "@/utils/store-accessor";
   import { DataOptions } from "vuetify";
-  import { IBrowser, IComponents } from "@/interfaces";
+  import { IBrowser, IComponents, Permission } from "@/interfaces";
+  import { extend, ValidationObserver, ValidationProvider } from "vee-validate";
+  import { excluded, required } from "vee-validate/dist/rules";
 
-  @Component
+  // register validation rules
+  extend("required", { ...required, message: "{_field_} can not be empty" });
+  extend("excluded", {
+    ...excluded,
+    message: "You already have a fact with this front text.",
+  });
+
+  @Component({
+    components: {
+      ValidationObserver,
+      ValidationProvider,
+    },
+  })
   export default class Facts extends Vue {
     loading = true;
     totalFacts = 0;
+    formTitle = "Edit Fact";
     options: DataOptions = {
       groupBy: [],
       groupDesc: [],
@@ -32,6 +190,22 @@
       sortBy: [],
       sortDesc: [],
     };
+    dialog = false;
+    editedFact = {
+      text: "",
+      answer: "",
+      deck_id: this.defaultDeck.id,
+      category: "",
+      identifier: "",
+    };
+    defaultFact = {
+      text: "",
+      answer: "",
+      deck_id: this.defaultDeck.id,
+      category: "",
+      identifier: "",
+    };
+    editedIndex = -1;
     facts: IComponents["Fact"][] = [];
     headers = [
       {
@@ -64,15 +238,32 @@
         value: "identifier",
         align: "left",
       },
+      { text: "Actions", value: "actions", sortable: false },
     ];
 
     async mounted() {
+      await mainStore.getUserProfile();
       this.getDataFromApi().then((data) => {
         this.facts = data.facts;
         this.totalFacts = data.totalFacts;
       });
     }
 
+    get defaultDeck() {
+      const userProfile = mainStore.userProfile;
+      const default_deck: IComponents["Deck"] = {
+        title: "Default",
+        public: true,
+        id: 1,
+      };
+      return userProfile && userProfile.default_deck
+        ? userProfile.default_deck
+        : default_deck;
+    }
+    get decks() {
+      const userProfile = mainStore.userProfile;
+      return userProfile && userProfile.decks ? userProfile.decks : [];
+    }
     async getDataFromApi() {
       this.loading = true;
       await mainStore.getFacts();
@@ -120,6 +311,58 @@
         this.facts = data.facts;
         this.totalFacts = data.totalFacts;
       });
+    }
+
+    editFact(item) {
+      this.editedIndex = this.facts.indexOf(item);
+      this.editedFact = Object.assign({}, item);
+      this.dialog = true;
+    }
+
+    async markFact(item) {
+      await mainStore.markFact(item.fact_id);
+    }
+
+    async reportFact(item) {
+      await mainStore.reportFact(item.fact_id);
+    }
+
+    async suspendFact(item) {
+      await mainStore.suspendFact(item.fact_id);
+    }
+
+    deleteFact(item) {
+      const index = this.facts.indexOf(item);
+      confirm("Are you sure you want to delete this fact?") &&
+        this.facts.splice(index, 1);
+    }
+
+    close() {
+      this.dialog = false;
+      this.$nextTick(() => {
+        this.editedFact = Object.assign({}, this.defaultFact);
+        this.editedIndex = -1;
+      });
+    }
+
+    async save() {
+      if (this.editedIndex > -1) {
+        const fact: IComponents["FactUpdate"] = {
+          text: this.editedFact.text,
+          deck_id: this.editedFact.deck_id,
+          answer: this.editedFact.answer,
+          category: this.editedFact.category,
+          identifier: this.editedFact.identifier,
+        };
+        Object.assign(this.facts[this.editedIndex], this.editedFact);
+        this.close();
+        await mainStore.updateFact({
+          id: this.facts[this.editedIndex].fact_id,
+          data: fact,
+        });
+      } else {
+        this.close();
+      }
     }
   }
 </script>

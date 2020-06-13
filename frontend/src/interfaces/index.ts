@@ -17,6 +17,10 @@ export interface IBrowser {
   totalFacts: number;
 }
 
+export enum Permission {
+  owner = "owner",
+  viewer = "viewer",
+}
 export interface IComponents {
   Deck: { title: string; public: boolean; id: number };
   DeckCreate: { title: string };
@@ -38,6 +42,7 @@ export interface IComponents {
     deck: IComponents["Deck"];
     rationale?: string;
     marked?: boolean;
+    permission?: Permission;
   };
   FactCreate: {
     text: string;

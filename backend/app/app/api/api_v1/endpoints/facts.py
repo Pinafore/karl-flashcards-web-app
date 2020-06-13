@@ -26,7 +26,7 @@ def read_facts(
     marked: Optional[bool] = None,
     suspended: Optional[bool] = None,
     reported: Optional[bool] = None,
-    permissions: Optional[bool] = None,
+    permissions: bool = True,
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
