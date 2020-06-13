@@ -63,7 +63,7 @@
         if (newNotification) {
           mainStore.removeNotificationDelayed({
             notification: newNotification,
-            timeout: 6500,
+            timeout: 500,
           });
         }
       }
