@@ -205,7 +205,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         if filters.randomize:
             facts_query = facts_query.order_by(func.random())
         if filters.skip:
-            facts_query = facts_query.skip(filters.skip)
+            facts_query = facts_query.offset(filters.skip)
         if filters.limit:
             facts_query = facts_query.limit(filters.limit)
         logger.info("Finished writing queries: " + str(time.time() - begin_overall_start))
