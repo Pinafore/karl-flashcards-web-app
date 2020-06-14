@@ -447,9 +447,13 @@ export default class MainModule extends VuexModule {
   }
 
   @Action
-  async deleteFact() {
+  async deleteFact(id: number) {
     try {
-      await api.deleteFact(mainStore.token, this.show.fact.fact_id);
+      await api.deleteFact(mainStore.token, id);
+      mainStore.addNotification({
+        content: "Fact deleted",
+        color: "success",
+      });
     } catch (error) {
       await mainStore.checkApiError(error);
     }

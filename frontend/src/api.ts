@@ -82,7 +82,7 @@ export const api = {
     if (data.reported) {
       url += `&reported=${data.reported}`
     }
-    return axios.get<IComponents["Fact"][]>(url, authHeaders(token));
+    return axios.get<IComponents["FactBrowse"]>(url, authHeaders(token));
   },
   async getStudyFacts(token: string, deckIds: number[]) {
     let url = `${apiUrl}/api/study/`;

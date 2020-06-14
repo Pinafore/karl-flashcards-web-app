@@ -10,6 +10,10 @@
       dense
       no-results-text="No results found"
       disable-sort
+      :footer-props="{
+        showFirstLastPage: true,
+        itemsPerPageOptions: [10, 50, 100, 1000],
+      }"
     >
       <template v-slot:top>
         <v-toolbar flat>
@@ -241,7 +245,7 @@
       const userProfile = mainStore.userProfile;
       return userProfile && userProfile.decks ? userProfile.decks : [];
     }
-    async getDataFromApi(searchData?: IComponents["FactSearch"]) {
+    async getDataFromApi(searchData: IComponents["FactSearch"]) {
       this.loading = true;
       await mainStore.getFacts(searchData);
       // eslint-disable-next-line
@@ -280,9 +284,8 @@
     @Watch("options", { deep: true })
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onOptionsChanged(value: DataOptions, oldValue: DataOptions) {
-      const limit = this.options.itemsPerPage;
-      const skip =
-        this.options.page * this.options.itemsPerPage - this.options.itemsPerPage;
+      const limit = value.itemsPerPage;
+      const skip = value.page * value.itemsPerPage - value.itemsPerPage;
       const searchData: IComponents["FactSearch"] = { skip: skip, limit: limit };
       this.getDataFromApi(searchData).then((data) => {
         this.facts = data.facts;
@@ -308,10 +311,11 @@
       await mainStore.suspendFact(item.fact_id);
     }
 
-    deleteFact(item) {
+    async deleteFact(item) {
       const index = this.facts.indexOf(item);
-      confirm("Are you sure you want to delete this fact?") &&
-        this.facts.splice(index, 1);
+
+      this.facts.splice(index, 1);
+      await mainStore.deleteFact(item.fact_id);
     }
 
     close() {
