@@ -14,7 +14,6 @@
                 name="Front"
                 :rules="{
                   required: true,
-                  excluded: factTexts,
                 }"
               >
                 <v-text-field
@@ -82,15 +81,11 @@
   import { Component, Vue } from "vue-property-decorator";
   import { IComponents } from "@/interfaces";
   import { mainStore } from "@/store";
-  import { excluded, required } from "vee-validate/dist/rules";
+  import { required } from "vee-validate/dist/rules";
   import { ValidationProvider, ValidationObserver, extend } from "vee-validate";
 
   // register validation rules
   extend("required", { ...required, message: "{_field_} can not be empty" });
-  extend("excluded", {
-    ...excluded,
-    message: "You already have a fact with this front text.",
-  });
 
   @Component({
     components: {
@@ -116,11 +111,6 @@
         this.deck_id = userProfile.default_deck.id;
       }
       this.onReset();
-      await mainStore.getFacts();
-    }
-
-    get factTexts() {
-      return mainStore.facts.map((a) => a.text);
     }
 
     get decks() {
