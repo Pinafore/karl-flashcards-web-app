@@ -46,13 +46,11 @@ def read_facts(
                                 suspended=suspended,
                                 reported=reported,
                                 studyable=studyable,
-                                skip=None,
-                                limit=None
+                                skip=skip,
+                                limit=limit
                                 )
     facts = crud.fact.get_eligible_facts(db=db, user=current_user, filters=search)
-    total = len(facts)
-    if skip is not None and limit is not None:
-        facts = facts[skip:skip+limit]
+    total = crud.fact.count_eligible_facts(db=db, user=current_user, filters=search)
     if permissions:
         new_facts: List[schemas.Fact] = []
         for fact in facts:
