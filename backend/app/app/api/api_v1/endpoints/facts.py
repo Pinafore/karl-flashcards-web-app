@@ -50,28 +50,18 @@ def read_facts(
                                 limit=None
                                 )
     facts = crud.fact.get_eligible_facts(db=db, user=current_user, filters=search)
-    logger.info("got facts")
+    total = len(facts)
     if skip is not None and limit is not None:
-        total = len(facts)
-        logger.info("skip or limit")
         facts = facts[skip:skip+limit]
-    else:
-        logger.info("no skip or limit")
-        total = len(facts)
-    print(len(facts))
     if permissions:
         new_facts: List[schemas.Fact] = []
         for fact in facts:
             new_fact = schemas.Fact.from_orm(fact)
             new_fact.permission = fact.permissions(current_user)
             new_facts.append(new_fact)
-        print("CHICKEN")
-        print(total)
         fact_browser = schemas.FactBrowse(facts=new_facts, total=total)
         return fact_browser
     else:
-        print("CHICKENNOODLES")
-        print(total)
         fact_browser = schemas.FactBrowse(facts=facts, total=total)
         return fact_browser
 
