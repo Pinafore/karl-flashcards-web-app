@@ -18,14 +18,14 @@ if TYPE_CHECKING:
 
 class Fact(Base):
     fact_id = Column(Integer, primary_key=True, index=True)
-    deck_id = Column(Integer, ForeignKey("deck.id"), nullable=False)
-    user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
+    deck_id = Column(Integer, ForeignKey("deck.id"), nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("user.id"), nullable=False, index=True)
     text = Column(String, index=True, nullable=False)
     answer = Column(String, index=True, nullable=False)
     create_date = Column(TIMESTAMP(timezone=True), nullable=False)
     update_date = Column(TIMESTAMP(timezone=True), nullable=False)
-    category = Column(String)
-    identifier = Column(String)
+    category = Column(String, index=True)
+    identifier = Column(String, index=True)
     answer_lines = Column(ARRAY(String), nullable=False)
     extra = Column(JSONB)
 
