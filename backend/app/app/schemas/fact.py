@@ -81,6 +81,12 @@ class Fact(FactInDBBase):
     permission: Optional[Permission] = None
 
 
+# Properties to return to client
+class FactBrowse(BaseModel):
+    facts: List[Fact]
+    total: int
+
+
 # Additional properties stored in DB
 class FactInDB(FactInDBBase):
     pass

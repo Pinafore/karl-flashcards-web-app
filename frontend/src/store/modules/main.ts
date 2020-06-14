@@ -18,6 +18,7 @@ export default class MainModule extends VuexModule {
   notifications: IAppNotification[] = [];
   publicDecks: IComponents["Deck"][] = [];
   facts: IComponents["Fact"][] = [];
+  totalFacts = 0
 
   get hasAdminAccess() {
     return (
@@ -74,6 +75,11 @@ export default class MainModule extends VuexModule {
   @Mutation
   setFacts(payload: IComponents["Fact"][]) {
     this.facts = payload;
+  }
+
+  @Mutation
+  setTotalFacts(payload: number) {
+    this.totalFacts = payload;
   }
 
   @Mutation
@@ -332,11 +338,12 @@ export default class MainModule extends VuexModule {
   }
 
   @Action
-  async getFacts() {
+  async getFacts(payload: IComponents["FactSearch"]) {
     try {
-      const response = await api.getFacts(this.token);
+      const response = await api.getFacts(this.token, payload);
       if (response) {
-        this.setFacts(response.data);
+        this.setFacts(response.data.facts);
+        this.setTotalFacts(response.data.total);
         return response.data;
       }
     } catch (error) {

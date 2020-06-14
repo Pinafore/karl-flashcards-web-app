@@ -12,11 +12,11 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get("/", response_model=List[schemas.Fact])
+@router.get("/", response_model=schemas.FactBrowse)
 def read_facts(
     db: Session = Depends(deps.get_db),
-    skip: int = None,
-    limit: int = None,
+    skip: int = 0,
+    limit: int = 100,
     text: Optional[str] = None,
     answer: Optional[str] = None,
     category: Optional[str] = None,
@@ -46,20 +46,34 @@ def read_facts(
                                 suspended=suspended,
                                 reported=reported,
                                 studyable=studyable,
-                                skip=skip,
-                                limit=limit
+                                skip=None,
+                                limit=None
                                 )
     facts = crud.fact.get_eligible_facts(db=db, user=current_user, filters=search)
     logger.info("got facts")
+    if skip is not None and limit is not None:
+        total = len(facts)
+        logger.info("skip or limit")
+        facts = facts[skip:skip+limit]
+    else:
+        logger.info("no skip or limit")
+        total = len(facts)
+    print(len(facts))
     if permissions:
-        new_facts = []
+        new_facts: List[schemas.Fact] = []
         for fact in facts:
             new_fact = schemas.Fact.from_orm(fact)
             new_fact.permission = fact.permissions(current_user)
             new_facts.append(new_fact)
-        return new_facts
+        print("CHICKEN")
+        print(total)
+        fact_browser = schemas.FactBrowse(facts=new_facts, total=total)
+        return fact_browser
     else:
-        return facts
+        print("CHICKENNOODLES")
+        print(total)
+        fact_browser = schemas.FactBrowse(facts=facts, total=total)
+        return fact_browser
 
 
 @router.post("/", response_model=schemas.Fact)

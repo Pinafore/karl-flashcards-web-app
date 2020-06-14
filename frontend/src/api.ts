@@ -53,8 +53,36 @@ export const api = {
       token,
     });
   },
-  async getFacts(token: string) {
-    return axios.get<IComponents["Fact"][]>(`${apiUrl}/api/facts/`, authHeaders(token));
+  async getFacts(token: string, data: IComponents["FactSearch"]) {
+    let url = `${apiUrl}/api/facts/?`
+    if (data.skip) {
+      url += `&skip=${data.skip}`
+    }
+    if (data.limit) {
+      url += `&limit=${data.limit}`
+    }
+    if (data.text) {
+      url += `&text=${data.text}`
+    }
+    if (data.answer) {
+      url += `&answer=${data.answer}`
+    }
+    if (data.category) {
+      url += `&category=${data.category}`
+    }
+    if (data.deck_id) {
+      url += `&deck_id=${data.deck_id}`
+    }
+    if (data.marked) {
+      url += `&marked=${data.marked}`
+    }
+    if (data.suspended) {
+      url += `&suspended=${data.suspended}`
+    }
+    if (data.reported) {
+      url += `&reported=${data.reported}`
+    }
+    return axios.get<IComponents["Fact"][]>(url, authHeaders(token));
   },
   async getStudyFacts(token: string, deckIds: number[]) {
     let url = `${apiUrl}/api/study/`;

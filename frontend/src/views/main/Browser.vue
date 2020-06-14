@@ -8,11 +8,21 @@
       :loading="loading"
       class="elevation-1"
       dense
+      no-results-text="No results found"
+      disable-sort
     >
       <template v-slot:top>
         <v-toolbar flat>
           <v-toolbar-title>Facts</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
+          <v-spacer></v-spacer>
+          <v-text-field
+            v-model="search"
+            append-icon="mdi-magnify"
+            label="Search"
+            single-line
+            hide-details
+          ></v-text-field>
           <v-spacer></v-spacer>
           <v-dialog v-model="dialog" max-width="500px">
             <template v-slot:activator="{ on }">
@@ -79,44 +89,6 @@
                     :error-messages="errors[0]"
                   ></v-text-field>
                 </validation-provider>
-                <!--                <v-container>-->
-                <!--                  <v-row>-->
-                <!--                    <v-col cols="12" sm="6" md="4">-->
-                <!--                      <v-text-field-->
-                <!--                        v-model="editedFact.text"-->
-                <!--                        label="Front"-->
-                <!--                      ></v-text-field>-->
-                <!--                    </v-col>-->
-                <!--                    <v-col cols="12" sm="6" md="4">-->
-                <!--                      <v-text-field-->
-                <!--                        v-model="editedFact.answer"-->
-                <!--                        label="answer"-->
-                <!--                      ></v-text-field>-->
-                <!--                    </v-col>-->
-                <!--                    <v-col cols="12" sm="6" md="4">-->
-                <!--                      <v-select-->
-                <!--                        v-model="editedFact.deck_id"-->
-                <!--                        :items="decks"-->
-                <!--                        item-text="title"-->
-                <!--                        item-value="id"-->
-                <!--                        label="Choose Deck"-->
-                <!--                      >-->
-                <!--                      </v-select>-->
-                <!--                    </v-col>-->
-                <!--                    <v-col cols="12" sm="6" md="4">-->
-                <!--                      <v-text-field-->
-                <!--                        v-model="editedFact.category"-->
-                <!--                        label="Category (g)"-->
-                <!--                      ></v-text-field>-->
-                <!--                    </v-col>-->
-                <!--                    <v-col cols="12" sm="6" md="4">-->
-                <!--                      <v-text-field-->
-                <!--                        v-model="editedFact.identifier"-->
-                <!--                        label="Identifier (g)"-->
-                <!--                      ></v-text-field>-->
-                <!--                    </v-col>-->
-                <!--                  </v-row>-->
-                <!--                </v-container>-->
               </v-card-text>
 
               <v-card-actions>
@@ -141,7 +113,7 @@
         <v-icon small @click="markFact(item)">
           mdi-star
         </v-icon>
-        <v-icon v-if="item.permission === 'viewer'" small @click="reportFact(item)">
+        <v-icon v-if="item.permission === 'viewer'" @click="reportFact(item)">
           mdi-report
         </v-icon>
         <v-icon small @click="suspendFact(item)">
@@ -159,7 +131,7 @@
   import { Component, Vue, Watch } from "vue-property-decorator";
   import { mainStore, studyStore } from "@/utils/store-accessor";
   import { DataOptions } from "vuetify";
-  import { IBrowser, IComponents, Permission } from "@/interfaces";
+  import { IComponents, Permission } from "@/interfaces";
   import { extend, ValidationObserver, ValidationProvider } from "vee-validate";
   import { excluded, required } from "vee-validate/dist/rules";
 
@@ -180,6 +152,7 @@
     loading = true;
     totalFacts = 0;
     formTitle = "Edit Fact";
+    search = "";
     options: DataOptions = {
       groupBy: [],
       groupDesc: [],
@@ -243,10 +216,14 @@
 
     async mounted() {
       await mainStore.getUserProfile();
-      this.getDataFromApi().then((data) => {
-        this.facts = data.facts;
-        this.totalFacts = data.totalFacts;
-      });
+      // const limit = this.options.itemsPerPage;
+      // const skip =
+      //   this.options.page * this.options.itemsPerPage - this.options.itemsPerPage;
+      // const searchData: IComponents["FactSearch"] = { skip: skip, limit: limit };
+      // this.getDataFromApi(searchData).then((data) => {
+      //   this.facts = data.facts;
+      //   this.totalFacts = data.total;
+      // });
     }
 
     get defaultDeck() {
@@ -264,14 +241,14 @@
       const userProfile = mainStore.userProfile;
       return userProfile && userProfile.decks ? userProfile.decks : [];
     }
-    async getDataFromApi() {
+    async getDataFromApi(searchData?: IComponents["FactSearch"]) {
       this.loading = true;
-      await mainStore.getFacts();
+      await mainStore.getFacts(searchData);
       // eslint-disable-next-line
-      return new Promise<IBrowser>( (resolve, reject) => {
+      return new Promise<IComponents["FactBrowse"]>( (resolve, reject) => {
         const { sortBy, sortDesc, page, itemsPerPage } = this.options;
         let items: IComponents["Fact"][] = mainStore.facts;
-        const total: number = items.length;
+        const total: number = mainStore.totalFacts;
 
         if (sortBy.length === 1 && sortDesc.length === 1) {
           items = items.sort((a, b) => {
@@ -290,15 +267,11 @@
           });
         }
 
-        if (itemsPerPage > 0) {
-          items = items.slice((page - 1) * itemsPerPage, page * itemsPerPage);
-        }
-
         setTimeout(() => {
           this.loading = false;
           resolve({
             facts: items,
-            totalFacts: total,
+            total: total,
           });
         }, 1000);
       });
@@ -307,9 +280,13 @@
     @Watch("options", { deep: true })
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onOptionsChanged(value: DataOptions, oldValue: DataOptions) {
-      this.getDataFromApi().then((data) => {
+      const limit = this.options.itemsPerPage;
+      const skip =
+        this.options.page * this.options.itemsPerPage - this.options.itemsPerPage;
+      const searchData: IComponents["FactSearch"] = { skip: skip, limit: limit };
+      this.getDataFromApi(searchData).then((data) => {
         this.facts = data.facts;
-        this.totalFacts = data.totalFacts;
+        this.totalFacts = data.total;
       });
     }
 

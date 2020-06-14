@@ -62,6 +62,23 @@ export interface IComponents {
     answer_lines?: string[];
     extra?: { [key: string]: any }; // eslint-disable-line @typescript-eslint/no-explicit-any
   };
+  FactSearch: {
+    skip?: number;
+    limit?: number;
+    text?: string;
+    answer?: string;
+    category?: string;
+    deck_id?: number;
+    identifier?: string;
+    deck_ids?: number[];
+    marked?: boolean;
+    suspended?: boolean;
+    reported?: boolean;
+  };
+  FactBrowse: {
+    facts: IComponents["Fact"][];
+    total: number;
+  }
   HTTPValidationError: {
     detail?: IComponents["ValidationError"][];
   };
