@@ -65,6 +65,7 @@ export interface IComponents {
   FactSearch: {
     skip?: number;
     limit?: number;
+    all?: string;
     text?: string;
     answer?: string;
     category?: string;

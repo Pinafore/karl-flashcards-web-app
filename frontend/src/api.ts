@@ -54,7 +54,10 @@ export const api = {
     });
   },
   async getFacts(token: string, data: IComponents["FactSearch"]) {
-    let url = `${apiUrl}/api/facts/?`
+    let url = ``
+    if (data.all) {
+      url += `&all=${data.all}`
+    }
     if (data.skip) {
       url += `&skip=${data.skip}`
     }
@@ -82,7 +85,8 @@ export const api = {
     if (data.reported) {
       url += `&reported=${data.reported}`
     }
-    return axios.get<IComponents["FactBrowse"]>(url, authHeaders(token));
+    url = url.slice(1);
+    return axios.get<IComponents["FactBrowse"]>(`${apiUrl}/api/facts/?${url}`, authHeaders(token));
   },
   async getStudyFacts(token: string, deckIds: number[]) {
     let url = `${apiUrl}/api/study/`;

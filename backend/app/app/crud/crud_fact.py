@@ -183,7 +183,11 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                     facts_query = facts_query.filter(models.Suspended.suspend_type == schemas.SuspendType.report)
                 else:
                     facts_query = facts_query.filter(models.Suspended.suspend_type != schemas.SuspendType.report)
-
+        if filters.all:
+            facts_query = facts_query.filter(or_(models.Fact.text.ilike(filters.all),
+                                                 models.Fact.answer.ilike(filters.all),
+                                                 models.Fact.category.ilike(filters.all),
+                                                 models.Fact.identifier.ilike(filters.all)))
         if filters.text:
             facts_query = facts_query.filter(models.Fact.text.ilike(filters.text))
         if filters.answer:
@@ -241,7 +245,11 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                     facts_query = facts_query.filter(models.Suspended.suspend_type == schemas.SuspendType.report)
                 else:
                     facts_query = facts_query.filter(models.Suspended.suspend_type != schemas.SuspendType.report)
-
+        if filters.all:
+            facts_query = facts_query.filter(or_(models.Fact.text.ilike(filters.all),
+                                                 models.Fact.answer.ilike(filters.all),
+                                                 models.Fact.category.ilike(filters.all),
+                                                 models.Fact.identifier.ilike(filters.all)))
         if filters.text:
             facts_query = facts_query.filter(models.Fact.text.ilike(filters.text))
         if filters.answer:

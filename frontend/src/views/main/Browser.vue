@@ -300,7 +300,7 @@
       const searchData: IComponents["FactSearch"] = {
         skip: skip,
         limit: limit,
-        text: value,
+        all: value,
       };
       this.getDataFromApi(searchData).then((data) => {
         this.facts = data.facts;

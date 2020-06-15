@@ -48,6 +48,7 @@ class FactUpdate(InternalFactBase):
 
 # Properties to receive on fact search
 class FactSearch(InternalFactBase):
+    all: Optional[str] = None
     deck_ids: Optional[List[int]] = None
     marked: Optional[bool] = None
     studyable: Optional[bool] = None
