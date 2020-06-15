@@ -104,7 +104,31 @@
           </v-dialog>
         </v-toolbar>
       </template>
-
+      <template v-slot:item.marked="{ item }">
+        <v-simple-checkbox
+          v-model="item.marked"
+          v-ripple
+          @input="markFact(item, item.marked)"
+        ></v-simple-checkbox>
+      </template>
+      <template v-slot:item.suspended="{ item }">
+        <v-simple-checkbox
+          v-model="item.suspended"
+          v-ripple
+          @input="suspendFact(item, item.suspended)"
+        ></v-simple-checkbox>
+      </template>
+      <template v-slot:item.reported="{ item }">
+        <v-simple-checkbox
+          v-if="item.permission === 'viewer'"
+          v-model="item.reported"
+          v-ripple
+          @input="reportFact(item, item.reported)"
+        ></v-simple-checkbox>
+        <div v-else>
+          owner
+        </div>
+      </template>
       <template v-slot:item.actions="{ item }">
         <v-icon
           v-if="item.permission === 'owner'"
@@ -114,16 +138,7 @@
         >
           mdi-pencil
         </v-icon>
-        <v-icon small @click="markFact(item)">
-          mdi-star
-        </v-icon>
-        <v-icon v-if="item.permission === 'viewer'" @click="reportFact(item)">
-          mdi-report
-        </v-icon>
-        <v-icon small @click="suspendFact(item)">
-          mdi-pause
-        </v-icon>
-        <v-icon small @click="deleteFact(item)">
+        <v-icon small @click="deleteFact(item, true)">
           mdi-delete
         </v-icon>
       </template>
@@ -217,6 +232,24 @@
         value: "identifier",
         align: "left",
       },
+      {
+        text: "marked",
+        sortable: true,
+        value: "marked",
+        align: "left",
+      },
+      {
+        text: "reported",
+        sortable: true,
+        value: "reported",
+        align: "left",
+      },
+      {
+        text: "suspended",
+        sortable: true,
+        value: "suspended",
+        align: "left",
+      },
       { text: "Actions", value: "actions", sortable: false },
     ];
 
@@ -280,23 +313,27 @@
       this.dialog = true;
     }
 
-    async markFact(item) {
-      await mainStore.markFact(item.fact_id);
+    async markFact(item, todo) {
+      await mainStore.markFact({ id: item.fact_id, todo: todo });
     }
 
-    async reportFact(item) {
-      await mainStore.reportFact(item.fact_id);
+    async reportFact(item, todo) {
+      await mainStore.reportFact({ id: item.fact_id, todo: todo });
+      item.suspended = todo;
     }
 
-    async suspendFact(item) {
-      await mainStore.suspendFact(item.fact_id);
+    async suspendFact(item, todo) {
+      await mainStore.suspendFact({ id: item.fact_id, todo: todo });
+      if (!todo && item.reported) {
+        item.reported = false;
+      }
     }
 
-    async deleteFact(item) {
+    async deleteFact(item, todo) {
       const index = this.facts.indexOf(item);
 
       this.facts.splice(index, 1);
-      await mainStore.deleteFact(item.fact_id);
+      await mainStore.deleteFact({ id: item.fact_id, todo: todo });
     }
 
     close() {

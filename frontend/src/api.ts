@@ -117,6 +117,10 @@ export const api = {
     const url = `${apiUrl}/api/facts/mark/${factId}`;
     return axios.put<IComponents["Fact"]>(url, null, authHeaders(token));
   },
+  async clearFact(token: string, factId: number) {
+    const url = `${apiUrl}/api/facts/status/${factId}`;
+    return axios.put<IComponents["Fact"]>(url, null, authHeaders(token));
+  },
   async deleteFact(token: string, factId: number) {
     const url = `${apiUrl}/api/facts/${factId}`;
     return axios.delete<IComponents["Fact"]>(url, authHeaders(token));

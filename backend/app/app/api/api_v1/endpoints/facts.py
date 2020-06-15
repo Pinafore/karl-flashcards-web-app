@@ -17,21 +17,21 @@ router = APIRouter()
 
 @router.get("/", response_model=schemas.FactBrowse)
 def read_facts(
-    db: Session = Depends(deps.get_db),
-    skip: int = 0,
-    limit: int = 100,
-    all: Optional[str] = None,
-    text: Optional[str] = None,
-    answer: Optional[str] = None,
-    category: Optional[str] = None,
-    identifier: Optional[str] = None,
-    deck_ids: Optional[List[int]] = None,
-    deck_id: Optional[int] = None,
-    marked: Optional[bool] = None,
-    suspended: Optional[bool] = None,
-    reported: Optional[bool] = None,
-    permissions: bool = True,
-    current_user: models.User = Depends(deps.get_current_active_user),
+        db: Session = Depends(deps.get_db),
+        skip: int = 0,
+        limit: int = 100,
+        all: Optional[str] = None,
+        text: Optional[str] = None,
+        answer: Optional[str] = None,
+        category: Optional[str] = None,
+        identifier: Optional[str] = None,
+        deck_ids: Optional[List[int]] = None,
+        deck_id: Optional[int] = None,
+        marked: Optional[bool] = None,
+        suspended: Optional[bool] = None,
+        reported: Optional[bool] = None,
+        permissions: bool = True,
+        current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Retrieve facts.
@@ -61,6 +61,20 @@ def read_facts(
         for fact in facts:
             new_fact = schemas.Fact.from_orm(fact)
             new_fact.permission = fact.permissions(current_user)
+            new_fact.marked = True if current_user in fact.markers else False
+            suspended = (db.query(models.Suspended)
+                         .filter(models.Suspended.user_id == current_user.id)
+                         .filter(models.Suspended.fact_id == fact.fact_id)
+                         .filter(models.Suspended.suspend_type == schemas.SuspendType.suspend)
+                         .first())
+            reported = (db.query(models.Suspended)
+                        .filter(models.Suspended.user_id == current_user.id)
+                        .filter(models.Suspended.fact_id == fact.fact_id)
+                        .filter(models.Suspended.suspend_type == schemas.SuspendType.suspend)
+                        .first())
+            new_fact.suspended = True if suspended or reported else False
+            if new_fact.permission is schemas.Permission.viewer:
+                new_fact.reported = True if reported else False
             new_facts.append(new_fact)
         fact_browser = schemas.FactBrowse(facts=new_facts, total=total)
         return fact_browser
@@ -71,10 +85,10 @@ def read_facts(
 
 @router.post("/", response_model=schemas.Fact)
 def create_fact(
-    *,
-    db: Session = Depends(deps.get_db),
-    fact_in: schemas.FactCreate,
-    current_user: models.User = Depends(deps.get_current_active_user),
+        *,
+        db: Session = Depends(deps.get_db),
+        fact_in: schemas.FactCreate,
+        current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Create new fact.
@@ -97,9 +111,9 @@ def update_preloaded_facts(
 
 @router.put("/{fact_id}", response_model=schemas.Fact)
 def update_fact(
-    *,
-    fact_in: schemas.FactUpdate,
-    perms: deps.OwnerFactPerms = Depends(),
+        *,
+        fact_in: schemas.FactUpdate,
+        perms: deps.OwnerFactPerms = Depends(),
 ) -> Any:
     """
     Update a fact.
@@ -110,8 +124,8 @@ def update_fact(
 
 @router.get("/{fact_id}", response_model=schemas.Fact)
 def read_fact(
-    *,
-    perms: deps.CheckFactPerms = Depends(),
+        *,
+        perms: deps.CheckFactPerms = Depends(),
 ) -> Any:
     """
     Get fact by ID.
@@ -121,8 +135,8 @@ def read_fact(
 
 @router.delete("/{fact_id}", response_model=schemas.Fact)
 def delete_fact(
-    *,
-    perms: deps.CheckFactPerms = Depends(),
+        *,
+        perms: deps.CheckFactPerms = Depends(),
 ) -> Any:
     """
     Delete a fact.
@@ -136,8 +150,8 @@ def delete_fact(
 
 @router.put("/suspend/{fact_id}", response_model=schemas.Fact)
 def suspend_fact(
-    *,
-    perms: deps.CheckFactPerms = Depends(),
+        *,
+        perms: deps.CheckFactPerms = Depends(),
 ) -> Any:
     """
     Suspend a fact.
@@ -151,8 +165,8 @@ def suspend_fact(
 
 @router.put("/report/{fact_id}", response_model=schemas.Fact)
 def report_fact(
-    *,
-    perms: deps.CheckFactPerms = Depends(),
+        *,
+        perms: deps.CheckFactPerms = Depends(),
 ) -> Any:
     """
     Report a fact.
@@ -166,8 +180,8 @@ def report_fact(
 
 @router.put("/mark/{fact_id}", response_model=schemas.Fact)
 def mark_fact(
-    *,
-    perms: deps.CheckFactPerms = Depends(),
+        *,
+        perms: deps.CheckFactPerms = Depends(),
 ) -> Any:
     """
     Report a fact.
@@ -180,3 +194,15 @@ def mark_fact(
 
     chicken = crud.fact.get_eligible_facts(db=db, user=user, filters=FactSearch(text="apple"))
     assert len(chicken) == 1
+
+
+@router.put("/status/{fact_id}", response_model=schemas.Fact)
+def clear_fact_status(
+        *,
+        perms: deps.CheckFactPerms = Depends(),
+) -> Any:
+    """
+    Clears a user's reports or supensions of a fact.
+    """
+    fact = crud.fact.clear_report_or_suspend(db=perms.db, db_obj=perms.fact, user=perms.current_user)
+    return fact

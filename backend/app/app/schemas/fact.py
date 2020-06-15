@@ -79,6 +79,8 @@ class FactInDBBase(InternalFactBase):
 class Fact(FactInDBBase):
     rationale: Optional[str] = None
     marked: Optional[bool] = None
+    reported: Optional[bool] = None
+    suspended: Optional[bool] = None
     permission: Optional[Permission] = None
 
 

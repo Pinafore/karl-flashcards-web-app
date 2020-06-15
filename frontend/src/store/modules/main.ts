@@ -408,52 +408,84 @@ export default class MainModule extends VuexModule {
   }
 
   @Action
-  async markFact(id: number) {
+  async markFact(payload: {id: number, todo: boolean}) {
     try {
-      await api.markFact(mainStore.token, id);
-      mainStore.addNotification({
-        content: "Fact marked",
-        color: "success",
-      });
+      await api.markFact(mainStore.token, payload.id);
+      if(payload.todo) {
+        mainStore.addNotification({
+          content: "Fact marked",
+          color: "success",
+        });
+      } else {
+        mainStore.addNotification({
+          content: "Fact unmarked",
+          color: "success",
+        });
+      }
+
     } catch (error) {
       await mainStore.checkApiError(error);
     }
   }
 
   @Action
-  async suspendFact(id: number) {
+  async suspendFact(payload: {id: number, todo: boolean}) {
     try {
-      await api.suspendFact(mainStore.token, id);
-      mainStore.addNotification({
-        content: "Fact suspended",
-        color: "success",
-      });
+      if(payload.todo) {
+        await api.suspendFact(mainStore.token, payload.id);
+        mainStore.addNotification({
+          content: "Fact suspended",
+          color: "success",
+        });
+      } else {
+        await api.clearFact(mainStore.token, payload.id);
+        mainStore.addNotification({
+          content: "Fact unsuspended",
+          color: "success",
+        });
+      }
     } catch (error) {
       await mainStore.checkApiError(error);
     }
   }
 
   @Action
-  async reportFact(id: number) {
+  async reportFact(payload: {id: number, todo: boolean}) {
     try {
-      await api.reportFact(mainStore.token, id);
-      mainStore.addNotification({
-        content: "Fact reported",
-        color: "success",
-      });
+
+      if(payload.todo) {
+        await api.reportFact(mainStore.token, payload.id);
+        mainStore.addNotification({
+          content: "Fact reported",
+          color: "success",
+        });
+      } else {
+        await api.clearFact(mainStore.token, payload.id);
+        mainStore.addNotification({
+          content: "Fact unreported",
+          color: "success",
+        });
+      }
     } catch (error) {
       await mainStore.checkApiError(error);
     }
   }
 
   @Action
-  async deleteFact(id: number) {
+  async deleteFact(payload: {id: number, todo: boolean}) {
     try {
-      await api.deleteFact(mainStore.token, id);
-      mainStore.addNotification({
-        content: "Fact deleted",
-        color: "success",
-      });
+      await api.deleteFact(mainStore.token, payload.id);
+      if(payload.todo) {
+        mainStore.addNotification({
+          content: "Fact deleted",
+          color: "success",
+        });
+      } else {
+        mainStore.addNotification({
+          content: "Fact deletion undone",
+          color: "success",
+        });
+      }
     } catch (error) {
       await mainStore.checkApiError(error);
     }

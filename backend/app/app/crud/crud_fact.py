@@ -143,6 +143,16 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         db.commit()
         return db_obj
 
+    def clear_report_or_suspend(
+            self, db: Session, *, db_obj: models.Fact, user: models.User
+    ) -> models.Fact:
+        db.query(models.Suspended) \
+            .filter(and_(models.Suspended.suspended_fact == db_obj,
+                         models.Suspended.suspend_type != schemas.SuspendType.delete,
+                         models.Suspended.suspender == user)).delete(synchronize_session=False)
+        db.commit()
+        return db_obj
+
     def undo_mark(
             self, db: Session, *, db_obj: models.Fact, user: models.User
     ) -> models.Fact:
