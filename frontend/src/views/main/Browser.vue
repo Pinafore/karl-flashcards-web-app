@@ -138,6 +138,7 @@
   import { IComponents, Permission } from "@/interfaces";
   import { extend, ValidationObserver, ValidationProvider } from "vee-validate";
   import { excluded, required } from "vee-validate/dist/rules";
+  import debounce from "lodash.debounce";
 
   // register validation rules
   extend("required", { ...required, message: "{_field_} can not be empty" });
@@ -184,6 +185,7 @@
     };
     editedIndex = -1;
     facts: IComponents["Fact"][] = [];
+    debounceSearch = debounce(this.searchAPI, 500);
     headers = [
       {
         text: "Text",
@@ -220,14 +222,6 @@
 
     async mounted() {
       await mainStore.getUserProfile();
-      // const limit = this.options.itemsPerPage;
-      // const skip =
-      //   this.options.page * this.options.itemsPerPage - this.options.itemsPerPage;
-      // const searchData: IComponents["FactSearch"] = { skip: skip, limit: limit };
-      // this.getDataFromApi(searchData).then((data) => {
-      //   this.facts = data.facts;
-      //   this.totalFacts = data.total;
-      // });
     }
 
     get defaultDeck() {
@@ -293,6 +287,26 @@
       });
     }
 
+    @Watch("search", { deep: true })
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onSearchChanged(value: string, oldValue: string) {
+      this.debounceSearch(value);
+    }
+
+    searchAPI(value: string) {
+      const limit = this.options.itemsPerPage;
+      const skip =
+        this.options.page * this.options.itemsPerPage - this.options.itemsPerPage;
+      const searchData: IComponents["FactSearch"] = {
+        skip: skip,
+        limit: limit,
+        text: value,
+      };
+      this.getDataFromApi(searchData).then((data) => {
+        this.facts = data.facts;
+        this.totalFacts = data.total;
+      });
+    }
     editFact(item) {
       this.editedIndex = this.facts.indexOf(item);
       this.editedFact = Object.assign({}, item);
