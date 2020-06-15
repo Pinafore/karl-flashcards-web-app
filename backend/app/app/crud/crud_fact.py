@@ -171,7 +171,6 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         if filters.studyable:
             facts_query = facts_query.filter(not_(models.Fact.suspenders.any(id=user.id)))
         else:
-            pass
             facts_query = (facts_query.outerjoin(models.Suspended, models.Fact.fact_id == models.Suspended.fact_id)
                            .filter(or_(models.Suspended.suspend_type != schemas.SuspendType.delete, models.Suspended.suspend_type == None)))
             if filters.suspended is not None:
@@ -230,7 +229,6 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         if filters.studyable:
             facts_query = facts_query.filter(not_(models.Fact.suspenders.any(id=user.id)))
         else:
-            pass
             facts_query = (facts_query.outerjoin(models.Suspended, models.Fact.fact_id == models.Suspended.fact_id)
                            .filter(or_(models.Suspended.suspend_type != schemas.SuspendType.delete, models.Suspended.suspend_type == None)))
             if filters.suspended is not None:
