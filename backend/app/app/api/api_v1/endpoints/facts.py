@@ -1,6 +1,6 @@
 from typing import Any, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app import crud, models, schemas
@@ -25,7 +25,7 @@ def read_facts(
         answer: Optional[str] = None,
         category: Optional[str] = None,
         identifier: Optional[str] = None,
-        deck_ids: Optional[List[int]] = None,
+        deck_ids: Optional[List[int]] = Query(None),
         deck_id: Optional[int] = None,
         marked: Optional[bool] = None,
         suspended: Optional[bool] = None,
