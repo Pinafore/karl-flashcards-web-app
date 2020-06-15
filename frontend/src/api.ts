@@ -76,6 +76,11 @@ export const api = {
     if (data.deck_id) {
       url += `&deck_id=${data.deck_id}`
     }
+    if (data.deck_ids) {
+      for (const eachId in data.deck_ids) {
+        url += `&deck_ids=${data.deck_ids[eachId]}`;
+      }
+    }
     if (data.marked) {
       url += `&marked=${data.marked}`
     }

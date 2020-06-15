@@ -28,10 +28,20 @@
             hide-details
           ></v-text-field>
           <v-spacer></v-spacer>
+          <v-select
+            v-model="selectedDecks"
+            :items="decks"
+            item-text="title"
+            item-value="id"
+            chips
+            single-line
+            label="Decks"
+            multiple
+            deletable-chips
+            hide-details
+          ></v-select>
+          <v-spacer></v-spacer>
           <v-dialog v-model="dialog" max-width="500px">
-            <template v-slot:activator="{ on }">
-              <v-btn color="primary" dark class="mb-2" v-on="on">New Fact</v-btn>
-            </template>
             <v-card>
               <v-card-title>
                 <span class="headline">{{ formTitle }}</span>
@@ -179,6 +189,7 @@
       sortDesc: [],
     };
     dialog = false;
+    selectedDecks = [];
     editedFact = {
       text: "",
       answer: "",
@@ -196,6 +207,7 @@
     editedIndex = -1;
     facts: IComponents["Fact"][] = [];
     debounceSearch = debounce(this.searchAPI, 1000);
+    debounceDeck = debounce(this.searchAPI, 2000);
     headers = [
       {
         text: "Text",
@@ -287,19 +299,29 @@
 
     @Watch("search", { deep: true })
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    onSearchChanged(value: string, oldValue: string) {
-      this.debounceSearch(value);
+    onSearchChanged() {
+      this.debounceSearch();
     }
 
-    searchAPI(value: string) {
-      const limit = this.options.itemsPerPage;
-      const skip =
-        this.options.page * this.options.itemsPerPage - this.options.itemsPerPage;
+    @Watch("selectedDecks", { deep: true })
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onSelectedDecksChanged() {
+      this.debounceDeck();
+    }
+
+    searchAPI() {
       const searchData: IComponents["FactSearch"] = {
-        skip: skip,
-        limit: limit,
-        all: value,
+        limit: this.options.itemsPerPage,
+        skip: this.options.page * this.options.itemsPerPage - this.options.itemsPerPage,
       };
+      if (this.search != "") {
+        searchData.all = this.search;
+      }
+
+      if (this.selectedDecks != []) {
+        searchData.deck_ids = this.selectedDecks;
+      }
+
       this.getDataFromApi(searchData);
     }
     editFact(item) {
