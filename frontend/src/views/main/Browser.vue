@@ -243,36 +243,9 @@
       this.loading = true;
       await mainStore.getFacts(searchData);
       // eslint-disable-next-line
-      return new Promise<IComponents["FactBrowse"]>( (resolve, reject) => {
-        const { sortBy, sortDesc, page, itemsPerPage } = this.options;
-        let items: IComponents["Fact"][] = mainStore.facts;
-        const total: number = mainStore.totalFacts;
-
-        if (sortBy.length === 1 && sortDesc.length === 1) {
-          items = items.sort((a, b) => {
-            const sortA = a[sortBy[0]];
-            const sortB = b[sortBy[0]];
-
-            if (sortDesc[0]) {
-              if (sortA < sortB) return 1;
-              if (sortA > sortB) return -1;
-              return 0;
-            } else {
-              if (sortA < sortB) return -1;
-              if (sortA > sortB) return 1;
-              return 0;
-            }
-          });
-        }
-
-        setTimeout(() => {
-          this.loading = false;
-          resolve({
-            facts: items,
-            total: total,
-          });
-        }, 1000);
-      });
+      this.facts = mainStore.facts;
+      this.totalFacts = mainStore.totalFacts;
+      this.loading = false;
     }
 
     @Watch("options", { deep: true })
@@ -281,10 +254,7 @@
       const limit = value.itemsPerPage;
       const skip = value.page * value.itemsPerPage - value.itemsPerPage;
       const searchData: IComponents["FactSearch"] = { skip: skip, limit: limit };
-      this.getDataFromApi(searchData).then((data) => {
-        this.facts = data.facts;
-        this.totalFacts = data.total;
-      });
+      this.getDataFromApi(searchData);
     }
 
     @Watch("search", { deep: true })
@@ -302,10 +272,7 @@
         limit: limit,
         all: value,
       };
-      this.getDataFromApi(searchData).then((data) => {
-        this.facts = data.facts;
-        this.totalFacts = data.total;
-      });
+      this.getDataFromApi(searchData);
     }
     editFact(item) {
       this.editedIndex = this.facts.indexOf(item);
