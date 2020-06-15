@@ -185,7 +185,7 @@
     };
     editedIndex = -1;
     facts: IComponents["Fact"][] = [];
-    debounceSearch = debounce(this.searchAPI, 500);
+    debounceSearch = debounce(this.searchAPI, 1000);
     headers = [
       {
         text: "Text",
