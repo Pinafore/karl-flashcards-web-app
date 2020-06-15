@@ -7,6 +7,9 @@ from app import crud, models, schemas
 from app.api import deps
 
 import logging
+
+from app.core.celery_app import celery_app
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -78,6 +81,18 @@ def create_fact(
     """
     fact = crud.fact.create_with_owner(db=db, obj_in=fact_in, user=current_user)
     return fact
+
+
+@router.put("/preloaded", response_model=bool)
+def update_preloaded_facts(
+        *,
+        current_user: models.User = Depends(deps.get_current_active_superuser),  # noqa
+) -> Any:
+    """
+    Update preloaded facts.
+    """
+    celery_app.send_task("app.worker.clean_up_preloaded_facts")
+    return True
 
 
 @router.put("/{fact_id}", response_model=schemas.Fact)
