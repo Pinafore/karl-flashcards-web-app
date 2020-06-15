@@ -130,15 +130,10 @@
         </div>
       </template>
       <template v-slot:item.actions="{ item }">
-        <v-icon
-          v-if="item.permission === 'owner'"
-          small
-          class="mr-2"
-          @click="editFact(item)"
-        >
+        <v-icon v-if="item.permission === 'owner'" @click="editFact(item)">
           mdi-pencil
         </v-icon>
-        <v-icon small @click="deleteFact(item, true)">
+        <v-icon @click="deleteFact(item, true)">
           mdi-delete
         </v-icon>
       </template>
