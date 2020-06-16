@@ -226,9 +226,13 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         return facts
 
     def get_eligible_facts(
-            self, query: Query
+            self, query: Query, skip: int, limit: int
     ) -> List[models.Fact]:
         begin_overall_start = time.time()
+        if skip:
+            query = query.offset(skip)
+        if limit:
+            query = query.limit(limit)
         facts = query.all()
         overall_end_time = time.time()
         overall_total_time = overall_end_time - begin_overall_start

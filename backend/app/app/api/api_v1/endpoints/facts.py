@@ -56,11 +56,10 @@ def read_facts(
                                 limit=limit
                                 )
     query = crud.fact.build_facts_query(db=db, user=current_user, filters=search)
-    facts = crud.fact.get_eligible_facts(query=query)
+    facts = crud.fact.get_eligible_facts(query=query, skip=skip, limit=limit)
     total = crud.fact.count_eligible_facts(query=query)
     if permissions:
         begin_overall_start = time.time()
-        logger.info("start permissions: " + str(begin_overall_start))
         new_facts: List[schemas.Fact] = []
         for fact in facts:
             new_fact = schemas.Fact.from_orm(fact)
@@ -83,7 +82,7 @@ def read_facts(
         fact_browser = schemas.FactBrowse(facts=new_facts, total=total)
         overall_end_time = time.time()
         overall_total_time = overall_end_time - begin_overall_start
-        logger.info("end permissions: " + str(overall_total_time))
+        logger.info("permissions: " + str(overall_total_time))
         return fact_browser
     else:
         fact_browser = schemas.FactBrowse(facts=facts, total=total)
