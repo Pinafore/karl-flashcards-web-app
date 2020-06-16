@@ -1,10 +1,11 @@
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import Column, ForeignKey, Integer, String, TIMESTAMP, ARRAY, Boolean
+from sqlalchemy import Column, ForeignKey, Integer, String, TIMESTAMP, ARRAY, Boolean, cast, Index, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_method
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects import postgresql
 
 from app.db.base_class import Base
 from app.schemas import Permission
@@ -14,6 +15,15 @@ if TYPE_CHECKING:
     from .suspended import Suspended  # noqa: F401
     from .deck import Deck  # noqa: F401
     from .history import History  # noqa: F401
+
+
+
+def create_tsvector(*args):
+    exp = args[0]
+    for e in args[1:]:
+        exp += ' ' + e
+    return func.to_tsvector('english', exp)
+
 
 
 class Fact(Base):
@@ -34,6 +44,21 @@ class Fact(Base):
     history = relationship("History", back_populates="fact")
     suspenders = association_proxy('suspensions', 'suspender')
     markers = association_proxy('marks', 'marker')
+
+    __ts_vector__ = create_tsvector(
+        cast(func.coalesce(text, ''), postgresql.TEXT),
+        cast(func.coalesce(answer, ''), postgresql.TEXT),
+        cast(func.coalesce(category, ''), postgresql.TEXT),
+        cast(func.coalesce(identifier, ''), postgresql.TEXT)
+    )
+
+    __table_args__ = (
+        Index(
+            'idx_fact_fts',
+            __ts_vector__,
+            postgresql_using='gin'
+        ),
+    )
 
     @hybrid_method
     def permissions(self, user: User) -> Optional[Permission]:
