@@ -1,3 +1,4 @@
+import time
 from typing import Any, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -58,6 +59,8 @@ def read_facts(
     facts = crud.fact.get_eligible_facts(query=query)
     total = crud.fact.count_eligible_facts(query=query)
     if permissions:
+        begin_overall_start = time.time()
+        logger.info("start permissions: " + str(begin_overall_start))
         new_facts: List[schemas.Fact] = []
         for fact in facts:
             new_fact = schemas.Fact.from_orm(fact)
@@ -78,6 +81,9 @@ def read_facts(
                 new_fact.reported = True if reported else False
             new_facts.append(new_fact)
         fact_browser = schemas.FactBrowse(facts=new_facts, total=total)
+        overall_end_time = time.time()
+        overall_total_time = overall_end_time - begin_overall_start
+        logger.info("end permissions: " + str(overall_total_time))
         return fact_browser
     else:
         fact_browser = schemas.FactBrowse(facts=facts, total=total)
