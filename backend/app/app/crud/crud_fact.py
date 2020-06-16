@@ -219,8 +219,6 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             self, query: Query
     ) -> int:
         begin_overall_start = time.time()
-
-        logger.info("Finished writing queries count: " + str(time.time() - begin_overall_start))
         facts = query.count()
         overall_end_time = time.time()
         overall_total_time = overall_end_time - begin_overall_start
