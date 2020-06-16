@@ -54,8 +54,9 @@ def read_facts(
                                 skip=skip,
                                 limit=limit
                                 )
-    facts = crud.fact.get_eligible_facts(db=db, user=current_user, filters=search)
-    total = crud.fact.count_eligible_facts(db=db, user=current_user, filters=search)
+    query = crud.fact.build_facts_query(db=db, user=current_user, filters=search)
+    facts = crud.fact.get_eligible_facts(query=query)
+    total = crud.fact.count_eligible_facts(query=query)
     if permissions:
         new_facts: List[schemas.Fact] = []
         for fact in facts:

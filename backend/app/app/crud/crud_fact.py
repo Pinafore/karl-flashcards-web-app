@@ -2,7 +2,7 @@ from typing import List, Union, Dict, Any, Optional
 
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import and_, or_, not_, func
-from sqlalchemy.orm import Session, aliased
+from sqlalchemy.orm import Session, aliased, Query
 
 from app.crud.base import CRUDBase
 from app import crud, models, schemas
@@ -162,10 +162,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         db.commit()
         return db_obj
 
-    def count_eligible_facts(
-            self, db: Session, *, user: models.User, filters: schemas.FactSearch = schemas.FactSearch()
-    ) -> int:
-        begin_overall_start = time.time()
+    def build_facts_query(self, db: Session, *, user: models.User, filters: schemas.FactSearch = schemas.FactSearch()):
         user_facts = (db.query(models.Fact).filter(models.Fact.user_id == user.id))
         visible_decks = (
             db.query(models.Deck.id).join(models.User_Deck).filter(models.User_Deck.owner_id == user.id).subquery())
@@ -182,7 +179,8 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             facts_query = facts_query.filter(not_(models.Fact.suspenders.any(id=user.id)))
         else:
             facts_query = (facts_query.outerjoin(models.Suspended, models.Fact.fact_id == models.Suspended.fact_id)
-                           .filter(or_(models.Suspended.suspend_type != schemas.SuspendType.delete, models.Suspended.suspend_type == None)))
+                           .filter(or_(models.Suspended.suspend_type != schemas.SuspendType.delete,
+                                       models.Suspended.suspend_type == None)))
             if filters.suspended is not None:
                 if filters.suspended:
                     facts_query = facts_query.filter(models.Suspended.suspend_type == schemas.SuspendType.suspend)
@@ -215,72 +213,25 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 facts_query = facts_query.filter(not_(models.Fact.markers.any(id=user.id)))
         if filters.randomize:
             facts_query = facts_query.order_by(func.random())
+        return facts_query
+
+    def count_eligible_facts(
+            self, query: Query
+    ) -> int:
+        begin_overall_start = time.time()
+
         logger.info("Finished writing queries count: " + str(time.time() - begin_overall_start))
-        facts = facts_query.count()
+        facts = query.count()
         overall_end_time = time.time()
         overall_total_time = overall_end_time - begin_overall_start
         logger.info("overall time count: " + str(overall_total_time))
         return facts
 
     def get_eligible_facts(
-            self, db: Session, *, user: models.User, filters: schemas.FactSearch = schemas.FactSearch()
+            self, query: Query
     ) -> List[models.Fact]:
         begin_overall_start = time.time()
-        user_facts = (db.query(models.Fact).filter(models.Fact.user_id == user.id))
-        visible_decks = (
-            db.query(models.Deck.id).join(models.User_Deck).filter(models.User_Deck.owner_id == user.id).subquery())
-        deck_owners = (db.query(models.User_Deck.deck_id, models.User_Deck.owner_id)
-                       .outerjoin(visible_decks)
-                       .filter(models.User_Deck.permissions == schemas.Permission.owner).subquery())
-        filtered_facts = (db.query(models.Fact)
-                          .join(visible_decks, models.Fact.deck_id == visible_decks.c.id)
-                          .join(deck_owners,
-                                and_(models.Fact.deck_id == deck_owners.c.deck_id,
-                                     models.Fact.user_id == deck_owners.c.owner_id)))
-        facts_query = (user_facts.union(filtered_facts))
-        if filters.studyable:
-            facts_query = facts_query.filter(not_(models.Fact.suspenders.any(id=user.id)))
-        else:
-            facts_query = (facts_query.outerjoin(models.Suspended, models.Fact.fact_id == models.Suspended.fact_id)
-                           .filter(or_(models.Suspended.suspend_type != schemas.SuspendType.delete, models.Suspended.suspend_type == None)))
-            if filters.suspended is not None:
-                if filters.suspended:
-                    facts_query = facts_query.filter(models.Suspended.suspend_type == schemas.SuspendType.suspend)
-                else:
-                    facts_query = facts_query.filter(models.Suspended.suspend_type != schemas.SuspendType.suspend)
-            if filters.reported is not None:
-                if filters.reported:
-                    facts_query = facts_query.filter(models.Suspended.suspend_type == schemas.SuspendType.report)
-                else:
-                    facts_query = facts_query.filter(models.Suspended.suspend_type != schemas.SuspendType.report)
-        if filters.all:
-            facts_query = facts_query.filter(
-                models.Fact.__ts_vector__.match(filters.all, postgresql_regconfig='english'))
-        if filters.text:
-            facts_query = facts_query.filter(models.Fact.text.ilike(filters.text))
-        if filters.answer:
-            facts_query = facts_query.filter(models.Fact.answer.ilike(filters.answer))
-        if filters.category:
-            facts_query = facts_query.filter(models.Fact.category.ilike(filters.category))
-        if filters.identifier:
-            facts_query = facts_query.filter(models.Fact.identifier.ilike(filters.identifier))
-        if filters.deck_ids:
-            facts_query = facts_query.filter(models.Fact.deck_id.in_(filters.deck_ids))
-        if filters.deck_id:
-            facts_query = facts_query.filter(models.Fact.deck_id == filters.deck_id)
-        if filters.marked is not None:
-            if filters.marked:
-                facts_query = facts_query.filter(models.Fact.markers.any(id=user.id))
-            else:
-                facts_query = facts_query.filter(not_(models.Fact.markers.any(id=user.id)))
-        if filters.randomize:
-            facts_query = facts_query.order_by(func.random())
-        if filters.skip:
-            facts_query = facts_query.offset(filters.skip)
-        if filters.limit:
-            facts_query = facts_query.limit(filters.limit)
-        logger.info("Finished writing queries: " + str(time.time() - begin_overall_start))
-        facts = facts_query.all()
+        facts = query.all()
         overall_end_time = time.time()
         overall_total_time = overall_end_time - begin_overall_start
         logger.info("overall time: " + str(overall_total_time))
@@ -296,7 +247,8 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             send_limit: Optional[int] = 100,
     ) -> List[schemas.Fact]:
         filters = schemas.FactSearch(deck_ids=deck_ids, limit=send_limit, studyable=True)
-        eligible_facts = self.get_eligible_facts(db, user=user, filters=filters)
+        query = crud.fact.build_facts_query(db=db, user=user, filters=filters)
+        eligible_facts = self.get_eligible_facts(query=query)
         if not eligible_facts:
             return []
         karl_list = []
