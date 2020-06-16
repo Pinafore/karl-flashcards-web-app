@@ -21,9 +21,10 @@ export enum Permission {
   owner = "owner",
   viewer = "viewer",
 }
-export enum Status {
-  report = "report",
-  suspend = "suspend",
+export interface IStatus {
+  marked?: boolean | undefined,
+  suspended?: boolean,
+  reported?: boolean
 }
 export interface IComponents {
   Deck: { title: string; public: boolean; id: number };
@@ -46,7 +47,6 @@ export interface IComponents {
     deck: IComponents["Deck"];
     rationale?: string;
     marked?: boolean;
-    status?: Status;
     permission?: Permission;
   };
   FactCreate: {

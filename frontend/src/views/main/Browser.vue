@@ -41,6 +41,16 @@
             hide-details
           ></v-select>
           <v-spacer></v-spacer>
+          <v-select
+            v-model="selectedStatus"
+            :items="status"
+            item-text="name"
+            item-value="params"
+            single-line
+            label="Status Filters"
+            hide-details
+          ></v-select>
+          <v-spacer></v-spacer>
           <v-dialog v-model="dialog" max-width="500px">
             <v-card>
               <v-card-title>
@@ -155,7 +165,7 @@
   import { Component, Vue, Watch } from "vue-property-decorator";
   import { mainStore, studyStore } from "@/utils/store-accessor";
   import { DataOptions } from "vuetify";
-  import { IComponents, Permission } from "@/interfaces";
+  import { IComponents, IStatus, Permission } from "@/interfaces";
   import { extend, ValidationObserver, ValidationProvider } from "vee-validate";
   import { excluded, required } from "vee-validate/dist/rules";
   import debounce from "lodash.debounce";
@@ -190,6 +200,7 @@
     };
     dialog = false;
     selectedDecks = [];
+    selectedStatus: IStatus = {};
     editedFact = {
       text: "",
       answer: "",
@@ -259,6 +270,16 @@
       },
       { text: "Actions", value: "actions", sortable: false },
     ];
+    status = [
+      { name: "No Status Filters", params: {} },
+      { name: "Marked", params: { marked: true } },
+      { name: "All Suspended (not reported)", params: { suspended: true } },
+      { name: "All Reported", params: { reported: true } },
+      { name: "Marked + Reported", params: { marked: true, reported: true } },
+      { name: "Marked + Suspended", params: { marked: true, suspended: true } },
+      { name: "Unmarked + Reported", params: { marked: false, reported: true } },
+      { name: "Unmarked + Suspended", params: { marked: false, suspended: true } },
+    ];
 
     async mounted() {
       await mainStore.getUserProfile();
@@ -290,7 +311,7 @@
 
     @Watch("options", { deep: true })
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    onOptionsChanged(value: DataOptions, oldValue: DataOptions) {
+    onOptionsChanged(value: DataOptions) {
       const limit = value.itemsPerPage;
       const skip = value.page * value.itemsPerPage - value.itemsPerPage;
       const searchData: IComponents["FactSearch"] = { skip: skip, limit: limit };
@@ -309,6 +330,12 @@
       this.debounceDeck();
     }
 
+    @Watch("selectedStatus", { deep: true })
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onSelectedStatusChanged() {
+      this.debounceSearch();
+    }
+
     searchAPI() {
       const searchData: IComponents["FactSearch"] = {
         limit: this.options.itemsPerPage,
@@ -322,6 +349,17 @@
         searchData.deck_ids = this.selectedDecks;
       }
 
+      if (this.selectedStatus.marked) {
+        searchData.marked = this.selectedStatus.marked;
+      }
+
+      if (this.selectedStatus.reported) {
+        searchData.reported = this.selectedStatus.reported;
+      }
+
+      if (this.selectedStatus.suspended) {
+        searchData.suspended = this.selectedStatus.suspended;
+      }
       this.getDataFromApi(searchData);
     }
     editFact(item) {
