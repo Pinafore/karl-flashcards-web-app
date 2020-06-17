@@ -13,7 +13,7 @@ from app.schemas.log import Log
 class HistoryBase(BaseModel):
     time: datetime
     user_id: int
-    fact_id: int
+    fact_id: Optional[int] = None
     log_type: Log
     details: dict
 

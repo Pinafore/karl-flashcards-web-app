@@ -1,6 +1,8 @@
+from datetime import datetime
 from typing import Any, List, Union
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from pytz import timezone
 from sqlalchemy.orm import Session
 
 from app import crud, models, schemas
@@ -79,6 +81,14 @@ def assign_decks(
         else:
             raise HTTPException(status_code=401, detail="User does not have permission to add one of the specified "
                                                         "decks")
+
+    history_in = schemas.HistoryCreate(
+        time=datetime.now(timezone('UTC')).isoformat(),
+        user_id=current_user.id,
+        log_type=schemas.Log.assign_viewer,
+        details={"study_system": "karl", "decks": deck_ids}
+    )
+    crud.history.create(db=db, obj_in=history_in)
     return decks
 
 

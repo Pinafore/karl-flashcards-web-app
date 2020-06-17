@@ -39,7 +39,7 @@
               text
               icon
               v-bind="attrs"
-              @click="suspend()"
+              @click="mark()"
               v-on="on"
             >
               <v-icon>mdi-star</v-icon>
@@ -65,7 +65,7 @@
               text
               icon
               v-bind="attrs"
-              @click="mark()"
+              @click="suspend()"
               v-on="on"
             >
               <v-icon>mdi-pause</v-icon>

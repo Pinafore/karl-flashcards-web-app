@@ -16,7 +16,7 @@ class History(Base):
     id = Column(Integer, primary_key=True, index=True)
     time = Column(TIMESTAMP(timezone=True), nullable=False)
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
-    fact_id = Column(Integer, ForeignKey("fact.fact_id"), nullable=False)
+    fact_id = Column(Integer, ForeignKey("fact.fact_id"))
     log_type = Column(Enum(Log), nullable=False)
     details = Column(JSONB)
     # repetition_model = Column(Enum(Repetition), default=Repetition.leitner, nullable=False)

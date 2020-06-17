@@ -1,4 +1,6 @@
 import time
+from datetime import datetime
+from pytz import timezone
 from typing import Any, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -83,10 +85,18 @@ def read_facts(
         overall_end_time = time.time()
         overall_total_time = overall_end_time - begin_overall_start
         logger.info("permissions: " + str(overall_total_time))
-        return fact_browser
     else:
         fact_browser = schemas.FactBrowse(facts=facts, total=total)
-        return fact_browser
+    details = search.dict()
+    details["study_system"] = "karl"
+    history_in = schemas.HistoryCreate(
+        time=datetime.now(timezone('UTC')).isoformat(),
+        user_id=current_user.id,
+        log_type=schemas.Log.browser,
+        details=details
+    )
+    crud.history.create(db=db, obj_in=history_in)
+    return fact_browser
 
 
 @router.post("/", response_model=schemas.Fact)

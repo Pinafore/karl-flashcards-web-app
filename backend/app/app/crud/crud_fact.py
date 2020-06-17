@@ -70,6 +70,15 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                                    suspend_type=schemas.SuspendType.delete)
         db.add(suspend)
         db.commit()
+
+        history_in = schemas.HistoryCreate(
+            time=datetime.now(timezone('UTC')).isoformat(),
+            user_id=user.id,
+            fact_id=db_obj.fact_id,
+            log_type=schemas.Log.delete,
+            details={"study_system": "karl"}
+        )
+        crud.history.create(db=db, obj_in=history_in)
         return db_obj
 
     def suspend(
@@ -81,6 +90,15 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                                    suspend_type=schemas.SuspendType.suspend)
         db.add(suspend)
         db.commit()
+
+        history_in = schemas.HistoryCreate(
+            time=datetime.now(timezone('UTC')).isoformat(),
+            user_id=user.id,
+            fact_id=db_obj.fact_id,
+            log_type=schemas.Log.suspend,
+            details={"study_system": "karl"}
+        )
+        crud.history.create(db=db, obj_in=history_in)
         return db_obj
 
     def report(
@@ -92,6 +110,15 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                                    suspend_type=schemas.SuspendType.report)
         db.add(suspend)
         db.commit()
+
+        history_in = schemas.HistoryCreate(
+            time=datetime.now(timezone('UTC')).isoformat(),
+            user_id=user.id,
+            fact_id=db_obj.fact_id,
+            log_type=schemas.Log.report,
+            details={"study_system": "karl"}
+        )
+        crud.history.create(db=db, obj_in=history_in)
         return db_obj
 
     def mark(
@@ -101,6 +128,15 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         mark = models.Marked(marker=user, marked_fact=db_obj, date_marked=datetime.now(timezone('UTC')))
         db.add(mark)
         db.commit()
+
+        history_in = schemas.HistoryCreate(
+            time=datetime.now(timezone('UTC')).isoformat(),
+            user_id=user.id,
+            fact_id=db_obj.fact_id,
+            log_type=schemas.Log.mark,
+            details={"study_system": "karl"}
+        )
+        crud.history.create(db=db, obj_in=history_in)
         return db_obj
 
     def undo_remove(
@@ -111,6 +147,15 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                          models.Suspended.suspend_type == schemas.SuspendType.delete,
                          models.Suspended.suspender == user)).delete(synchronize_session=False)
         db.commit()
+
+        history_in = schemas.HistoryCreate(
+            time=datetime.now(timezone('UTC')).isoformat(),
+            user_id=user.id,
+            fact_id=db_obj.fact_id,
+            log_type=schemas.Log.undo_delete,
+            details={"study_system": "karl"}
+        )
+        crud.history.create(db=db, obj_in=history_in)
         return db_obj
 
     def undo_suspend(
@@ -121,6 +166,15 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                          models.Suspended.suspend_type == schemas.SuspendType.suspend,
                          models.Suspended.suspender == user)).delete(synchronize_session=False)
         db.commit()
+
+        history_in = schemas.HistoryCreate(
+            time=datetime.now(timezone('UTC')).isoformat(),
+            user_id=user.id,
+            fact_id=db_obj.fact_id,
+            log_type=schemas.Log.undo_suspend,
+            details={"study_system": "karl"}
+        )
+        crud.history.create(db=db, obj_in=history_in)
         return db_obj
 
     def undo_report(
@@ -131,16 +185,34 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                          models.Suspended.suspend_type == schemas.SuspendType.report,
                          models.Suspended.suspender == user)).delete(synchronize_session=False)
         db.commit()
+
+        history_in = schemas.HistoryCreate(
+            time=datetime.now(timezone('UTC')).isoformat(),
+            user_id=user.id,
+            fact_id=db_obj.fact_id,
+            log_type=schemas.Log.undo_report,
+            details={"study_system": "karl"}
+        )
+        crud.history.create(db=db, obj_in=history_in)
         return db_obj
 
     def resolve_report(
-            self, db: Session, *, db_obj: models.Fact
+            self, db: Session, *, user: models.User, db_obj: models.Fact
     ) -> models.Fact:
         db.query(models.Suspended) \
             .filter(and_(models.Suspended.suspended_fact == db_obj,
                          models.Suspended.suspend_type == schemas.SuspendType.report)).delete(
             synchronize_session=False)
         db.commit()
+
+        history_in = schemas.HistoryCreate(
+            time=datetime.now(timezone('UTC')).isoformat(),
+            user_id=user.id,
+            fact_id=db_obj.fact_id,
+            log_type=schemas.Log.resolve_report,
+            details={"study_system": "karl"}
+        )
+        crud.history.create(db=db, obj_in=history_in)
         return db_obj
 
     def clear_report_or_suspend(
@@ -151,6 +223,15 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                          models.Suspended.suspend_type != schemas.SuspendType.delete,
                          models.Suspended.suspender == user)).delete(synchronize_session=False)
         db.commit()
+
+        history_in = schemas.HistoryCreate(
+            time=datetime.now(timezone('UTC')).isoformat(),
+            user_id=user.id,
+            fact_id=db_obj.fact_id,
+            log_type=schemas.Log.clear_report_or_suspend,
+            details={"study_system": "karl"}
+        )
+        crud.history.create(db=db, obj_in=history_in)
         return db_obj
 
     def undo_mark(
@@ -160,6 +241,15 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             .filter(and_(models.Marked.marked_fact == db_obj,
                          models.Marked.marker == user)).delete(synchronize_session=False)
         db.commit()
+
+        history_in = schemas.HistoryCreate(
+            time=datetime.now(timezone('UTC')).isoformat(),
+            user_id=user.id,
+            fact_id=db_obj.fact_id,
+            log_type=schemas.Log.undo_mark,
+            details={"study_system": "karl"}
+        )
+        crud.history.create(db=db, obj_in=history_in)
         return db_obj
 
     def build_facts_query(self, db: Session, *, user: models.User, filters: schemas.FactSearch = schemas.FactSearch()):
@@ -265,13 +355,17 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 fact_id=each_card.fact_id,
                 env=settings.ENVIRONMENT
             ).dict())
-        logger.info("eligible fact time: " + str(time.time() - karl_list_start))
+        eligible_fact_time = time.time() - karl_list_start
+        logger.info("eligible fact time: " + str(eligible_fact_time))
+
         karl_query_start = time.time()
         scheduler_response = requests.post(settings.INTERFACE + "api/karl/schedule", json=karl_list)
         response_json = scheduler_response.json()
         card_order = response_json["order"]
         rationale = response_json["rationale"]
-        logger.info("query time: " + str(time.time() - karl_query_start))
+
+        query_time = time.time() - karl_query_start
+        logger.info("query time: " + str(query_time))
 
         facts = []
         if rationale != "<p>no fact received</p>":
@@ -295,11 +389,24 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                     retrieved_fact = self.get(db=db, id=int(each_karl_fact["fact_id"]))
                     fact_schema = schemas.Fact.from_orm(retrieved_fact)
                     fact_schema.rationale = rationale
-                    print(retrieved_fact)
                     # MARK: maybe not the most efficient solution for determining if user has marked a fact
                     if retrieved_fact:
                         fact_schema.marked = True if user in retrieved_fact.markers else False
                     facts.append(fact_schema)
+        details = {
+            "study_system": "karl",
+            "first_fact": facts[0] if len(facts) != 0 else "empty",
+            "eligible_fact_time": query_time,
+            "scheduler_query_time": eligible_fact_time,
+        }
+        history_in = schemas.HistoryCreate(
+            time=datetime.now(timezone('UTC')).isoformat(),
+            user_id=user.id,
+            log_type=schemas.Log.get_facts,
+            details=details
+
+        )
+        crud.history.create(db=db, obj_in=history_in)
         return facts
 
     def update_schedule(
