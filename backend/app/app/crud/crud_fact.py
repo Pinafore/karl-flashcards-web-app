@@ -226,7 +226,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         return facts
 
     def get_eligible_facts(
-            self, query: Query, skip: int, limit: int
+            self, query: Query, skip: int = None, limit: int = None
     ) -> List[models.Fact]:
         begin_overall_start = time.time()
         if skip:
