@@ -256,7 +256,7 @@
         align: "left",
       },
       {
-        text: "marked",
+        text: "Favorite",
         sortable: true,
         value: "marked",
         align: "left",
