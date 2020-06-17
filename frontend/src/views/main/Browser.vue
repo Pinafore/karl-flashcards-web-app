@@ -262,13 +262,13 @@
         align: "left",
       },
       {
-        text: "reported",
+        text: "Reported",
         sortable: true,
         value: "reported",
         align: "left",
       },
       {
-        text: "suspended",
+        text: "Suspended",
         sortable: true,
         value: "suspended",
         align: "left",
@@ -277,13 +277,13 @@
     ];
     status = [
       { name: "No Status Filters", params: {} },
-      { name: "Marked", params: { marked: true } },
+      { name: "Favorite", params: { marked: true } },
       { name: "All Suspended (not reported)", params: { suspended: true } },
       { name: "All Reported", params: { reported: true } },
-      { name: "Marked + Reported", params: { marked: true, reported: true } },
-      { name: "Marked + Suspended", params: { marked: true, suspended: true } },
-      { name: "Unmarked + Reported", params: { marked: false, reported: true } },
-      { name: "Unmarked + Suspended", params: { marked: false, suspended: true } },
+      { name: "Favorite + Reported", params: { marked: true, reported: true } },
+      { name: "Favorite + Suspended", params: { marked: true, suspended: true } },
+      { name: "Not Favorite + Reported", params: { marked: false, reported: true } },
+      { name: "Not Favorite + Suspended", params: { marked: false, suspended: true } },
     ];
 
     async mounted() {
