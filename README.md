@@ -3,46 +3,51 @@
 ## Before release
 
 - [x] Sentry backend environments
-- [ ] System for updating current card metadata/correcting grammar errors
-- [ ] Flashcard browser
-- [ ] Tutorial
+- [x] Flashcard browser
+- [x] Tutorial
+- [x] Update preloaded facts
 - [x] Send deck field information to scheduler
-- [ ] Add max-length to field so that it centers itself
-- [ ] Add favicon
-- [ ] Sticky Decks/Add Deck/Study All (Sticky Header)
-- [ ] Scroll down to back side on show answer
-- [ ] Add option for "marked/favorited" facts (viewable through browser)
-- [ ] Refactor some functions to be SQLAlchemy class methods
-  - https://stackoverflow.com/questions/8933877/sqlalchemy-search-function-on-table-as-classmethod
+- [x] Add max-length to field so that it centers itself
+- [x] Add favicon
+- [x] Sticky Decks/Add Deck/Study All (Sticky Header)
+- [x] Scroll down to back side on show answer
+- [x] Add option for "marked/favorited" facts (viewable through browser)
 - [x] Add stronger test cases in study.py
-- [ ] Change Suspended to User_Fact (but only add special facts)
+- [x] Change Suspended to User_Fact (but only add special facts)
 - [x] Add SuperDeckCreate and move "public" there
+- [ ] Redesign home page
+- [ ] Stats page
+- [ ] Resolve reports
+- [x] Add logging for updates
+- [ ] Upload cards
 
 ### Bug Fixes
 
 - [x] Fix study bugs
-  - [ ] Maybe try using from_statement
-- [ ] Sentry add frontend
-- [ ] Workbox cache issues
+	- [x] Convert to SQLAlchemy
+- [x] Sentry add frontend
+- [x] Workbox cache issues
 - [x] Report/Suspend/Delete are not working correctly
-- [ ] Don't redirect to textbox when non alphanumeric characters are typed (or just exclude cmd/opt/ctrl/shift/fn keys)
-- [ ] Get rid of Jeopardy cards that have <a> links
-- [ ] Fix "Choose Deck" after adding fact. reset fields
+- [x] Don't redirect to textbox when non alphanumeric characters are typed (or just exclude cmd/opt/ctrl/shift/fn keys)
+- [x] Get rid of Jeopardy cards that have  links
+- [x] Fix "Choose Deck" after adding fact. reset fields
 - [x] Fix issues with scheduler/study ids (by passing in an env)
+- [x] Issue when adding facts
+- [x] Check if there are android-chrome and msapplicatin-icon and mstile icons
+- [x] Change name away from "frontend"
+- [x] Fix errors in npm run build
 
 #### Waiting
-
-- [ ] Stats page
-- [ ] Figure out emails
+- [x] Figure out emails
 
 ## Further Features
 
-- [ ] iOS password file
-- [ ] Upload cards
+- [x] iOS password file
 - [ ] Share facts
 - [ ] CI & CD, improved deployment
 - [ ] Add undo
-- [ ] Rewrite get_eligible_facts to be fully sqlaclhemy orm
+- [x] Rewrite get_eligible_facts to be fully sqlaclhemy orm
+- [x] System for updating current card metadata/correcting grammar errors
 
 ## Backend Requirements
 
@@ -97,7 +102,6 @@ If your Docker is not running in `localhost` (the URLs above wouldn't work) chec
 ## Backend local development, additional details
 
 ### General workflow
-
 By default, the dependencies are managed with [Poetry](https://python-poetry.org/), go there and install it.
 
 From `./backend/app/` you can install all the dependencies with:
@@ -121,7 +125,6 @@ Add and modify tasks to the Celery worker in `./backend/app/app/worker.py`.
 If you need to install any additional package to the worker, add it to the file `./backend/app/celeryworker.dockerfile`.
 
 ### Docker Compose Override
-
 During development, you can change Docker Compose settings that will only affect the local development environment, in the file `docker-compose.override.yml`.
 
 The changes to that file only affect the local development environment, not the production environment. So, you can add "temporary" changes that help the development workflow.
@@ -175,7 +178,6 @@ Nevertheless, if it doesn't detect a change but a syntax error, it will just sto
 ...this previous detail is what makes it useful to have the container alive doing nothing and then, in a Bash session, make it run the live reload server.
 
 ### Backend tests
-
 To test the backend run:
 
 ```console
@@ -189,7 +191,6 @@ The tests run with Pytest, modify and add tests to `./backend/app/app/tests/`.
 If you use GitLab CI the tests will run automatically.
 
 #### Local tests
-
 Start the stack with this command:
 
 ```Bash
@@ -203,7 +204,6 @@ docker-compose exec backend /app/tests-start.sh
 ```
 
 #### Test running stack
-
 If your stack is already up and you just want to run the tests, you can use:
 
 ```bash
@@ -219,7 +219,6 @@ docker-compose exec backend bash /app/tests-start.sh -x
 ```
 
 #### Test Coverage
-
 Because the test scripts forward arguments to `pytest`, you can enable test coverage HTML report generation by passing `--cov-report=html`.
 
 To run the local tests with coverage HTML reports:
@@ -235,7 +234,6 @@ docker-compose exec backend bash /app/tests-start.sh --cov-report=html
 ```
 
 ### Live development with Python Jupyter Notebooks
-
 If you know about Python [Jupyter Notebooks](http://jupyter.org/), you can take advantage of them during local development.
 
 The `docker-compose.override.yml` file sends a variable `env` with a value `dev` to the build process of the Docker image (during local development) and the `Dockerfile` has steps to then install and configure Jupyter inside your Docker container.
@@ -271,12 +269,11 @@ you can copy that URL and modify the "host" to be `localhost` or the domain you 
 http://localhost:8888/token=f20939a41524d021fbfc62b31be8ea4dd9232913476f4397
 ```
 
- and then open it in your browser.
+and then open it in your browser.
 
 You will have a full Jupyter Notebook running inside your container that has direct access to your database by the container name (`db`), etc. So, you can just run sections of your backend code directly, for example with [VS Code Python Jupyter Interactive Window](https://code.visualstudio.com/docs/python/jupyter-support-py) or [Hydrogen](https://github.com/nteract/hydrogen).
 
 ### Migrations
-
 As during local development your app directory is mounted as a volume inside the container, you can also run the migrations with `alembic` commands inside the container and the migration code will be in your app directory (instead of being only inside the container). So you can add it to your git repository.
 
 Make sure you create a "revision" of your models and that you "upgrade" your database with that revision every time you change them. As this is what will update the tables in your database. Otherwise, your application will have errors.
@@ -318,7 +315,6 @@ $ alembic upgrade head
 If you don't want to start with the default models and want to remove them / modify them, from the beginning, without having any previous revision, you can remove the revision files (`.py` Python files) under `./backend/app/alembic/versions/`. And then create a first migration as described above.
 
 ### Development with Docker Toolbox
-
 If you are using **Docker Toolbox** in Windows or macOS instead of **Docker for Windows** or **Docker for Mac**, Docker will be running in a VirtualBox Virtual Machine, and it will have a local IP different than `127.0.0.1`, which is the IP address for `localhost` in your machine.
 
 The address of your Docker Toolbox virtual machine would probably be `192.168.99.100` (that is the default).
@@ -334,7 +330,6 @@ After performing those steps you should be able to open: http://local.dockertool
 Check all the corresponding available URLs in the section at the end.
 
 ### Development in `localhost` with a custom domain
-
 You might want to use something different than `localhost` as the domain. For example, if you are having problems with cookies that need a subdomain, and Chrome is not allowing you to use `localhost`.
 
 In that case, you have two options: you could use the instructions to modify your system `hosts` file with the instructions below in **Development with a custom IP** or you can just use `localhost.tiangolo.com`, it is set up to point to `localhost` (to the IP `127.0.0.1`) and all its subdomains too. And as it is an actual domain, the browsers will store the cookies you set during development, etc.
@@ -348,7 +343,6 @@ After performing those steps you should be able to open: http://localhost.tiango
 Check all the corresponding available URLs in the section at the end.
 
 ### Development with a custom IP
-
 If you are running Docker in an IP address different than `127.0.0.1` (`localhost`) and `192.168.99.100` (the default of Docker Toolbox), you will need to perform some additional steps. That will be the case if you are running a custom Virtual Machine, a secondary Docker Toolbox or your Docker is located in a different machine in your network.
 
 In that case, you will need to use a fake local domain (`dev.karl.qanta.org`) and make your computer think that the domain is is served by the custom IP (e.g. `192.168.99.150`).
@@ -356,8 +350,8 @@ In that case, you will need to use a fake local domain (`dev.karl.qanta.org`) an
 If you used the default CORS enabled domains, `dev.karl.qanta.org` was configured to be allowed. If you want a custom one, you need to add it to the list in the variable `BACKEND_CORS_ORIGINS` in the `.env` file.
 
 * Open your `hosts` file with administrative privileges using a text editor:
-  * **Note for Windows**: If you are in Windows, open the main Windows menu, search for "notepad", right click on it, and select the option "open as Administrator" or similar. Then click the "File" menu, "Open file", go to the directory `c:\Windows\System32\Drivers\etc\`, select the option to show "All files" instead of only "Text (.txt) files", and open the `hosts` file.
-  * **Note for Mac and Linux**: Your `hosts` file is probably located at `/etc/hosts`, you can edit it in a terminal running `sudo nano /etc/hosts`.
+	* **Note for Windows**: If you are in Windows, open the main Windows menu, search for "notepad", right click on it, and select the option "open as Administrator" or similar. Then click the "File" menu, "Open file", go to the directory `c:\Windows\System32\Drivers\etc\`, select the option to show "All files" instead of only "Text (.txt) files", and open the `hosts` file.
+	* **Note for Mac and Linux**: Your `hosts` file is probably located at `/etc/hosts`, you can edit it in a terminal running `sudo nano /etc/hosts`.
 
 * Additional to the contents it might have, add a new line with the custom IP (e.g. `192.168.99.150`) a space character, and your fake local domain: `dev.karl.qanta.org`.
 
@@ -368,7 +362,7 @@ The new line might look like:
 ```
 
 * Save the file.
-  * **Note for Windows**: Make sure you save the file as "All files", without an extension of `.txt`. By default, Windows tries to add the extension. Make sure the file is saved as is, without extension.
+	* **Note for Windows**: Make sure you save the file as "All files", without an extension of `.txt`. By default, Windows tries to add the extension. Make sure the file is saved as is, without extension.
 
 ...that will make your computer think that the fake local domain is served by that custom IP, and when you open that URL in your browser, it will talk directly to your locally running server when it is asked to go to `dev.karl.qanta.org` and think that it is a remote server while it is actually running in your computer.
 
@@ -379,7 +373,6 @@ After performing those steps you should be able to open: http://dev.karl.qanta.o
 Check all the corresponding available URLs in the section at the end.
 
 ### Change the development "domain"
-
 If you need to use your local stack with a different domain than `localhost`, you need to make sure the domain you use points to the IP where your stack is set up. See the different ways to achieve that in the sections above (i.e. using Docker Toolbox with `local.dockertoolbox.tiangolo.com`, using `localhost.tiangolo.com` or using `dev.karl.qanta.org`).
 
 To simplify your Docker Compose setup, for example, so that the API docs (Swagger UI) knows where is your API, you should let it know you are using that domain for development. You will need to edit 1 line in 2 files.
@@ -455,7 +448,6 @@ VUE_APP_ENV=staging
 ```
 
 ### Removing the frontend
-
 If you are developing an API-only app and want to remove the frontend, you can do it easily:
 
 * Remove the `./frontend` directory.
@@ -464,7 +456,7 @@ If you are developing an API-only app and want to remove the frontend, you can d
 
 Done, you have a frontend-less (api-only) app. 🔥 🚀
 
----
+- - - -
 
 If you want, you can also remove the `FRONTEND` environment variables from:
 
@@ -475,16 +467,14 @@ If you want, you can also remove the `FRONTEND` environment variables from:
 But it would be only to clean them up, leaving them won't really have any effect either way.
 
 ## Deployment
-
-You can deploy the stack to a Docker Swarm mode cluster with a main Traefik proxy, set up using the ideas from <a href="https://dockerswarm.rocks" target="_blank">DockerSwarm.rocks</a>, to get automatic HTTPS certificates, etc.
+You can deploy the stack to a Docker Swarm mode cluster with a main Traefik proxy, set up using the ideas from DockerSwarm.rocks, to get automatic HTTPS certificates, etc.
 
 And you can use CI (continuous integration) systems to do it automatically.
 
 But you have to configure a couple things first.
 
 ### Traefik network
-
-This stack expects the public Traefik network to be named `traefik-public`, just as in the tutorials in <a href="https://dockerswarm.rocks" class="external-link" target="_blank">DockerSwarm.rocks</a>.
+This stack expects the public Traefik network to be named `traefik-public`, just as in the tutorials in DockerSwarm.rocks.
 
 If you need to use a different Traefik public network name, update it in the `docker-compose.yml` files, in the section:
 
@@ -501,7 +491,6 @@ TRAEFIK_PUBLIC_NETWORK=traefik-public
 ```
 
 ### Persisting Docker named volumes
-
 You need to make sure that each service (Docker container) that uses a volume is always deployed to the same Docker "node" in the cluster, that way it will preserve the data. Otherwise, it could be deployed to a different node each time, and each time the volume would be created in that new node before starting the service. As a result, it would look like your service was starting from scratch every time, losing all the previous data.
 
 That's specially important for a service running a database. But the same problem would apply if you were saving files in your main backend service (for example, if those files were uploaded by your users, or if they were created by your system).
@@ -509,7 +498,6 @@ That's specially important for a service running a database. But the same proble
 To solve that, you can put constraints in the services that use one or more data volumes (like databases) to make them be deployed to a Docker node with a specific label. And of course, you need to have that label assigned to one (only one) of your nodes.
 
 #### Adding services with volumes
-
 For each service that uses a volume (databases, services with uploaded files, etc) you should have a label constraint in your `docker-compose.yml` file.
 
 To make sure that your labels are unique per volume per stack (for example, that they are not the same for `prod` and `stag`) you should prefix them with the name of your stack and then use the same name of the volume.
@@ -555,7 +543,6 @@ If you add more volumes to your stack, you need to make sure you add the corresp
 Then you have to create those labels in some nodes in your Docker Swarm mode cluster. You can use `docker-auto-labels` to do it automatically.
 
 #### `docker-auto-labels`
-
 You can use [`docker-auto-labels`](https://github.com/tiangolo/docker-auto-labels) to automatically read the placement constraint labels in your Docker stack (Docker Compose file) and assign them to a random Docker node in your Swarm mode cluster if those labels don't exist yet.
 
 To do that, you can install `docker-auto-labels`:
@@ -573,7 +560,6 @@ docker-auto-labels docker-stack.yml
 You can run that command every time you deploy, right before deploying, as it doesn't modify anything if the required labels already exist.
 
 #### (Optionally) adding labels manually
-
 If you don't want to use `docker-auto-labels` or for any reason you want to manually assign the constraint labels to specific nodes in your Docker Swarm mode cluster, you can do the following:
 
 * First, connect via SSH to your Docker Swarm mode cluster.
@@ -607,22 +593,21 @@ docker node update --label-add stag-karl.app-db-data=true cat.example.com
 ```
 
 ### Deploy to a Docker Swarm mode cluster
-
 There are 3 steps:
 
 1. **Build** your app images
 2. Optionally, **push** your custom images to a Docker Registry
 3. **Deploy** your stack
 
----
+- - - -
 
 Here are the steps in detail:
 
 1. **Build your app images**
 
 * Set these environment variables, right before the next command:
-  * `TAG=prod`
-  * `FRONTEND_ENV=production`
+	* `TAG=prod`
+	* `FRONTEND_ENV=production`
 * Use the provided `scripts/build.sh` file with those environment variables:
 
 ```bash
@@ -636,8 +621,8 @@ TAG=prod FRONTEND_ENV=production bash ./scripts/build.sh
 If you are using a registry and pushing your images, you can omit running the previous script and instead using this one, in a single shot.
 
 * Set these environment variables:
-  * `TAG=prod`
-  * `FRONTEND_ENV=production`
+	* `TAG=prod`
+	* `FRONTEND_ENV=production`
 * Use the provided `scripts/build-push.sh` file with those environment variables:
 
 ```bash
@@ -647,10 +632,10 @@ TAG=prod FRONTEND_ENV=production bash ./scripts/build-push.sh
 3. **Deploy your stack**
 
 * Set these environment variables:
-  * `DOMAIN=karl.qanta.org`
-  * `TRAEFIK_TAG=karl`
-  * `STACK_NAME=karl`
-  * `TAG=prod`
+	* `DOMAIN=karl.qanta.org`
+	* `TRAEFIK_TAG=karl`
+	* `STACK_NAME=karl`
+	* `TAG=prod`
 * Use the provided `scripts/deploy.sh` file with those environment variables:
 
 ```bash
@@ -661,12 +646,11 @@ TAG=prod \
 bash ./scripts/deploy.sh
 ```
 
----
+- - - -
 
 If you change your mind and, for example, want to deploy everything to a different domain, you only have to change the `DOMAIN` environment variable in the previous commands. If you wanted to add a different version / environment of your stack, like "`preproduction`", you would only have to set `TAG=preproduction` in your command and update these other environment variables accordingly. And it would all work, that way you could have different environments and deployments of the same app in the same cluster.
 
 #### Deployment Technical Details
-
 Building and pushing is done with the `docker-compose.yml` file, using the `docker-compose` command. The file `docker-compose.yml` uses the file `.env` with default environment variables. And the scripts set some additional environment variables as well.
 
 The deployment requires using `docker stack` instead of `docker-swarm`, and it can't read environment variables or `.env` files. Because of that, the `deploy.sh` script generates a file `docker-stack.yml` with the configurations from `docker-compose.yml` and injecting the environment variables in it. And then uses it to deploy the stack.
@@ -701,7 +685,6 @@ docker stack deploy -c docker-stack.yml --with-registry-auth "${STACK_NAME}"
 ```
 
 ### Continuous Integration / Continuous Delivery
-
 If you use GitLab CI, the included `.gitlab-ci.yml` can automatically deploy it. You may need to update it according to your GitLab configurations.
 
 If you use any other CI / CD provider, you can base your deployment from that `.gitlab-ci.yml` file, as all the actual script steps are performed in `bash` scripts that you can easily re-use.
@@ -714,7 +697,6 @@ GitLab CI is configured assuming 2 environments following GitLab flow:
 If you need to add more environments, for example, you could imagine using a client-approved `preprod` branch, you can just copy the configurations in `.gitlab-ci.yml` for `stag` and rename the corresponding variables. The Docker Compose file and environment variables are configured to support as many environments as you need, so that you only need to modify `.gitlab-ci.yml` (or whichever CI system configuration you are using).
 
 ## Docker Compose files and env vars
-
 There is a main `docker-compose.yml` file with all the configurations that apply to the whole stack, it is used automatically by `docker-compose`.
 
 And there's also a `docker-compose.override.yml` with overrides for development, for example to mount the source code as a volume. It is used automatically by `docker-compose` to apply overrides on top of `docker-compose.yml`.
@@ -730,7 +712,6 @@ They are designed to have the minimum repetition of code and configurations, so 
 Also, if you want to have another deployment environment, say `preprod`, you just have to change environment variables, but you can keep using the same Docker Compose files.
 
 ### The .env file
-
 The `.env` file is the one that contains all your configurations, generated keys and passwords, etc.
 
 Depending on your workflow, you could want to exclude it from Git, for example if your project is public. In that case, you would have to make sure to set up a way for your CI tools to obtain it while building or deploying your project.
@@ -738,11 +719,9 @@ Depending on your workflow, you could want to exclude it from Git, for example i
 One way to do it could be to add each environment variable to your CI/CD system, and updating the `docker-compose.yml` file to read that specific env var instead of reading the `.env` file.
 
 ## URLs
-
 These are the URLs that will be used and generated by the project.
 
 ### Production URLs
-
 Production URLs, from the branch `production`.
 
 Frontend: https://karl.qanta.org
@@ -758,7 +737,6 @@ PGAdmin: https://pgadmin.karl.qanta.org
 Flower: https://flower.karl.qanta.org
 
 ### Staging URLs
-
 Staging URLs, from the branch `master`.
 
 Frontend: https://stag.karl.qanta.org
@@ -774,7 +752,6 @@ PGAdmin: https://pgadmin.stag.karl.qanta.org
 Flower: https://flower.stag.karl.qanta.org
 
 ### Development URLs
-
 Development URLs, for local development.
 
 Frontend: http://localhost
@@ -792,7 +769,6 @@ Flower: http://localhost:5555
 Traefik UI: http://localhost:8090
 
 ### Development with Docker Toolbox URLs
-
 Development URLs, for local development.
 
 Frontend: http://local.dockertoolbox.tiangolo.com
@@ -810,7 +786,6 @@ Flower: http://local.dockertoolbox.tiangolo.com:5555
 Traefik UI: http://local.dockertoolbox.tiangolo.com:8090
 
 ### Development with a custom IP URLs
-
 Development URLs, for local development.
 
 Frontend: http://dev.karl.qanta.org
@@ -828,7 +803,6 @@ Flower: http://dev.karl.qanta.org:5555
 Traefik UI: http://dev.karl.qanta.org:8090
 
 ### Development in localhost with a custom domain URLs
-
 Development URLs, for local development.
 
 Frontend: http://localhost.tiangolo.com
@@ -846,7 +820,6 @@ Flower: http://localhost.tiangolo.com:5555
 Traefik UI: http://localhost.tiangolo.com:8090
 
 ## Project generation and updating, or re-generating
-
 This project was generated using https://github.com/tiangolo/full-stack-fastapi-postgresql with:
 
 ```bash
