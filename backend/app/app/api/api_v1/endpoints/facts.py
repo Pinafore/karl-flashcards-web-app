@@ -134,7 +134,22 @@ def update_fact(
     """
     Update a fact.
     """
+    details = {
+        "study_system": "karl",
+        "old_fact": perms.fact.__dict__,
+        "fact_update": fact_in.dict(),
+    }
+
     fact = crud.fact.update(db=perms.db, db_obj=perms.fact, obj_in=fact_in)
+
+    history_in = schemas.HistoryCreate(
+        time=datetime.now(timezone('UTC')).isoformat(),
+        user_id=perms.current_user.id,
+        log_type=schemas.Log.update_fact,
+        details=details
+
+    )
+    crud.history.create(db=perms.db, obj_in=history_in)
     return fact
 
 
