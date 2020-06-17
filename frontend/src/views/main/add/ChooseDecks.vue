@@ -5,7 +5,9 @@
         Public Decks
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn :disabled="selected !== []" @click="decksSelected()">Add Deck(s)</v-btn>
+      <v-btn :disabled="selected.length === 0" @click="decksSelected()"
+        >Add Deck(s)</v-btn
+      >
     </v-toolbar>
     <v-dialog v-model="onboard" scrollable width="500">
       <v-card>
