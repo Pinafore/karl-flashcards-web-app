@@ -5,7 +5,7 @@
         Public Decks
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn @click="decksSelected()">Add Selected Deck</v-btn>
+      <v-btn @click="decksSelected()">Add Selected Deck(s)</v-btn>
     </v-toolbar>
     <v-data-table
       v-model="selected"
