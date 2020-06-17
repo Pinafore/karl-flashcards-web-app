@@ -206,7 +206,10 @@ export default class MainModule extends VuexModule {
     if (router.currentRoute.path === "/login" || router.currentRoute.path === "/") {
       router.push("/main");
     } else if (router.currentRoute.path === "/sign-up") {
-      router.push("main/add/public-decks");
+      router.push({
+        path: "main/add/public-decks",
+        query: { onboard: "true" },
+      });
     }
   }
 

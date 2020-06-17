@@ -5,8 +5,25 @@
         Public Decks
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn @click="decksSelected()">Add Selected Deck(s)</v-btn>
+      <v-btn :disabled="selected !== []" @click="decksSelected()">Add Deck(s)</v-btn>
     </v-toolbar>
+    <v-dialog v-model="onboard" scrollable width="500">
+      <v-card>
+        <v-card-title>
+          <h2>Welcome!</h2>
+        </v-card-title>
+        <v-card-text>
+          KAR³L has decks of pre-made facts. Choose the decks you're interested in and
+          click "Add Decks" to continue
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" text @click="onboard = false">
+            Got it!
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-data-table
       v-model="selected"
       :headers="headers"
@@ -37,8 +54,10 @@
       },
     ];
     selected: IComponents["Deck"][] = [];
+    onboard = false;
 
     async mounted() {
+      this.onboard = this.$router.currentRoute.query.onboard === "true";
       await mainStore.getPublicDecks();
     }
 
