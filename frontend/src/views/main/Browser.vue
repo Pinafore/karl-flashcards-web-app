@@ -16,113 +16,118 @@
       }"
     >
       <template v-slot:top>
-        <v-toolbar flat>
-          <v-toolbar-title>Facts</v-toolbar-title>
-          <v-divider class="mx-4" inset vertical></v-divider>
-          <v-spacer></v-spacer>
-          <v-text-field
-            v-model="search"
-            append-icon="mdi-magnify"
-            label="Search"
-            single-line
-            hide-details
-          ></v-text-field>
-          <v-spacer></v-spacer>
-          <v-select
-            v-model="selectedDecks"
-            :items="decks"
-            item-text="title"
-            item-value="id"
-            chips
-            single-line
-            label="Decks"
-            multiple
-            deletable-chips
-            hide-details
-          ></v-select>
-          <v-spacer></v-spacer>
-          <v-select
-            v-model="selectedStatus"
-            :items="status"
-            item-text="name"
-            item-value="params"
-            single-line
-            label="Status Filters"
-            hide-details
-          ></v-select>
-          <v-spacer></v-spacer>
-          <v-dialog v-model="dialog" max-width="500px">
-            <v-card>
-              <v-card-title>
-                <span class="headline">{{ formTitle }}</span>
-              </v-card-title>
+        <v-container class="ma-0 py-0" fluid>
+          <v-row>
+            <v-col cols="12" sm="4">
+              <v-text-field
+                v-model="search"
+                append-icon="mdi-magnify"
+                label="Search"
+                single-line
+                dense
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" sm="4">
+              <v-select
+                v-model="selectedDecks"
+                :items="decks"
+                item-text="title"
+                item-value="id"
+                small-chips
+                single-line
+                label="Decks"
+                multiple
+                deletable-chips
+                hide-details
+                dense
+              ></v-select>
+            </v-col>
+            <v-col cols="12" sm="4">
+              <v-select
+                v-model="selectedStatus"
+                :items="status"
+                item-text="name"
+                item-value="params"
+                single-line
+                label="Status Filters"
+                hide-details
+                dense
+              ></v-select>
+            </v-col>
+          </v-row>
+        </v-container>
+        <v-dialog v-model="dialog" max-width="500px">
+          <v-card>
+            <v-card-title>
+              <span class="headline">{{ formTitle }}</span>
+            </v-card-title>
 
-              <v-card-text>
-                <!-- front -->
-                <validation-provider
-                  v-slot="{ errors }"
-                  name="Front"
-                  :rules="{
-                    required: true,
-                  }"
-                >
-                  <v-text-field
-                    v-model="editedFact.text"
-                    label="Front"
-                    :error-messages="errors[0]"
-                    required
-                  ></v-text-field>
-                </validation-provider>
+            <v-card-text>
+              <!-- front -->
+              <validation-provider
+                v-slot="{ errors }"
+                name="Front"
+                :rules="{
+                  required: true,
+                }"
+              >
+                <v-text-field
+                  v-model="editedFact.text"
+                  label="Front"
+                  :error-messages="errors[0]"
+                  required
+                ></v-text-field>
+              </validation-provider>
 
-                <!-- back -->
-                <validation-provider v-slot="{ errors }" rules="required" name="Back">
-                  <v-text-field
-                    v-model="editedFact.answer"
-                    label="Back"
-                    type="back"
-                    :error-messages="errors[0]"
-                    required
-                  ></v-text-field>
-                </validation-provider>
+              <!-- back -->
+              <validation-provider v-slot="{ errors }" rules="required" name="Back">
+                <v-text-field
+                  v-model="editedFact.answer"
+                  label="Back"
+                  type="back"
+                  :error-messages="errors[0]"
+                  required
+                ></v-text-field>
+              </validation-provider>
 
-                <v-select
-                  v-model="editedFact.deck_id"
-                  :items="decks"
-                  item-text="title"
-                  item-value="id"
-                  label="Choose Deck"
-                >
-                </v-select>
+              <v-select
+                v-model="editedFact.deck_id"
+                :items="decks"
+                item-text="title"
+                item-value="id"
+                label="Choose Deck"
+              >
+              </v-select>
 
-                <!-- category -->
-                <validation-provider v-slot="{ errors }" name="Category">
-                  <v-text-field
-                    v-model="editedFact.category"
-                    label="Category"
-                    type="category"
-                    :error-messages="errors[0]"
-                  ></v-text-field>
-                </validation-provider>
+              <!-- category -->
+              <validation-provider v-slot="{ errors }" name="Category">
+                <v-text-field
+                  v-model="editedFact.category"
+                  label="Category"
+                  type="category"
+                  :error-messages="errors[0]"
+                ></v-text-field>
+              </validation-provider>
 
-                <!-- identifier -->
-                <validation-provider v-slot="{ errors }" name="Identifier">
-                  <v-text-field
-                    v-model="editedFact.identifier"
-                    label="Identifier"
-                    type="identifier"
-                    :error-messages="errors[0]"
-                  ></v-text-field>
-                </validation-provider>
-              </v-card-text>
+              <!-- identifier -->
+              <validation-provider v-slot="{ errors }" name="Identifier">
+                <v-text-field
+                  v-model="editedFact.identifier"
+                  label="Identifier"
+                  type="identifier"
+                  :error-messages="errors[0]"
+                ></v-text-field>
+              </validation-provider>
+            </v-card-text>
 
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="blue darken-1" text @click="close">Cancel</v-btn>
-                <v-btn color="blue darken-1" text @click="save">Save</v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
-        </v-toolbar>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="blue darken-1" text @click="close">Cancel</v-btn>
+              <v-btn color="blue darken-1" text @click="save">Save</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </template>
       <template v-slot:item.marked="{ item }">
         <v-simple-checkbox
