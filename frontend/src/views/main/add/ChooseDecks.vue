@@ -15,6 +15,7 @@
       :items-per-page="15"
       show-select
       :style="{ cursor: 'pointer' }"
+      no-data-text="You have added all available public decks!"
     >
     </v-data-table>
   </div>
