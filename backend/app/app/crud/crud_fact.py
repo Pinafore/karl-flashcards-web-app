@@ -248,9 +248,9 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             return_limit: Optional[int] = None,
             send_limit: Optional[int] = 100,
     ) -> List[schemas.Fact]:
-        filters = schemas.FactSearch(deck_ids=deck_ids, limit=send_limit, studyable=True)
+        filters = schemas.FactSearch(deck_ids=deck_ids, limit=send_limit, randomize=True, studyable=True)
         query = crud.fact.build_facts_query(db=db, user=user, filters=filters)
-        eligible_facts = self.get_eligible_facts(query=query)
+        eligible_facts = self.get_eligible_facts(query=query, limit=send_limit)
         if not eligible_facts:
             return []
         karl_list = []
