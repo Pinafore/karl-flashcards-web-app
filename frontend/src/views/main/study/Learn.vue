@@ -4,91 +4,139 @@
       <v-card-title primary-title class="mx-3 my-0 pa-0">
         <div class="headline primary--text">Learn</div>
         <v-spacer></v-spacer>
-        <v-btn
-          v-if="$vuetify.breakpoint.mdAndDown"
-          :disabled="!show.enable_actions"
-          text
-          icon
-          @click="dialog = true"
-        >
-          <v-icon>mdi-information</v-icon>
-        </v-btn>
-        <v-btn
-          v-else
-          :disabled="!show.enable_actions"
-          class="ma-1 pa-2"
-          @click="dialog = true"
-        >
-          <v-icon>mdi-information</v-icon>Debug (Alt-/)
-        </v-btn>
-        <v-btn
-          v-if="$vuetify.breakpoint.mdAndDown"
-          :disabled="!show.enable_actions"
-          text
-          icon
-          @click="suspend()"
-        >
-          <v-icon>mdi-star</v-icon>
-        </v-btn>
-        <v-btn
-          v-else
-          :disabled="!show.enable_actions"
-          class="ma-1 pa-2"
-          @click="mark()"
-        >
-          <v-icon left>mdi-star</v-icon>Favorite (Alt-M)
-        </v-btn>
-        <v-btn
-          v-if="$vuetify.breakpoint.mdAndDown"
-          :disabled="!show.enable_actions"
-          text
-          icon
-          @click="mark()"
-        >
-          <v-icon>mdi-pause</v-icon>
-        </v-btn>
-        <v-btn
-          v-else
-          :disabled="!show.enable_actions"
-          class="ma-1 pa-2"
-          @click="suspend()"
-        >
-          <v-icon left>mdi-pause</v-icon>Suspend (Alt-S)
-        </v-btn>
-        <v-btn
-          v-if="$vuetify.breakpoint.mdAndDown"
-          :disabled="!show.enable_report"
-          text
-          icon
-          @click="report()"
-        >
-          <v-icon>mdi-alert-octagon</v-icon>
-        </v-btn>
-        <v-btn
-          v-else
-          class="ma-1 pa-2"
-          :disabled="!show.enable_report"
-          @click="report()"
-        >
-          <v-icon left>mdi-alert-octagon</v-icon>Report (Alt-R)
-        </v-btn>
-        <v-btn
-          v-if="$vuetify.breakpoint.mdAndDown"
-          :disabled="!show.enable_actions"
-          text
-          icon
-          @click="remove()"
-        >
-          <v-icon>mdi-delete</v-icon>
-        </v-btn>
-        <v-btn
-          v-else
-          class="ma-1 pa-2"
-          :disabled="!show.enable_actions"
-          @click="remove()"
-        >
-          <v-icon left>mdi-delete</v-icon>Delete (Alt-R)
-        </v-btn>
+
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              v-if="$vuetify.breakpoint.mdAndDown"
+              :disabled="!show.enable_actions"
+              text
+              icon
+              v-bind="attrs"
+              @click="dialog = true"
+              v-on="on"
+            >
+              <v-icon>mdi-information</v-icon>
+            </v-btn>
+            <v-btn
+              v-else
+              :disabled="!show.enable_actions"
+              class="ma-1 pa-2"
+              v-bind="attrs"
+              @click="dialog = true"
+              v-on="on"
+            >
+              <v-icon>mdi-information</v-icon>Debug (Alt-/)
+            </v-btn>
+          </template>
+          <span>Debug (Alt-/)</span>
+        </v-tooltip>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              v-if="$vuetify.breakpoint.mdAndDown"
+              :disabled="!show.enable_actions"
+              text
+              icon
+              v-bind="attrs"
+              @click="suspend()"
+              v-on="on"
+            >
+              <v-icon>mdi-star</v-icon>
+            </v-btn>
+            <v-btn
+              v-else
+              :disabled="!show.enable_actions"
+              class="ma-1 pa-2"
+              v-bind="attrs"
+              @click="mark()"
+              v-on="on"
+            >
+              <v-icon left>mdi-star</v-icon>Favorite (Alt-M)
+            </v-btn>
+          </template>
+          <span>Favorite (Alt-M)</span>
+        </v-tooltip>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              v-if="$vuetify.breakpoint.mdAndDown"
+              :disabled="!show.enable_actions"
+              text
+              icon
+              v-bind="attrs"
+              @click="mark()"
+              v-on="on"
+            >
+              <v-icon>mdi-pause</v-icon>
+            </v-btn>
+            <v-btn
+              v-else
+              :disabled="!show.enable_actions"
+              class="ma-1 pa-2"
+              v-bind="attrs"
+              @click="suspend()"
+              v-on="on"
+            >
+              <v-icon left>mdi-pause</v-icon>Suspend (Alt-S)
+            </v-btn>
+          </template>
+          <span>Suspend (Alt-S)</span>
+        </v-tooltip>
+
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              v-if="$vuetify.breakpoint.mdAndDown"
+              :disabled="!show.enable_report"
+              text
+              icon
+              v-bind="attrs"
+              @click="report()"
+              v-on="on"
+            >
+              <v-icon>mdi-alert-octagon</v-icon>
+            </v-btn>
+            <v-btn
+              v-else
+              class="ma-1 pa-2"
+              :disabled="!show.enable_report"
+              v-bind="attrs"
+              @click="report()"
+              v-on="on"
+            >
+              <v-icon left>mdi-alert-octagon</v-icon>Report (Alt-R)
+            </v-btn>
+          </template>
+          <span>Report (Alt-R)</span>
+        </v-tooltip>
+
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              v-if="$vuetify.breakpoint.mdAndDown"
+              :disabled="!show.enable_actions"
+              text
+              icon
+              v-bind="attrs"
+              @click="remove()"
+              v-on="on"
+            >
+              <v-icon>mdi-delete</v-icon>
+            </v-btn>
+            <v-btn
+              v-else
+              class="ma-1 pa-2"
+              :disabled="!show.enable_actions"
+              v-bind="attrs"
+              @click="remove()"
+              v-on="on"
+            >
+              <v-icon left>mdi-delete</v-icon>Delete (Alt-D)
+            </v-btn>
+          </template>
+          <span>Delete (Alt-D)</span>
+        </v-tooltip>
       </v-card-title>
     </v-card>
     <v-card class="my-2 mx-3 px-3 py-3">
@@ -259,6 +307,8 @@
       const KeyBoardInt = e.keyCode;
       if (e.altKey && KeyBoardCode == "KeyS") {
         this.suspend();
+      } else if (e.altKey && KeyBoardCode == "KeyD") {
+        this.remove();
       } else if (e.altKey && KeyBoardCode == "Slash") {
         this.dialog = !this.dialog;
       } else if (e.altKey && KeyBoardCode == "KeyR") {
