@@ -172,13 +172,13 @@
           id="answer"
           v-model="typed"
           solo
-          label="Type Answer"
+          label="Type Answer (Press any letter to focus)"
           autofocus
           class="hide-details"
         ></v-text-field>
       </v-card-text>
       <v-card-actions v-show="show.enable_actions">
-        <v-btn @click="showAnswer">Show Answer</v-btn>
+        <v-btn @click="showAnswer">Show Answer (Enter)</v-btn>
       </v-card-actions>
     </v-card>
     <v-card v-show="showBack" class="my-2 mx-3 px-3 py-2">
@@ -208,7 +208,7 @@
           id="retype_answer"
           v-model="retyped"
           solo
-          label="Retype Answer"
+          label="Retype Answer (Press any letter to focus)"
           autofocus
           class="hide-details pt-3"
         ></v-text-field>
