@@ -16,7 +16,7 @@
       }
     } else if (mainStore.isLoggedIn === false) {
       if (to.path === "/" || (to.path as string).startsWith("/main")) {
-        next("/login");
+        next("/landing");
       } else {
         next();
       }
