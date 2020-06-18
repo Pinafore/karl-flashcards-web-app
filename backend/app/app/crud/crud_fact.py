@@ -427,7 +427,6 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             fact_id=db_obj.fact_id,
             log_type=schemas.Log.study,
             details=details
-
         )
         history = crud.history.create(db=db, obj_in=history_in)
         payload_update = [schemas.KarlFact(
@@ -439,6 +438,8 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             deck_name=db_obj.deck.title,
             answer=db_obj.answer,
             env=settings.ENVIRONMENT,
+            elapsed_seconds_text=schedule.elapsed_seconds_text,
+            elapsed_seconds_answer=schedule.elapsed_seconds_answer,
             label=response).dict()]
         request = requests.post(settings.INTERFACE + "api/karl/update", json=payload_update)
         if 200 <= request.status_code < 300:

@@ -24,6 +24,8 @@ class KarlFact(FactBase):
     label: Optional[str] = None
     history_id: Optional[int] = None
     env: str
+    elapsed_seconds_text: Optional[int] = None
+    elapsed_seconds_answer: Optional[int] = None
 
 
 class InternalFactBase(FactBase):
