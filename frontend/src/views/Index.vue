@@ -8,7 +8,7 @@
           <v-row justify="center" class="pt-2">
             <v-col align-self="center" class="text-md-h1 text-h2 font-weight-bold">
               <div class="white--text text-center">
-                KAR³L
+                {{ appName }}
               </div>
             </v-col>
           </v-row>
@@ -156,6 +156,9 @@
             </v-col>
           </v-row>
         </v-container>
+        <v-dialog>
+          <router-view name="dialog"></router-view>
+        </v-dialog>
       </v-theme-provider>
     </v-img>
   </v-content>
@@ -164,11 +167,11 @@
 <script lang="ts">
   import { Component, Vue } from "vue-property-decorator";
   import { appName } from "@/env";
-  import { mainStore } from "@/store";
   import { mdiHeadCog, mdiFormatListNumbered } from "@mdi/js";
 
   @Component
   export default class Login extends Vue {
+    public appName = appName;
     mdiHeadCog = mdiHeadCog;
     mdiFormatListNumbered = mdiFormatListNumbered;
     public signup() {

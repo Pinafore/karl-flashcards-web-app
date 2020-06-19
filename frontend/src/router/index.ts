@@ -18,22 +18,27 @@ export default new VueRouter({
           // route level code-splitting
           // this generates a separate chunk (about.[hash].js) for this route
           // which is lazy-loaded when the route is visited.
-          component: () => import(/* webpackChunkName: "login" */ "@/views/Index.vue"),
+          component: () => import(/* webpackChunkName: "index" */ "@/views/Index.vue"),
         },
         {
           path: "login",
           // route level code-splitting
           // this generates a separate chunk (about.[hash].js) for this route
           // which is lazy-loaded when the route is visited.
-          component: () => import(/* webpackChunkName: "login" */ "@/views/Login.vue"),
+          components: {
+            default: () => import(/* webpackChunkName: "index" */ "@/views/Index.vue"),
+            dialog: () => import(/* webpackChunkName: "login" */ "@/views/Login.vue")
+          },
         },
         {
           path: "sign-up",
           // route level code-splitting
           // this generates a separate chunk (about.[hash].js) for this route
           // which is lazy-loaded when the route is visited.
-          component: () =>
-            import(/* webpackChunkName: "signup" */ "@/views/Signup.vue"),
+          components: {
+            default: () => import(/* webpackChunkName: "index" */ "@/views/Index.vue"),
+            dialog: () => import(/* webpackChunkName: "signup" */ "@/views/Signup.vue"),
+          },
         },
         {
           path: "recover-password",

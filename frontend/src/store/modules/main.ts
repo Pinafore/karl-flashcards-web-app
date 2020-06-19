@@ -19,6 +19,7 @@ export default class MainModule extends VuexModule {
   publicDecks: IComponents["Deck"][] = [];
   facts: IComponents["Fact"][] = [];
   totalFacts = 0
+  isOnLogin: boolean | null = null;
 
   get hasAdminAccess() {
     return (
@@ -38,6 +39,11 @@ export default class MainModule extends VuexModule {
   @Mutation
   setLoggedIn(payload: boolean) {
     this.isLoggedIn = payload;
+  }
+
+  @Mutation
+  setIsOnLogin(payload: boolean) {
+    this.isOnLogin = payload;
   }
 
   @Mutation
