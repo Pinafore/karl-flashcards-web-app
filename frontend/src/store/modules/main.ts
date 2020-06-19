@@ -196,13 +196,14 @@ export default class MainModule extends VuexModule {
   @Action
   async routeLogOut() {
     if (router.currentRoute.path !== "/login") {
-      await router.push("/login");
+      await router.push("/landing");
     }
   }
 
   @Action
   async checkApiError(payload: AxiosError) {
     if (payload.response && payload.response.status === UNAUTHORIZED) {
+      this.addNotification({ content: "An error occurred", color: "error" });
       await this.logOut();
     }
   }
