@@ -3,8 +3,9 @@ from datetime import datetime
 from pytz import timezone
 from typing import Any, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
 from sqlalchemy.orm import Session
+from starlette.background import BackgroundTasks
 
 from app import crud, models, schemas
 from app.api import deps
@@ -112,6 +113,26 @@ def create_fact(
     fact = crud.fact.create_with_owner(db=db, obj_in=fact_in, user=current_user)
     return fact
 
+
+@router.post("/upload", response_model=bool)
+def create_facts(
+    *,
+    db: Session = Depends(deps.get_db),
+    upload_file: UploadFile = File(...),
+    background_tasks: BackgroundTasks,
+    current_user: models.User = Depends(deps.get_current_active_user)
+):
+    """
+    Create new fact.
+    """
+
+    if "application/json" == upload_file.content_type:
+        background_tasks.add_task(crud.fact.load_json_facts, db=db, file=upload_file.file, user=current_user)
+        # celery_app.send_task("app.worker.load_json_facts", args=[upload_file, current_user])
+    else:
+        raise HTTPException(status_code=423, detail="This file type is unsupported")
+
+    return True
 
 @router.put("/preloaded", response_model=bool)
 def update_preloaded_facts(

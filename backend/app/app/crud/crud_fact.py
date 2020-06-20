@@ -1,3 +1,6 @@
+import json
+import csv
+from tempfile import SpooledTemporaryFile
 from typing import List, Union, Dict, Any, Optional
 
 from fastapi.encoders import jsonable_encoder
@@ -446,6 +449,27 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             return True
         else:
             return False
+
+    def load_json_facts(self, db: Session, file: SpooledTemporaryFile, user: models.User) -> str:
+        count = 0
+        json_data = json.load(file)
+        for fact_obj in json_data:
+            self.create_fact(db, fact_obj, user, False)
+            count += 1
+        logger.info(f"{count} facts loaded from txt file")
+
+    def create_fact(self, db: Session, fact_obj: Any, user: models.User, public: bool):
+        deck = crud.deck.find_or_create(db, proposed_deck=fact_obj["deck"], user=user, public=public)
+        fact_in = schemas.FactCreate(
+            text=fact_obj["text"],
+            answer=fact_obj["answer"],
+            deck_id=deck.id,
+            answer_lines=fact_obj["answer_lines"],
+            identifier=fact_obj["identifier"],
+            category=fact_obj["category"],
+            extra=fact_obj["extra"]
+        )
+        crud.fact.create_with_owner(db, obj_in=fact_in, user=user)
 
 
 fact = CRUDFact(models.Fact)

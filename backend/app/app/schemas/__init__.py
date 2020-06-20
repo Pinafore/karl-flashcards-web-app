@@ -10,3 +10,5 @@ from .permission import Permission
 from .log import Log
 from .schedule import Schedule
 from .statistics import Statistics
+from .field import Field
+from .file_props import FileProps
