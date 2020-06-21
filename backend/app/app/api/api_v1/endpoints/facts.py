@@ -62,23 +62,7 @@ def read_facts(
         begin_overall_start = time.time()
         new_facts: List[schemas.Fact] = []
         for fact in facts:
-            new_fact = schemas.Fact.from_orm(fact)
-            new_fact.permission = fact.permissions(current_user)
-            new_fact.marked = True if current_user in fact.markers else False
-            suspended = (db.query(models.Suspended)
-                         .filter(models.Suspended.user_id == current_user.id)
-                         .filter(models.Suspended.fact_id == fact.fact_id)
-                         .filter(models.Suspended.suspend_type == schemas.SuspendType.suspend)
-                         .first())
-            reported = (db.query(models.Suspended)
-                        .filter(models.Suspended.user_id == current_user.id)
-                        .filter(models.Suspended.fact_id == fact.fact_id)
-                        .filter(models.Suspended.suspend_type == schemas.SuspendType.suspend)
-                        .first())
-            new_fact.suspended = True if suspended or reported else False
-            if new_fact.permission is schemas.Permission.viewer:
-                new_fact.reported = True if reported else False
-            new_facts.append(new_fact)
+            new_facts.append(crud.fact.get_schema_with_perm(db=db, db_obj=fact, user=current_user))
         fact_browser = schemas.FactBrowse(facts=new_facts, total=total)
         overall_end_time = time.time()
         overall_total_time = overall_end_time - begin_overall_start

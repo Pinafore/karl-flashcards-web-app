@@ -23,7 +23,26 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
     def get(self, db: Session, id: Any) -> Optional[models.Fact]:
         db_obj = db.query(self.model).filter(models.Fact.fact_id == id).first()
         return db_obj
-
+    
+    def get_schema_with_perm(self, db: Session, db_obj: models.Fact, user: models.User):
+        schema = schemas.Fact.from_orm(db_obj)
+        schema.permission = db_obj.permissions(user)
+        schema.marked = True if user in db_obj.markers else False
+        suspended = (db.query(models.Suspended)
+                     .filter(models.Suspended.user_id == user.id)
+                     .filter(models.Suspended.fact_id == db_obj.fact_id)
+                     .filter(models.Suspended.suspend_type == schemas.SuspendType.suspend)
+                     .first())
+        reported = (db.query(models.Suspended)
+                    .filter(models.Suspended.user_id == user.id)
+                    .filter(models.Suspended.fact_id == db_obj.fact_id)
+                    .filter(models.Suspended.suspend_type == schemas.SuspendType.suspend)
+                    .first())
+        schema.suspended = True if suspended or reported else False
+        if schema.permission is schemas.Permission.viewer:
+            schema.reported = True if reported else False
+        return schema
+    
     def create_with_owner(
             self, db: Session, *, obj_in: schemas.FactCreate, user: models.User
     ) -> models.Fact:
@@ -379,7 +398,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             if return_limit:
                 for _, each_karl_fact in zip(range(return_limit), reordered_karl_list):
                     retrieved_fact = self.get(db=db, id=int(each_karl_fact["fact_id"]))
-                    fact_schema = schemas.Fact.from_orm(retrieved_fact)
+                    fact_schema = self.get_schema_with_perm(db=db, db_obj=retrieved_fact, user=user)
                     fact_schema.rationale = rationale
                     if retrieved_fact:
                         fact_schema.marked = True if user in retrieved_fact.markers else False
@@ -387,7 +406,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             else:
                 for each_karl_fact in reordered_karl_list:
                     retrieved_fact = self.get(db=db, id=int(each_karl_fact["fact_id"]))
-                    fact_schema = schemas.Fact.from_orm(retrieved_fact)
+                    fact_schema = self.get_schema_with_perm(db=db, db_obj=retrieved_fact, user=user)
                     fact_schema.rationale = rationale
                     # MARK: maybe not the most efficient solution for determining if user has marked a fact
                     if retrieved_fact:
@@ -492,6 +511,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             extra=fact_obj["extra"]
         )
         crud.fact.create_with_owner(db, obj_in=fact_in, user=user)
+    
 
 
 fact = CRUDFact(models.Fact)

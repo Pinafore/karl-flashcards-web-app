@@ -1,6 +1,6 @@
 import { api } from "@/api";
 import { Action, Module, Mutation, VuexModule } from "vuex-module-decorators";
-import { IComponents, IStudyShow } from "@/interfaces";
+import { IComponents, IStudyShow, Permission } from "@/interfaces";
 import { mainStore } from "@/utils/store-accessor";
 
 @Module({ name: "study" })
@@ -45,7 +45,7 @@ export default class StudyModule extends VuexModule {
     this.show = {
       text: payload.text,
       fact: payload,
-      enable_report: true,
+      enable_report: payload.permission === Permission.viewer,
       enable_actions: true,
       marked: payload.marked ?? false,
     };
