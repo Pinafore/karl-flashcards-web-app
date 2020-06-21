@@ -3,6 +3,7 @@ import csv
 from tempfile import SpooledTemporaryFile
 from typing import List, Union, Dict, Any, Optional
 
+import pandas
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import and_, or_, not_, func
 from sqlalchemy.orm import Session, aliased, Query
@@ -456,6 +457,31 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         for fact_obj in json_data:
             self.create_fact(db, fact_obj, user, False)
             count += 1
+        logger.info(f"{count} facts loaded from txt file")
+
+    def load_txt_facts(self, db: Session, file: SpooledTemporaryFile, user: models.User, props: schemas.FileProps) -> str:
+        count = 0
+        with file as f:
+            df = pandas.read_csv(f, sep=props.delimeter, names=props.headers)
+            for index, fact_obj in df.iterrows():
+                if schemas.Field.deck in props.headers and not pandas.isna(fact_obj[schemas.Field.deck]):
+                    deck_id = crud.deck.find_or_create(db, proposed_deck=fact_obj["deck"], user=user).id
+                else:
+                    deck_id = props.default_deck.id
+                fact_in = schemas.FactCreate(
+                    text=fact_obj[schemas.Field.text],
+                    answer=fact_obj[schemas.Field.answer],
+                    deck_id=deck_id,
+                    answer_lines=[fact_obj[schemas.Field.answer]],
+                    extra={"type": "uploaded"}
+                )
+                if schemas.Field.identifier in props.headers and fact_obj[schemas.Field.identifier]:
+                    fact_in.identifier = fact_obj[schemas.Field.identifier]
+                if schemas.Field.category in props.headers and fact_obj[schemas.Field.category]:
+                    fact_in.identifier = fact_obj[schemas.Field.category]
+                logger.info(fact_in.dict())
+                crud.fact.create_with_owner(db, obj_in=fact_in, user=user)
+                count += 1
         logger.info(f"{count} facts loaded from txt file")
 
     def create_fact(self, db: Session, fact_obj: Any, user: models.User, public: bool):

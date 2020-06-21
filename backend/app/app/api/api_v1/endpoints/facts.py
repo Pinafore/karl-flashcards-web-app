@@ -3,7 +3,7 @@ from datetime import datetime
 from pytz import timezone
 from typing import Any, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from starlette.background import BackgroundTasks
 
@@ -114,8 +114,35 @@ def create_fact(
     return fact
 
 
-@router.post("/upload", response_model=bool)
-def create_facts(
+@router.post("/upload/txt", response_model=bool)
+def create_facts_txt(
+    *,
+    db: Session = Depends(deps.get_db),
+    upload_file: UploadFile = File(...),
+    deck_id: int = Form(...),
+    headers: List[schemas.Field] = Query([schemas.Field.text, schemas.Field.answer]),
+    delimeter: str = Form("\t"),
+    background_tasks: BackgroundTasks,
+    current_user: models.User = Depends(deps.get_current_active_user)
+):
+    """
+    Upload a txt/tsv/csv file with facts
+    """
+    if "text/plain" == upload_file.content_type or "text/csv" == upload_file.content_type:
+        deck = crud.deck.get(db=db, id=deck_id)
+        if not deck:
+            raise HTTPException(status_code=404, detail="Deck not found")
+        if deck not in current_user.decks:
+            raise HTTPException(status_code=401, detail="User does not possess the specified deck")
+        props = schemas.FileProps(default_deck=deck, delimeter=delimeter, headers=headers)
+        background_tasks.add_task(crud.fact.load_txt_facts, db=db, file=upload_file.file, user=current_user, props=props)
+    else:
+        raise HTTPException(status_code=423, detail="This file type is unsupported")
+
+    return True
+
+@router.post("/upload/json", response_model=bool)
+def create_facts_json(
     *,
     db: Session = Depends(deps.get_db),
     upload_file: UploadFile = File(...),
@@ -123,17 +150,15 @@ def create_facts(
     current_user: models.User = Depends(deps.get_current_active_user)
 ):
     """
-    Create new fact.
+    Upload a json file with facts
     """
 
     if "application/json" == upload_file.content_type:
         background_tasks.add_task(crud.fact.load_json_facts, db=db, file=upload_file.file, user=current_user)
-        # celery_app.send_task("app.worker.load_json_facts", args=[upload_file, current_user])
     else:
         raise HTTPException(status_code=423, detail="This file type is unsupported")
 
     return True
-
 @router.put("/preloaded", response_model=bool)
 def update_preloaded_facts(
         *,
