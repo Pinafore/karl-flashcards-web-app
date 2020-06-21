@@ -169,7 +169,7 @@ export default class StudyModule extends VuexModule {
       try {
         await api.markFact(mainStore.token, this.show.fact.fact_id);
         mainStore.addNotification({
-          content: "Fact successfully marked",
+          content: "Fact marked/unmarked",
           color: "success",
         });
         this.changeMarked();
@@ -185,6 +185,10 @@ export default class StudyModule extends VuexModule {
     if (this.show.fact && this.show.enable_actions) {
       try {
         await api.suspendFact(mainStore.token, this.show.fact.fact_id);
+        mainStore.addNotification({
+          content: "Fact suspended",
+          color: "success",
+        });
         await this.getNextShow();
       } catch (error) {
         await mainStore.checkApiError(error);
@@ -197,6 +201,10 @@ export default class StudyModule extends VuexModule {
     this.resetTimer();
     if (this.show.fact && this.show.enable_report) {
       try {
+        mainStore.addNotification({
+          content: "Fact reported",
+          color: "success",
+        });
         await api.reportFact(mainStore.token, this.show.fact.fact_id);
         await this.getNextShow();
       } catch (error) {
@@ -210,6 +218,10 @@ export default class StudyModule extends VuexModule {
     this.resetTimer();
     if (this.show.fact && this.show.enable_actions) {
       try {
+        mainStore.addNotification({
+          content: "Fact deleted",
+          color: "success",
+        });
         await api.deleteFact(mainStore.token, this.show.fact.fact_id);
         await this.getNextShow();
       } catch (error) {
