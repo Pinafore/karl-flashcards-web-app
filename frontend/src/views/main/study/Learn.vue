@@ -302,26 +302,26 @@
       window.removeEventListener("keydown", this.handleKeyPress);
     }
 
-    public handleKeyPress(e) {
-      const KeyBoardCode = String(e.code);
-      const KeyBoardInt = e.keyCode;
-      if (e.altKey && KeyBoardCode == "KeyS") {
+    public handleKeyPress(e: KeyboardEvent) {
+      const key = e.key.toLowerCase();
+      console.log(key);
+      if (e.altKey && e.key == "s") {
         this.suspend();
-      } else if (e.altKey && KeyBoardCode == "KeyD") {
+      } else if (e.altKey && key == "d") {
         this.remove();
-      } else if (e.altKey && KeyBoardCode == "Slash") {
+      } else if (e.altKey && key == "/") {
         this.dialog = !this.dialog;
-      } else if (e.altKey && KeyBoardCode == "KeyR") {
+      } else if (e.altKey && key == "r") {
         this.report();
-      } else if (e.altKey && KeyBoardCode == "KeyM") {
+      } else if (e.altKey && key == "m") {
         this.mark();
       } else if (this.showBack) {
-        this.determineResponse(KeyBoardCode);
-      } else if (KeyBoardCode == "Enter") {
+        this.determineResponse(e, key);
+      } else if (key == "enter") {
+        console.log("SHOWING ANSWER");
         this.showAnswer();
       } else if (
-        65 <= KeyBoardInt &&
-        KeyBoardInt <= 90 &&
+        /^[a-z0-9]$/i.test(key) &&
         !e.altKey &&
         !e.metaKey &&
         !e.shiftKey &&
@@ -332,21 +332,21 @@
       }
     }
 
-    public determineResponse(KeyBoardCode) {
-      switch (KeyBoardCode) {
-        case "Enter":
-          this.response(this.recommendation);
-          break;
-        case "Digit1":
-          this.response(false);
-          break;
-        case "Digit2":
-          this.response(true);
-          break;
-        default:
-          // TODO: Don't use getElementById
-          document.getElementById("retype_answer")!.focus(); //eslint-disable-line
-          break;
+    public determineResponse(e: KeyboardEvent, key: string) {
+      if (key == "enter") {
+        this.response(this.recommendation);
+      } else if (key == "1") {
+        this.response(false);
+      } else if (key == "2") {
+        this.response(true);
+      } else if (
+        /^[a-z0-9]$/i.test(key) &&
+        !e.altKey &&
+        !e.metaKey &&
+        !e.shiftKey &&
+        !e.ctrlKey
+      ) {
+        document.getElementById("retype_answer")!.focus(); //eslint-disable-line
       }
     }
 
