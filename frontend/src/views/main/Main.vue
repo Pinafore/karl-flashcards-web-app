@@ -8,7 +8,7 @@
       :expand-on-hover="$vuetify.breakpoint.smAndUp"
       clipped
       elevation="20"
-      mobile-break-point="600"
+      mobile-breakpoint="600"
       bottom
       style="z-index: 11;"
     >
@@ -247,6 +247,5 @@
     public async logout() {
       await mainStore.userLogOut();
     }
-    // TODO: Don't show bottom for small screen on reload
   }
 </script>
