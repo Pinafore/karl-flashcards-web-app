@@ -75,6 +75,14 @@
             <v-list-item-title>Add Deck</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+        <v-list-item to="/main/add/upload-facts">
+          <v-list-item-action>
+            <v-icon>{{ mdiUploadMultiple }}</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Upload Facts</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
         <v-list-item to="/main/add/public-decks">
           <v-list-item-action>
             <v-icon>{{ mdiEarthPlus }}</v-icon>
@@ -188,6 +196,7 @@
     mdiTextBoxPlus,
     mdiBookMultiple,
     mdiTextBoxMultiple,
+    mdiUploadMultiple,
   } from "@mdi/js";
 
   const routeGuardMain = async (to, _from, next) => {
@@ -205,6 +214,7 @@
     mdiTextBoxPlus = mdiTextBoxPlus;
     mdiBookMultiple = mdiBookMultiple;
     mdiTextBoxMultiple = mdiTextBoxMultiple;
+    mdiUploadMultiple = mdiUploadMultiple;
 
     public beforeRouteEnter(to, from, next) {
       routeGuardMain(to, from, next);

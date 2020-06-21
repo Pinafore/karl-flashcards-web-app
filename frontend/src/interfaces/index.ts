@@ -12,9 +12,13 @@ export interface IStudyShow {
   marked: boolean;
 }
 
-export interface IBrowser {
-  facts: IComponents["Fact"][];
-  totalFacts: number;
+export enum Field {
+  text = "text",
+  answer = "answer",
+  deck = "deck",
+  identifier = "identifier",
+  category = "category",
+  extra = "extra",
 }
 
 export enum Permission {
@@ -84,6 +88,12 @@ export interface IComponents {
   FactBrowse: {
     facts: IComponents["Fact"][];
     total: number;
+  };
+  FactUpload: {
+    headers: Field[];
+    deck_id: number;
+    delimeter?: string;
+    upload_file: File;
   }
   HTTPValidationError: {
     detail?: IComponents["ValidationError"][];

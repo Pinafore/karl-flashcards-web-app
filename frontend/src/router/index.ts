@@ -110,14 +110,14 @@ export default new VueRouter({
                   path: "fact",
                   component: () =>
                     import(
-                      /* webpackChunkName: "main-dashboard" */ "@/views/main/add/AddFact.vue"
+                      /* webpackChunkName: "main-add-fact" */ "@/views/main/add/AddFact.vue"
                     ),
                 },
                 {
                   path: "deck",
                   component: () =>
                     import(
-                      /* webpackChunkName: "main-dashboard" */ "@/views/main/add/AddDeck.vue"
+                      /* webpackChunkName: "main-add-deck" */ "@/views/main/add/AddDeck.vue"
                     ),
                 },
                 {
@@ -126,6 +126,13 @@ export default new VueRouter({
                     import(
                       /* webpackChunkName: "main-choose-decks" */ "@/views/main/add/ChooseDecks.vue"
                     ),
+                },
+                {
+                  path: "upload-facts",
+                  component: () =>
+                    import(
+                      /* webpackChunkName: "main-upload-facts" */ "@/views/main/add/UploadFacts.vue"
+                      ),
                 },
               ],
             },

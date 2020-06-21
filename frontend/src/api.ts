@@ -159,4 +159,26 @@ export const api = {
   async updateFact(token: string, id: number, data: IComponents["FactUpdate"]) {
     return axios.put(`${apiUrl}/api/facts/${id}`, data, authHeaders(token));
   },
+  async uploadFacts(token: string, data: IComponents["FactUpload"]) {
+    let url = `${apiUrl}/api/facts/upload/txt`;
+    if (data.headers.length > 0) {
+      url += `?`;
+      for (const header of data.headers) {
+        url += `headers=${header}&`;
+      }
+      url = url.slice(0, -1);
+    }
+    const formData = new FormData();
+    formData.append("upload_file", data.upload_file)
+    formData.append("deck_id", data.deck_id.toString())
+    if (data.delimeter !== undefined){
+      formData.append("delimeter", data.delimeter)
+    }
+
+    return axios.post( url, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data'
+    }})
+  },
 };

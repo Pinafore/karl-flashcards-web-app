@@ -348,6 +348,27 @@ export default class MainModule extends VuexModule {
   }
 
   @Action
+  async uploadFacts(payload: IComponents["FactUpload"]) {
+    try {
+      const loadingNotification = { content: "validating file", showProgress: true };
+      this.addNotification(loadingNotification);
+      const _response = (
+        await Promise.all([
+          api.uploadFacts(this.token, payload),
+          await new Promise((resolve, _reject) => setTimeout(() => resolve(), 500)),
+        ])
+      )[0];
+      this.removeNotification(loadingNotification);
+      this.addNotification({
+        content: "File accepted and import begins",
+        color: "success",
+      });
+    } catch (error) {
+      await this.checkApiError(error);
+    }
+  }
+
+  @Action
   async getFacts(payload: IComponents["FactSearch"]) {
     try {
       const response = await api.getFacts(this.token, payload);

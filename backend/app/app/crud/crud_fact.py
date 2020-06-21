@@ -459,7 +459,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                        props: schemas.FileProps) -> str:
         count = 0
         with file as f:
-            df = pandas.read_csv(f, sep=props.delimeter, names=props.headers)
+            df = pandas.read_csv(f, sep=props.delimeter, names=props.headers, index_col=False)
             for index, fact_obj in df.iterrows():
                 if schemas.Field.deck in props.headers and not pandas.isna(fact_obj[schemas.Field.deck]):
                     deck_id = crud.deck.find_or_create(db, proposed_deck=fact_obj["deck"], user=user).id
@@ -472,9 +472,9 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                     answer_lines=[fact_obj[schemas.Field.answer]],
                     extra={"type": "uploaded"}
                 )
-                if schemas.Field.identifier in props.headers and fact_obj[schemas.Field.identifier]:
+                if schemas.Field.identifier in props.headers and not pandas.isna(fact_obj[schemas.Field.identifier]):
                     fact_in.identifier = fact_obj[schemas.Field.identifier]
-                if schemas.Field.category in props.headers and fact_obj[schemas.Field.category]:
+                if schemas.Field.category in props.headers and not pandas.isna(fact_obj[schemas.Field.category]):
                     fact_in.identifier = fact_obj[schemas.Field.category]
                 logger.info(fact_in.dict())
                 crud.fact.create_with_owner(db, obj_in=fact_in, user=user)
