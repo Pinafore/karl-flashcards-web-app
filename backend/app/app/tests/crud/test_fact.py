@@ -1,11 +1,9 @@
-from sqlalchemy.orm import Session
-
 from app import crud
 from app.schemas import DeckCreate
-from app.schemas.fact import FactCreate, FactUpdate, FactSearch
-from app.tests.utils.fact import create_random_fact_with_deck
+from app.schemas.fact import FactCreate, FactSearch
 from app.tests.utils.user import create_random_user
 from app.tests.utils.utils import random_lower_string
+from sqlalchemy.orm import Session
 
 
 def test_search_facts(db: Session) -> None:
@@ -54,36 +52,49 @@ def test_search_facts(db: Session) -> None:
                                                                identifier="This animal",
                                                                extra={"type": "testing"}), user=user))
 
-    all_facts = crud.fact.get_eligible_facts(db=db, user=user, filters=FactSearch(deck_ids=[decks[0].id, decks[1].id]))
+    query = crud.fact.build_facts_query(db=db, user=user, filters=FactSearch(deck_ids=[decks[0].id, decks[1].id]))
+    all_facts = crud.fact.get_eligible_facts(query=query)
     assert len(all_facts) == 5
-    deck1_facts = crud.fact.get_eligible_facts(db=db, user=user, filters=FactSearch(deck_id=decks[0].id))
+    query = crud.fact.build_facts_query(db=db, user=user, filters=FactSearch(deck_id=decks[0].id))
+    deck1_facts = crud.fact.get_eligible_facts(query=query)
     assert len(deck1_facts) == 3
-    deck2_facts = crud.fact.get_eligible_facts(db=db, user=user, filters=FactSearch(deck_id=decks[1].id))
+    query = crud.fact.build_facts_query(db=db, user=user, filters=FactSearch(deck_id=decks[1].id))
+    deck2_facts = crud.fact.get_eligible_facts(query=query)
     assert len(deck2_facts) == 2
-    apple_in_deck1 = crud.fact.get_eligible_facts(db=db, user=user, filters=FactSearch(deck_id=decks[0].id,
-                                                                                    text="apple"))
+    query = crud.fact.build_facts_query(db=db, user=user, filters=FactSearch(deck_id=decks[0].id,
+                                                                                       text="apple"))
+    apple_in_deck1 = crud.fact.get_eligible_facts(query=query)
     assert len(apple_in_deck1) == 1
-    apple_in_deck2 = crud.fact.get_eligible_facts(db=db, user=user, filters=FactSearch(deck_id=decks[1].id,
-                                                                                    text="apple"))
+    query = crud.fact.build_facts_query(db=db, user=user, filters=FactSearch(deck_id=decks[1].id,
+                                                                                       text="apple"))
+    apple_in_deck2 = crud.fact.get_eligible_facts(query=query)
     assert len(apple_in_deck2) == 1
-    apple = crud.fact.get_eligible_facts(db=db, user=user, filters=FactSearch(text="apple"))
+    query = crud.fact.build_facts_query(db=db, user=user, filters=FactSearch(text="apple"))
+    apple = crud.fact.get_eligible_facts(query=query)
     assert len(apple) == 2
-    identifier = crud.fact.get_eligible_facts(db=db, user=user, filters=FactSearch(identifier="This animal"))
+    query = crud.fact.build_facts_query(db=db, user=user, filters=FactSearch(identifier="This animal"))
+    identifier = crud.fact.get_eligible_facts(query=query)
     assert len(identifier) == 3
-    category_apple = crud.fact.get_eligible_facts(db=db, user=user, filters=FactSearch(category="apple"))
+    query = crud.fact.build_facts_query(db=db, user=user, filters=FactSearch(category="apple"))
+    category_apple = crud.fact.get_eligible_facts(query=query)
     assert len(category_apple) == 0
-    category_empty_string = crud.fact.get_eligible_facts(db=db, user=user, filters=FactSearch(category=""))
+    query = crud.fact.build_facts_query(db=db, user=user, filters=FactSearch(category=""))
+    category_empty_string = crud.fact.get_eligible_facts(query=query)
     assert len(category_empty_string) == 5
-    category_null = crud.fact.get_eligible_facts(db=db, user=user, filters=FactSearch())
+    query = crud.fact.build_facts_query(db=db, user=user, filters=FactSearch())
+    category_null = crud.fact.get_eligible_facts(query=query)
     assert len(category_null) == 5
 
     crud.fact.mark(db=db, db_obj=facts[0], user=user)
-    chicken = crud.fact.get_eligible_facts(db=db, user=user, filters=FactSearch(marked=True))
+    query = crud.fact.build_facts_query(db=db, user=user, filters=FactSearch(marked=True))
+    chicken = crud.fact.get_eligible_facts(query=query)
     assert len(chicken) == 1
 
-    chicken = crud.fact.get_eligible_facts(db=db, user=user, filters=FactSearch(marked=False))
+    query = crud.fact.build_facts_query(db=db, user=user, filters=FactSearch(marked=False))
+    chicken = crud.fact.get_eligible_facts(query=query)
     assert len(chicken) == 4
 
     crud.fact.undo_mark(db=db, db_obj=facts[0], user=user)
-    chicken = crud.fact.get_eligible_facts(db=db, user=user, filters=FactSearch(marked=True))
+    query = crud.fact.build_facts_query(db=db, user=user, filters=FactSearch(marked=True))
+    chicken = crud.fact.get_eligible_facts(query=query)
     assert len(chicken) == 0
