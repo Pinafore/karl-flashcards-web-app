@@ -4,14 +4,12 @@ import os
 import re
 
 import sentry_sdk
-from sentry_sdk.integrations.celery import CeleryIntegration
-from sqlalchemy.orm import Session
-
+from app import crud, schemas
 from app.core.celery_app import celery_app
 from app.core.config import settings
-
-from app import crud, schemas
 from app.db.session import SessionLocal
+from sentry_sdk.integrations.celery import CeleryIntegration
+from sqlalchemy.orm import Session
 
 sentry_sdk.init(
     settings.SENTRY_DSN,
@@ -35,17 +33,18 @@ def load_quizbowl_facts() -> str:
         with open(filename, "r") as file:
             json_data = json.load(file)
             for fact in json_data:
-                deck = crud.deck.find_or_create(db, proposed_deck=fact["deck"], user=user, public=True)
-                fact_in = schemas.FactCreate(
-                        text=fact["text"],
-                        answer=fact["answer"],
-                        deck_id=deck.id,
-                        answer_lines=fact["answer_lines"],
-                        identifier=fact["identifier"],
-                        category=fact["category"],
-                        extra=fact["extra"]
-                    )
-                crud.fact.create_with_owner(db, obj_in=fact_in, user=user)
+                crud.fact.create_fact(db, fact, user, True)
+                #     deck = crud.deck.find_or_create(db, proposed_deck=fact["deck"], user=user, public=True)
+                #     fact_in = schemas.FactCreate(
+                #             text=fact["text"],
+                #             answer=fact["answer"],
+                #             deck_id=deck.id,
+                #             answer_lines=fact["answer_lines"],
+                #             identifier=fact["identifier"],
+                #             category=fact["category"],
+                #             extra=fact["extra"]
+                #         )
+                #     crud.fact.create_with_owner(db, obj_in=fact_in, user=user)
                 count = count + 1
         return f"{count} quizbowl questions loaded"
     return f"superuser does not exist yet"
@@ -71,15 +70,15 @@ def load_jeopardy_facts() -> str:
                         "show_number": fact["show_number"]
                     }
                     fact_in = schemas.FactCreate(
-                            text=fact["question"],
-                            answer=fact["answer"],
-                            deck_id=deck.id,
-                            answer_lines=[fact["answer"]],
-                            category=fact["category"],
-                            extra=extra
-                        )
+                        text=fact["question"],
+                        answer=fact["answer"],
+                        deck_id=deck.id,
+                        answer_lines=[fact["answer"]],
+                        category=fact["category"],
+                        extra=extra
+                    )
                     crud.fact.create_with_owner(db, obj_in=fact_in, user=user)
-        return f"{count+1} quizbowl questions loaded"
+        return f"{count + 1} quizbowl questions loaded"
     return f"superuser does not exist yet"
 
 
