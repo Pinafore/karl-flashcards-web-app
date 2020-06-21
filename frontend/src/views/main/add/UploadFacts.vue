@@ -10,11 +10,13 @@
             <p>
               KAR³L can import txt/tsv/csv files exported from other flashcard apps and
               allows you to map columns to different fields.
-              <b>Warning: </b>Import may silently fail and stop if an unexpected error
+              <br />
+              <b>Warning</b>: Import may silently fail and stop if an unexpected error
               is encountered. Contact us if you believe this has occurred.
             </p>
             <p>
-              <b>From Anki</b>: Export -> Export Format: Card in Plain Text (*.txt)
+              <b>From Anki</b>: Export -> Export Format: Card in Plain Text (*.txt). Do
+              not include HTML and media references
               <br />
               <b>From Mnemosyne</b>: Export -> File format: Tab-separated text files
             </p>
@@ -50,7 +52,9 @@
                   multiple
                   chips
                   deletable-chips
-                  label="Column Headers (Order Matters)"
+                  label="Column Headers"
+                  hint="Order of selection matters. To reorder, uncheck and check in the right order."
+                  persistent-hint
                 >
                 </v-select>
               </validation-provider>
@@ -60,12 +64,16 @@
                 item-text="title"
                 item-value="id"
                 label="Choose Default Deck"
+                hint="Assign facts to this deck when no deck is specified in a column"
+                persistent-hint
               >
               </v-select>
               <validation-provider v-slot="{ errors }" name="Delimeter">
                 <v-text-field
                   v-model="delimeter"
-                  label="Field Seperator (Empty defaults to tab)"
+                  label="Field Seperator"
+                  hint="By default, columns are separated by a tab. Specify a custom delimeter here (e.g ,)"
+                  persistent-hint
                   :error-messages="errors[0]"
                 ></v-text-field>
               </validation-provider>
