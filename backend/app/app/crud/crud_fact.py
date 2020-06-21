@@ -476,7 +476,6 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                     fact_in.identifier = fact_obj[schemas.Field.identifier]
                 if schemas.Field.category in props.headers and not pandas.isna(fact_obj[schemas.Field.category]):
                     fact_in.identifier = fact_obj[schemas.Field.category]
-                logger.info(fact_in.dict())
                 crud.fact.create_with_owner(db, obj_in=fact_in, user=user)
                 count += 1
         logger.info(f"{count} facts loaded from txt file")
