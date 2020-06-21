@@ -2,9 +2,8 @@ import random
 import string
 from typing import Dict
 
-from fastapi.testclient import TestClient
-
 from app.core.config import settings
+from fastapi.testclient import TestClient
 
 
 def random_lower_string() -> str:

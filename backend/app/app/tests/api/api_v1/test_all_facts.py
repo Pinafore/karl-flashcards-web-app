@@ -1,22 +1,19 @@
 import json
 from typing import Dict
 
-from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session
-
 from app import crud
 from app.core.config import settings
 from app.models import User
-from app.schemas import SuperUserCreate
 from app.tests.utils.deck import create_random_deck
 from app.tests.utils.fact import create_random_fact, create_random_fact_with_deck
-from app.schemas.fact import FactCreate
 from app.tests.utils.user import create_random_user
-from app.tests.utils.utils import random_lower_string, random_email
+from app.tests.utils.utils import random_lower_string
+from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
 
 
 def test_create_fact(
-    client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+        client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
 ) -> None:
     data_string = """
   {
@@ -55,7 +52,7 @@ def test_create_fact(
 
 
 def test_read_fact(
-    client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+        client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
 ) -> None:
     fact = create_random_fact(db, normal_user_token_headers[1])
     response = client.get(
@@ -76,7 +73,7 @@ def test_read_facts(
 
 
 def test_update_fact(
-    client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+        client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
 ) -> None:
     fact = create_random_fact(db, normal_user_token_headers[1])
     old_text = fact.text
@@ -93,7 +90,7 @@ def test_update_fact(
 
 
 def test_update_unowned_fact_when_deck_viewer(
-    client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+        client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
 ) -> None:
     other_user = create_random_user(db)
     deck = create_random_deck(db, user=other_user)
@@ -110,7 +107,7 @@ def test_update_unowned_fact_when_deck_viewer(
 
 
 def test_update_unowned_fact_when_deck_owner(
-    client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+        client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
 ) -> None:
     other_user = create_random_user(db)
     deck = create_random_deck(db, user=other_user)
@@ -132,7 +129,7 @@ def test_update_unowned_fact_when_deck_owner(
 
 
 def test_delete_fact(
-    client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+        client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
 ) -> None:
     fact = create_random_fact(db, normal_user_token_headers[1])
     user = normal_user_token_headers[1]
@@ -147,7 +144,7 @@ def test_delete_fact(
 
 
 def test_delete_unowned_fact(
-    client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+        client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
 ) -> None:
     other_user = create_random_user(db)
     deck = create_random_deck(db, user=other_user)
@@ -165,7 +162,7 @@ def test_delete_unowned_fact(
 
 
 def test_suspend_fact(
-    client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+        client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
 ) -> None:
     fact = create_random_fact(db, normal_user_token_headers[1])
     user = normal_user_token_headers[1]
@@ -180,7 +177,7 @@ def test_suspend_fact(
 
 
 def test_suspend_unowned_fact(
-    client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+        client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
 ) -> None:
     other_user = create_random_user(db)
     deck = create_random_deck(db, user=other_user)
@@ -198,7 +195,7 @@ def test_suspend_unowned_fact(
 
 
 def test_report_fact(
-    client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+        client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
 ) -> None:
     fact = create_random_fact(db, normal_user_token_headers[1])
     user = normal_user_token_headers[1]
@@ -213,7 +210,7 @@ def test_report_fact(
 
 
 def test_report_unowned_fact(
-    client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+        client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
 ) -> None:
     other_user = create_random_user(db)
     deck = create_random_deck(db, user=other_user)
@@ -229,8 +226,9 @@ def test_report_unowned_fact(
     db.refresh(fact)
     assert user in fact.suspenders
 
+
 def test_mark_fact(
-    client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+        client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
 ) -> None:
     fact = create_random_fact(db, normal_user_token_headers[1])
     user = normal_user_token_headers[1]
@@ -245,7 +243,7 @@ def test_mark_fact(
 
 
 def test_mark_unowned_fact(
-    client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+        client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
 ) -> None:
     other_user = create_random_user(db)
     deck = create_random_deck(db, user=other_user)

@@ -1,11 +1,11 @@
+import logging
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 
+from app.db.base_class import Base
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.db.base_class import Base
-import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         return db_obj
 
     def get_multi(
-        self, db: Session, *, skip: Optional[int] = None, limit: Optional[int] = None
+            self, db: Session, *, skip: Optional[int] = None, limit: Optional[int] = None
     ) -> List[ModelType]:
         query = db.query(self.model)
         if skip:
@@ -49,11 +49,11 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         return db_obj
 
     def update(
-        self,
-        db: Session,
-        *,
-        db_obj: ModelType,
-        obj_in: Union[UpdateSchemaType, Dict[str, Any]]
+            self,
+            db: Session,
+            *,
+            db_obj: ModelType,
+            obj_in: Union[UpdateSchemaType, Dict[str, Any]]
     ) -> ModelType:
         obj_data = jsonable_encoder(db_obj)
         if isinstance(obj_in, dict):

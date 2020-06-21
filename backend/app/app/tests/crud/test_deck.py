@@ -1,9 +1,8 @@
-from sqlalchemy.orm import Session
-
 from app import crud
-from app.schemas.deck import DeckCreate, DeckUpdate
+from app.schemas.deck import DeckCreate
 from app.tests.utils.user import create_random_user
 from app.tests.utils.utils import random_lower_string
+from sqlalchemy.orm import Session
 
 
 def test_get_multi_by_owner(db: Session) -> None:

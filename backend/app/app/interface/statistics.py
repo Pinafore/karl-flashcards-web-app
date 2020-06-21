@@ -1,15 +1,9 @@
 import json
+import logging
 from datetime import datetime
-from typing import List, Optional
 
 import requests
-from fastapi.encoders import jsonable_encoder
-from sqlalchemy.orm import Session
-from sqlalchemy import func, desc
-from app import crud, models, schemas
-
-import logging
-
+from app import models, schemas
 from app.core.config import settings
 
 logging.basicConfig(level=logging.INFO)
@@ -22,4 +16,3 @@ def get_user_stats(user: models.user, *, start_date: datetime = None, end_date: 
     result_dict = json.loads(result)
     statistics = schemas.Statistics(**result_dict, username=user.username)
     return statistics
-

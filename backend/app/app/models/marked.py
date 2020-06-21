@@ -1,10 +1,9 @@
 from datetime import datetime
-from typing import TYPE_CHECKING
-
-from sqlalchemy import Column, Integer, ForeignKey, TIMESTAMP, Enum
-from sqlalchemy.orm import relationship, backref
 
 from app.db.base_class import Base
+from sqlalchemy import Column, Integer, ForeignKey, TIMESTAMP
+from sqlalchemy.orm import relationship, backref
+
 from .fact import Fact
 from .user import User
 

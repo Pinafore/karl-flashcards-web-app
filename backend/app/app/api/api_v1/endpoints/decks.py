@@ -1,21 +1,20 @@
 from datetime import datetime
 from typing import Any, List, Union
 
+from app import crud, models, schemas
+from app.api import deps
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pytz import timezone
 from sqlalchemy.orm import Session
-
-from app import crud, models, schemas
-from app.api import deps
 
 router = APIRouter()
 
 
 @router.get("/", response_model=List[schemas.Deck])
 def read_decks(
-    db: Session = Depends(deps.get_db),
-    paginate: deps.Paginate = Depends(),
-    current_user: models.User = Depends(deps.get_current_active_user),
+        db: Session = Depends(deps.get_db),
+        paginate: deps.Paginate = Depends(),
+        current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Retrieve decks.
@@ -31,9 +30,9 @@ def read_decks(
 
 @router.get("/public", response_model=List[schemas.Deck])
 def read_open_decks(
-    db: Session = Depends(deps.get_db),
-    current_user: models.User = Depends(deps.get_current_active_user),  # noqa
-    unowned: bool = True,
+        db: Session = Depends(deps.get_db),
+        current_user: models.User = Depends(deps.get_current_active_user),  # noqa
+        unowned: bool = True,
 ) -> Any:
     """
     Retrieve decks.
@@ -45,10 +44,10 @@ def read_open_decks(
 
 @router.post("/", response_model=schemas.Deck)
 def create_deck(
-    *,
-    db: Session = Depends(deps.get_db),
-    deck_in: Union[schemas.DeckCreate, schemas.SuperDeckCreate],
-    current_user: models.User = Depends(deps.get_current_active_user),
+        *,
+        db: Session = Depends(deps.get_db),
+        deck_in: Union[schemas.DeckCreate, schemas.SuperDeckCreate],
+        current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Create new deck.
@@ -59,10 +58,10 @@ def create_deck(
 
 @router.put("/", response_model=List[schemas.Deck])
 def assign_decks(
-    *,
-    db: Session = Depends(deps.get_db),
-    deck_ids: List[int] = Query(...),
-    current_user: models.User = Depends(deps.get_current_active_user),
+        *,
+        db: Session = Depends(deps.get_db),
+        deck_ids: List[int] = Query(...),
+        current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
         Assign an existing deck to a new user.
@@ -94,11 +93,11 @@ def assign_decks(
 
 @router.put("/{deck_id}", response_model=schemas.Deck)
 def update_deck(
-    *,
-    db: Session = Depends(deps.get_db),
-    deck_id: int,
-    deck_in: Union[schemas.DeckUpdate, schemas.SuperDeckUpdate],
-    current_user: models.User = Depends(deps.get_current_active_user),
+        *,
+        db: Session = Depends(deps.get_db),
+        deck_id: int,
+        deck_in: Union[schemas.DeckUpdate, schemas.SuperDeckUpdate],
+        current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Update an deck.
@@ -114,10 +113,10 @@ def update_deck(
 
 @router.get("/{deck_id}", response_model=schemas.Deck)
 def read_deck(
-    *,
-    db: Session = Depends(deps.get_db),
-    deck_id: int,
-    current_user: models.User = Depends(deps.get_current_active_user),
+        *,
+        db: Session = Depends(deps.get_db),
+        deck_id: int,
+        current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Get deck by ID.
@@ -133,10 +132,10 @@ def read_deck(
 
 @router.delete("/{deck_id}", response_model=schemas.Deck)
 def delete_deck(
-    *,
-    db: Session = Depends(deps.get_db),
-    deck_id: int,
-    current_user: models.User = Depends(deps.get_current_active_user),
+        *,
+        db: Session = Depends(deps.get_db),
+        deck_id: int,
+        current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Delete an deck.

@@ -13,7 +13,7 @@ class Log(str, Enum):
     undo_suspend = "undo_suspend"
     undo_delete = "undo_delete"
     undo_report = "undo_report"
-    undo_study = "undo_study" # currently unimplemented
+    undo_study = "undo_study"  # currently unimplemented
     undo_mark = "undo_mark"
     resolve_report = "resolve_report"
     clear_report_or_suspend = "clear_report_or_suspend"

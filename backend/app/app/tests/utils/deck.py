@@ -1,8 +1,7 @@
-from sqlalchemy.orm import Session
-
 from app import crud, models
 from app.schemas.deck import DeckCreate
 from app.tests.utils.utils import random_lower_string
+from sqlalchemy.orm import Session
 
 
 def create_random_deck(db: Session, user: models.User) -> models.Deck:

@@ -1,23 +1,19 @@
 import json
-import csv
+import logging
+import time
+from datetime import datetime
 from tempfile import SpooledTemporaryFile
 from typing import List, Union, Dict, Any, Optional
 
 import pandas
-from fastapi.encoders import jsonable_encoder
-from sqlalchemy import and_, or_, not_, func
-from sqlalchemy.orm import Session, aliased, Query
-
-from app.crud.base import CRUDBase
-from app import crud, models, schemas
-from datetime import datetime
-from pytz import timezone
-import time
 import requests
-
-import logging
-
+from app import crud, models, schemas
 from app.core.config import settings
+from app.crud.base import CRUDBase
+from fastapi.encoders import jsonable_encoder
+from pytz import timezone
+from sqlalchemy import and_, or_, not_, func
+from sqlalchemy.orm import Session, Query
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -459,7 +455,8 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             count += 1
         logger.info(f"{count} facts loaded from txt file")
 
-    def load_txt_facts(self, db: Session, file: SpooledTemporaryFile, user: models.User, props: schemas.FileProps) -> str:
+    def load_txt_facts(self, db: Session, file: SpooledTemporaryFile, user: models.User,
+                       props: schemas.FileProps) -> str:
         count = 0
         with file as f:
             df = pandas.read_csv(f, sep=props.delimeter, names=props.headers)

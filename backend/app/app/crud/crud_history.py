@@ -1,7 +1,7 @@
-from app.crud.base import CRUDBase
-from app import models, schemas
-
 import logging
+
+from app import models, schemas
+from app.crud.base import CRUDBase
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

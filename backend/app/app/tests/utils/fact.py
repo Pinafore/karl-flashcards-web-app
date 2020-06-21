@@ -1,9 +1,9 @@
-from sqlalchemy.orm import Session
-
 from app import crud, models
 from app.schemas.fact import FactCreate
-from app.tests.utils.utils import random_lower_string
 from app.tests.utils.deck import create_random_deck
+from app.tests.utils.utils import random_lower_string
+from sqlalchemy.orm import Session
+
 
 def create_random_fact(db: Session, user: models.User) -> models.Fact:
     text = random_lower_string()

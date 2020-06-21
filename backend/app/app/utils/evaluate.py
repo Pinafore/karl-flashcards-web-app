@@ -1,9 +1,8 @@
+import logging
 from typing import List
 
-from sklearn.metrics.pairwise import cosine_similarity
-import logging
-
 from app import models
+from sklearn.metrics.pairwise import cosine_similarity
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

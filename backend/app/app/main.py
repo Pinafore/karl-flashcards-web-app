@@ -1,11 +1,10 @@
-from fastapi import FastAPI
-from starlette.middleware.cors import CORSMiddleware
-
+import sentry_sdk
 from app.api.api_v1.api import api_router
 from app.core.config import settings
-import sentry_sdk
-from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
+from fastapi import FastAPI
 from fastapi.routing import APIRoute
+from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
+from starlette.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title=settings.PROJECT_NAME, openapi_url=f"{settings.API_V1_STR}/openapi.json"

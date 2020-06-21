@@ -1,24 +1,21 @@
 from typing import Any, List, Optional
 
-from fastapi import APIRouter, Body, Depends, HTTPException
-from fastapi.encoders import jsonable_encoder
-from pydantic.networks import EmailStr
-from sqlalchemy.orm import Session
-
 from app import crud, models, schemas
 from app.api import deps
 from app.core.config import settings
 from app.utils.utils import send_new_account_email
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
 
 @router.get("/", response_model=List[schemas.User])
 def read_users(
-    db: Session = Depends(deps.get_db),
-    skip: Optional[int] = None,
-    limit: Optional[int] = None,
-    current_user: models.User = Depends(deps.get_current_active_superuser),  # noqa
+        db: Session = Depends(deps.get_db),
+        skip: Optional[int] = None,
+        limit: Optional[int] = None,
+        current_user: models.User = Depends(deps.get_current_active_superuser),  # noqa
 ) -> Any:
     """
     Retrieve users.
@@ -29,10 +26,10 @@ def read_users(
 
 @router.post("/", response_model=schemas.User)
 def create_user(
-    *,
-    db: Session = Depends(deps.get_db),
-    user_in: schemas.SuperUserCreate,
-    current_user: models.User = Depends(deps.get_current_active_superuser),  # noqa
+        *,
+        db: Session = Depends(deps.get_db),
+        user_in: schemas.SuperUserCreate,
+        current_user: models.User = Depends(deps.get_current_active_superuser),  # noqa
 ) -> Any:
     """
     Create new user.
@@ -60,10 +57,10 @@ def create_user(
 
 @router.put("/me", response_model=schemas.User)
 def update_user_me(
-    *,
-    db: Session = Depends(deps.get_db),
-    user_in: schemas.UserUpdate,
-    current_user: models.User = Depends(deps.get_current_active_user),
+        *,
+        db: Session = Depends(deps.get_db),
+        user_in: schemas.UserUpdate,
+        current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Update own user.
@@ -90,8 +87,8 @@ def update_user_me(
 
 @router.get("/me", response_model=schemas.User)
 def read_user_me(
-    db: Session = Depends(deps.get_db),  # noqa
-    current_user: models.User = Depends(deps.get_current_active_user),
+        db: Session = Depends(deps.get_db),  # noqa
+        current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Get current user.
@@ -101,9 +98,9 @@ def read_user_me(
 
 @router.post("/open", response_model=schemas.User)
 def create_user_open(
-    *,
-    db: Session = Depends(deps.get_db),
-    user_in: schemas.UserCreate,
+        *,
+        db: Session = Depends(deps.get_db),
+        user_in: schemas.UserCreate,
 ) -> Any:
     """
     Create new user without the need to be logged in.
@@ -139,9 +136,9 @@ def create_user_open(
 
 @router.get("/{user_id}", response_model=schemas.User)
 def read_user_by_id(
-    user_id: int,
-    current_user: models.User = Depends(deps.get_current_active_user),
-    db: Session = Depends(deps.get_db),
+        user_id: int,
+        current_user: models.User = Depends(deps.get_current_active_user),
+        db: Session = Depends(deps.get_db),
 ) -> Any:
     """
     Get a specific user by id.
@@ -158,11 +155,11 @@ def read_user_by_id(
 
 @router.put("/{user_id}", response_model=schemas.User)
 def update_user(
-    *,
-    db: Session = Depends(deps.get_db),
-    user_id: int,
-    user_in: schemas.SuperUserUpdate,
-    current_user: models.User = Depends(deps.get_current_active_superuser),
+        *,
+        db: Session = Depends(deps.get_db),
+        user_id: int,
+        user_in: schemas.SuperUserUpdate,
+        current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """
     Update a user.
@@ -179,4 +176,3 @@ def update_user(
         )
     user = crud.user.update(db, db_obj=user, obj_in=user_in)
     return user
-

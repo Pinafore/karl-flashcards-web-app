@@ -1,10 +1,10 @@
 from typing import TYPE_CHECKING
 
+from app.db.base_class import Base
 from sqlalchemy import Boolean, Column, Integer, String
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
 
-from app.db.base_class import Base
 # from .user_deck import user_deck
 
 if TYPE_CHECKING:

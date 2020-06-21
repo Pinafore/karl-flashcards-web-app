@@ -1,11 +1,10 @@
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, Column, Integer, ForeignKey, TIMESTAMP, Enum
-from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import relationship
-
 from app.db.base_class import Base
 from app.schemas.log import Log
+from sqlalchemy import Column, Integer, ForeignKey, TIMESTAMP, Enum
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import relationship
 
 if TYPE_CHECKING:
     from .fact import Fact  # noqa: F401

@@ -1,19 +1,12 @@
 from typing import Dict
 
-from fastapi.testclient import TestClient
-
 from app.core.celery_app import celery_app
 from app.core.config import settings
-from app import crud, schemas
-import os
-from app.db.session import SessionLocal
-import itertools
-import json
-from sqlalchemy.orm import Session
+from fastapi.testclient import TestClient
 
 
 def test_celery_worker_test(
-    client: TestClient, superuser_token_headers: Dict[str, str]
+        client: TestClient, superuser_token_headers: Dict[str, str]
 ) -> None:
     data = {"msg": "test"}
     r = client.post(
@@ -24,8 +17,9 @@ def test_celery_worker_test(
     response = r.json()
     assert response["msg"] == "Word received"
 
+
 def test_fact_load(
-    client: TestClient, superuser_token_headers: Dict[str, str]
+        client: TestClient, superuser_token_headers: Dict[str, str]
 ) -> None:
     celery_app.send_task("app.worker.load_quizbowl_facts")
 #     db: Session = SessionLocal()

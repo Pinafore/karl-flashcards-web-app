@@ -1,14 +1,14 @@
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import Column, ForeignKey, Integer, String, TIMESTAMP, ARRAY, Boolean, cast, Index, func
+from app.db.base_class import Base
+from app.schemas import Permission
+from sqlalchemy import Column, ForeignKey, Integer, String, TIMESTAMP, ARRAY, cast, Index, func
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_method
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects import postgresql
 
-from app.db.base_class import Base
-from app.schemas import Permission
 from .user import User
 
 if TYPE_CHECKING:
@@ -17,13 +17,11 @@ if TYPE_CHECKING:
     from .history import History  # noqa: F401
 
 
-
 def create_tsvector(*args):
     exp = args[0]
     for e in args[1:]:
         exp += ' ' + e
     return func.to_tsvector('english', exp)
-
 
 
 class Fact(Base):

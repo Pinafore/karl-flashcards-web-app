@@ -1,15 +1,14 @@
-import requests
-
+import logging
 from typing import Any, List, Optional
+
+import requests
+from app import crud, models, schemas
+from app.api import deps
+from app.core.config import settings
+from app.utils import evaluate
 from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from sqlalchemy.orm import Session
 
-from app import crud, models, schemas
-from app.core.config import settings
-from app.utils import evaluate
-from app.api import deps
-
-import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -17,11 +16,11 @@ router = APIRouter()
 
 @router.get("/", response_model=List[schemas.Fact])
 def get_next_set(
-    db: Session = Depends(deps.get_db),
-    user_id: Optional[int] = None,
-    deck_ids: Optional[List[int]] = Query(None),
-    limit: int = 1,
-    current_user: models.User = Depends(deps.get_current_active_user),
+        db: Session = Depends(deps.get_db),
+        user_id: Optional[int] = None,
+        deck_ids: Optional[List[int]] = Query(None),
+        limit: int = 1,
+        current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Get next set of facts for review using user's schedule.
@@ -52,12 +51,13 @@ def get_next_set(
         facts = crud.fact.get_study_set(db=db, user=user, deck_ids=deck_ids, return_limit=limit)
     return facts
 
+
 @router.put("/", response_model=List[bool], summary="Update Fact Set with the correct schedule")
 def update_schedule_set(
-    *,
-    db: Session = Depends(deps.get_db),
-    facts_in: List[schemas.Schedule] = Body(...),
-    current_user: models.User = Depends(deps.get_current_active_user),
+        *,
+        db: Session = Depends(deps.get_db),
+        facts_in: List[schemas.Schedule] = Body(...),
+        current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
         Updates the schedules of the returned fact set using the current user's assigned schedule
@@ -75,11 +75,11 @@ def update_schedule_set(
 
 @router.get("/evaluate", response_model=Optional[bool], summary="Evaluates accuracy of typed answer to the given fact")
 def evaluate_answer(
-    *,
-    db: Session = Depends(deps.get_db),
-    fact_id: int,
-    typed: Optional[str] = None,
-    current_user: models.User = Depends(deps.get_current_active_user),
+        *,
+        db: Session = Depends(deps.get_db),
+        fact_id: int,
+        typed: Optional[str] = None,
+        current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     fact = crud.fact.get(db=db, id=fact_id)
     if not fact:

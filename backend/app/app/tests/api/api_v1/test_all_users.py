@@ -1,20 +1,17 @@
 from typing import Dict
 
-from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session
-
 from app import crud
 from app.core.config import settings
 from app.models import User
 from app.schemas import UserCreate
-from app.tests.utils.deck import create_random_deck
-from app.schemas.deck import DeckCreate
 from app.tests.utils.utils import random_lower_string, random_email
+from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
 
 
 #
 def test_get_users_superuser_me(
-    client: TestClient, superuser_token_headers: Dict[str, str]
+        client: TestClient, superuser_token_headers: Dict[str, str]
 ) -> None:
     r = client.get(f"{settings.API_V1_STR}/users/me", headers=superuser_token_headers)
     current_user = r.json()
@@ -25,7 +22,7 @@ def test_get_users_superuser_me(
 
 
 def test_get_users_normal_user_me(
-    client: TestClient, normal_user_token_headers: (Dict[str, str], User)
+        client: TestClient, normal_user_token_headers: (Dict[str, str], User)
 ) -> None:
     r = client.get(f"{settings.API_V1_STR}/users/me", headers=normal_user_token_headers[0])
     current_user = r.json()
@@ -36,7 +33,7 @@ def test_get_users_normal_user_me(
 
 
 def test_create_user_new_email(
-    client: TestClient, superuser_token_headers: Dict[str, str], db: Session
+        client: TestClient, superuser_token_headers: Dict[str, str], db: Session
 ) -> None:
     username = random_lower_string()
     email = random_email()
@@ -54,7 +51,7 @@ def test_create_user_new_email(
 
 
 def test_get_existing_user(
-    client: TestClient, superuser_token_headers: Dict[str, str], db: Session
+        client: TestClient, superuser_token_headers: Dict[str, str], db: Session
 ) -> None:
     username = random_lower_string()
     email = random_email()
@@ -74,7 +71,7 @@ def test_get_existing_user(
 
 
 def test_create_user_existing_email(
-    client: TestClient, superuser_token_headers: Dict[str, str], db: Session
+        client: TestClient, superuser_token_headers: Dict[str, str], db: Session
 ) -> None:
     username = random_lower_string()
     email = random_email()
@@ -91,7 +88,7 @@ def test_create_user_existing_email(
 
 
 def test_create_user_by_normal_user(
-    client: TestClient, normal_user_token_headers: (Dict[str, str], User)
+        client: TestClient, normal_user_token_headers: (Dict[str, str], User)
 ) -> None:
     username = random_lower_string()
     email = random_email()
@@ -104,7 +101,7 @@ def test_create_user_by_normal_user(
 
 
 def test_retrieve_users(
-    client: TestClient, superuser_token_headers: Dict[str, str], db: Session
+        client: TestClient, superuser_token_headers: Dict[str, str], db: Session
 ) -> None:
     username = random_lower_string()
     email = random_email()

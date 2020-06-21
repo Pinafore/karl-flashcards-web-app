@@ -1,14 +1,10 @@
-from typing import TYPE_CHECKING, Optional
-
+from app.db.base_class import Base
+from app.schemas.permission import Permission
 from sqlalchemy import Column, Integer, ForeignKey, Enum
 from sqlalchemy.orm import relationship
 
-from app.db.base_class import Base
-from app.schemas.permission import Permission
-
-from .user import User
 from .deck import Deck
-
+from .user import User
 
 
 # user_deck = Table("user_deck", Base.metadata,

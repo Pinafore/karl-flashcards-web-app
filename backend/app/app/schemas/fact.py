@@ -1,12 +1,10 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, Json
-
-
+from app.schemas.deck import Deck
 # Shared properties
 from app.schemas.permission import Permission
-from app.schemas.deck import Deck
+from pydantic import BaseModel
 
 
 class FactBase(BaseModel):

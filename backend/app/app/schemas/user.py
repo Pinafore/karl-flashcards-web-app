@@ -1,11 +1,11 @@
-from typing import Optional, List, Collection, Any, Type
+from typing import Optional, List, Any, Type
 
 from pydantic import BaseModel, EmailStr
 from pydantic.utils import GetterDict
 
+from .deck import Deck
+from .fact import Fact
 from .repetition import Repetition
-from .deck import DeckInDB, Deck
-from .fact import FactInDB, Fact
 
 
 # Shared properties

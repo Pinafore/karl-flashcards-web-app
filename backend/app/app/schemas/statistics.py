@@ -1,10 +1,6 @@
-from typing import Optional
-
 from pydantic import BaseModel
 
-
 # Properties to return to client about statistics
-from app import schemas
 
 
 class StatisticsBase(BaseModel):

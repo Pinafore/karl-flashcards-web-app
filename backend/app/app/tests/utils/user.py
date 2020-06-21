@@ -1,19 +1,20 @@
+import logging
 from typing import Dict
-
-from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session
 
 from app import crud
 from app.core.config import settings
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
 from app.tests.utils.utils import random_email, random_lower_string
-import logging
+from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 def user_authentication_headers(
-    *, client: TestClient, email: str, password: str
+        *, client: TestClient, email: str, password: str
 ) -> Dict[str, str]:
     data = {"username": email, "password": password}
 
@@ -33,7 +34,7 @@ def create_random_user(db: Session) -> User:
 
 
 def authentication_token_from_email(
-    *, client: TestClient, email: str, db: Session
+        *, client: TestClient, email: str, db: Session
 ) -> (Dict[str, str], User):
     """
     Return a valid token for the user with given email.

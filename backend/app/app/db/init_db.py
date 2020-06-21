@@ -1,13 +1,14 @@
-from fastapi.encoders import jsonable_encoder
-from sqlalchemy.orm import Session
+import logging
 
-from app import crud, schemas, models
+from app import crud, schemas
+from app.core.celery_app import celery_app
 from app.core.config import settings
 from app.db import base  # noqa: F401
-from app.core.celery_app import celery_app
-import logging
+from sqlalchemy.orm import Session
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 # make sure all SQL Alchemy models are imported (app.db.base) before initializing DB
 # otherwise, SQL Alchemy might fail to initialize relationships properly

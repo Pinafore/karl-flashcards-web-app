@@ -1,13 +1,10 @@
 from datetime import datetime
-from typing import List, Optional
-
-from pydantic import BaseModel, Json
-
+from typing import Optional
 
 # Shared properties
 from app.schemas import Fact, User
-from app.schemas.deck import Deck
 from app.schemas.log import Log
+from pydantic import BaseModel
 
 
 class HistoryBase(BaseModel):

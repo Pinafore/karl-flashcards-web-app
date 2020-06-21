@@ -1,11 +1,11 @@
 from typing import TYPE_CHECKING
 
+from app.db.base_class import Base
+from app.schemas.repetition import Repetition
 from sqlalchemy import Boolean, Column, Integer, String, ForeignKey, Enum
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
 
-from app.db.base_class import Base
-from app.schemas.repetition import Repetition
 # from .user_deck import user_deck
 
 if TYPE_CHECKING:

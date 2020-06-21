@@ -1,31 +1,29 @@
-from datetime import datetime, time
+import logging
 from typing import List, Optional, Union, Dict, Any
-
-from fastapi.encoders import jsonable_encoder
-from pytz import timezone
-from sqlalchemy import not_
-from sqlalchemy.orm import Session
-from sqlalchemy.sql.expression import true
 
 from app.crud.base import CRUDBase
 from app.models import User, Deck
 from app.models.user_deck import User_Deck
 from app.schemas import Permission
 from app.schemas.deck import DeckCreate, DeckUpdate, SuperDeckCreate, SuperDeckUpdate
-import logging
+from sqlalchemy import not_
+from sqlalchemy.orm import Session
+from sqlalchemy.sql.expression import true
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
     def create_with_owner(
-        self, db: Session, *, obj_in: Union[DeckCreate, SuperDeckCreate], user: User
+            self, db: Session, *, obj_in: Union[DeckCreate, SuperDeckCreate], user: User
     ) -> Deck:
         db_obj = self.create(db, obj_in=obj_in)
         db_obj = self.assign_owner(db, db_obj=db_obj, user=user)
         return db_obj
 
     def assign_owner(
-        self, db: Session, *, db_obj: Deck, user: User
+            self, db: Session, *, db_obj: Deck, user: User
     ) -> Deck:
         user_deck = User_Deck(db_obj, user, Permission.owner)
 
@@ -36,7 +34,7 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
         return db_obj
 
     def assign_viewer(
-        self, db: Session, *, db_obj: Deck, user: User
+            self, db: Session, *, db_obj: Deck, user: User
     ) -> Deck:
         # db_obj.user_decks.append(User_Deck(db_obj, user, Permission.viewer))
         user_deck = User_Deck(db_obj, user, Permission.viewer)
@@ -46,10 +44,10 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
         return db_obj
 
     def get_multi_by_owner(
-        self, *, user: User, skip: Optional[int] = None, limit: Optional[int] = None
+            self, *, user: User, skip: Optional[int] = None, limit: Optional[int] = None
     ) -> List[Deck]:
         if skip and limit:
-            return user.decks[skip:skip+limit]
+            return user.decks[skip:skip + limit]
         elif skip:
             return user.decks[skip:]
         elif limit:
@@ -60,7 +58,7 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
     def get_public(
             self, db: Session, unowned: bool, user: User
     ) -> List[Deck]:
-        query = db.query(self.model).filter(Deck.public == true(), Deck.id != 1) # Don't return "default"
+        query = db.query(self.model).filter(Deck.public == true(), Deck.id != 1)  # Don't return "default"
         if unowned:
             query = query.filter(not_(Deck.users.any(id=user.id)))
         return query.all()
@@ -73,7 +71,8 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
         if owned_deck:
             user_deck = owned_deck[0]
         else:
-            user_deck = self.create_with_owner(db=db, obj_in=SuperDeckCreate(title=proposed_deck, public=public), user=user)
+            user_deck = self.create_with_owner(db=db, obj_in=SuperDeckCreate(title=proposed_deck, public=public),
+                                               user=user)
         return user_deck
 
     def update(
