@@ -283,7 +283,7 @@
 
     public async mounted() {
       await this.determine_decks(this.$router.currentRoute.query.deck);
-      window.addEventListener("keydown", this.handleKeyPress);
+      window.addEventListener("keydown", this.handleKeyDown);
     }
 
     public async beforeRouteUpdate(to, from, next) {
@@ -307,12 +307,11 @@
     public async destroyed() {
       studyStore.setShowLoading();
       studyStore.emptySchedule();
-      window.removeEventListener("keydown", this.handleKeyPress);
+      window.removeEventListener("keydown", this.handleKeyDown);
     }
 
-    public handleKeyPress(e: KeyboardEvent) {
+    public handleKeyDown(e: KeyboardEvent) {
       const key = e.key.toLowerCase();
-      console.log(key);
       if (e.altKey && e.key == "s") {
         this.suspend();
       } else if (e.altKey && key == "d") {
@@ -326,7 +325,6 @@
       } else if (this.showBack) {
         this.determineResponse(e, key);
       } else if (key == "enter") {
-        console.log("SHOWING ANSWER");
         this.showAnswer();
       } else if (
         /^[a-z0-9]$/i.test(key) &&
