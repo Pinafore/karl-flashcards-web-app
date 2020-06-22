@@ -282,16 +282,26 @@
     }
 
     public async mounted() {
-      const deckIds = this.$router.currentRoute.query.deck;
+      await this.determine_decks(this.$router.currentRoute.query.deck);
+      window.addEventListener("keydown", this.handleKeyPress);
+    }
+
+    public async beforeRouteUpdate(to, from, next) {
+      await this.determine_decks(to.query.deck);
+      next();
+    }
+
+    public async determine_decks(deckIds: string | (string | null)[]) {
       if (deckIds) {
         if (typeof deckIds === "string") {
           studyStore.setDeckIds([Number(deckIds)]);
         } else {
           studyStore.setDeckIds(deckIds.map(Number));
         }
+      } else {
+        studyStore.setDeckIds([]);
       }
       await studyStore.getNextShow();
-      window.addEventListener("keydown", this.handleKeyPress);
     }
 
     public async destroyed() {
