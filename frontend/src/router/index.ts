@@ -41,6 +41,16 @@ export default new VueRouter({
           },
         },
         {
+          path: "privacy-irb",
+          // route level code-splitting
+          // this generates a separate chunk (about.[hash].js) for this route
+          // which is lazy-loaded when the route is visited.
+          components: {
+            default: () => import(/* webpackChunkName: "index" */ "@/views/Index.vue"),
+            dialog: () => import(/* webpackChunkName: "signup" */ "@/views/IRB.vue"),
+          },
+        },
+        {
           path: "recover-password",
           component: () =>
             import(

@@ -10,6 +10,7 @@
 <script lang="ts">
   import { Component, Vue } from "vue-property-decorator";
   import { mainStore } from "@/store";
+  import { getVisited, saveVisited } from "@/utils";
 
   const startRouteGuard = async (to, _from, next) => {
     await mainStore.checkLoggedIn();
@@ -21,9 +22,17 @@
         next();
       }
     } else if (mainStore.isLoggedIn === false) {
-      if (to.path === "/" || (to.path as string).startsWith("/main")) {
+      const visited = getVisited();
+      if (visited === null && to.path !== "/privacy-irb") {
+        mainStore.setIsOnLogin(true);
+        next("/privacy-irb");
+      } else if (to.path === "/" || (to.path as string).startsWith("/main")) {
         next("/landing");
-      } else if (to.path === "/login" || to.path === "/sign-up") {
+      } else if (
+        to.path === "/login" ||
+        to.path === "/sign-up" ||
+        to.path === "/privacy-irb"
+      ) {
         mainStore.setIsOnLogin(true);
         next();
       } else {
@@ -46,6 +55,7 @@
       startRouteGuard(to, from, next);
     }
     public goHome() {
+      saveVisited();
       this.$router.push("/landing");
     }
   }
