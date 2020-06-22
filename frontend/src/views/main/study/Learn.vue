@@ -87,7 +87,8 @@
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
             <v-btn
-              v-if="$vuetify.breakpoint.mdAndDown && show.enable_report"
+              v-if="$vuetify.breakpoint.mdAndDown"
+              :disabled="!show.enable_report"
               text
               icon
               v-bind="attrs"
@@ -97,8 +98,9 @@
               <v-icon>mdi-alert-octagon</v-icon>
             </v-btn>
             <v-btn
-              v-else-if="show.enable_report"
+              v-else
               class="ma-1 pa-2"
+              :disabled="!show.enable_report"
               v-bind="attrs"
               @click="report()"
               v-on="on"
