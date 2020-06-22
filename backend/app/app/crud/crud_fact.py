@@ -36,11 +36,10 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         reported = (db.query(models.Suspended)
                     .filter(models.Suspended.user_id == user.id)
                     .filter(models.Suspended.fact_id == db_obj.fact_id)
-                    .filter(models.Suspended.suspend_type == schemas.SuspendType.suspend)
+                    .filter(models.Suspended.suspend_type == schemas.SuspendType.report)
                     .first())
         schema.suspended = True if suspended or reported else False
-        if schema.permission is schemas.Permission.viewer:
-            schema.reported = True if reported else False
+        schema.reported = True if reported else False
         return schema
     
     def create_with_owner(
