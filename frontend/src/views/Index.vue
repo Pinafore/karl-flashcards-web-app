@@ -30,17 +30,31 @@
               </div>
             </v-col>
           </v-row>
-          <v-row justify="center" class="pa-3">
-            <v-btn
-              large
-              depressed
-              color="white"
-              class="primary--text text-h5 text-none"
-              width="200px"
-              @click="signup"
-            >
-              Sign Up
-            </v-btn>
+          <v-row justify="center" align="center" class="pa-3">
+            <v-col cols="12" sm="auto">
+              <v-btn
+                large
+                depressed
+                color="white"
+                class="primary--text text-h5 text-none"
+                width="200px"
+                @click="signup"
+              >
+                Sign Up
+              </v-btn>
+            </v-col>
+            <v-col cols="12" sm="auto">
+              <v-btn
+                large
+                depressed
+                color="white"
+                class="primary--text text-h5 text-none"
+                width="200px"
+                @click="login"
+              >
+                Login
+              </v-btn>
+            </v-col>
           </v-row>
           <v-row justify="center" class="pa-3">
             <v-btn
@@ -48,9 +62,9 @@
               large
               text
               class="white--text text-h5 text-none"
-              @click="login"
+              @click="privacy"
             >
-              Login
+              IRB Privacy Form
             </v-btn>
           </v-row>
           <v-row justify="center" no-gutters>
@@ -180,6 +194,10 @@
 
     public login() {
       this.$router.push("/login");
+    }
+
+    public privacy() {
+      this.$router.push("/privacy-irb");
     }
   }
 </script>
