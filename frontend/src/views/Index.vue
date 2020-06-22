@@ -7,9 +7,7 @@
         <v-container fluid>
           <v-row justify="center" class="pt-2">
             <v-col align-self="center" class="text-md-h1 text-h2 font-weight-bold">
-              <div class="white--text text-center">
-                {{ appName }}
-              </div>
+              <div class="white--text text-center">{{ appName }}</div>
             </v-col>
           </v-row>
           <v-row justify="center" class="pt-0 mt-0" no-gutters>
