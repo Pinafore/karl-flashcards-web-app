@@ -145,14 +145,10 @@
       </template>
       <template v-slot:item.reported="{ item }">
         <v-simple-checkbox
-          v-if="item.permission === 'viewer'"
           v-model="item.reported"
           v-ripple
           @input="reportFact(item, item.reported)"
         ></v-simple-checkbox>
-        <div v-else>
-          owner
-        </div>
       </template>
       <template v-slot:item.actions="{ item }">
         <v-icon v-if="item.permission === 'owner'" @click="editFact(item)">
