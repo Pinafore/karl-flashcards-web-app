@@ -266,5 +266,8 @@ def clear_fact_status(
     """
     Clears a user's reports or supensions of a fact.
     """
-    fact = crud.fact.clear_report_or_suspend(db=perms.db, db_obj=perms.fact, user=perms.current_user)
+    if crud.user.is_superuser(perms.current_user):
+        fact = crud.fact.resolve_report(db=perms.db, user=perms.current_user, db_obj=perms.fact)
+    else:
+        fact = crud.fact.clear_report_or_suspend(db=perms.db, db_obj=perms.fact, user=perms.current_user)
     return fact
