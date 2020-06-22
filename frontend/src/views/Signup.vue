@@ -204,8 +204,8 @@
             >
           </v-card-text>
           <v-card-actions>
-            <v-btn @click="login">Go to Login</v-btn>
             <v-btn @click="close">Close</v-btn>
+            <v-btn @click="login">Go to Login</v-btn>
             <v-spacer></v-spacer>
             <v-btn type="reset">Reset</v-btn>
             <v-btn type="submit" :disabled="invalid">Sign Up</v-btn>
