@@ -218,7 +218,7 @@
               ref="again"
               :color="!recommendation ? 'red' : ''"
               @click="response(false)"
-              >wrong (1)</v-btn
+              >wrong ([)</v-btn
             >
           </v-col>
           <v-col class="ma-1 pa-1 shrink">
@@ -226,7 +226,7 @@
               ref="good"
               :color="recommendation ? 'green' : ''"
               @click="response(true)"
-              >right (2)</v-btn
+              >right (])</v-btn
             >
           </v-col>
         </v-row>
@@ -333,9 +333,9 @@
     public determineResponse(e: KeyboardEvent, key: string) {
       if (key == "enter") {
         this.response(this.recommendation);
-      } else if (key == "1") {
+      } else if (key == "[") {
         this.response(false);
-      } else if (key == "2") {
+      } else if (key == "]") {
         this.response(true);
       } else if (
         /^[a-z0-9]$/i.test(key) &&
