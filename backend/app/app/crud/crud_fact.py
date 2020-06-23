@@ -339,16 +339,11 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             facts_query = facts_query.order_by(func.random())
         return facts_query
 
-    def get_count_from_query(self, q):
-        count_q = q.statement.with_only_columns([func.count()]).order_by(None)
-        count = q.session.execute(count_q).scalar()
-        return count
-
     def count_eligible_facts(
             self, query: Query
     ) -> int:
         begin_overall_start = time.time()
-        facts = self.get_count_from_query(q=query)
+        facts = query.distinct().count()
         overall_end_time = time.time()
         overall_total_time = overall_end_time - begin_overall_start
         logger.info("overall time count: " + str(overall_total_time))
@@ -365,7 +360,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         facts = query.all()
         overall_end_time = time.time()
         overall_total_time = overall_end_time - begin_overall_start
-        logger.info("overall time: " + str(overall_total_time))
+        logger.info("overall time facts: " + str(overall_total_time))
         return facts
 
     def get_study_set(
