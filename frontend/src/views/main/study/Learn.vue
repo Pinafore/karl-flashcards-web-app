@@ -400,6 +400,7 @@
         });
         this.resetCard();
         await studyStore.updateSchedule();
+        this.resetCard();
       }
     }
 
