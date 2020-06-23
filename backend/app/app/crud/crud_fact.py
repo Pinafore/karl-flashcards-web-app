@@ -335,15 +335,21 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 facts_query = facts_query.filter(models.Fact.markers.any(id=user.id))
             else:
                 facts_query = facts_query.filter(not_(models.Fact.markers.any(id=user.id)))
+        # facts_query = facts_query.join(models.Fact)
         if filters.randomize:
             facts_query = facts_query.order_by(func.random())
         return facts_query
 
+    def get_count_from_query(self, q):
+        count_q = q.statement.with_only_columns([func.count()]).order_by(None)
+        count = q.session.execute(count_q).scalar()
+        return count
+    
     def count_eligible_facts(
             self, query: Query
     ) -> int:
         begin_overall_start = time.time()
-        facts = query.count()
+        facts = self.get_count_from_query(q=query)
         overall_end_time = time.time()
         overall_total_time = overall_end_time - begin_overall_start
         logger.info("overall time count: " + str(overall_total_time))
