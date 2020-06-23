@@ -33,14 +33,22 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                      .filter(models.Suspended.fact_id == db_obj.fact_id)
                      .filter(models.Suspended.suspend_type == schemas.SuspendType.suspend)
                      .first())
-        reported = (db.query(models.Suspended)
-                    .filter(models.Suspended.user_id == user.id)
-                    .filter(models.Suspended.fact_id == db_obj.fact_id)
-                    .filter(models.Suspended.suspend_type == schemas.SuspendType.report)
-                    .first())
+
+        if crud.user.is_superuser(user):
+            reported = (db.query(models.Suspended)
+                        .filter(models.Suspended.fact_id == db_obj.fact_id)
+                        .filter(models.Suspended.suspend_type == schemas.SuspendType.report)
+                        .first())
+        else:
+            reported = (db.query(models.Suspended)
+                        .filter(models.Suspended.user_id == user.id)
+                        .filter(models.Suspended.fact_id == db_obj.fact_id)
+                        .filter(models.Suspended.suspend_type == schemas.SuspendType.report)
+                        .first())
         schema.suspended = True if suspended or reported else False
         schema.reported = True if reported else False
         return schema
+
     
     def create_with_owner(
             self, db: Session, *, obj_in: schemas.FactCreate, user: models.User
@@ -286,14 +294,22 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         if filters.studyable:
             facts_query = facts_query.filter(not_(models.Fact.suspenders.any(id=user.id)))
         else:
-            facts_query = (facts_query.outerjoin(models.Suspended, models.Fact.fact_id == models.Suspended.fact_id)
-                           .filter(or_(models.Suspended.suspend_type != schemas.SuspendType.delete,
-                                       models.Suspended.suspend_type == None)))
+
+            if crud.user.is_superuser(user):
+                facts_query = (facts_query.outerjoin(models.Suspended, models.Fact.fact_id == models.Suspended.fact_id)
+                               .filter(or_(and_(models.Suspended.suspend_type != schemas.SuspendType.delete),
+                                           models.Suspended.suspend_type == None)))
+            else:
+                facts_query = (facts_query.outerjoin(models.Suspended, models.Fact.fact_id == models.Suspended.fact_id)
+                               .filter(or_(and_(models.Suspended.suspend_type != schemas.SuspendType.delete,
+                                                models.Suspended.user_id == user.id),
+                                           models.Suspended.suspend_type == None)))
             if filters.suspended is not None:
                 if filters.suspended:
                     facts_query = facts_query.filter(models.Suspended.suspend_type == schemas.SuspendType.suspend)
                 else:
                     facts_query = facts_query.filter(models.Suspended.suspend_type != schemas.SuspendType.suspend)
+
             if filters.reported is not None:
                 if filters.reported:
                     facts_query = facts_query.filter(models.Suspended.suspend_type == schemas.SuspendType.report)
