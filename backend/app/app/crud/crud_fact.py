@@ -300,7 +300,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                                .filter(or_(and_(models.Suspended.suspend_type != schemas.SuspendType.delete),
                                            models.Suspended.suspend_type == None)))
             else:
-                facts_query = (facts_query.options(joinedload(models.Suspended, models.Fact.fact_id == models.Suspended.fact_id))
+                facts_query = (facts_query.outerjoin(models.Suspended, models.Fact.fact_id == models.Suspended.fact_id)
                                .filter(or_(and_(models.Suspended.suspend_type != schemas.SuspendType.delete,
                                                 models.Suspended.user_id == user.id),
                                            models.Suspended.suspend_type == None)))
