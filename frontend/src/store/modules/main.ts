@@ -427,7 +427,6 @@ export default class MainModule extends VuexModule {
           await new Promise((resolve, _reject) => setTimeout(() => resolve(), 500)),
         ])
       )[0];
-      mainStore.setUserProfile(response.data);
       mainStore.removeNotification(loadingNotification);
       mainStore.addNotification({
         content: "Fact updated",
