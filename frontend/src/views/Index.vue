@@ -1,5 +1,5 @@
 <template>
-  <v-content>
+  <v-main>
     <v-img
       :min-height="'calc(100vh - ' + $vuetify.application.top + 'px)'"
       :src="require('@/assets/background-desktop.png')"
@@ -173,7 +173,7 @@
         </v-dialog>
       </v-theme-provider>
     </v-img>
-  </v-content>
+  </v-main>
 </template>
 
 <script lang="ts">

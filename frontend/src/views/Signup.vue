@@ -1,5 +1,5 @@
 <template>
-  <v-content>
+  <v-main>
     <validation-observer ref="observer" v-slot="{ invalid }">
       <form @submit.prevent="onSubmit" @reset.prevent="onReset">
         <v-card class="elevation-24">
@@ -89,7 +89,7 @@
         </v-card>
       </form>
     </validation-observer>
-  </v-content>
+  </v-main>
 </template>
 
 <script lang="ts">

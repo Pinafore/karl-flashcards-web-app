@@ -1,5 +1,5 @@
 <template>
-  <v-content>
+  <v-main>
     <v-card class="elevation-24">
       <v-toolbar dark color="primary">
         <v-toolbar-title
@@ -141,7 +141,7 @@
         <v-btn @click="signup">Sign Up</v-btn>
       </v-card-actions>
     </v-card>
-  </v-content>
+  </v-main>
 </template>
 
 <script lang="ts">
