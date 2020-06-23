@@ -5,7 +5,7 @@ import { mainStore } from "@/utils/store-accessor";
 
 @Module({ name: "study" })
 export default class StudyModule extends VuexModule {
-  facts: IComponents["Fact"][] = [];
+  study: IComponents["Fact"][] = [];
   deckIds: number[] = [];
   schedule: IComponents["Schedule"][] = [];
   recommendation = false;
@@ -82,13 +82,13 @@ export default class StudyModule extends VuexModule {
   }
 
   @Mutation
-  setFacts(payload: IComponents["Fact"][]) {
-    this.facts = payload;
+  setStudy(payload: IComponents["Fact"][]) {
+    this.study = payload;
   }
 
   @Mutation
   removeFirstFact() {
-    this.facts.shift();
+    this.study.shift();
   }
 
   @Mutation
@@ -135,8 +135,8 @@ export default class StudyModule extends VuexModule {
   @Action
   async getNextShow() {
     this.resetTimer();
-    if (this.facts.length > 0) {
-      this.setShow(this.facts[0]);
+    if (this.study.length > 0) {
+      this.setShow(this.study[0]);
       this.startTimer();
       this.removeFirstFact();
     } else {
@@ -152,9 +152,9 @@ export default class StudyModule extends VuexModule {
       const response = await api.getStudyFacts(mainStore.token, this.deckIds);
       if (response.data.length == 0) {
         this.setShowEmpty();
-        this.setFacts([]);
+        this.setStudy([]);
       } else {
-        this.setFacts(response.data);
+        this.setStudy(response.data);
         await this.getNextShow();
       }
     } catch (error) {

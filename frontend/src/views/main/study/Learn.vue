@@ -264,7 +264,7 @@
     dialog = false;
 
     get facts() {
-      return studyStore.facts;
+      return studyStore.study;
     }
 
     get show() {
