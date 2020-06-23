@@ -211,7 +211,7 @@ export default class MainModule extends VuexModule {
   @Action
   async routeLoggedIn() {
     if (router.currentRoute.path === "/login" || router.currentRoute.path === "/") {
-      router.push("/main");
+      router.push("/main/dashboard");
     } else if (router.currentRoute.path === "/sign-up") {
       router.push({
         path: "main/add/public-decks",
