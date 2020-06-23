@@ -13,7 +13,7 @@ from app.crud.base import CRUDBase
 from fastapi.encoders import jsonable_encoder
 from pytz import timezone
 from sqlalchemy import and_, or_, not_, func
-from sqlalchemy.orm import Session, Query
+from sqlalchemy.orm import Session, Query, joinedload
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -300,7 +300,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                                .filter(or_(and_(models.Suspended.suspend_type != schemas.SuspendType.delete),
                                            models.Suspended.suspend_type == None)))
             else:
-                facts_query = (facts_query.outerjoin(models.Suspended, models.Fact.fact_id == models.Suspended.fact_id)
+                facts_query = (facts_query.options(joinedload(models.Suspended, models.Fact.fact_id == models.Suspended.fact_id))
                                .filter(or_(and_(models.Suspended.suspend_type != schemas.SuspendType.delete,
                                                 models.Suspended.user_id == user.id),
                                            models.Suspended.suspend_type == None)))
@@ -335,7 +335,6 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 facts_query = facts_query.filter(models.Fact.markers.any(id=user.id))
             else:
                 facts_query = facts_query.filter(not_(models.Fact.markers.any(id=user.id)))
-        # facts_query = facts_query.join(models.Fact)
         if filters.randomize:
             facts_query = facts_query.order_by(func.random())
         return facts_query
@@ -344,7 +343,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         count_q = q.statement.with_only_columns([func.count()]).order_by(None)
         count = q.session.execute(count_q).scalar()
         return count
-    
+
     def count_eligible_facts(
             self, query: Query
     ) -> int:
