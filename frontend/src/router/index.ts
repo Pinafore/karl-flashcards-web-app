@@ -78,10 +78,21 @@ export default new VueRouter({
             },
             {
               path: "browse",
+              name: "browse",
               component: () =>
                 import(
-                  /* webpackChunkName: "main-dashboard" */ "@/views/main/Browser.vue"
+                  /* webpackChunkName: "main-browser" */ "@/views/main/Browser.vue"
                   ),
+              children: [
+                {
+                  path: "edit/:id",
+                  name: "browse-edit",
+                  components: {
+                    default: () => import(/* webpackChunkName: "main-browser" */ "@/views/main/Browser.vue"),
+                    edit: () => import(/* webpackChunkName: "edit-fact" */ "@/views/main/EditFact.vue")
+                  },
+                }
+              ]
             },
             {
               path: "profile",

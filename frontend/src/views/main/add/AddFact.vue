@@ -16,23 +16,27 @@
                   required: true,
                 }"
               >
-                <v-text-field
+                <v-textarea
                   v-model="front"
                   label="Front"
+                  auto-grow
+                  rows="1"
                   :error-messages="errors[0]"
                   required
-                ></v-text-field>
+                ></v-textarea>
               </validation-provider>
 
               <!-- back -->
               <validation-provider v-slot="{ errors }" rules="required" name="Back">
-                <v-text-field
+                <v-textarea
                   v-model="back"
                   label="Back"
                   type="back"
+                  auto-grow
+                  rows="1"
                   :error-messages="errors[0]"
                   required
-                ></v-text-field>
+                ></v-textarea>
               </validation-provider>
 
               <v-select

@@ -57,76 +57,8 @@
             </v-col>
           </v-row>
         </v-container>
-        <v-dialog v-model="dialog" max-width="500px">
-          <v-card>
-            <v-card-title>
-              <span class="headline">{{ formTitle }}</span>
-            </v-card-title>
-
-            <v-card-text>
-              <!-- front -->
-              <validation-provider
-                v-slot="{ errors }"
-                name="Front"
-                :rules="{
-                  required: true,
-                }"
-              >
-                <v-text-field
-                  v-model="editedFact.text"
-                  label="Front"
-                  :error-messages="errors[0]"
-                  required
-                ></v-text-field>
-              </validation-provider>
-
-              <!-- back -->
-              <validation-provider v-slot="{ errors }" rules="required" name="Back">
-                <v-text-field
-                  v-model="editedFact.answer"
-                  label="Back"
-                  type="back"
-                  :error-messages="errors[0]"
-                  required
-                ></v-text-field>
-              </validation-provider>
-
-              <v-select
-                v-model="editedFact.deck_id"
-                :items="decks"
-                item-text="title"
-                item-value="id"
-                label="Choose Deck"
-              >
-              </v-select>
-
-              <!-- category -->
-              <validation-provider v-slot="{ errors }" name="Category">
-                <v-text-field
-                  v-model="editedFact.category"
-                  label="Category"
-                  type="category"
-                  :error-messages="errors[0]"
-                ></v-text-field>
-              </validation-provider>
-
-              <!-- identifier -->
-              <validation-provider v-slot="{ errors }" name="Identifier">
-                <v-text-field
-                  v-model="editedFact.identifier"
-                  label="Identifier"
-                  type="identifier"
-                  :error-messages="errors[0]"
-                ></v-text-field>
-              </validation-provider>
-            </v-card-text>
-
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="blue darken-1" text @click="close">Cancel</v-btn>
-              <v-btn color="blue darken-1" text @click="save">Save</v-btn>
-            </v-card-actions>
-          </v-card>
+        <v-dialog v-model="dialog" max-width="1000px" @click:outside="returnBrowser">
+          <router-view name="edit"></router-view>
         </v-dialog>
       </template>
       <template v-slot:item.marked="{ item }">
@@ -151,7 +83,7 @@
         ></v-simple-checkbox>
       </template>
       <template v-slot:item.actions="{ item }">
-        <v-icon v-if="item.permission === 'owner'" @click="editFact(item)">
+        <v-icon v-if="showEdit(item)" @click="editFact(item)">
           mdi-pencil
         </v-icon>
         <v-icon @click="deleteFact(item, true)">
@@ -164,19 +96,16 @@
 
 <script lang="ts">
   import { Component, Vue, Watch } from "vue-property-decorator";
-  import { mainStore, studyStore } from "@/utils/store-accessor";
+  import { mainStore } from "@/utils/store-accessor";
   import { DataOptions } from "vuetify";
   import { IComponents, IStatus, Permission } from "@/interfaces";
   import { extend, ValidationObserver, ValidationProvider } from "vee-validate";
-  import { excluded, required } from "vee-validate/dist/rules";
+  import { required } from "vee-validate/dist/rules";
   import debounce from "lodash.debounce";
+  import { saveVisited } from "@/utils";
 
   // register validation rules
   extend("required", { ...required, message: "{_field_} can not be empty" });
-  extend("excluded", {
-    ...excluded,
-    message: "You already have a fact with this front text.",
-  });
 
   @Component({
     components: {
@@ -186,7 +115,6 @@
   })
   export default class Facts extends Vue {
     loading = true;
-    totalFacts = 0;
     formTitle = "Edit Fact";
     search = "";
     options: DataOptions = {
@@ -202,22 +130,6 @@
     dialog = false;
     selectedDecks = [];
     selectedStatus: IStatus = {};
-    editedFact = {
-      text: "",
-      answer: "",
-      deck_id: this.defaultDeck.id,
-      category: "",
-      identifier: "",
-    };
-    defaultFact = {
-      text: "",
-      answer: "",
-      deck_id: this.defaultDeck.id,
-      category: "",
-      identifier: "",
-    };
-    editedIndex = -1;
-    facts: IComponents["Fact"][] = [];
     debounceSearch = debounce(this.searchAPI, 1000);
     debounceDeck = debounce(this.searchAPI, 2000);
     headers = [
@@ -286,27 +198,38 @@
       await mainStore.getUserProfile();
     }
 
-    get defaultDeck() {
-      const userProfile = mainStore.userProfile;
-      const default_deck: IComponents["Deck"] = {
-        title: "Default",
-        public: true,
-        id: 1,
-      };
-      return userProfile && userProfile.default_deck
-        ? userProfile.default_deck
-        : default_deck;
+    public beforeRouteEnter(to, from, next) {
+      next((vm) => {
+        vm.dialog = to.name == "browse-edit";
+      });
     }
+
+    public beforeRouteUpdate(to, from, next) {
+      this.dialog = to.name == "browse-edit";
+      next();
+    }
+
     get decks() {
       const userProfile = mainStore.userProfile;
       return userProfile && userProfile.decks ? userProfile.decks : [];
     }
+
+    showEdit(item) {
+      return item.permission === Permission.owner;
+    }
+
+    get facts() {
+      return mainStore.facts;
+    }
+
+    get totalFacts() {
+      return mainStore.totalFacts;
+    }
+
     async getDataFromApi(searchData: IComponents["FactSearch"]) {
       this.loading = true;
       await mainStore.getFacts(searchData);
       // eslint-disable-next-line
-      this.facts = mainStore.facts;
-      this.totalFacts = mainStore.totalFacts;
       this.loading = false;
     }
 
@@ -363,10 +286,13 @@
       }
       this.getDataFromApi(searchData);
     }
+
     editFact(item) {
-      this.editedIndex = this.facts.indexOf(item);
-      this.editedFact = Object.assign({}, item);
-      this.dialog = true;
+      const index = String(this.facts.indexOf(item));
+      this.$router.push({
+        name: "browse-edit",
+        params: { id: index },
+      });
     }
 
     async markFact(item, todo) {
@@ -392,32 +318,11 @@
       await mainStore.deleteFact({ id: item.fact_id, todo: todo });
     }
 
-    close() {
-      this.dialog = false;
-      this.$nextTick(() => {
-        this.editedFact = Object.assign({}, this.defaultFact);
-        this.editedIndex = -1;
+    returnBrowser() {
+      saveVisited();
+      this.$router.push({
+        name: "browse",
       });
-    }
-
-    async save() {
-      if (this.editedIndex > -1) {
-        const fact: IComponents["FactUpdate"] = {
-          text: this.editedFact.text,
-          deck_id: this.editedFact.deck_id,
-          answer: this.editedFact.answer,
-          category: this.editedFact.category,
-          identifier: this.editedFact.identifier,
-        };
-        Object.assign(this.facts[this.editedIndex], this.editedFact);
-        this.close();
-        await mainStore.updateFact({
-          id: this.facts[this.editedIndex].fact_id,
-          data: fact,
-        });
-      } else {
-        this.close();
-      }
     }
   }
 </script>

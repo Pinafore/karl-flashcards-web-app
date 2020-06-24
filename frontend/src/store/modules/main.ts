@@ -84,6 +84,11 @@ export default class MainModule extends VuexModule {
   }
 
   @Mutation
+  updateFactInFacts(payload: {index: number; fact: IComponents["Fact"]}) {
+    Object.assign(this.facts[payload.index], payload.fact);
+  }
+
+  @Mutation
   setTotalFacts(payload: number) {
     this.totalFacts = payload;
   }
