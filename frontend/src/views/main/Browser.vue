@@ -102,7 +102,6 @@
   import { extend, ValidationObserver, ValidationProvider } from "vee-validate";
   import { required } from "vee-validate/dist/rules";
   import debounce from "lodash.debounce";
-  import { saveVisited } from "@/utils";
 
   // register validation rules
   extend("required", { ...required, message: "{_field_} can not be empty" });
@@ -313,7 +312,6 @@
     }
 
     returnBrowser() {
-      saveVisited();
       this.$router.push({
         name: "browse",
       });
