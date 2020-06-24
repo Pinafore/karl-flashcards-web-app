@@ -52,6 +52,7 @@
                   multiple
                   chips
                   deletable-chips
+                  :error-messages="errors[0]"
                   label="Column Headers"
                   hint="Order of selection matters. To reorder, uncheck and check in the right order."
                   persistent-hint
@@ -95,7 +96,7 @@
   import { Component, Vue } from "vue-property-decorator";
   import { Field, IComponents } from "@/interfaces";
   import { mainStore } from "@/store";
-  import { required, min } from "vee-validate/dist/rules";
+  import { required } from "vee-validate/dist/rules";
   import { ValidationProvider, ValidationObserver, extend } from "vee-validate";
 
   // register validation rules

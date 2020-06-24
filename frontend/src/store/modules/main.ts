@@ -18,7 +18,7 @@ export default class MainModule extends VuexModule {
   notifications: IAppNotification[] = [];
   publicDecks: IComponents["Deck"][] = [];
   facts: IComponents["Fact"][] = [];
-  totalFacts = 0
+  totalFacts = 0;
   isOnLogin: boolean | null = null;
 
   get hasAdminAccess() {
@@ -84,7 +84,7 @@ export default class MainModule extends VuexModule {
   }
 
   @Mutation
-  updateFactInFacts(payload: {index: number; fact: IComponents["Fact"]}) {
+  updateFactInFacts(payload: { index: number; fact: IComponents["Fact"] }) {
     Object.assign(this.facts[payload.index], payload.fact);
   }
 
@@ -426,7 +426,7 @@ export default class MainModule extends VuexModule {
     try {
       const loadingNotification = { content: "saving", showProgress: true };
       mainStore.addNotification(loadingNotification);
-      const response = (
+      const _response = (
         await Promise.all([
           api.updateFact(mainStore.token, payload.id, payload.data),
           await new Promise((resolve, _reject) => setTimeout(() => resolve(), 500)),
@@ -443,10 +443,10 @@ export default class MainModule extends VuexModule {
   }
 
   @Action
-  async markFact(payload: {id: number, todo: boolean}) {
+  async markFact(payload: { id: number; todo: boolean }) {
     try {
       await api.markFact(mainStore.token, payload.id);
-      if(payload.todo) {
+      if (payload.todo) {
         mainStore.addNotification({
           content: "Fact marked",
           color: "success",
@@ -457,16 +457,15 @@ export default class MainModule extends VuexModule {
           color: "success",
         });
       }
-
     } catch (error) {
       await mainStore.checkApiError(error);
     }
   }
 
   @Action
-  async suspendFact(payload: {id: number, todo: boolean}) {
+  async suspendFact(payload: { id: number; todo: boolean }) {
     try {
-      if(payload.todo) {
+      if (payload.todo) {
         await api.suspendFact(mainStore.token, payload.id);
         mainStore.addNotification({
           content: "Fact suspended",
@@ -485,10 +484,9 @@ export default class MainModule extends VuexModule {
   }
 
   @Action
-  async reportFact(payload: {id: number, todo: boolean}) {
+  async reportFact(payload: { id: number; todo: boolean }) {
     try {
-
-      if(payload.todo) {
+      if (payload.todo) {
         await api.reportFact(mainStore.token, payload.id);
         mainStore.addNotification({
           content: "Fact reported",
@@ -507,10 +505,10 @@ export default class MainModule extends VuexModule {
   }
 
   @Action
-  async deleteFact(payload: {id: number, todo: boolean}) {
+  async deleteFact(payload: { id: number; todo: boolean }) {
     try {
       await api.deleteFact(mainStore.token, payload.id);
-      if(payload.todo) {
+      if (payload.todo) {
         mainStore.addNotification({
           content: "Fact deleted",
           color: "success",

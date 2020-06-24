@@ -27,7 +27,7 @@ export default new VueRouter({
           // which is lazy-loaded when the route is visited.
           components: {
             default: () => import(/* webpackChunkName: "index" */ "@/views/Index.vue"),
-            dialog: () => import(/* webpackChunkName: "login" */ "@/views/Login.vue")
+            dialog: () => import(/* webpackChunkName: "login" */ "@/views/Login.vue"),
           },
         },
         {
@@ -82,17 +82,23 @@ export default new VueRouter({
               component: () =>
                 import(
                   /* webpackChunkName: "main-browser" */ "@/views/main/Browser.vue"
-                  ),
+                ),
               children: [
                 {
                   path: "edit/:id",
                   name: "browse-edit",
                   components: {
-                    default: () => import(/* webpackChunkName: "main-browser" */ "@/views/main/Browser.vue"),
-                    edit: () => import(/* webpackChunkName: "edit-fact" */ "@/views/main/EditFact.vue")
+                    default: () =>
+                      import(
+                        /* webpackChunkName: "main-browser" */ "@/views/main/Browser.vue"
+                      ),
+                    edit: () =>
+                      import(
+                        /* webpackChunkName: "edit-fact" */ "@/views/main/EditFact.vue"
+                      ),
                   },
-                }
-              ]
+                },
+              ],
             },
             {
               path: "profile",
@@ -153,7 +159,7 @@ export default new VueRouter({
                   component: () =>
                     import(
                       /* webpackChunkName: "main-upload-facts" */ "@/views/main/add/UploadFacts.vue"
-                      ),
+                    ),
                 },
               ],
             },

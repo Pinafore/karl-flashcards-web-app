@@ -54,27 +54,27 @@ export const api = {
     });
   },
   async getFacts(token: string, data: IComponents["FactSearch"]) {
-    let url = ``
+    let url = ``;
     if (data.all) {
-      url += `&all=${data.all}`
+      url += `&all=${data.all}`;
     }
     if (data.skip) {
-      url += `&skip=${data.skip}`
+      url += `&skip=${data.skip}`;
     }
     if (data.limit) {
-      url += `&limit=${data.limit}`
+      url += `&limit=${data.limit}`;
     }
     if (data.text) {
-      url += `&text=${data.text}`
+      url += `&text=${data.text}`;
     }
     if (data.answer) {
-      url += `&answer=${data.answer}`
+      url += `&answer=${data.answer}`;
     }
     if (data.category) {
-      url += `&category=${data.category}`
+      url += `&category=${data.category}`;
     }
     if (data.deck_id) {
-      url += `&deck_id=${data.deck_id}`
+      url += `&deck_id=${data.deck_id}`;
     }
     if (data.deck_ids) {
       for (const eachId in data.deck_ids) {
@@ -82,16 +82,19 @@ export const api = {
       }
     }
     if (data.marked) {
-      url += `&marked=${data.marked}`
+      url += `&marked=${data.marked}`;
     }
     if (data.suspended) {
-      url += `&suspended=${data.suspended}`
+      url += `&suspended=${data.suspended}`;
     }
     if (data.reported) {
-      url += `&reported=${data.reported}`
+      url += `&reported=${data.reported}`;
     }
     url = url.slice(1);
-    return axios.get<IComponents["FactBrowse"]>(`${apiUrl}/api/facts/?${url}`, authHeaders(token));
+    return axios.get<IComponents["FactBrowse"]>(
+      `${apiUrl}/api/facts/?${url}`,
+      authHeaders(token),
+    );
   },
   async getStudyFacts(token: string, deckIds: number[]) {
     let url = `${apiUrl}/api/study/`;
@@ -169,16 +172,17 @@ export const api = {
       url = url.slice(0, -1);
     }
     const formData = new FormData();
-    formData.append("upload_file", data.upload_file)
-    formData.append("deck_id", data.deck_id.toString())
-    if (data.delimeter !== undefined){
-      formData.append("delimeter", data.delimeter)
+    formData.append("upload_file", data.upload_file);
+    formData.append("deck_id", data.deck_id.toString());
+    if (data.delimeter !== undefined) {
+      formData.append("delimeter", data.delimeter);
     }
 
-    return axios.post( url, formData, {
+    return axios.post(url, formData, {
       headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'multipart/form-data'
-    }})
+        "Content-Type": "multipart/form-data",
+      },
+    });
   },
 };

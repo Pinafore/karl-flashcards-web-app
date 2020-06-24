@@ -26,9 +26,9 @@ export enum Permission {
   viewer = "viewer",
 }
 export interface IStatus {
-  marked?: boolean | undefined,
-  suspended?: boolean,
-  reported?: boolean
+  marked?: boolean | undefined;
+  suspended?: boolean;
+  reported?: boolean;
 }
 export interface IComponents {
   Deck: { title: string; public: boolean; id: number };
@@ -94,7 +94,7 @@ export interface IComponents {
     deck_id: number;
     delimeter?: string;
     upload_file: File;
-  }
+  };
   HTTPValidationError: {
     detail?: IComponents["ValidationError"][];
   };
