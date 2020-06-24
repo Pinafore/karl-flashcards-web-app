@@ -15,7 +15,7 @@
   const startRouteGuard = async (to, _from, next) => {
     await mainStore.checkLoggedIn();
     if (mainStore.isLoggedIn) {
-      mainStore.setIsOnLogin(false);
+      mainStore.setisOnHomeScreenPopup(false);
       if (to.path === "/login" || to.path === "/") {
         next("/main");
       } else {
@@ -24,7 +24,7 @@
     } else if (mainStore.isLoggedIn === false) {
       const visited = getVisited();
       if (visited === null && to.path !== "/privacy-irb") {
-        mainStore.setIsOnLogin(true);
+        mainStore.setisOnHomeScreenPopup(true);
         next("/privacy-irb");
       } else if (to.path === "/" || (to.path as string).startsWith("/main")) {
         next("/landing");
@@ -33,10 +33,10 @@
         to.path === "/sign-up" ||
         to.path === "/privacy-irb"
       ) {
-        mainStore.setIsOnLogin(true);
+        mainStore.setisOnHomeScreenPopup(true);
         next();
       } else {
-        mainStore.setIsOnLogin(false);
+        mainStore.setisOnHomeScreenPopup(false);
         next();
       }
     }
@@ -45,7 +45,7 @@
   @Component
   export default class Start extends Vue {
     get dialog() {
-      return mainStore.isOnLogin;
+      return mainStore.isOnHomeScreenPopup;
     }
     public beforeRouteEnter(to, from, next) {
       startRouteGuard(to, from, next);

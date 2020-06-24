@@ -19,7 +19,7 @@ export default class MainModule extends VuexModule {
   publicDecks: IComponents["Deck"][] = [];
   facts: IComponents["Fact"][] = [];
   totalFacts = 0;
-  isOnLogin: boolean | null = null;
+  isOnHomeScreenPopup: boolean | null = null;
 
   get hasAdminAccess() {
     return (
@@ -42,8 +42,8 @@ export default class MainModule extends VuexModule {
   }
 
   @Mutation
-  setIsOnLogin(payload: boolean) {
-    this.isOnLogin = payload;
+  setisOnHomeScreenPopup(payload: boolean) {
+    this.isOnHomeScreenPopup = payload;
   }
 
   @Mutation
