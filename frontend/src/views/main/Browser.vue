@@ -115,7 +115,6 @@
   })
   export default class Facts extends Vue {
     loading = true;
-    formTitle = "Edit Fact";
     search = "";
     options: DataOptions = {
       groupBy: [],
@@ -229,12 +228,10 @@
     async getDataFromApi(searchData: IComponents["FactSearch"]) {
       this.loading = true;
       await mainStore.getFacts(searchData);
-      // eslint-disable-next-line
       this.loading = false;
     }
 
     @Watch("options", { deep: true })
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onOptionsChanged(value: DataOptions) {
       const limit = value.itemsPerPage;
       const skip = value.page * value.itemsPerPage - value.itemsPerPage;
@@ -243,19 +240,16 @@
     }
 
     @Watch("search", { deep: true })
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onSearchChanged() {
       this.debounceSearch();
     }
 
     @Watch("selectedDecks", { deep: true })
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onSelectedDecksChanged() {
       this.debounceDeck();
     }
 
     @Watch("selectedStatus", { deep: true })
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onSelectedStatusChanged() {
       this.debounceSearch();
     }
