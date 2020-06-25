@@ -1,3 +1,4 @@
+import json
 import logging
 from typing import Any, List, Optional
 
@@ -49,6 +50,11 @@ def get_next_set(
                                            " of the specified decks")
 
         facts = crud.fact.get_study_set(db=db, user=user, deck_ids=deck_ids, return_limit=limit)
+
+    if isinstance(facts, requests.exceptions.RequestException):
+        raise HTTPException(status_code=555, detail="Connection to scheduler is down")
+    if isinstance(facts, json.decoder.JSONDecodeError):
+        raise HTTPException(status_code=556, detail="Scheduler malfunction")
     return facts
 
 

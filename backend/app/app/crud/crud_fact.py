@@ -7,6 +7,8 @@ from typing import List, Union, Dict, Any, Optional
 
 import pandas
 import requests
+from sentry_sdk import capture_exception
+
 from app import crud, models, schemas
 from app.core.config import settings
 from app.crud.base import CRUDBase
@@ -371,7 +373,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             deck_ids: List[int] = None,
             return_limit: Optional[int] = None,
             send_limit: Optional[int] = 100,
-    ) -> List[schemas.Fact]:
+    ) -> Union[List[schemas.Fact], requests.exceptions.RequestException, json.decoder.JSONDecodeError]:
         filters = schemas.FactSearch(deck_ids=deck_ids, limit=send_limit, randomize=True, studyable=True)
         query = crud.fact.build_facts_query(db=db, user=user, filters=filters)
         eligible_facts = self.get_eligible_facts(query=query, limit=send_limit)
@@ -393,55 +395,62 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         logger.info("eligible fact time: " + str(eligible_fact_time))
 
         karl_query_start = time.time()
-        scheduler_response = requests.post(settings.INTERFACE + "api/karl/schedule", json=karl_list)
-        response_json = scheduler_response.json()
-        card_order = response_json["order"]
-        rationale = response_json["rationale"]
+        try:
+            scheduler_response = requests.post(settings.INTERFACE + "api/karl/schedule", json=karl_list)
+            response_json = scheduler_response.json()
+            card_order = response_json["order"]
+            rationale = response_json["rationale"]
 
-        query_time = time.time() - karl_query_start
-        logger.info("query time: " + str(query_time))
+            query_time = time.time() - karl_query_start
+            logger.info("query time: " + str(query_time))
 
-        facts = []
-        if rationale != "<p>no fact received</p>":
-            if settings.ENVIRONMENT == "dev":
-                logger.info(karl_list)
-                logger.info(scheduler_response.json())
-                logger.info("First order: " + str(card_order[0]))
-                logger.info("First card: " + str(karl_list[card_order[0]]))
-                logger.info("rationale:" + str(rationale))
-            reordered_karl_list = [karl_list[x] for x in card_order]
-            if return_limit:
-                for _, each_karl_fact in zip(range(return_limit), reordered_karl_list):
-                    retrieved_fact = self.get(db=db, id=int(each_karl_fact["fact_id"]))
-                    fact_schema = self.get_schema_with_perm(db=db, db_obj=retrieved_fact, user=user)
-                    fact_schema.rationale = rationale
-                    if retrieved_fact:
-                        fact_schema.marked = True if user in retrieved_fact.markers else False
-                    facts.append(fact_schema)
-            else:
-                for each_karl_fact in reordered_karl_list:
-                    retrieved_fact = self.get(db=db, id=int(each_karl_fact["fact_id"]))
-                    fact_schema = self.get_schema_with_perm(db=db, db_obj=retrieved_fact, user=user)
-                    fact_schema.rationale = rationale
-                    # MARK: maybe not the most efficient solution for determining if user has marked a fact
-                    if retrieved_fact:
-                        fact_schema.marked = True if user in retrieved_fact.markers else False
-                    facts.append(fact_schema)
-        details = {
-            "study_system": "karl",
-            "first_fact": facts[0] if len(facts) != 0 else "empty",
-            "eligible_fact_time": query_time,
-            "scheduler_query_time": eligible_fact_time,
-        }
-        history_in = schemas.HistoryCreate(
-            time=datetime.now(timezone('UTC')).isoformat(),
-            user_id=user.id,
-            log_type=schemas.Log.get_facts,
-            details=details
+            facts = []
+            if rationale != "<p>no fact received</p>":
+                if settings.ENVIRONMENT == "dev":
+                    logger.info(karl_list)
+                    logger.info(scheduler_response.json())
+                    logger.info("First order: " + str(card_order[0]))
+                    logger.info("First card: " + str(karl_list[card_order[0]]))
+                    logger.info("rationale:" + str(rationale))
+                reordered_karl_list = [karl_list[x] for x in card_order]
+                if return_limit:
+                    for _, each_karl_fact in zip(range(return_limit), reordered_karl_list):
+                        retrieved_fact = self.get(db=db, id=int(each_karl_fact["fact_id"]))
+                        fact_schema = self.get_schema_with_perm(db=db, db_obj=retrieved_fact, user=user)
+                        fact_schema.rationale = rationale
+                        if retrieved_fact:
+                            fact_schema.marked = True if user in retrieved_fact.markers else False
+                        facts.append(fact_schema)
+                else:
+                    for each_karl_fact in reordered_karl_list:
+                        retrieved_fact = self.get(db=db, id=int(each_karl_fact["fact_id"]))
+                        fact_schema = self.get_schema_with_perm(db=db, db_obj=retrieved_fact, user=user)
+                        fact_schema.rationale = rationale
+                        # MARK: maybe not the most efficient solution for determining if user has marked a fact
+                        if retrieved_fact:
+                            fact_schema.marked = True if user in retrieved_fact.markers else False
+                        facts.append(fact_schema)
+            details = {
+                "study_system": "karl",
+                "first_fact": facts[0] if len(facts) != 0 else "empty",
+                "eligible_fact_time": query_time,
+                "scheduler_query_time": eligible_fact_time,
+            }
+            history_in = schemas.HistoryCreate(
+                time=datetime.now(timezone('UTC')).isoformat(),
+                user_id=user.id,
+                log_type=schemas.Log.get_facts,
+                details=details
 
-        )
-        crud.history.create(db=db, obj_in=history_in)
-        return facts
+            )
+            crud.history.create(db=db, obj_in=history_in)
+            return facts
+        except requests.exceptions.RequestException as e:
+            capture_exception(e)
+            return e
+        except json.decoder.JSONDecodeError as e:
+            capture_exception(e)
+            return e
 
     def update_schedule(
             self, db: Session, *, user: models.User, db_obj: models.Fact, schedule: schemas.Schedule
