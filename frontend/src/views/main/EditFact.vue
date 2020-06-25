@@ -87,9 +87,10 @@
 <script lang="ts">
   import { Component, Vue, Watch } from "vue-property-decorator";
   import { IComponents } from "@/interfaces";
-  import { mainStore } from "@/store";
+  import { mainStore, studyStore } from "@/store";
   import { required } from "vee-validate/dist/rules";
   import { ValidationProvider, ValidationObserver, extend } from "vee-validate";
+  import router from "@/router";
 
   // register validation rules
   extend("required", { ...required, message: "{_field_} can not be empty" });
@@ -110,9 +111,27 @@
     fact: IComponents["Fact"] | null = null;
 
     async mounted() {
-      this.editedIndex = Number(this.$router.currentRoute.params.id);
-      this.storedFact();
       await mainStore.getUserProfile();
+    }
+
+    public beforeRouteEnter(to, from, next) {
+      next((vm) => {
+        vm.setEditedIndex(to.name);
+        vm.storedFact();
+      });
+    }
+
+    public async beforeRouteUpdate(to, from, next) {
+      this.setEditedIndex(to.name);
+      next();
+    }
+
+    setEditedIndex(routeName) {
+      if (routeName == "learn-edit") {
+        this.editedIndex = 0;
+      } else {
+        this.editedIndex = Number(this.$router.currentRoute.params.id);
+      }
     }
 
     get decks() {
@@ -121,7 +140,11 @@
     }
 
     get facts() {
-      return mainStore.facts;
+      if (this.$router.currentRoute.name == "learn-edit") {
+        return [studyStore.show.fact];
+      } else {
+        return mainStore.facts;
+      }
     }
 
     @Watch("facts")
@@ -135,12 +158,12 @@
 
     onReset() {
       this.$refs.observer.reset();
-      this.editedIndex = Number(this.$router.currentRoute.params.id);
+      this.setEditedIndex(this.$router.currentRoute.name);
       this.storedFact();
     }
 
     close() {
-      this.$router.push({ name: "browse" });
+      this.$router.back();
     }
 
     async save() {
@@ -159,11 +182,15 @@
           identifier: this.fact.identifier,
         };
         this.close();
-        await mainStore.updateFact({
-          id: this.fact.fact_id,
-          data: fact_update,
-        });
-        mainStore.updateFactInFacts({ index: this.editedIndex, fact: this.fact });
+        if (this.$router.currentRoute.name == "learn-edit") {
+          await studyStore.editFact(fact_update);
+        } else {
+          await mainStore.updateFact({
+            id: this.fact.fact_id,
+            data: fact_update,
+          });
+          mainStore.updateFactInFacts({ index: this.editedIndex, fact: this.fact });
+        }
       } else {
         this.close();
       }

@@ -173,16 +173,32 @@ export default new VueRouter({
                   name: "main-study-users-decks",
                   component: () =>
                     import(
-                      /* webpackChunkName: "main-profile" */ "@/views/main/study/Decks.vue"
+                      /* webpackChunkName: "main-decks" */ "@/views/main/study/Decks.vue"
                     ),
                 },
                 {
                   path: "learn",
-                  name: "main-study-users-learn",
+                  name: "learn",
                   component: () =>
                     import(
-                      /* webpackChunkName: "main-profile" */ "@/views/main/study/Learn.vue"
+                      /* webpackChunkName: "main-learn" */ "@/views/main/study/Learn.vue"
                     ),
+                  children: [
+                    {
+                      path: "edit",
+                      name: "learn-edit",
+                      components: {
+                        default: () =>
+                          import(
+                            /* webpackChunkName: "main-learn" */ "@/views/main/study/Learn.vue"
+                            ),
+                        edit: () =>
+                          import(
+                            /* webpackChunkName: "edit-fact" */ "@/views/main/EditFact.vue"
+                            ),
+                      },
+                    },
+                  ],
                 },
               ],
             },

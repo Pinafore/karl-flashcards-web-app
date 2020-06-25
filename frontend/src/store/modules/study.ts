@@ -2,11 +2,12 @@ import { api } from "@/api";
 import { Action, Module, Mutation, VuexModule } from "vuex-module-decorators";
 import { IComponents, IStudyShow, Permission } from "@/interfaces";
 import { mainStore } from "@/utils/store-accessor";
+import router from '@/router';
 
 @Module({ name: "study" })
 export default class StudyModule extends VuexModule {
   study: IComponents["Fact"][] = [];
-  deckIds: number[] = [];
+  deckIds: number[] | null = null;
   schedule: IComponents["Schedule"][] = [];
   recommendation = false;
   show: IStudyShow = {
@@ -87,6 +88,22 @@ export default class StudyModule extends VuexModule {
   }
 
   @Mutation
+  editShowFact(payload: IComponents["FactUpdate"]) {
+    if (payload.text) {
+      this.show.text = payload.text;
+    }
+    if (payload.answer && this.show.fact) {
+      this.show.fact.answer = payload.answer
+    }
+    if (payload.category && this.show.fact) {
+      this.show.fact.category = payload.category
+    }
+    if (payload.identifier && this.show.fact) {
+      this.show.fact.identifier = payload.identifier
+    }
+  }
+
+  @Mutation
   removeFirstFact() {
     this.study.shift();
   }
@@ -149,7 +166,7 @@ export default class StudyModule extends VuexModule {
     this.resetTimer();
     try {
       this.setShowLoading();
-      const response = await api.getStudyFacts(mainStore.token, this.deckIds);
+      const response = await api.getStudyFacts(mainStore.token, this.deckIds ?? []);
       if (response.data.length == 0) {
         this.setShowEmpty();
         this.setStudy([]);
@@ -207,6 +224,41 @@ export default class StudyModule extends VuexModule {
         });
         await api.reportFact(mainStore.token, this.show.fact.fact_id);
         await this.getNextShow();
+      } catch (error) {
+        await mainStore.checkApiError(error);
+      }
+    }
+  }
+
+  @Action
+  async editFact(payload: IComponents["FactUpdate"]) {
+    this.resetTimer();
+    if (this.show.fact && !this.show.enable_report) {
+      try {
+        await api.updateFact(mainStore.token, this.show.fact.fact_id, payload);
+        mainStore.addNotification({
+          content: "Fact edited",
+          color: "success",
+        });
+        this.editShowFact(payload);
+        router.back();
+      } catch (error) {
+        await mainStore.checkApiError(error);
+      }
+    }
+  }
+
+  @Action
+  async editFactDialog() {
+    this.resetTimer();
+    if (this.show.fact && !this.show.enable_report) {
+      try {
+        if (router.currentRoute.name == "learn") {
+          router.push({name: "learn-edit"})
+        } else {
+          router.back()
+        }
+
       } catch (error) {
         await mainStore.checkApiError(error);
       }

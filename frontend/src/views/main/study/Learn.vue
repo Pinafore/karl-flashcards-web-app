@@ -83,34 +83,6 @@
           </template>
           <span>Suspend (Alt-S)</span>
         </v-tooltip>
-
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn
-              v-if="$vuetify.breakpoint.mdAndDown"
-              :disabled="!show.enable_report"
-              text
-              icon
-              v-bind="attrs"
-              @click="report()"
-              v-on="on"
-            >
-              <v-icon>mdi-alert-octagon</v-icon>
-            </v-btn>
-            <v-btn
-              v-else
-              class="ma-1 pa-2"
-              :disabled="!show.enable_report"
-              v-bind="attrs"
-              @click="report()"
-              v-on="on"
-            >
-              <v-icon left>mdi-alert-octagon</v-icon>Report (Alt-R)
-            </v-btn>
-          </template>
-          <span>Report (Alt-R)</span>
-        </v-tooltip>
-
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
             <v-btn
@@ -137,6 +109,52 @@
           </template>
           <span>Delete (Alt-D)</span>
         </v-tooltip>
+        <span v-if="show.enable_report">
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                v-if="$vuetify.breakpoint.mdAndDown"
+                text
+                icon
+                v-bind="attrs"
+                @click="report()"
+                v-on="on"
+              >
+                <v-icon>mdi-alert-octagon</v-icon>
+              </v-btn>
+              <v-btn
+                v-else
+                class="ma-1 pa-2"
+                v-bind="attrs"
+                @click="report()"
+                v-on="on"
+              >
+                <v-icon left>mdi-alert-octagon</v-icon>Report (Alt-R)
+              </v-btn>
+            </template>
+            <span>Report (Alt-R)</span>
+          </v-tooltip>
+        </span>
+        <span v-else-if="show.enable_actions">
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                v-if="$vuetify.breakpoint.mdAndDown"
+                text
+                icon
+                v-bind="attrs"
+                @click="edit()"
+                v-on="on"
+              >
+                <v-icon>mdi-pencil</v-icon>
+              </v-btn>
+              <v-btn v-else class="ma-1 pa-2" v-bind="attrs" @click="edit()" v-on="on">
+                <v-icon left>mdi-pencil</v-icon>Edit (Alt-E)
+              </v-btn>
+            </template>
+            <span>Edit (Alt-E)</span>
+          </v-tooltip>
+        </span>
       </v-card-title>
     </v-card>
     <v-card class="my-2 mx-3 px-3 py-3">
@@ -249,6 +267,14 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog
+      v-model="editDialog"
+      max-width="1000px"
+      scrollable
+      @click:outside="returnLearn"
+    >
+      <router-view name="edit"></router-view>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -262,6 +288,7 @@
     typed = "";
     retyped = "";
     dialog = false;
+    editDialog = false;
 
     get facts() {
       return studyStore.study;
@@ -288,8 +315,17 @@
       window.addEventListener("keydown", this.handleKeyDown);
     }
 
+    public beforeRouteEnter(to, from, next) {
+      next((vm) => {
+        vm.editDialog = to.name == "learn-edit";
+      });
+    }
+
     public async beforeRouteUpdate(to, from, next) {
-      await this.determine_decks(to.query.deck);
+      if (to.name != "learn-edit" && from.name != "learn-edit") {
+        await this.determine_decks(to.query.deck);
+      }
+      this.editDialog = to.name == "learn-edit";
       next();
     }
 
@@ -324,6 +360,8 @@
         this.report();
       } else if (e.altKey && key == "m") {
         this.mark();
+      } else if (e.altKey && key == "e") {
+        this.edit();
       } else if (this.showBack) {
         this.determineResponse(e, key);
       } else if (key == "enter") {
@@ -375,6 +413,10 @@
       this.resetCard();
     }
 
+    public async edit() {
+      await studyStore.editFactDialog();
+    }
+
     public async report() {
       await studyStore.reportFact();
       this.resetCard();
@@ -409,6 +451,10 @@
       if (container) {
         container.scrollIntoView();
       }
+    }
+
+    returnLearn() {
+      this.$router.back();
     }
   }
 </script>
