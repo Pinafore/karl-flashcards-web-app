@@ -11,10 +11,11 @@ from app.db.session import SessionLocal
 from sentry_sdk.integrations.celery import CeleryIntegration
 from sqlalchemy.orm import Session
 
-sentry_sdk.init(
-    settings.SENTRY_DSN,
-    integrations=[CeleryIntegration()]
-)
+if settings.SENTRY_DSN:
+    sentry_sdk.init(
+        settings.SENTRY_DSN,
+        integrations=[CeleryIntegration()]
+    )
 
 
 @celery_app.task(acks_late=True)
