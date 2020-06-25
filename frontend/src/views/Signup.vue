@@ -10,6 +10,16 @@
             <v-spacer></v-spacer>
           </v-toolbar>
           <v-card-text>
+            <validation-provider v-slot="{ errors }" name="Username" rules="required">
+              <v-text-field
+                v-model="username"
+                prepend-icon="mdi-account"
+                label="Username"
+                :error-messages="errors[0]"
+                required
+                name="username"
+              ></v-text-field>
+            </validation-provider>
             <validation-provider
               v-slot="{ errors }"
               name="Email"
@@ -21,16 +31,7 @@
                 :error-messages="errors[0]"
                 label="Email"
                 type="email"
-                required
-              ></v-text-field>
-            </validation-provider>
-            <validation-provider v-slot="{ errors }" name="Username" rules="required">
-              <v-text-field
-                v-model="username"
-                prepend-icon="mdi-account"
-                label="Username"
-                :error-messages="errors[0]"
-                autocomplete="off"
+                name="email"
                 required
               ></v-text-field>
             </validation-provider>
