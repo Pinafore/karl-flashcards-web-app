@@ -21,7 +21,7 @@ if (process.env.VUE_APP_ENV) {
 Vue.config.productionTip = false;
 
 Vue.use(VueGtag, {
-  config: { id: "G-9X7E66LXQM" },
+  config: { id: "UA-170799823-1" },
   appName: 'KAR³L',
   pageTrackerScreenviewEnabled: true
 }, router);
