@@ -29,7 +29,7 @@
             </v-col>
           </v-row>
           <v-row justify="center" align="center" class="pa-3">
-            <v-col cols="12" sm="auto">
+            <v-col cols="auto">
               <v-btn
                 large
                 depressed
@@ -41,7 +41,7 @@
                 Sign Up
               </v-btn>
             </v-col>
-            <v-col cols="12" sm="auto">
+            <v-col cols="auto">
               <v-btn
                 large
                 depressed
