@@ -7,6 +7,7 @@ import store from "./store";
 import vuetify from "./plugins/vuetify";
 import * as Sentry from "@sentry/browser";
 import { Vue as VueIntegration } from "@sentry/integrations";
+import VueAnalytics from 'vue-analytics';
 
 if (process.env.VUE_APP_ENV) {
   Sentry.init({
@@ -17,6 +18,11 @@ if (process.env.VUE_APP_ENV) {
 
 
 Vue.config.productionTip = false;
+
+Vue.use(VueAnalytics, {
+  id: 'G-9X7E66LXQM',
+  router
+});
 
 new Vue({
   router,
