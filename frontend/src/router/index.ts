@@ -15,6 +15,7 @@ export default new VueRouter({
       children: [
         {
           path: "landing",
+          name: "landing",
           // route level code-splitting
           // this generates a separate chunk (about.[hash].js) for this route
           // which is lazy-loaded when the route is visited.
@@ -22,6 +23,7 @@ export default new VueRouter({
         },
         {
           path: "login",
+          name: "login",
           // route level code-splitting
           // this generates a separate chunk (about.[hash].js) for this route
           // which is lazy-loaded when the route is visited.
@@ -32,6 +34,7 @@ export default new VueRouter({
         },
         {
           path: "sign-up",
+          name: "sign-up",
           // route level code-splitting
           // this generates a separate chunk (about.[hash].js) for this route
           // which is lazy-loaded when the route is visited.
@@ -42,6 +45,7 @@ export default new VueRouter({
         },
         {
           path: "privacy-irb",
+          name: "privacy-irb",
           // route level code-splitting
           // this generates a separate chunk (about.[hash].js) for this route
           // which is lazy-loaded when the route is visited.
@@ -52,6 +56,7 @@ export default new VueRouter({
         },
         {
           path: "recover-password",
+          name: "recover-password",
           component: () =>
             import(
               /* webpackChunkName: "recover-password" */ "@/views/PasswordRecovery.vue"
@@ -59,6 +64,7 @@ export default new VueRouter({
         },
         {
           path: "reset-password",
+          name: "reset-password",
           component: () =>
             import(
               /* webpackChunkName: "reset-password" */ "@/views/ResetPassword.vue"
@@ -66,11 +72,13 @@ export default new VueRouter({
         },
         {
           path: "main",
+          name: "main",
           component: () =>
             import(/* webpackChunkName: "main" */ "@/views/main/Main.vue"),
           children: [
             {
               path: "dashboard",
+              name: "dashboard",
               component: () =>
                 import(
                   /* webpackChunkName: "main-dashboard" */ "@/views/main/Dashboard.vue"
@@ -107,6 +115,7 @@ export default new VueRouter({
               children: [
                 {
                   path: "view",
+                  name: "user-view",
                   component: () =>
                     import(
                       /* webpackChunkName: "main-profile" */ "@/views/main/profile/UserProfile.vue"
@@ -114,6 +123,7 @@ export default new VueRouter({
                 },
                 {
                   path: "edit",
+                  name: "user-edit",
                   component: () =>
                     import(
                       /* webpackChunkName: "main-profile-edit" */ "@/views/main/profile/UserProfileEdit.vue"
@@ -121,6 +131,7 @@ export default new VueRouter({
                 },
                 {
                   path: "password",
+                  name: "user-edit-password",
                   component: () =>
                     import(
                       /* webpackChunkName: "main-profile-password" */ "@/views/main/profile/UserProfileEditPassword.vue"
@@ -135,6 +146,7 @@ export default new VueRouter({
               children: [
                 {
                   path: "fact",
+                  name: "add-fact",
                   component: () =>
                     import(
                       /* webpackChunkName: "main-add-fact" */ "@/views/main/add/AddFact.vue"
@@ -142,6 +154,7 @@ export default new VueRouter({
                 },
                 {
                   path: "deck",
+                  name: "add-deck",
                   component: () =>
                     import(
                       /* webpackChunkName: "main-add-deck" */ "@/views/main/add/AddDeck.vue"
@@ -149,6 +162,7 @@ export default new VueRouter({
                 },
                 {
                   path: "public-decks",
+                  name: "public-decks",
                   component: () =>
                     import(
                       /* webpackChunkName: "main-choose-decks" */ "@/views/main/add/ChooseDecks.vue"
@@ -156,6 +170,7 @@ export default new VueRouter({
                 },
                 {
                   path: "upload-facts",
+                  name: "upload-facts",
                   component: () =>
                     import(
                       /* webpackChunkName: "main-upload-facts" */ "@/views/main/add/UploadFacts.vue"
@@ -170,7 +185,7 @@ export default new VueRouter({
               children: [
                 {
                   path: "decks",
-                  name: "main-study-users-decks",
+                  name: "decks",
                   component: () =>
                     import(
                       /* webpackChunkName: "main-decks" */ "@/views/main/study/Decks.vue"
@@ -216,6 +231,7 @@ export default new VueRouter({
                 },
                 {
                   path: "users/all",
+                  name: "users-all",
                   component: () =>
                     import(
                       /* webpackChunkName: "main-admin-users" */ "@/views/main/admin/AdminUsers.vue"
