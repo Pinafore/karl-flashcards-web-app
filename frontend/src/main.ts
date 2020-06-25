@@ -8,10 +8,13 @@ import vuetify from "./plugins/vuetify";
 import * as Sentry from "@sentry/browser";
 import { Vue as VueIntegration } from "@sentry/integrations";
 
-Sentry.init({
-  dsn: "https://ac296d2d7e8c4115ab8f2713520612cf@o283930.ingest.sentry.io/5259730",
-  integrations: [new VueIntegration({ Vue, attachProps: true, logErrors: true })],
-});
+if (process.env.VUE_APP_ENV) {
+  Sentry.init({
+    dsn: "https://ac296d2d7e8c4115ab8f2713520612cf@o283930.ingest.sentry.io/5259730",
+    integrations: [new VueIntegration({ Vue, attachProps: true, logErrors: true })],
+  });
+}
+
 
 Vue.config.productionTip = false;
 
