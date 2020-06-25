@@ -7,7 +7,7 @@ import store from "./store";
 import vuetify from "./plugins/vuetify";
 import * as Sentry from "@sentry/browser";
 import { Vue as VueIntegration } from "@sentry/integrations";
-import VueGtag from "vue-gtag"
+import VueGtag from "vue-gtag";
 
 if (process.env.VUE_APP_ENV) {
   Sentry.init({
@@ -22,8 +22,6 @@ Vue.config.productionTip = false;
 
 Vue.use(VueGtag, {
   config: { id: "UA-170799823-1" },
-  appName: 'KAR³L',
-  pageTrackerScreenviewEnabled: true
 }, router);
 
 new Vue({
