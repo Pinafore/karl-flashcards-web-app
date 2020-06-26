@@ -3,7 +3,7 @@ import time
 from datetime import datetime
 from typing import Any, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Form, Body
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Form
 from pytz import timezone
 from sqlalchemy.orm import Session
 from starlette.background import BackgroundTasks
@@ -38,6 +38,9 @@ def read_facts(
     """
     Retrieve facts.
     """
+    if limit > 1000:
+        raise HTTPException(status_code=445, detail="Too many facts requested. Please limit to <1000 facts.")
+
     if suspended and reported:
         studyable = True
     else:
@@ -59,17 +62,16 @@ def read_facts(
     query = crud.fact.build_facts_query(db=db, user=current_user, filters=search)
     facts = crud.fact.get_eligible_facts(query=query, skip=skip, limit=limit)
     total = crud.fact.count_eligible_facts(query=query)
-    if permissions:
-        begin_overall_start = time.time()
-        new_facts: List[schemas.Fact] = []
-        for fact in facts:
-            new_facts.append(crud.fact.get_schema_with_perm(db=db, db_obj=fact, user=current_user))
-        fact_browser = schemas.FactBrowse(facts=new_facts, total=total)
-        overall_end_time = time.time()
-        overall_total_time = overall_end_time - begin_overall_start
-        logger.info("permissions: " + str(overall_total_time))
-    else:
-        fact_browser = schemas.FactBrowse(facts=facts, total=total)
+
+    begin_overall_start = time.time()
+    new_facts: List[schemas.Fact] = []
+    for fact in facts:
+        new_facts.append(crud.fact.get_schema_with_perm(db=db, db_obj=fact, user=current_user))
+    overall_end_time = time.time()
+    overall_total_time = overall_end_time - begin_overall_start
+    logger.info("permissions: " + str(overall_total_time))
+
+    fact_browser = schemas.FactBrowse(facts=new_facts, total=total)
     details = search.dict()
     details["study_system"] = "karl"
     history_in = schemas.HistoryCreate(
@@ -230,7 +232,7 @@ def suspend_fact(
 def report_fact(
         *,
         perms: deps.CheckFactPerms = Depends(),
-        suggestion: schemas.FactReport = Body(None),
+        suggestion: schemas.FactReport,
 ) -> Any:
     """
     Report or undo report of a fact.
@@ -273,6 +275,4 @@ def clear_fact_status(
     """
     if crud.user.is_superuser(perms.current_user):
         fact = crud.fact.resolve_report(db=perms.db, user=perms.current_user, db_obj=perms.fact)
-    else:
-        fact = crud.fact.clear_report_or_suspend(db=perms.db, db_obj=perms.fact, user=perms.current_user)
     return fact

@@ -1,14 +1,11 @@
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, ForeignKey, TIMESTAMP, Enum, String
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import Column, Integer, ForeignKey, TIMESTAMP
 from sqlalchemy.orm import relationship, backref
 
 from app.db.base_class import Base
-from app.schemas.suspend_type import SuspendType
 from .fact import Fact
 from .user import User
-from ..schemas import FactUpdate
 
 
 class Suspended(Base):
@@ -16,20 +13,11 @@ class Suspended(Base):
     fact_id = Column(Integer, ForeignKey("fact.fact_id"), nullable=False)
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     date_suspended = Column(TIMESTAMP(timezone=True), nullable=False)
-    suspend_type = Column(Enum(SuspendType), nullable=False)
-    suggestion = Column(JSONB)
-    comment = Column(String)
 
     suspender = relationship("User", backref=backref("suspensions", cascade="all, delete-orphan"))
     suspended_fact = relationship("Fact", backref=backref("suspensions", cascade="all, delete-orphan"))
 
-    def __init__(self, suspender: User, suspended_fact: Fact, date_suspended: datetime, suspend_type: SuspendType,
-                 suggestion: FactUpdate = None, comment: str = None):
+    def __init__(self, suspender: User, suspended_fact: Fact, date_suspended: datetime):
         self.suspended_fact = suspended_fact
         self.suspender = suspender
         self.date_suspended = date_suspended
-        self.suspend_type = suspend_type
-        if suggestion:
-            self.suggestion = suggestion.dict()
-        if comment:
-            self.comment = comment

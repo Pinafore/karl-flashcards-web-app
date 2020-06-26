@@ -1,7 +1,5 @@
 from typing import TYPE_CHECKING, Optional
 
-from app.db.base_class import Base
-from app.schemas import Permission
 from sqlalchemy import Column, ForeignKey, Integer, String, TIMESTAMP, ARRAY, cast, Index, func
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.dialects.postgresql import JSONB
@@ -9,6 +7,8 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_method
 from sqlalchemy.orm import relationship
 
+from app.db.base_class import Base
+from app.schemas import Permission
 from .user import User
 
 if TYPE_CHECKING:
@@ -41,6 +41,8 @@ class Fact(Base):
     deck = relationship("Deck", back_populates="facts")
     history = relationship("History", back_populates="fact")
     suspenders = association_proxy('suspensions', 'suspender')
+    deleters = association_proxy('deletions', 'deleter')
+    reporters = association_proxy('reports', 'reporter')
     markers = association_proxy('marks', 'marker')
 
     __ts_vector__ = create_tsvector(

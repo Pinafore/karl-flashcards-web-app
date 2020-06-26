@@ -465,14 +465,13 @@ export default class MainModule extends VuexModule {
   @Action
   async suspendFact(payload: { id: number; todo: boolean }) {
     try {
+      await api.suspendFact(mainStore.token, payload.id);
       if (payload.todo) {
-        await api.suspendFact(mainStore.token, payload.id);
         mainStore.addNotification({
           content: "Fact suspended",
           color: "success",
         });
       } else {
-        await api.clearFact(mainStore.token, payload.id);
         mainStore.addNotification({
           content: "Fact unsuspended",
           color: "success",
@@ -493,7 +492,7 @@ export default class MainModule extends VuexModule {
           color: "success",
         });
       } else {
-        await api.clearFact(mainStore.token, payload.id);
+        await api.reportFact(mainStore.token, payload.id);
         mainStore.addNotification({
           content: "Fact unreported",
           color: "success",

@@ -142,7 +142,7 @@ def test_delete_fact(
     content = assert_success(response)
     assert content["text"] == fact.text
     db.refresh(fact)
-    assert user in fact.suspenders
+    assert user in fact.deleters
 
 
 def test_delete_unowned_fact(
@@ -160,7 +160,7 @@ def test_delete_unowned_fact(
     content = assert_success(response)
     assert content["text"] == fact.text
     db.refresh(fact)
-    assert user in fact.suspenders
+    assert user in fact.deleters
 
 
 def test_suspend_fact(
@@ -209,7 +209,7 @@ def test_report_fact(
     content = assert_success(response)
     assert content["text"] == fact.text
     db.refresh(fact)
-    assert user in fact.suspenders
+    assert user in fact.reporters
 
 
 def test_report_unowned_fact(
@@ -228,7 +228,7 @@ def test_report_unowned_fact(
     content = assert_success(response)
     assert content["text"] == fact.text
     db.refresh(fact)
-    assert user in fact.suspenders
+    assert user in fact.reporters
 
 
 def test_mark_fact(
