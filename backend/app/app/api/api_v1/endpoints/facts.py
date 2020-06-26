@@ -3,13 +3,14 @@ import time
 from datetime import datetime
 from typing import Any, List, Optional
 
-from app import crud, models, schemas
-from app.api import deps
-from app.core.celery_app import celery_app
-from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Form, Body
 from pytz import timezone
 from sqlalchemy.orm import Session
 from starlette.background import BackgroundTasks
+
+from app import crud, models, schemas
+from app.api import deps
+from app.core.celery_app import celery_app
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -229,14 +230,18 @@ def suspend_fact(
 def report_fact(
         *,
         perms: deps.CheckFactPerms = Depends(),
+        suggestion: schemas.FactReport = Body(None),
 ) -> Any:
     """
-    Report a fact.
+    Report or undo report of a fact.
     """
     if perms.current_user in perms.fact.markers:
         fact = crud.fact.undo_report(db=perms.db, db_obj=perms.fact, user=perms.current_user)
     else:
-        fact = crud.fact.report(db=perms.db, db_obj=perms.fact, user=perms.current_user)
+        if suggestion:
+            fact = crud.fact.report(db=perms.db, db_obj=perms.fact, user=perms.current_user, suggestion=suggestion)
+        else:
+            raise HTTPException(status_code=434, detail="Suggestion required when reporting")
     return fact
 
 
@@ -246,7 +251,7 @@ def mark_fact(
         perms: deps.CheckFactPerms = Depends(),
 ) -> Any:
     """
-    Report a fact.
+    Mark a fact.
     """
     if perms.current_user in perms.fact.markers:
         fact = crud.fact.undo_mark(db=perms.db, db_obj=perms.fact, user=perms.current_user)

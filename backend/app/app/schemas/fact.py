@@ -1,10 +1,11 @@
 from datetime import datetime
 from typing import List, Optional
 
+from pydantic import BaseModel
+
 from app.schemas.deck import Deck
 # Shared properties
 from app.schemas.permission import Permission
-from pydantic import BaseModel
 
 
 class FactBase(BaseModel):
@@ -44,6 +45,11 @@ class FactCreate(InternalFactBase):
 # Properties to receive on fact update
 class FactUpdate(InternalFactBase):
     pass
+
+
+# Properties to receive on fact report
+class FactReport(InternalFactBase):
+    comment: str
 
 
 # Properties to receive on fact search

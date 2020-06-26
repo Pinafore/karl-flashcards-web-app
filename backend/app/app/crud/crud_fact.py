@@ -129,12 +129,14 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         return db_obj
 
     def report(
-            self, db: Session, *, db_obj: models.Fact, user: models.User
+            self, db: Session, *, db_obj: models.Fact, user: models.User, suggestion: schemas.FactReport
     ) -> models.Fact:
         suspend = models.Suspended(suspender=user,
                                    suspended_fact=db_obj,
                                    date_suspended=datetime.now(timezone('UTC')),
-                                   suspend_type=schemas.SuspendType.report)
+                                   suspend_type=schemas.SuspendType.report,
+                                   suggestion=suggestion,
+                                   comment=suggestion.comment)
         db.add(suspend)
         db.commit()
 
