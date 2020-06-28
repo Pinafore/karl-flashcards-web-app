@@ -7,15 +7,15 @@ from typing import List, Union, Dict, Any, Optional
 
 import pandas
 import requests
+from fastapi.encoders import jsonable_encoder
+from pytz import timezone
 from sentry_sdk import capture_exception
+from sqlalchemy import and_, or_, not_, func
+from sqlalchemy.orm import Session, Query
 
 from app import crud, models, schemas
 from app.core.config import settings
 from app.crud.base import CRUDBase
-from fastapi.encoders import jsonable_encoder
-from pytz import timezone
-from sqlalchemy import and_, or_, not_, func
-from sqlalchemy.orm import Session, Query, joinedload
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -25,7 +25,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
     def get(self, db: Session, id: Any) -> Optional[models.Fact]:
         db_obj = db.query(self.model).filter(models.Fact.fact_id == id).first()
         return db_obj
-    
+
     def get_schema_with_perm(self, db: Session, db_obj: models.Fact, user: models.User):
         schema = schemas.Fact.from_orm(db_obj)
         schema.permission = db_obj.permissions(user)
@@ -51,7 +51,6 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         schema.reported = True if reported else False
         return schema
 
-    
     def create_with_owner(
             self, db: Session, *, obj_in: schemas.FactCreate, user: models.User
     ) -> models.Fact:
@@ -406,12 +405,6 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
 
             facts = []
             if rationale != "<p>no fact received</p>":
-                if settings.ENVIRONMENT == "dev":
-                    logger.info(karl_list)
-                    logger.info(scheduler_response.json())
-                    logger.info("First order: " + str(card_order[0]))
-                    logger.info("First card: " + str(karl_list[card_order[0]]))
-                    logger.info("rationale:" + str(rationale))
                 reordered_karl_list = [karl_list[x] for x in card_order]
                 if return_limit:
                     for _, each_karl_fact in zip(range(return_limit), reordered_karl_list):
@@ -535,7 +528,6 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             extra=fact_obj["extra"]
         )
         crud.fact.create_with_owner(db, obj_in=fact_in, user=user)
-    
 
 
 fact = CRUDFact(models.Fact)
