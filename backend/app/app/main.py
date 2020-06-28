@@ -1,17 +1,19 @@
 import sentry_sdk
-from app.api.api_v1.api import api_router
-from app.core.config import settings
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
+from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from starlette.middleware.cors import CORSMiddleware
+
+from app.api.api_v1.api import api_router
+from app.core.config import settings
 
 app = FastAPI(
     title=settings.PROJECT_NAME, openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
 
 if settings.SENTRY_DSN:
-    sentry_sdk.init(dsn=settings.SENTRY_DSN, environment=settings.ENVIRONMENT)
+    sentry_sdk.init(dsn=settings.SENTRY_DSN, integrations=[SqlalchemyIntegration()], environment=settings.ENVIRONMENT)
     app.add_middleware(SentryAsgiMiddleware)
 
 # Set all CORS enabled origins
