@@ -10,7 +10,7 @@ import requests
 from fastapi.encoders import jsonable_encoder
 from pytz import timezone
 from sentry_sdk import capture_exception
-from sqlalchemy import and_, not_, func, or_
+from sqlalchemy import and_, not_, func
 from sqlalchemy.orm import Session, Query
 
 from app import crud, models, schemas
@@ -268,21 +268,37 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                                      models.Fact.user_id == deck_owners.c.owner_id)))
         facts_query = (user_facts.union(filtered_facts))
         if filters.studyable:
-            facts_query = facts_query.filter(not_(
-                or_(models.Fact.suspenders.any(id=user.id), models.Fact.deleters.any(id=user.id),
-                    models.Fact.reporters.any(id=user.id))))
+            facts_query = (facts_query
+                           .outerjoin(models.Deleted,
+                                      and_(models.Fact.fact_id == models.Deleted.fact_id,
+                                           models.Deleted.user_id == user.id))
+                           .filter(models.Deleted.user_id == None)
+                           .outerjoin(models.Reported,
+                                      and_(models.Fact.fact_id == models.Reported.fact_id,
+                                           models.Reported.user_id == user.id)
+                                      )
+                           .filter(models.Reported.user_id == None)
+                           .outerjoin(models.Suspended,
+                                      and_(models.Fact.fact_id == models.Suspended.fact_id,
+                                           models.Suspended.user_id == user.id)
+                                      )
+                           .filter(models.Suspended.user_id == None))
         else:
-            # facts_query = facts_query.outerjoin(models.Deleted, models.Fact.fact_id == models.Deleted.fact_id).filter(
-            #     models.Reported.id == None)
-            facts_query = facts_query.filter(not_(models.Fact.deleters.any(id=user.id)))
+            facts_query = (facts_query
+                           .outerjoin(models.Deleted,
+                                      and_(models.Fact.fact_id == models.Deleted.fact_id,
+                                           models.Deleted.user_id == user.id))
+                           .filter(models.Deleted.user_id == None))
             if filters.suspended is not None:
                 if filters.suspended:
                     facts_query = facts_query.join(models.Suspended).filter(models.Suspended.user_id == user.id)
                 else:
-                    # facts_query = facts_query.outerjoin(models.Suspended,
-                    #                                     models.Fact.fact_id == models.Suspended.fact_id).filter(
-                    #     models.Suspended.id == None)
-                    facts_query = facts_query.filter(not_(models.Fact.suspenders.any(id=user.id)))
+                    facts_query = (facts_query
+                                   .outerjoin(models.Suspended,
+                                              and_(models.Fact.fact_id == models.Suspended.fact_id,
+                                                   models.Suspended.user_id == user.id)
+                                              )
+                                   .filter(models.Suspended.user_id == None))
 
             if filters.reported is not None:
                 if filters.reported:
@@ -290,10 +306,12 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                     if not crud.user.is_superuser(user):
                         facts_query = facts_query.filter(models.Reported.user_id == user.id)
                 else:
-                    facts_query = facts_query.filter(not_(models.Fact.reporters.any(id=user.id)))
-                    # facts_query = facts_query.outerjoin(models.Reported,
-                    #                                     models.Fact.fact_id == models.Reported.fact_id).filter(
-                    #     models.Reported.id == None)
+                    facts_query = (facts_query
+                                   .outerjoin(models.Reported,
+                                              and_(models.Fact.fact_id == models.Reported.fact_id,
+                                                   models.Reported.user_id == user.id)
+                                              )
+                                   .filter(models.Reported.user_id == None))
         if filters.all:
             facts_query = facts_query.filter(
                 models.Fact.__ts_vector__.match(filters.all, postgresql_regconfig='english'))
