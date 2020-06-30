@@ -298,7 +298,6 @@
     }
 
     storedFact() {
-      console.log(this.facts);
       if (this.facts[this.editedIndex] !== undefined) {
         if (
           this.routeName == "browse-report" &&
