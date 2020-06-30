@@ -58,7 +58,7 @@ def get_next_set(
     return facts
 
 
-@router.put("/", response_model=List[bool], summary="Update Fact Set with the correct schedule")
+@router.put("/", response_model=List[bool])
 def update_schedule_set(
         *,
         db: Session = Depends(deps.get_db),
