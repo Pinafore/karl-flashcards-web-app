@@ -303,7 +303,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             if filters.reported is not None:
                 if filters.reported:
                     facts_query = facts_query.join(models.Reported)
-                    if not crud.user.is_superuser(user):
+                    if not user.is_superuser:
                         facts_query = facts_query.filter(models.Reported.user_id == user.id)
                 else:
                     facts_query = (facts_query
