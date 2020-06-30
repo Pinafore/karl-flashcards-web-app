@@ -51,7 +51,8 @@
           <p style="text-align:left">
             We will not ask you for any personal information beyond your email address.
             Any potential loss of confidentiality will be minimized by storing data
-            securely in password-protected account on Amazon Web Services.
+            securely in a password-protected account. After the end of the experiment,
+            data will be anonymized and released publicly.
           </p>
           <p style="text-align:left">
             If we write a report or article about this research project, your identity
@@ -113,23 +114,19 @@
             >
           </p>
           <p style="text-align:left">
-            This research has been reviewed according to the University of Maryland IRB
-            procedures for research involving human subjects.
+            This research has been reviewed according to the University of Maryland,
+            College Park IRB procedures for research involving human subjects.
           </p>
 
           <h3>Statement of Consent</h3>
-          <p style="text-align:left">
-            Your signature indicates that you are at least 18 years of age; you have
-            read this consent form or have had it read to you; your questions have been
-            answered to your satisfaction and you voluntarily agree to participate in
-            this research study. You will receive a copy of this signed consent form.
-          </p>
-
           <p style="text-align:left">
             By clicking “Sign Up” or otherwise exiting this page, you indicate that you
             are at least 18 years of age; you have read this consent form or have had it
             read to you; your questions have been answered to your satisfaction and you
             voluntarily agree to participate in this research study.
+          </p>
+          <p style="text-align:left">
+            If you agree to participate, please fill out the form below.
           </p>
         </div>
       </v-card-text>
