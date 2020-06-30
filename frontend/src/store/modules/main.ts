@@ -208,7 +208,7 @@ export default class MainModule extends VuexModule {
   @Action
   async checkApiError(payload: AxiosError) {
     if (payload.response && payload.response.status === UNAUTHORIZED) {
-      this.addNotification({ content: "An error occurred", color: "error" });
+      this.addNotification({ content: "This action is unauthorized. You are logged out.", color: "error" });
       await this.logOut();
     }
   }
