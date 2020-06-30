@@ -10,7 +10,7 @@ import requests
 from fastapi.encoders import jsonable_encoder
 from pytz import timezone
 from sentry_sdk import capture_exception
-from sqlalchemy import and_, or_, not_, func
+from sqlalchemy import and_, not_, func
 from sqlalchemy.orm import Session, Query
 
 from app import crud, models, schemas
@@ -26,29 +26,12 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         db_obj = db.query(self.model).filter(models.Fact.fact_id == id).first()
         return db_obj
 
-    def get_schema_with_perm(self, db: Session, db_obj: models.Fact, user: models.User):
+    def get_schema_with_perm(self, db_obj: models.Fact, user: models.User):
         schema = schemas.Fact.from_orm(db_obj)
         schema.permission = db_obj.permissions(user)
-        schema.marked = True if user in db_obj.markers else False
-        suspended = (db.query(models.Suspended)
-                     .filter(models.Suspended.user_id == user.id)
-                     .filter(models.Suspended.fact_id == db_obj.fact_id)
-                     .filter(models.Suspended.suspend_type == schemas.SuspendType.suspend)
-                     .first())
-
-        if crud.user.is_superuser(user):
-            reported = (db.query(models.Suspended)
-                        .filter(models.Suspended.fact_id == db_obj.fact_id)
-                        .filter(models.Suspended.suspend_type == schemas.SuspendType.report)
-                        .first())
-        else:
-            reported = (db.query(models.Suspended)
-                        .filter(models.Suspended.user_id == user.id)
-                        .filter(models.Suspended.fact_id == db_obj.fact_id)
-                        .filter(models.Suspended.suspend_type == schemas.SuspendType.report)
-                        .first())
-        schema.suspended = True if suspended or reported else False
-        schema.reported = True if reported else False
+        schema.marked = db_obj.is_marked(user)
+        schema.suspended = db_obj.is_suspended(user)
+        schema.reports = db_obj.find_reports(user)
         return schema
 
     def create_with_owner(
@@ -91,15 +74,13 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
     def remove(
             self, db: Session, *, db_obj: models.Fact, user: models.User
     ) -> models.Fact:
-        suspend = models.Suspended(suspender=user,
-                                   suspended_fact=db_obj,
-                                   date_suspended=datetime.now(timezone('UTC')),
-                                   suspend_type=schemas.SuspendType.delete)
-        db.add(suspend)
+        now = datetime.now(timezone('UTC'))
+        delete = models.Deleted(deleter=user, deleted_fact=db_obj, date_deleted=now)
+        db.add(delete)
         db.commit()
 
         history_in = schemas.HistoryCreate(
-            time=datetime.now(timezone('UTC')).isoformat(),
+            time=now,
             user_id=user.id,
             fact_id=db_obj.fact_id,
             log_type=schemas.Log.delete,
@@ -111,15 +92,15 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
     def suspend(
             self, db: Session, *, db_obj: models.Fact, user: models.User
     ) -> models.Fact:
+        now = datetime.now(timezone('UTC'))
         suspend = models.Suspended(suspender=user,
                                    suspended_fact=db_obj,
-                                   date_suspended=datetime.now(timezone('UTC')),
-                                   suspend_type=schemas.SuspendType.suspend)
+                                   date_suspended=now)
         db.add(suspend)
         db.commit()
 
         history_in = schemas.HistoryCreate(
-            time=datetime.now(timezone('UTC')).isoformat(),
+            time=now,
             user_id=user.id,
             fact_id=db_obj.fact_id,
             log_type=schemas.Log.suspend,
@@ -129,17 +110,18 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         return db_obj
 
     def report(
-            self, db: Session, *, db_obj: models.Fact, user: models.User
+            self, db: Session, *, db_obj: models.Fact, user: models.User, suggestion: schemas.FactToReport
     ) -> models.Fact:
-        suspend = models.Suspended(suspender=user,
-                                   suspended_fact=db_obj,
-                                   date_suspended=datetime.now(timezone('UTC')),
-                                   suspend_type=schemas.SuspendType.report)
-        db.add(suspend)
+        now = datetime.now(timezone('UTC'))
+        report = models.Reported(reporter=user,
+                                 reported_fact=db_obj,
+                                 date_reported=datetime.now(timezone('UTC')),
+                                 suggestion=suggestion)
+        db.add(report)
         db.commit()
 
         history_in = schemas.HistoryCreate(
-            time=datetime.now(timezone('UTC')).isoformat(),
+            time=now,
             user_id=user.id,
             fact_id=db_obj.fact_id,
             log_type=schemas.Log.report,
@@ -151,13 +133,14 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
     def mark(
             self, db: Session, *, db_obj: models.Fact, user: models.User
     ) -> models.Fact:
+        now = datetime.now(timezone('UTC'))
 
-        mark = models.Marked(marker=user, marked_fact=db_obj, date_marked=datetime.now(timezone('UTC')))
+        mark = models.Marked(marker=user, marked_fact=db_obj, date_marked=now)
         db.add(mark)
         db.commit()
 
         history_in = schemas.HistoryCreate(
-            time=datetime.now(timezone('UTC')).isoformat(),
+            time=now,
             user_id=user.id,
             fact_id=db_obj.fact_id,
             log_type=schemas.Log.mark,
@@ -169,10 +152,9 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
     def undo_remove(
             self, db: Session, *, db_obj: models.Fact, user: models.User
     ) -> models.Fact:
-        db.query(models.Suspended) \
-            .filter(and_(models.Suspended.suspended_fact == db_obj,
-                         models.Suspended.suspend_type == schemas.SuspendType.delete,
-                         models.Suspended.suspender == user)).delete(synchronize_session=False)
+        db.query(models.Deleted).filter(
+            and_(models.Deleted.fact_id == db_obj.fact_id, models.Deleted.user_id == user.id)).delete(
+            synchronize_session=False)
         db.commit()
 
         history_in = schemas.HistoryCreate(
@@ -190,7 +172,6 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
     ) -> models.Fact:
         db.query(models.Suspended) \
             .filter(and_(models.Suspended.suspended_fact == db_obj,
-                         models.Suspended.suspend_type == schemas.SuspendType.suspend,
                          models.Suspended.suspender == user)).delete(synchronize_session=False)
         db.commit()
 
@@ -207,10 +188,10 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
     def undo_report(
             self, db: Session, *, db_obj: models.Fact, user: models.User
     ) -> models.Fact:
-        db.query(models.Suspended) \
-            .filter(and_(models.Suspended.suspended_fact == db_obj,
-                         models.Suspended.suspend_type == schemas.SuspendType.report,
-                         models.Suspended.suspender == user)).delete(synchronize_session=False)
+
+        db.query(models.Reported) \
+            .filter(and_(models.Reported.fact_id == db_obj.fact_id,
+                         models.Reported.user_id == user.id)).delete(synchronize_session=False)
         db.commit()
 
         history_in = schemas.HistoryCreate(
@@ -226,9 +207,8 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
     def resolve_report(
             self, db: Session, *, user: models.User, db_obj: models.Fact
     ) -> models.Fact:
-        db.query(models.Suspended) \
-            .filter(and_(models.Suspended.suspended_fact == db_obj,
-                         models.Suspended.suspend_type == schemas.SuspendType.report)).delete(
+        db.query(models.Reported) \
+            .filter(models.Reported.fact_id == db_obj.fact_id).delete(
             synchronize_session=False)
         db.commit()
 
@@ -237,25 +217,6 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             user_id=user.id,
             fact_id=db_obj.fact_id,
             log_type=schemas.Log.resolve_report,
-            details={"study_system": "karl"}
-        )
-        crud.history.create(db=db, obj_in=history_in)
-        return db_obj
-
-    def clear_report_or_suspend(
-            self, db: Session, *, db_obj: models.Fact, user: models.User
-    ) -> models.Fact:
-        db.query(models.Suspended) \
-            .filter(and_(models.Suspended.suspended_fact == db_obj,
-                         models.Suspended.suspend_type != schemas.SuspendType.delete,
-                         models.Suspended.suspender == user)).delete(synchronize_session=False)
-        db.commit()
-
-        history_in = schemas.HistoryCreate(
-            time=datetime.now(timezone('UTC')).isoformat(),
-            user_id=user.id,
-            fact_id=db_obj.fact_id,
-            log_type=schemas.Log.clear_report_or_suspend,
             details={"study_system": "karl"}
         )
         crud.history.create(db=db, obj_in=history_in)
@@ -293,29 +254,50 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                                      models.Fact.user_id == deck_owners.c.owner_id)))
         facts_query = (user_facts.union(filtered_facts))
         if filters.studyable:
-            facts_query = facts_query.filter(not_(models.Fact.suspenders.any(id=user.id)))
+            facts_query = (facts_query
+                           .outerjoin(models.Deleted,
+                                      and_(models.Fact.fact_id == models.Deleted.fact_id,
+                                           models.Deleted.user_id == user.id))
+                           .filter(models.Deleted.user_id == None)
+                           .outerjoin(models.Reported,
+                                      and_(models.Fact.fact_id == models.Reported.fact_id,
+                                           models.Reported.user_id == user.id)
+                                      )
+                           .filter(models.Reported.user_id == None)
+                           .outerjoin(models.Suspended,
+                                      and_(models.Fact.fact_id == models.Suspended.fact_id,
+                                           models.Suspended.user_id == user.id)
+                                      )
+                           .filter(models.Suspended.user_id == None))
         else:
-
-            if crud.user.is_superuser(user):
-                facts_query = (facts_query.outerjoin(models.Suspended, models.Fact.fact_id == models.Suspended.fact_id)
-                               .filter(or_(and_(models.Suspended.suspend_type != schemas.SuspendType.delete),
-                                           models.Suspended.suspend_type == None)))
-            else:
-                facts_query = (facts_query.outerjoin(models.Suspended, models.Fact.fact_id == models.Suspended.fact_id)
-                               .filter(or_(and_(models.Suspended.suspend_type != schemas.SuspendType.delete,
-                                                models.Suspended.user_id == user.id),
-                                           models.Suspended.suspend_type == None)))
+            facts_query = (facts_query
+                           .outerjoin(models.Deleted,
+                                      and_(models.Fact.fact_id == models.Deleted.fact_id,
+                                           models.Deleted.user_id == user.id))
+                           .filter(models.Deleted.user_id == None))
             if filters.suspended is not None:
                 if filters.suspended:
-                    facts_query = facts_query.filter(models.Suspended.suspend_type == schemas.SuspendType.suspend)
+                    facts_query = facts_query.join(models.Suspended).filter(models.Suspended.user_id == user.id)
                 else:
-                    facts_query = facts_query.filter(models.Suspended.suspend_type != schemas.SuspendType.suspend)
+                    facts_query = (facts_query
+                                   .outerjoin(models.Suspended,
+                                              and_(models.Fact.fact_id == models.Suspended.fact_id,
+                                                   models.Suspended.user_id == user.id)
+                                              )
+                                   .filter(models.Suspended.user_id == None))
 
             if filters.reported is not None:
                 if filters.reported:
-                    facts_query = facts_query.filter(models.Suspended.suspend_type == schemas.SuspendType.report)
+                    facts_query = facts_query.join(models.Reported)
+                    if not user.is_superuser:
+                        facts_query = facts_query.filter(models.Reported.user_id == user.id)
                 else:
-                    facts_query = facts_query.filter(models.Suspended.suspend_type != schemas.SuspendType.report)
+                    facts_query = (facts_query
+                                   .outerjoin(models.Reported,
+                                              and_(models.Fact.fact_id == models.Reported.fact_id,
+                                                   models.Reported.user_id == user.id)
+                                              )
+                                   .filter(models.Reported.user_id == None))
         if filters.all:
             facts_query = facts_query.filter(
                 models.Fact.__ts_vector__.match(filters.all, postgresql_regconfig='english'))
@@ -409,7 +391,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 if return_limit:
                     for _, each_karl_fact in zip(range(return_limit), reordered_karl_list):
                         retrieved_fact = self.get(db=db, id=int(each_karl_fact["fact_id"]))
-                        fact_schema = self.get_schema_with_perm(db=db, db_obj=retrieved_fact, user=user)
+                        fact_schema = self.get_schema_with_perm(db_obj=retrieved_fact, user=user)
                         fact_schema.rationale = rationale
                         if retrieved_fact:
                             fact_schema.marked = True if user in retrieved_fact.markers else False
@@ -417,11 +399,11 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 else:
                     for each_karl_fact in reordered_karl_list:
                         retrieved_fact = self.get(db=db, id=int(each_karl_fact["fact_id"]))
-                        fact_schema = self.get_schema_with_perm(db=db, db_obj=retrieved_fact, user=user)
+                        fact_schema = self.get_schema_with_perm(db_obj=retrieved_fact, user=user)
                         fact_schema.rationale = rationale
                         # MARK: maybe not the most efficient solution for determining if user has marked a fact
                         if retrieved_fact:
-                            fact_schema.marked = True if user in retrieved_fact.markers else False
+                            fact_schema.marked = retrieved_fact.is_marked(user)
                         facts.append(fact_schema)
             details = {
                 "study_system": "karl",

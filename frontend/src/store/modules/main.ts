@@ -465,14 +465,13 @@ export default class MainModule extends VuexModule {
   @Action
   async suspendFact(payload: { id: number; todo: boolean }) {
     try {
+      await api.suspendFact(mainStore.token, payload.id);
       if (payload.todo) {
-        await api.suspendFact(mainStore.token, payload.id);
         mainStore.addNotification({
           content: "Fact suspended",
           color: "success",
         });
       } else {
-        await api.clearFact(mainStore.token, payload.id);
         mainStore.addNotification({
           content: "Fact unsuspended",
           color: "success",
@@ -484,21 +483,39 @@ export default class MainModule extends VuexModule {
   }
 
   @Action
-  async reportFact(payload: { id: number; todo: boolean }) {
+  async reportFact(payload: { id: number; data: IComponents["FactToReport"]}) {
     try {
-      if (payload.todo) {
-        await api.reportFact(mainStore.token, payload.id);
-        mainStore.addNotification({
-          content: "Fact reported",
-          color: "success",
-        });
-      } else {
-        await api.clearFact(mainStore.token, payload.id);
-        mainStore.addNotification({
-          content: "Fact unreported",
-          color: "success",
-        });
-      }
+      await api.reportFact(mainStore.token, payload.id, payload.data);
+      mainStore.addNotification({
+        content: "Fact reported",
+        color: "success",
+      });
+    } catch (error) {
+      await mainStore.checkApiError(error);
+    }
+  }
+
+  @Action
+  async clearReportFact(payload: { id: number }) {
+    try {
+      await api.clearReportFact(mainStore.token, payload.id);
+      mainStore.addNotification({
+        content: "Fact report discarded",
+        color: "success",
+      });
+    } catch (error) {
+      await mainStore.checkApiError(error);
+    }
+  }
+
+  @Action
+  async clearReportsFact(payload: { id: number }) {
+    try {
+      await api.clearReportsFact(mainStore.token, payload.id);
+      mainStore.addNotification({
+        content: "Fact Reports Resolved",
+        color: "success",
+      });
     } catch (error) {
       await mainStore.checkApiError(error);
     }

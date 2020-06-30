@@ -106,6 +106,34 @@ export default new VueRouter({
                       ),
                   },
                 },
+                {
+                  path: "report/:id",
+                  name: "browse-report",
+                  components: {
+                    default: () =>
+                      import(
+                        /* webpackChunkName: "main-browser" */ "@/views/main/Browser.vue"
+                        ),
+                    edit: () =>
+                      import(
+                        /* webpackChunkName: "edit-fact" */ "@/views/main/EditFact.vue"
+                        ),
+                  },
+                },
+                {
+                  path: "resolve/:id",
+                  name: "browse-resolve",
+                  components: {
+                    default: () =>
+                      import(
+                        /* webpackChunkName: "main-browser" */ "@/views/main/Browser.vue"
+                        ),
+                    edit: () =>
+                      import(
+                        /* webpackChunkName: "edit-fact" */ "@/views/main/EditFact.vue"
+                        ),
+                  },
+                },
               ],
             },
             {
@@ -202,6 +230,20 @@ export default new VueRouter({
                     {
                       path: "edit",
                       name: "learn-edit",
+                      components: {
+                        default: () =>
+                          import(
+                            /* webpackChunkName: "main-learn" */ "@/views/main/study/Learn.vue"
+                            ),
+                        edit: () =>
+                          import(
+                            /* webpackChunkName: "edit-fact" */ "@/views/main/EditFact.vue"
+                            ),
+                      },
+                    },
+                    {
+                      path: "report",
+                      name: "learn-report",
                       components: {
                         default: () =>
                           import(

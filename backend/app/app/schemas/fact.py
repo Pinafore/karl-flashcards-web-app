@@ -1,10 +1,11 @@
 from datetime import datetime
 from typing import List, Optional
 
+from pydantic import BaseModel
+
 from app.schemas.deck import Deck
 # Shared properties
 from app.schemas.permission import Permission
-from pydantic import BaseModel
 
 
 class FactBase(BaseModel):
@@ -46,6 +47,17 @@ class FactUpdate(InternalFactBase):
     pass
 
 
+# Properties to receive on fact report
+class FactToReport(InternalFactBase):
+    pass
+
+
+class FactReported(InternalFactBase):
+    reporter_id: int
+    reporter_username: str
+    report_id: int
+
+
 # Properties to receive on fact search
 class FactSearch(InternalFactBase):
     all: Optional[str] = None
@@ -82,6 +94,7 @@ class Fact(FactInDBBase):
     reported: Optional[bool] = None
     suspended: Optional[bool] = None
     permission: Optional[Permission] = None
+    reports: Optional[List[FactReported]] = None
 
 
 # Properties to return to client

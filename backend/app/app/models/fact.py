@@ -1,14 +1,14 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, List
 
-from app.db.base_class import Base
-from app.schemas import Permission
 from sqlalchemy import Column, ForeignKey, Integer, String, TIMESTAMP, ARRAY, cast, Index, func
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.ext.hybrid import hybrid_method
+from sqlalchemy.ext.hybrid import hybrid_method, hybrid_property
 from sqlalchemy.orm import relationship
 
+from app.db.base_class import Base
+from app.schemas import Permission, FactReported
 from .user import User
 
 if TYPE_CHECKING:
@@ -41,6 +41,8 @@ class Fact(Base):
     deck = relationship("Deck", back_populates="facts")
     history = relationship("History", back_populates="fact")
     suspenders = association_proxy('suspensions', 'suspender')
+    deleters = association_proxy('deletions', 'deleter')
+    reporters = association_proxy('reporteds', 'reporter')
     markers = association_proxy('marks', 'marker')
 
     __ts_vector__ = create_tsvector(
@@ -67,3 +69,23 @@ class Fact(Base):
                 return user_deck.permissions
         else:
             return None
+
+    @hybrid_method
+    def find_reports(self, user: User) -> Optional[List[FactReported]]:
+        if user.is_superuser:
+            return [FactReported.construct(report_id=ind, reporter_id=report.user_id,
+                                           reporter_username=report.reporter.username, **report.suggestion)
+                    for ind, report in enumerate(self.reporteds)]
+        else:
+            return [FactReported.construct(report_id=ind, reporter_id=report.user_id,
+                                           reporter_username=report.reporter.username, **report.suggestion)
+                    for ind, report in enumerate(self.reporteds) if
+                    report.user_id == user.id]
+
+    @hybrid_method
+    def is_marked(self, user: User) -> bool:
+        return True if user in self.markers else False
+
+    @hybrid_method
+    def is_suspended(self, user: User) -> bool:
+        return True if user in self.suspenders else False

@@ -1,10 +1,11 @@
 from typing import TYPE_CHECKING
 
-from app.db.base_class import Base
-from app.schemas.repetition import Repetition
 from sqlalchemy import Boolean, Column, Integer, String, ForeignKey, Enum
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
+
+from app.db.base_class import Base
+from app.schemas.repetition import Repetition
 
 # from .user_deck import user_deck
 
@@ -30,6 +31,8 @@ class User(Base):
     owned_facts = relationship("Fact", back_populates="owner")
     history = relationship("History", back_populates="user")
     suspended_facts = association_proxy('suspensions', 'suspended_fact')
+    deleted_facts = association_proxy('deletions', 'deleted_fact')
+    reported_facts = association_proxy('reporteds', 'reported_fact')
     user_decks = relationship("User_Deck", back_populates="user", cascade="all, delete-orphan")
     decks = association_proxy('user_decks', 'deck')
     marked_facts = association_proxy('marks', 'marked_fact')

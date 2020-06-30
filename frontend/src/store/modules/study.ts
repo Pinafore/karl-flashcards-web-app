@@ -214,15 +214,15 @@ export default class StudyModule extends VuexModule {
   }
 
   @Action
-  async reportFact() {
+  async reportFact(payload: IComponents["FactUpdate"]) {
     this.resetTimer();
     if (this.show.fact && this.show.enable_report) {
       try {
+        await api.reportFact(mainStore.token, this.show.fact.fact_id, payload);
         mainStore.addNotification({
           content: "Fact reported",
           color: "success",
         });
-        await api.reportFact(mainStore.token, this.show.fact.fact_id);
         await this.getNextShow();
       } catch (error) {
         await mainStore.checkApiError(error);
@@ -241,7 +241,6 @@ export default class StudyModule extends VuexModule {
           color: "success",
         });
         this.editShowFact(payload);
-        router.back();
       } catch (error) {
         await mainStore.checkApiError(error);
       }
@@ -255,6 +254,23 @@ export default class StudyModule extends VuexModule {
       try {
         if (router.currentRoute.name == "learn") {
           router.push({name: "learn-edit"})
+        } else {
+          router.back()
+        }
+
+      } catch (error) {
+        await mainStore.checkApiError(error);
+      }
+    }
+  }
+
+  @Action
+  async reportFactDialog() {
+    this.resetTimer();
+    if (this.show.fact && this.show.enable_report) {
+      try {
+        if (router.currentRoute.name == "learn") {
+          router.push({name: "learn-report"})
         } else {
           router.back()
         }
@@ -305,6 +321,7 @@ export default class StudyModule extends VuexModule {
   async updateSchedule() {
     if (this.show.fact && this.show.enable_actions) {
       try {
+        this.setShowLoading();
         this.markBackTime();
         this.resetTimer();
         await api.updateSchedule(mainStore.token, this.schedule);

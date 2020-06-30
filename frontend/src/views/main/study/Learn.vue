@@ -317,15 +317,15 @@
 
     public beforeRouteEnter(to, from, next) {
       next((vm) => {
-        vm.editDialog = to.name == "learn-edit";
+        vm.editDialog = to.name == "learn-edit" || to.name == "learn-report";
       });
     }
 
     public async beforeRouteUpdate(to, from, next) {
-      if (to.name != "learn-edit" && from.name != "learn-edit") {
+      if (!to.name.startsWith("learn-") && !from.name.startsWith("learn-")) {
         await this.determine_decks(to.query.deck);
       }
-      this.editDialog = to.name == "learn-edit";
+      this.editDialog = to.name == "learn-edit" || to.name == "learn-report";
       next();
     }
 
@@ -418,7 +418,7 @@
     }
 
     public async report() {
-      await studyStore.reportFact();
+      await studyStore.reportFactDialog();
       this.resetCard();
     }
 

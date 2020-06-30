@@ -1,4 +1,4 @@
-from .fact import Fact, FactCreate, FactInDB, FactUpdate, KarlFact, FactSearch, FactBrowse
+from .fact import Fact, FactCreate, FactInDB, FactUpdate, KarlFact, FactSearch, FactBrowse, FactReported, FactToReport
 from .msg import Msg
 from .token import Token, TokenPayload
 from .user import User, UserCreate, UserInDB, UserUpdate, SuperUserCreate, SuperUserUpdate

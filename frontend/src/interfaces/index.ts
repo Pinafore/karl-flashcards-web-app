@@ -25,6 +25,7 @@ export enum Permission {
   owner = "owner",
   viewer = "viewer",
 }
+
 export interface IStatus {
   marked?: boolean | undefined;
   suspended?: boolean;
@@ -51,7 +52,10 @@ export interface IComponents {
     deck: IComponents["Deck"];
     rationale?: string;
     marked?: boolean;
+    suspended?: boolean;
+    reported?: boolean;
     permission?: Permission;
+    reports?: IComponents["FactReported"][];
   };
   FactCreate: {
     text: string;
@@ -70,6 +74,27 @@ export interface IComponents {
     identifier?: string;
     answer_lines?: string[];
     extra?: { [key: string]: any }; // eslint-disable-line @typescript-eslint/no-explicit-any
+  };
+  FactToReport: {
+    text?: string;
+    answer?: string;
+    category?: string;
+    deck_id?: number;
+    identifier?: string;
+    answer_lines?: string[];
+    extra?: { [key: string]: any }; // eslint-disable-line @typescript-eslint/no-explicit-any
+  };
+  FactReported: {
+    text?: string;
+    answer?: string;
+    category?: string;
+    deck_id?: number;
+    identifier?: string;
+    answer_lines?: string[];
+    extra?: { [key: string]: any }; // eslint-disable-line @typescript-eslint/no-explicit-any
+    report_id?: number;
+    reporter_id?: number;
+    reporter_username?: number;
   };
   FactSearch: {
     skip?: number;

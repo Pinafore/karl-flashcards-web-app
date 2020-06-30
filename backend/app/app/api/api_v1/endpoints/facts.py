@@ -3,13 +3,14 @@ import time
 from datetime import datetime
 from typing import Any, List, Optional
 
-from app import crud, models, schemas
-from app.api import deps
-from app.core.celery_app import celery_app
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Form
 from pytz import timezone
 from sqlalchemy.orm import Session
 from starlette.background import BackgroundTasks
+
+from app import crud, models, schemas
+from app.api import deps
+from app.core.celery_app import celery_app
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -31,12 +32,14 @@ def read_facts(
         marked: Optional[bool] = None,
         suspended: Optional[bool] = None,
         reported: Optional[bool] = None,
-        permissions: bool = True,
         current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Retrieve facts.
     """
+    if limit > 1000:
+        raise HTTPException(status_code=445, detail="Too many facts requested. Please limit to <1000 facts.")
+
     if suspended and reported:
         studyable = True
     else:
@@ -58,17 +61,16 @@ def read_facts(
     query = crud.fact.build_facts_query(db=db, user=current_user, filters=search)
     facts = crud.fact.get_eligible_facts(query=query, skip=skip, limit=limit)
     total = crud.fact.count_eligible_facts(query=query)
-    if permissions:
-        begin_overall_start = time.time()
-        new_facts: List[schemas.Fact] = []
-        for fact in facts:
-            new_facts.append(crud.fact.get_schema_with_perm(db=db, db_obj=fact, user=current_user))
-        fact_browser = schemas.FactBrowse(facts=new_facts, total=total)
-        overall_end_time = time.time()
-        overall_total_time = overall_end_time - begin_overall_start
-        logger.info("permissions: " + str(overall_total_time))
-    else:
-        fact_browser = schemas.FactBrowse(facts=facts, total=total)
+
+    begin_overall_start = time.time()
+    new_facts: List[schemas.Fact] = []
+    for fact in facts:
+        new_facts.append(crud.fact.get_schema_with_perm(db_obj=fact, user=current_user))
+    overall_end_time = time.time()
+    overall_total_time = overall_end_time - begin_overall_start
+    logger.info("permissions: " + str(overall_total_time))
+
+    fact_browser = schemas.FactBrowse(facts=new_facts, total=total)
     details = search.dict()
     details["study_system"] = "karl"
     history_in = schemas.HistoryCreate(
@@ -229,14 +231,29 @@ def suspend_fact(
 def report_fact(
         *,
         perms: deps.CheckFactPerms = Depends(),
+        suggestion: schemas.FactToReport,
 ) -> Any:
     """
-    Report a fact.
+    Report or undo report of a fact.
     """
-    if perms.current_user in perms.fact.markers:
+    if perms.current_user in perms.fact.reporters:
+        fact = crud.fact.undo_report(db=perms.db, db_obj=perms.fact, user=perms.current_user)
+    fact = crud.fact.report(db=perms.db, db_obj=perms.fact, user=perms.current_user, suggestion=suggestion)
+    return fact
+
+
+@router.delete("/report/{fact_id}", response_model=schemas.Fact)
+def clear_report_fact(
+        *,
+        perms: deps.CheckFactPerms = Depends(),
+) -> Any:
+    """
+    Report or undo report of a fact.
+    """
+    if perms.current_user in perms.fact.reporters:
         fact = crud.fact.undo_report(db=perms.db, db_obj=perms.fact, user=perms.current_user)
     else:
-        fact = crud.fact.report(db=perms.db, db_obj=perms.fact, user=perms.current_user)
+        raise HTTPException(status_code=448, detail="User has not previously reported this fact")
     return fact
 
 
@@ -246,7 +263,7 @@ def mark_fact(
         perms: deps.CheckFactPerms = Depends(),
 ) -> Any:
     """
-    Report a fact.
+    Mark a fact.
     """
     if perms.current_user in perms.fact.markers:
         fact = crud.fact.undo_mark(db=perms.db, db_obj=perms.fact, user=perms.current_user)
@@ -258,8 +275,8 @@ def mark_fact(
     assert len(chicken) == 1
 
 
-@router.put("/status/{fact_id}", response_model=schemas.Fact)
-def clear_fact_status(
+@router.delete("/report/all/{fact_id}", response_model=schemas.Fact)
+def clear_reports(
         *,
         perms: deps.CheckFactPerms = Depends(),
 ) -> Any:
@@ -268,6 +285,4 @@ def clear_fact_status(
     """
     if crud.user.is_superuser(perms.current_user):
         fact = crud.fact.resolve_report(db=perms.db, user=perms.current_user, db_obj=perms.fact)
-    else:
-        fact = crud.fact.clear_report_or_suspend(db=perms.db, db_obj=perms.fact, user=perms.current_user)
     return fact

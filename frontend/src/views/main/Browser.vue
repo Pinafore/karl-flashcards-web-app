@@ -75,15 +75,32 @@
           @input="suspendFact(item, item.suspended)"
         ></v-simple-checkbox>
       </template>
-      <template v-slot:item.reported="{ item }">
-        <v-simple-checkbox
-          v-model="item.reported"
-          v-ripple
-          @input="reportFact(item, item.reported)"
-        ></v-simple-checkbox>
+      <template v-slot:item.reports="{ item }">
+        <v-tooltip v-if="isViewer(item) && item.reports.length === 0" bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn icon v-bind="attrs" @click="viewReport(item)" v-on="on">
+              <v-icon>mdi-alert-octagon</v-icon>
+            </v-btn>
+          </template>
+          <span>Report</span>
+        </v-tooltip>
+        <v-tooltip v-else bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              icon
+              v-bind="attrs"
+              :disabled="item.reports.length === 0"
+              @click="viewReport(item)"
+              v-on="on"
+            >
+              <v-icon>mdi-eye</v-icon>
+            </v-btn>
+          </template>
+          <span>View Report(s)</span>
+        </v-tooltip>
       </template>
       <template v-slot:item.actions="{ item }">
-        <v-icon v-if="showEdit(item)" @click="editFact(item)">
+        <v-icon v-if="isOwner(item)" @click="editFact(item)">
           mdi-pencil
         </v-icon>
         <v-icon @click="deleteFact(item, true)">
@@ -168,15 +185,15 @@
         align: "left",
       },
       {
-        text: "Reported",
-        sortable: true,
-        value: "reported",
-        align: "left",
-      },
-      {
         text: "Suspended",
         sortable: true,
         value: "suspended",
+        align: "left",
+      },
+      {
+        text: "Reported",
+        sortable: true,
+        value: "reports",
         align: "left",
       },
       { text: "Actions", value: "actions", sortable: false },
@@ -198,12 +215,18 @@
 
     public beforeRouteEnter(to, from, next) {
       next((vm) => {
-        vm.dialog = to.name == "browse-edit";
+        vm.dialog =
+          to.name == "browse-edit" ||
+          to.name == "browse-report" ||
+          to.name == "browse-resolve";
       });
     }
 
     public beforeRouteUpdate(to, from, next) {
-      this.dialog = to.name == "browse-edit";
+      this.dialog =
+        to.name == "browse-edit" ||
+        to.name == "browse-report" ||
+        to.name == "browse-resolve";
       next();
     }
 
@@ -212,8 +235,12 @@
       return userProfile && userProfile.decks ? userProfile.decks : [];
     }
 
-    showEdit(item) {
+    isOwner(item) {
       return item.permission === Permission.owner;
+    }
+
+    isViewer(item) {
+      return item.permission === Permission.viewer;
     }
 
     get facts() {
@@ -288,20 +315,27 @@
       });
     }
 
+    viewReport(item) {
+      const index = String(this.facts.indexOf(item));
+      if (this.isViewer(item)) {
+        this.$router.push({
+          name: "browse-report",
+          params: { id: index },
+        });
+      } else {
+        this.$router.push({
+          name: "browse-resolve",
+          params: { id: index },
+        });
+      }
+    }
+
     async markFact(item, todo) {
       await mainStore.markFact({ id: item.fact_id, todo: todo });
     }
 
-    async reportFact(item, todo) {
-      await mainStore.reportFact({ id: item.fact_id, todo: todo });
-      item.suspended = todo;
-    }
-
     async suspendFact(item, todo) {
       await mainStore.suspendFact({ id: item.fact_id, todo: todo });
-      if (!todo && item.reported) {
-        item.reported = false;
-      }
     }
 
     async deleteFact(item, todo) {
@@ -312,9 +346,7 @@
     }
 
     returnBrowser() {
-      this.$router.push({
-        name: "browse",
-      });
+      this.$router.back();
     }
   }
 </script>
