@@ -275,12 +275,35 @@
     >
       <router-view name="edit"></router-view>
     </v-dialog>
+    <v-dialog
+      v-model="connectionError"
+      max-width="1000px"
+      scrollable
+      @click:outside="returnHome"
+    >
+      <v-card>
+        <v-card-title>
+          <h2>Scheduler Connection Error</h2>
+        </v-card-title>
+        <v-card-text>
+          Due to updates at the University of Maryland, College Park, the connection to
+          KAR³L's scheduler is currently down. During this brief period of time, you
+          will be unable to study facts or view statistics, but you may continue to
+          access all other functionality (such as the fact browser). Please check back
+          in a few hours and KAR³L will be ready again to schedule facts to review for
+          you.
+        </v-card-text>
+        <v-card-actions>
+          <v-btn @click="returnHome">Return to Home Screen</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
 <script lang="ts">
   import { Component, Vue } from "vue-property-decorator";
-  import { studyStore } from "@/utils/store-accessor";
+  import { studyStore, mainStore } from "@/utils/store-accessor";
 
   @Component
   export default class Learn extends Vue {
@@ -289,6 +312,10 @@
     retyped = "";
     dialog = false;
     editDialog = false;
+
+    get connectionError() {
+      return mainStore.connectionError;
+    }
 
     get facts() {
       return studyStore.study;
@@ -455,6 +482,10 @@
 
     returnLearn() {
       this.$router.back();
+    }
+    returnHome() {
+      mainStore.setConnectionError(false);
+      this.$router.push("/main/dashboard");
     }
   }
 </script>

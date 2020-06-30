@@ -20,6 +20,7 @@ export default class MainModule extends VuexModule {
   facts: IComponents["Fact"][] = [];
   totalFacts = 0;
   isOnHomeScreenPopup: boolean | null = null;
+  connectionError = false;
 
   get hasAdminAccess() {
     return (
@@ -97,6 +98,12 @@ export default class MainModule extends VuexModule {
   setPublicDecks(payload: IComponents["Deck"][]) {
     this.publicDecks = payload;
   }
+
+  @Mutation
+  setConnectionError(payload: boolean) {
+    this.connectionError = payload;
+  }
+
 
   @Action
   async logIn(payload: { username: string; password: string }) {
@@ -207,9 +214,14 @@ export default class MainModule extends VuexModule {
 
   @Action
   async checkApiError(payload: AxiosError) {
-    if (payload.response && payload.response.status === UNAUTHORIZED) {
-      this.addNotification({ content: "This action is unauthorized. You are logged out.", color: "error" });
-      await this.logOut();
+    if (payload.response) {
+      if (payload.response.status === UNAUTHORIZED) {
+        this.addNotification({ content: "This action is unauthorized. You are logged out.", color: "error" });
+        await this.logOut();
+      }
+      if (payload.response.status == 555) {
+        this.setConnectionError(true);
+      }
     }
   }
 
