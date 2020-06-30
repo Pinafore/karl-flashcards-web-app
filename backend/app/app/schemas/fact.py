@@ -48,8 +48,14 @@ class FactUpdate(InternalFactBase):
 
 
 # Properties to receive on fact report
-class FactReport(InternalFactBase):
-    comment: str
+class FactToReport(InternalFactBase):
+    pass
+
+
+class FactReported(InternalFactBase):
+    reporter_id: int
+    reporter_username: str
+    report_id: int
 
 
 # Properties to receive on fact search
@@ -88,6 +94,7 @@ class Fact(FactInDBBase):
     reported: Optional[bool] = None
     suspended: Optional[bool] = None
     permission: Optional[Permission] = None
+    reports: Optional[List[FactReported]] = None
 
 
 # Properties to return to client

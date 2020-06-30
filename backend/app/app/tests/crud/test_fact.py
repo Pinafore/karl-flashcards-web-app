@@ -3,7 +3,7 @@ from tqdm import tqdm
 
 from app import crud
 from app.schemas import DeckCreate
-from app.schemas.fact import FactCreate, FactSearch, FactReport
+from app.schemas.fact import FactCreate, FactSearch, FactToReport
 from app.tests.utils.fact import create_random_fact_with_deck
 from app.tests.utils.user import create_random_user
 from app.tests.utils.utils import random_lower_string
@@ -125,7 +125,7 @@ def test_suspend_many_facts(db: Session) -> None:
 
     for number in tqdm(range(5 * multiplier)):
         crud.fact.suspend(db, db_obj=user1_facts[number], user=user1)
-        crud.fact.report(db, db_obj=user1_facts[number], user=user2, suggestion=FactReport(comment="report"))
+        crud.fact.report(db, db_obj=user1_facts[number], user=user2, suggestion=FactToReport(comment="report"))
         crud.fact.remove(db, db_obj=user2_facts[number], user=user2)
 
     query = crud.fact.build_facts_query(db=db, user=user1, filters=FactSearch(studyable=True))

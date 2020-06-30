@@ -32,7 +32,7 @@ class User(Base):
     history = relationship("History", back_populates="user")
     suspended_facts = association_proxy('suspensions', 'suspended_fact')
     deleted_facts = association_proxy('deletions', 'deleted_fact')
-    reported_facts = association_proxy('reports', 'reported_fact')
+    reported_facts = association_proxy('reporteds', 'reported_fact')
     user_decks = relationship("User_Deck", back_populates="user", cascade="all, delete-orphan")
     decks = association_proxy('user_decks', 'deck')
     marked_facts = association_proxy('marks', 'marked_fact')

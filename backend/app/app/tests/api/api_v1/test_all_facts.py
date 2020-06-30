@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app import crud
 from app.core.config import settings
 from app.models import User
-from app.schemas import FactReport
+from app.schemas import FactToReport
 from app.tests.utils.deck import create_random_deck
 from app.tests.utils.fact import create_random_fact, create_random_fact_with_deck
 from app.tests.utils.user import create_random_user
@@ -202,7 +202,7 @@ def test_report_fact(
     fact = create_random_fact(db, normal_user_token_headers[1])
     user = normal_user_token_headers[1]
     assert user is fact.owner
-    suggestion = FactReport(text="CHICKEN", answer="NOODLES", comment="THIS IS A REPORT").dict()
+    suggestion = FactToReport(text="CHICKEN", answer="NOODLES", comment="THIS IS A REPORT").dict()
     response = client.put(
         f"{settings.API_V1_STR}/facts/report/{fact.fact_id}", headers=normal_user_token_headers[0], json=suggestion,
     )
@@ -221,7 +221,7 @@ def test_report_unowned_fact(
     user = normal_user_token_headers[1]
     crud.deck.assign_viewer(db=db, db_obj=deck, user=user)
     assert user is not fact.owner
-    suggestion = FactReport(text="CHICKEN", answer="NOODLES", comment="THIS IS A REPORT").dict()
+    suggestion = FactToReport(text="CHICKEN", answer="NOODLES", comment="THIS IS A REPORT").dict()
     response = client.put(
         f"{settings.API_V1_STR}/facts/report/{fact.fact_id}", headers=normal_user_token_headers[0], json=suggestion
     )

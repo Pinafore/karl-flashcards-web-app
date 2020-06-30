@@ -117,16 +117,20 @@ export const api = {
     const url = `${apiUrl}/api/facts/suspend/${factId}`;
     return axios.put<IComponents["Fact"]>(url, null, authHeaders(token));
   },
-  async reportFact(token: string, factId: number) {
+  async reportFact(token: string, factId: number, data: IComponents["FactToReport"]) {
     const url = `${apiUrl}/api/facts/report/${factId}`;
-    return axios.put<IComponents["Fact"]>(url, null, authHeaders(token));
+    return axios.put<IComponents["Fact"]>(url, data, authHeaders(token));
+  },
+  async clearReportFact(token: string, factId: number) {
+    const url = `${apiUrl}/api/facts/report/${factId}`;
+    return axios.delete<IComponents["Fact"]>(url, authHeaders(token));
+  },
+  async clearReportsFact(token: string, factId: number) {
+    const url = `${apiUrl}/api/facts/report/all/${factId}`;
+    return axios.delete<IComponents["Fact"]>(url, authHeaders(token));
   },
   async markFact(token: string, factId: number) {
     const url = `${apiUrl}/api/facts/mark/${factId}`;
-    return axios.put<IComponents["Fact"]>(url, null, authHeaders(token));
-  },
-  async clearFact(token: string, factId: number) {
-    const url = `${apiUrl}/api/facts/status/${factId}`;
     return axios.put<IComponents["Fact"]>(url, null, authHeaders(token));
   },
   async deleteFact(token: string, factId: number) {

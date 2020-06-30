@@ -26,26 +26,12 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         db_obj = db.query(self.model).filter(models.Fact.fact_id == id).first()
         return db_obj
 
-    def get_schema_with_perm(self, db: Session, db_obj: models.Fact, user: models.User):
+    def get_schema_with_perm(self, db_obj: models.Fact, user: models.User):
         schema = schemas.Fact.from_orm(db_obj)
         schema.permission = db_obj.permissions(user)
-        schema.marked = True if user in db_obj.markers else False
-        suspended = (db.query(models.Suspended)
-                     .filter(models.Suspended.user_id == user.id)
-                     .filter(models.Suspended.fact_id == db_obj.fact_id)
-                     .first())
-
-        if crud.user.is_superuser(user):
-            reported = (db.query(models.Reported)
-                        .filter(models.Reported.fact_id == db_obj.fact_id)
-                        .first())
-        else:
-            reported = (db.query(models.Reported)
-                        .filter(models.Reported.user_id == user.id)
-                        .filter(models.Reported.fact_id == db_obj.fact_id)
-                        .first())
-        schema.suspended = True if suspended else False
-        schema.reported = True if reported else False
+        schema.marked = db_obj.is_marked(user)
+        schema.suspended = db_obj.is_suspended(user)
+        schema.reports = db_obj.find_reports(user)
         return schema
 
     def create_with_owner(
@@ -124,7 +110,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         return db_obj
 
     def report(
-            self, db: Session, *, db_obj: models.Fact, user: models.User, suggestion: schemas.FactReport
+            self, db: Session, *, db_obj: models.Fact, user: models.User, suggestion: schemas.FactToReport
     ) -> models.Fact:
         now = datetime.now(timezone('UTC'))
         report = models.Reported(reporter=user,
@@ -405,7 +391,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 if return_limit:
                     for _, each_karl_fact in zip(range(return_limit), reordered_karl_list):
                         retrieved_fact = self.get(db=db, id=int(each_karl_fact["fact_id"]))
-                        fact_schema = self.get_schema_with_perm(db=db, db_obj=retrieved_fact, user=user)
+                        fact_schema = self.get_schema_with_perm(db_obj=retrieved_fact, user=user)
                         fact_schema.rationale = rationale
                         if retrieved_fact:
                             fact_schema.marked = True if user in retrieved_fact.markers else False
@@ -413,11 +399,11 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 else:
                     for each_karl_fact in reordered_karl_list:
                         retrieved_fact = self.get(db=db, id=int(each_karl_fact["fact_id"]))
-                        fact_schema = self.get_schema_with_perm(db=db, db_obj=retrieved_fact, user=user)
+                        fact_schema = self.get_schema_with_perm(db_obj=retrieved_fact, user=user)
                         fact_schema.rationale = rationale
                         # MARK: maybe not the most efficient solution for determining if user has marked a fact
                         if retrieved_fact:
-                            fact_schema.marked = True if user in retrieved_fact.markers else False
+                            fact_schema.marked = retrieved_fact.is_marked(user)
                         facts.append(fact_schema)
             details = {
                 "study_system": "karl",

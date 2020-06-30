@@ -32,7 +32,6 @@ def read_facts(
         marked: Optional[bool] = None,
         suspended: Optional[bool] = None,
         reported: Optional[bool] = None,
-        permissions: bool = True,
         current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
@@ -66,7 +65,7 @@ def read_facts(
     begin_overall_start = time.time()
     new_facts: List[schemas.Fact] = []
     for fact in facts:
-        new_facts.append(crud.fact.get_schema_with_perm(db=db, db_obj=fact, user=current_user))
+        new_facts.append(crud.fact.get_schema_with_perm(db_obj=fact, user=current_user))
     overall_end_time = time.time()
     overall_total_time = overall_end_time - begin_overall_start
     logger.info("permissions: " + str(overall_total_time))
@@ -232,18 +231,29 @@ def suspend_fact(
 def report_fact(
         *,
         perms: deps.CheckFactPerms = Depends(),
-        suggestion: schemas.FactReport,
+        suggestion: schemas.FactToReport,
 ) -> Any:
     """
     Report or undo report of a fact.
     """
-    if perms.current_user in perms.fact.markers:
+    if perms.current_user in perms.fact.reporters:
+        fact = crud.fact.undo_report(db=perms.db, db_obj=perms.fact, user=perms.current_user)
+    fact = crud.fact.report(db=perms.db, db_obj=perms.fact, user=perms.current_user, suggestion=suggestion)
+    return fact
+
+
+@router.delete("/report/{fact_id}", response_model=schemas.Fact)
+def clear_report_fact(
+        *,
+        perms: deps.CheckFactPerms = Depends(),
+) -> Any:
+    """
+    Report or undo report of a fact.
+    """
+    if perms.current_user in perms.fact.reporters:
         fact = crud.fact.undo_report(db=perms.db, db_obj=perms.fact, user=perms.current_user)
     else:
-        if suggestion:
-            fact = crud.fact.report(db=perms.db, db_obj=perms.fact, user=perms.current_user, suggestion=suggestion)
-        else:
-            raise HTTPException(status_code=434, detail="Suggestion required when reporting")
+        raise HTTPException(status_code=448, detail="User has not previously reported this fact")
     return fact
 
 
@@ -265,8 +275,8 @@ def mark_fact(
     assert len(chicken) == 1
 
 
-@router.put("/status/{fact_id}", response_model=schemas.Fact)
-def clear_fact_status(
+@router.delete("/report/all/{fact_id}", response_model=schemas.Fact)
+def clear_reports(
         *,
         perms: deps.CheckFactPerms = Depends(),
 ) -> Any:
