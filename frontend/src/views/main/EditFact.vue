@@ -232,7 +232,7 @@
     public beforeRouteEnter(to, from, next) {
       next((vm) => {
         vm.routeName = to.name;
-        vm.determineTitle();
+        vm.determineRoute();
         vm.setEditedIndex();
         vm.storedFact();
       });
@@ -240,13 +240,13 @@
 
     public async beforeRouteUpdate(to, from, next) {
       this.routeName = to.name;
-      this.determineTitle();
+      await this.determineRoute();
       this.setEditedIndex();
       this.storedFact();
       next();
     }
 
-    determineTitle() {
+    async determineRoute() {
       if (this.routeName == "learn-edit" || this.routeName == "browse-edit") {
         this.formTitle = "Edit Fact";
         this.cancel = "Cancel";
@@ -261,6 +261,7 @@
         this.cancel = "Cancel";
         this.reset = "Reset";
         this.saveMsg = "Report";
+        await mainStore.getPublicDecks();
       }
     }
 
@@ -281,7 +282,15 @@
 
     get decks() {
       const userProfile = mainStore.userProfile;
-      return userProfile && userProfile.decks ? userProfile.decks : [];
+      const decks = userProfile && userProfile.decks ? userProfile.decks : [];
+      if (this.routeName.endsWith("report")) {
+        decks.push(...mainStore.publicDecks);
+      }
+      return decks;
+    }
+
+    get publicDecks() {
+      return mainStore.publicDecks;
     }
 
     get facts() {
