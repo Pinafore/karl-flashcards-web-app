@@ -201,7 +201,7 @@
     status = [
       { name: "No Status Filters", params: {} },
       { name: "Favorite", params: { marked: true } },
-      { name: "All Suspended (not reported)", params: { suspended: true } },
+      { name: "All Suspended", params: { suspended: true } },
       { name: "All Reported", params: { reported: true } },
       { name: "Favorite + Reported", params: { marked: true, reported: true } },
       { name: "Favorite + Suspended", params: { marked: true, suspended: true } },
@@ -219,6 +219,7 @@
           to.name == "browse-edit" ||
           to.name == "browse-report" ||
           to.name == "browse-resolve";
+        vm.setSettings(to);
       });
     }
 
@@ -227,7 +228,14 @@
         to.name == "browse-edit" ||
         to.name == "browse-report" ||
         to.name == "browse-resolve";
+      this.setSettings(to);
       next();
+    }
+
+    setSettings(route) {
+      if (route.query.reported === "1") {
+        this.selectedStatus = { reported: true };
+      }
     }
 
     get decks() {

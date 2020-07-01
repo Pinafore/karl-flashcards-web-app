@@ -56,6 +56,14 @@
             <v-list-item-title>Browse Facts</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+        <v-list-item to="/main/browse?reported=1">
+          <v-list-item-action>
+            <v-icon>mdi-alert-octagon</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Reported Facts</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
       </v-list>
       <v-divider></v-divider>
       <v-list>
