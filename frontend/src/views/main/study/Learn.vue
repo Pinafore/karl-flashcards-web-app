@@ -193,6 +193,7 @@
           label="Type Answer (Press any letter to focus)"
           autofocus
           class="hide-details"
+          @keydown="keyHandler"
         ></v-text-field>
       </v-card-text>
       <v-card-actions v-show="show.enable_actions">
@@ -377,17 +378,17 @@
 
     public handleKeyDown(e: KeyboardEvent) {
       const key = e.key.toLowerCase();
-      if (e.altKey && e.key == "s") {
+      if (e.altKey && (e.key == "s" || key == "ß")) {
         this.suspend();
-      } else if (e.altKey && key == "d") {
+      } else if (e.altKey && (key == "d" || key == "∂")) {
         this.remove();
-      } else if (e.altKey && key == "/") {
+      } else if (e.altKey && (key == "/" || key == "÷")) {
         this.dialog = !this.dialog;
-      } else if (e.altKey && key == "r") {
+      } else if (e.altKey && (key == "r" || key == "®")) {
         this.report();
-      } else if (e.altKey && key == "m") {
+      } else if (e.altKey && (key == "m" || key == "µ")) {
         this.mark();
-      } else if (e.altKey && key == "e") {
+      } else if (e.altKey && (key == "e" || key == "dead")) {
         this.edit();
       } else if (this.showBack) {
         this.determineResponse(e, key);
@@ -423,6 +424,25 @@
       }
     }
 
+    public keyHandler(e: KeyboardEvent) {
+      const key = e.key.toLowerCase();
+      if (
+        (e.altKey &&
+          (key == "m" ||
+            key == "µ" ||
+            key == "d" ||
+            key == "∂" ||
+            key == "/" ||
+            key == "÷" ||
+            key == "r" ||
+            key == "®" ||
+            key == "e" ||
+            key == "dead")) ||
+        (this.showBack && (key == "[" || key == "]"))
+      ) {
+        e.preventDefault();
+      }
+    }
     public async showAnswer() {
       await studyStore.evaluateAnswer(this.typed);
       this.showBack = true;
