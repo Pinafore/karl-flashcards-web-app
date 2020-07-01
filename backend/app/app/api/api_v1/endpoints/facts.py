@@ -237,7 +237,7 @@ def report_fact(
     Report or undo report of a fact.
     """
     if perms.current_user in perms.fact.reporters:
-        fact = crud.fact.undo_report(db=perms.db, db_obj=perms.fact, user=perms.current_user)
+        crud.fact.undo_report(db=perms.db, db_obj=perms.fact, user=perms.current_user)
     fact = crud.fact.report(db=perms.db, db_obj=perms.fact, user=perms.current_user, suggestion=suggestion)
     return fact
 
