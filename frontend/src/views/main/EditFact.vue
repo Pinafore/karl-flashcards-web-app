@@ -112,8 +112,9 @@
         </v-card-title>
         <v-card-text>
           <div v-if="formTitle === 'Report Fact'">
-            While optional, it would be helpful if you could suggest changes to the
-            reported fact below.
+            Reported facts will not be shown to you again until the owner resolves the
+            report. While optional, it would be helpful if you could suggest changes to
+            the reported fact below.
           </div>
           <span v-if="fact">
             <!-- text -->
