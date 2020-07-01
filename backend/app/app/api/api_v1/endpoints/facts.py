@@ -60,7 +60,9 @@ def read_facts(
                                 )
     query = crud.fact.build_facts_query(db=db, user=current_user, filters=search)
     facts = crud.fact.get_eligible_facts(query=query, skip=skip, limit=limit)
-    total = crud.fact.count_eligible_facts(query=query)
+    total = len(facts)
+    if total == limit:
+        total = crud.fact.count_eligible_facts(query=query)
 
     begin_overall_start = time.time()
     new_facts: List[schemas.Fact] = []
