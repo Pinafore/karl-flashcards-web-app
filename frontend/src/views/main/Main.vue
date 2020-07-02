@@ -257,3 +257,16 @@
     }
   }
 </script>
+
+<style>
+  .v-navigation-drawer__content {
+    overflow-y: scroll;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+  }
+  .v-navigation-drawer__content::-webkit-scrollbar {
+    /* WebKit */
+    width: 0;
+    height: 0;
+  }
+</style>
