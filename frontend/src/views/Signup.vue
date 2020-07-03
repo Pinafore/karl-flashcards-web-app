@@ -10,7 +10,11 @@
             <v-spacer></v-spacer>
           </v-toolbar>
           <v-card-text>
-            <validation-provider v-slot="{ errors }" name="Username" rules="required">
+            <validation-provider
+              v-slot="{ errors }"
+              name="Username"
+              rules="required|min:4|max:32"
+            >
               <v-text-field
                 v-model="username"
                 prepend-icon="mdi-account"
@@ -40,7 +44,7 @@
               :debounce="100"
               name="Password"
               vid="password1"
-              rules="required"
+              rules="required|min:8|max:32"
             >
               <v-text-field
                 v-model="password1"
@@ -96,7 +100,7 @@
 <script lang="ts">
   import { Component, Vue } from "vue-property-decorator";
   import { appName } from "@/env";
-  import { confirmed, email, required } from "vee-validate/dist/rules";
+  import { confirmed, email, required, min, max } from "vee-validate/dist/rules";
   import { extend, ValidationObserver, ValidationProvider } from "vee-validate";
   import { mainStore } from "@/utils/store-accessor";
   import { IComponents } from "@/interfaces";
@@ -105,6 +109,21 @@
   extend("required", { ...required, message: "{_field_} can not be empty" });
   extend("confirmed", { ...confirmed, message: "Passwords do not match" });
   extend("email", { ...email, message: "Invalid email address" });
+  extend("min", {
+    validate(value, { length }) {
+      return value.length >= length;
+    },
+    params: ["length"],
+    message: "{_field_} must have at least {length} characters",
+  });
+
+  extend("max", {
+    validate(value, { length }) {
+      return value.length <= length;
+    },
+    params: ["length"],
+    message: "{_field_} must be less than or equal to {length} characters",
+  });
 
   @Component({
     components: {
