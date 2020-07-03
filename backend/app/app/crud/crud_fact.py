@@ -369,6 +369,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 answer=each_card.answer,
                 category=each_card.category,
                 deck_name=each_card.deck.title,
+                deck_id=each_card.deck_id,
                 user_id=user.id,
                 fact_id=each_card.fact_id,
                 env=settings.ENVIRONMENT
@@ -455,6 +456,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             history_id=history.id,
             category=db_obj.category,
             deck_name=db_obj.deck.title,
+            deck_id=db_obj.deck_id,
             answer=db_obj.answer,
             env=settings.ENVIRONMENT,
             elapsed_seconds_text=schedule.elapsed_seconds_text,
