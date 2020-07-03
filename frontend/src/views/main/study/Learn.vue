@@ -191,7 +191,7 @@
           id="answer"
           v-model="typed"
           solo
-          label="Type Answer (Press any letter to focus)"
+          label="Recommended - Type Answer (Press any letter to focus)"
           autofocus
           class="hide-details"
           @keydown="keyHandler"
@@ -228,7 +228,7 @@
           id="retype_answer"
           v-model="retyped"
           solo
-          label="Retype Answer (Press any letter to focus)"
+          label="Optional - Retype Answer (Press any letter to focus)"
           autofocus
           class="hide-details pt-3"
         ></v-text-field>
