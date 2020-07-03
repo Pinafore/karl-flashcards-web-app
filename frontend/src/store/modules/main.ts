@@ -21,6 +21,7 @@ export default class MainModule extends VuexModule {
   totalFacts = 0;
   isOnHomeScreenPopup: boolean | null = null;
   connectionError = false;
+  schedulerError = false;
 
   get hasAdminAccess() {
     return (
@@ -104,6 +105,10 @@ export default class MainModule extends VuexModule {
     this.connectionError = payload;
   }
 
+  @Mutation
+  setSchedulerError(payload: boolean) {
+    this.schedulerError = payload;
+  }
 
   @Action
   async logIn(payload: { username: string; password: string }) {
@@ -243,6 +248,9 @@ export default class MainModule extends VuexModule {
       }
       if (payload.response.status == 555) {
         this.setConnectionError(true);
+      }
+      if (payload.response.status == 556) {
+        this.setSchedulerError(true);
       }
     }
   }

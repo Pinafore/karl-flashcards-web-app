@@ -300,6 +300,26 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog
+      v-model="schedulerError"
+      max-width="1000px"
+      scrollable
+      @click:outside="returnHome"
+    >
+      <v-card>
+        <v-card-title>
+          <h2>Scheduler Error</h2>
+        </v-card-title>
+        <v-card-text>
+          There is a problem with the KAR³L scheduler and we are working on a solution.
+          Please check back in a few hours and KAR³L will be ready again to schedule
+          facts to review for you.
+        </v-card-text>
+        <v-card-actions>
+          <v-btn @click="returnHome">Return to Home Screen</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -320,6 +340,10 @@
 
     get connectionError() {
       return mainStore.connectionError;
+    }
+
+    get schedulerError() {
+      return mainStore.schedulerError;
     }
 
     get facts() {
@@ -343,6 +367,8 @@
     }
 
     public async mounted() {
+      mainStore.setConnectionError(false);
+      mainStore.setSchedulerError(false);
       await this.determine_decks(this.$router.currentRoute.query.deck);
       window.addEventListener("keydown", this.handleKeyDown);
     }
@@ -509,6 +535,7 @@
     }
     returnHome() {
       mainStore.setConnectionError(false);
+      mainStore.setSchedulerError(false);
       this.$router.push("/main/dashboard");
     }
   }
