@@ -1,5 +1,6 @@
 <template>
   <div>
+    <Onboard></Onboard>
     <v-toolbar style="position: sticky; top: 0; z-index: 10;">
       <v-toolbar-title>
         Public Decks
@@ -9,23 +10,6 @@
         >Add Deck(s)</v-btn
       >
     </v-toolbar>
-    <v-dialog v-model="onboard" scrollable width="500">
-      <v-card>
-        <v-card-title>
-          <h2>Welcome!</h2>
-        </v-card-title>
-        <v-card-text>
-          KAR³L has decks of pre-made facts. Choose the decks you're interested in and
-          click "Add Decks" to continue
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="primary" text @click="onboard = false">
-            Got it!
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
     <v-data-table
       v-model="selected"
       :headers="headers"
@@ -44,8 +28,11 @@
   import { Component, Vue } from "vue-property-decorator";
   import { mainStore } from "@/utils/store-accessor";
   import { IComponents } from "@/interfaces";
+  import Onboard from "@/views/Onboard.vue";
 
-  @Component
+  @Component({
+    components: { Onboard },
+  })
   export default class Decks extends Vue {
     public headers = [
       {
@@ -56,10 +43,8 @@
       },
     ];
     selected: IComponents["Deck"][] = [];
-    onboard = false;
 
     async mounted() {
-      this.onboard = this.$router.currentRoute.query.onboard === "true";
       await mainStore.getPublicDecks();
     }
 

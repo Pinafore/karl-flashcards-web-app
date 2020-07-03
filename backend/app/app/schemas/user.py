@@ -14,6 +14,7 @@ class UserBase(BaseModel):
     username: Optional[str] = None
     is_active: bool = True
     repetition_model: Optional[Repetition] = None
+    show_help: Optional[bool] = None
 
 
 # Properties to receive via API on creation
@@ -45,7 +46,8 @@ class UserInDBBase(UserBase):
     username: str
     is_active: bool
     is_superuser: bool
-
+    show_help: bool
+    
     class Config:
         orm_mode = True
 

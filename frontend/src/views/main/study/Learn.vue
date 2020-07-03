@@ -1,5 +1,6 @@
 <template>
   <v-container fluid style="max-width:1200px">
+    <onboard></onboard>
     <v-card class="mx-3 my-1 py-1 px-3">
       <v-card-title primary-title class="mx-3 my-0 pa-0">
         <div class="headline primary--text">Learn</div>
@@ -305,8 +306,11 @@
 <script lang="ts">
   import { Component, Vue } from "vue-property-decorator";
   import { studyStore, mainStore } from "@/utils/store-accessor";
+  import Onboard from "@/views/Onboard.vue";
 
-  @Component
+  @Component({
+    components: { Onboard },
+  })
   export default class Learn extends Vue {
     showBack = false;
     typed = "";

@@ -1,5 +1,6 @@
 <template>
   <div>
+    <Onboard></Onboard>
     <v-toolbar style="position: sticky; top: 0; z-index: 10;">
       <v-toolbar-title>
         Decks
@@ -29,8 +30,11 @@
   import { Component, Vue } from "vue-property-decorator";
   import { mainStore } from "@/utils/store-accessor";
   import { IComponents } from "@/interfaces";
+  import Onboard from "@/views/Onboard.vue";
 
-  @Component
+  @Component({
+    components: { Onboard },
+  })
   export default class Decks extends Vue {
     public headers = [
       {

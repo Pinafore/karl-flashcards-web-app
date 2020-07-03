@@ -165,6 +165,7 @@ export interface IComponents {
     repetition_model?: "leitner" | "sm-2" | "karl";
     id: number;
     is_superuser: boolean;
+    show_help: boolean;
     default_deck: IComponents["Deck"];
     decks?: IComponents["Deck"][];
     suspended_facts?: IComponents["Fact"][];
@@ -184,6 +185,7 @@ export interface IComponents {
     repetition_model?: "leitner" | "sm-2" | "karl";
     password?: string;
     default_deck_id?: number;
+    show_help?: boolean;
   };
   ValidationError: { loc: string[]; msg: string; type: string };
 }

@@ -162,6 +162,28 @@ export default class MainModule extends VuexModule {
   }
 
   @Action
+  async updateUserHelp(payload: boolean) {
+    try {
+      const loadingNotification = { content: "saving", showProgress: true };
+      this.addNotification(loadingNotification);
+      const response = (
+        await Promise.all([
+          api.updateMe(this.token, {show_help: payload}),
+          await new Promise((resolve, _reject) => setTimeout(() => resolve(), 500)),
+        ])
+      )[0];
+      this.setUserProfile(response.data);
+      this.removeNotification(loadingNotification);
+      this.addNotification({
+        content: "Profile successfully updated",
+        color: "success",
+      });
+    } catch (error) {
+      await this.checkApiError(error);
+    }
+  }
+
+  @Action
   async checkLoggedIn() {
     if (!this.isLoggedIn) {
       let token = this.token;
@@ -231,8 +253,7 @@ export default class MainModule extends VuexModule {
       router.push("/main/dashboard");
     } else if (router.currentRoute.path === "/sign-up") {
       router.push({
-        path: "main/add/public-decks",
-        query: { onboard: "true" },
+        path: "main/add/public-decks"
       });
     }
   }
