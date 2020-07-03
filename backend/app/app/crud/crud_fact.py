@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session, Query
 from app import crud, models, schemas
 from app.core.config import settings
 from app.crud.base import CRUDBase
+from sqlalchemy import func
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -300,7 +301,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                                    .filter(models.Reported.user_id == None))
         if filters.all:
             facts_query = facts_query.filter(
-                models.Fact.__ts_vector__.match(filters.all, postgresql_regconfig='english'))
+                models.Fact.__ts_vector__.op('@@')(func.plainto_tsquery('english', filters.all)))
         if filters.text:
             facts_query = facts_query.filter(models.Fact.text.ilike(filters.text))
         if filters.answer:
