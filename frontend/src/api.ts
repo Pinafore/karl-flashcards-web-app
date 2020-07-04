@@ -189,4 +189,59 @@ export const api = {
       },
     });
   },
+  async getUserStats(token: string, data: IComponents["StatSearch"]) {
+    let url = ``;
+    if (data.date_end) {
+      url += `&date_end=${new Date(data.date_end).toISOString()}`;
+    }
+    if (data.date_start) {
+      url += `&date_start=${new Date(data.date_start).toISOString()}`;
+    }
+    if (data.deck_id) {
+      url += `&deck_id=${data.deck_id}`;
+    }
+    url = url.slice(1);
+    return axios.get<IComponents["Statistics"]>(
+      `${apiUrl}/api/statistics/?${url}`,
+      authHeaders(token),
+    );
+  },
+  async getHomeStats(token: string) {
+    return axios.get<IComponents["Statistics"][]>(
+      `${apiUrl}/api/statistics/home`,
+      authHeaders(token),
+    );
+  },
+  async getSavedStats(token: string) {
+    return axios.get<IComponents["Statistics"][]>(
+      `${apiUrl}/api/statistics/saved`,
+      authHeaders(token),
+    );
+  },
+  async getLeaderboard(token: string, data: IComponents["LeaderboardSearch"]) {
+    let url = ``;
+    if (data.date_end) {
+      url += `&date_end=${data.date_end}`;
+    }
+    if (data.date_start) {
+      url += `&date_start=${data.date_start}`;
+    }
+    if (data.deck_id) {
+      url += `&deck_id=${data.deck_id}`;
+    }
+    if (data.rank_type) {
+      url += `&rank_type=${data.rank_type}`;
+    }
+    if (data.skip) {
+      url += `&skip=${data.skip}`;
+    }
+    if (data.min_studied) {
+      url += `&min_studied=${data.min_studied}`;
+    }
+    url = url.slice(1);
+    return axios.get<IComponents["Leaderboard"]>(
+      `${apiUrl}/api/statistics/leaderboard?${url}`,
+      authHeaders(token),
+    );
+  }
 };

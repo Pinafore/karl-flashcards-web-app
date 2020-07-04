@@ -21,6 +21,22 @@
             <v-list-item-title>Dashboard</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+        <v-list-item to="/main/statistics">
+          <v-list-item-action>
+            <v-icon>{{ mdiBookInformationVariant }}</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Statistics</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item to="/main/leaderboards">
+          <v-list-item-action>
+            <v-icon>{{ mdiFormatListNumbered }}</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Leaderboards</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
         <v-list-item to="/main/profile/view">
           <v-list-item-action>
             <v-icon>mdi-account</v-icon>
@@ -205,6 +221,8 @@
     mdiBookMultiple,
     mdiTextBoxMultiple,
     mdiUploadMultiple,
+    mdiFormatListNumbered,
+    mdiBookInformationVariant,
   } from "@mdi/js";
 
   const routeGuardMain = async (to, _from, next) => {
@@ -223,6 +241,8 @@
     mdiBookMultiple = mdiBookMultiple;
     mdiTextBoxMultiple = mdiTextBoxMultiple;
     mdiUploadMultiple = mdiUploadMultiple;
+    mdiBookInformationVariant = mdiBookInformationVariant;
+    mdiFormatListNumbered = mdiFormatListNumbered;
 
     public beforeRouteEnter(to, from, next) {
       routeGuardMain(to, from, next);

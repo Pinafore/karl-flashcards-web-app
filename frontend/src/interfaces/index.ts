@@ -1,3 +1,5 @@
+import { DataTableHeader } from "vuetify";
+
 export interface IAppNotification {
   content: string;
   color?: string;
@@ -131,15 +133,6 @@ export interface IComponents {
     elapsed_seconds_text: number;
     elapsed_seconds_answer: number;
   };
-  Statistics: {
-    new_known_rate?: number;
-    review_known_rate?: number;
-    new_facts: number;
-    reviewed_facts: number;
-    total_seen: number;
-    total_seconds: number;
-    user: IComponents["User"];
-  };
   SuperUserCreate: {
     email: string;
     username: string;
@@ -188,4 +181,41 @@ export interface IComponents {
     show_help?: boolean;
   };
   ValidationError: { loc: string[]; msg: string; type: string };
+  StatSearch: {
+    date_start?: string;
+    date_end?: string;
+    deck_id?: number;
+  };
+  Statistics: {
+    name: string;
+    user_id: number;
+    new_known_rate: number;
+    review_known_rate: number;
+    known_rate: number;
+    new_facts: number;
+    reviewed_facts: number;
+    total_seen: number;
+    total_minutes: number;
+    elapsed_minutes_text: number;
+    user: IComponents["User"];
+  };
+  LeaderboardSearch: {
+    rank_type: string;
+    skip?: number;
+    limit?: number;
+    min_studied?: number;
+    deck_id?: number;
+    date_start?: string;
+    date_end?: string;
+  };
+  LeaderboardUser: {
+    value: number;
+    user: IComponents["User"];
+  };
+  Leaderboard: {
+    leaderboard: IComponents["LeaderboardUser"][];
+    name: string;
+    rank_type: string;
+    headers: DataTableHeader[];
+  };
 }

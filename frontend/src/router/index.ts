@@ -85,6 +85,22 @@ export default new VueRouter({
                 ),
             },
             {
+              path: "statistics",
+              name: "statistics",
+              component: () =>
+                import(
+                  /* webpackChunkName: "main-statistics" */ "@/views/main/Statistics.vue"
+                  ),
+            },
+            {
+              path: "leaderboards",
+              name: "leaderboards",
+              component: () =>
+                import(
+                  /* webpackChunkName: "main-leaderboard" */ "@/views/main/Leaderboards.vue"
+                  ),
+            },
+            {
               path: "browse",
               name: "browse",
               component: () =>

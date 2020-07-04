@@ -1,10 +1,14 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, List, Optional
+
+import json
+import requests
+from fastapi import APIRouter, Depends, HTTPException
+from pytz import timezone
+from sqlalchemy.orm import Session
 
 from app import models, schemas, interface
 from app.api import deps
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 
 router = APIRouter()
 
@@ -13,25 +17,101 @@ router = APIRouter()
 def read_statistics(
         *,
         db: Session = Depends(deps.get_db),
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
+        date_start: Optional[datetime] = None,
+        date_end: Optional[datetime] = None,
+        deck_id: Optional[int] = None,
         current_user: models.User = Depends(deps.get_current_active_user),
 ):
-    statistics = interface.statistics.get_user_stats(user=current_user)
+    statistics = interface.statistics.get_user_stats(db=db, user=current_user, date_start=date_start, date_end=date_end,
+                                                     deck_id=deck_id)
+    if isinstance(statistics, requests.exceptions.RequestException):
+        raise HTTPException(status_code=555, detail="Connection to scheduler is down")
+    if isinstance(statistics, json.decoder.JSONDecodeError):
+        raise HTTPException(status_code=556, detail="Scheduler malfunction")
     return statistics
 
 
-@router.get("/leaderboard", response_model=List[schemas.User])
+@router.get("/home", response_model=List[schemas.Statistics])
+def read_home_statistics(
+        *,
+        db: Session = Depends(deps.get_db),
+        current_user: models.User = Depends(deps.get_current_active_user),
+):
+    today = datetime.now(timezone('UTC')) - timedelta(days=1)
+    stat = interface.statistics.get_user_stats(db=db, user=current_user, date_start=today)
+    stat.name = "Last 24 Hours"
+    if isinstance(stat, requests.exceptions.RequestException):
+        raise HTTPException(status_code=555, detail="Connection to scheduler is down")
+    if isinstance(stat, json.decoder.JSONDecodeError):
+        raise HTTPException(status_code=556, detail="Scheduler malfunction")
+
+    seven_days = datetime.now(timezone('UTC')) - timedelta(days=7)
+    seven_stat = interface.statistics.get_user_stats(db=db, user=current_user, date_start=seven_days)
+    seven_stat.name = "Last 7 Days"
+    if isinstance(seven_stat, requests.exceptions.RequestException):
+        raise HTTPException(status_code=555, detail="Connection to scheduler is down")
+    if isinstance(seven_stat, json.decoder.JSONDecodeError):
+        raise HTTPException(status_code=556, detail="Scheduler malfunction")
+
+    total_stat = interface.statistics.get_user_stats(db=db, user=current_user)
+    if isinstance(total_stat, requests.exceptions.RequestException):
+        raise HTTPException(status_code=555, detail="Connection to scheduler is down")
+    if isinstance(total_stat, json.decoder.JSONDecodeError):
+        raise HTTPException(status_code=556, detail="Scheduler malfunction")
+    return [stat, seven_stat, total_stat]
+
+
+@router.get("/saved", response_model=List[schemas.Statistics])
+def read_saved_statistics(
+        *,
+        db: Session = Depends(deps.get_db),
+        current_user: models.User = Depends(deps.get_current_active_user),
+):
+    today = datetime.now(timezone('UTC')) - timedelta(days=1)
+    stat = interface.statistics.get_user_stats(db=db, user=current_user, date_start=today)
+    stat.name = "Last 24 Hours"
+    if isinstance(stat, requests.exceptions.RequestException):
+        raise HTTPException(status_code=555, detail="Connection to scheduler is down")
+    if isinstance(stat, json.decoder.JSONDecodeError):
+        raise HTTPException(status_code=556, detail="Scheduler malfunction")
+
+    seven_days = datetime.now(timezone('UTC')) - timedelta(days=7)
+    seven_stat = interface.statistics.get_user_stats(db=db, user=current_user, date_start=seven_days)
+    seven_stat.name = "Last 7 Days"
+    if isinstance(seven_stat, requests.exceptions.RequestException):
+        raise HTTPException(status_code=555, detail="Connection to scheduler is down")
+    if isinstance(seven_stat, json.decoder.JSONDecodeError):
+        raise HTTPException(status_code=556, detail="Scheduler malfunction")
+
+    total_stat = interface.statistics.get_user_stats(db=db, user=current_user)
+    if isinstance(total_stat, requests.exceptions.RequestException):
+        raise HTTPException(status_code=555, detail="Connection to scheduler is down")
+    if isinstance(total_stat, json.decoder.JSONDecodeError):
+        raise HTTPException(status_code=556, detail="Scheduler malfunction")
+    return [stat, seven_stat, total_stat]
+
+
+@router.get("/leaderboard", response_model=schemas.Leaderboard)
 def read_leaderboard(
         *,
         db: Session = Depends(deps.get_db),
+        rank_type: schemas.RankType,
+        skip: int = None,
         limit: int = 10,
-        start_date: Optional[datetime] = None,
+        min_studied: int = 10,
+        deck_id: int = None,
+        date_start: datetime = None,
+        date_end: datetime = None
 ) -> Any:
     """
-    Retrieves users with the most reviews since the specified start time, or all time otherwise
+    Retrieves leaderboard of users since the specified start time, or all time otherwise
     """
 
-    # top_users = crud.user.get_top_users(db=db, limit=limit, start_date=start_date)
-
-    return []
+    top_users = interface.statistics.get_leaderboard(db=db, rank_type=rank_type, skip=skip, limit=limit,
+                                                     min_studied=min_studied, deck_id=deck_id, date_start=date_start,
+                                                     date_end=date_end)
+    if isinstance(top_users, requests.exceptions.RequestException):
+        raise HTTPException(status_code=555, detail="Connection to scheduler is down")
+    if isinstance(top_users, json.decoder.JSONDecodeError):
+        raise HTTPException(status_code=556, detail="Scheduler malfunction")
+    return top_users

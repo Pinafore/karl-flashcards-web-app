@@ -201,7 +201,7 @@
         <v-btn @click="showAnswer">Show Answer (Enter)</v-btn>
       </v-card-actions>
     </v-card>
-    <v-card v-show="showBack" class="my-2 mx-3 px-3 py-2">
+    <v-card v-show="showBack && show.enable_actions" class="my-2 mx-3 px-3 py-2">
       <v-card-title class="py-2 pb-0">
         <div class="title">Back</div>
       </v-card-title>
@@ -422,7 +422,7 @@
         this.edit();
       } else if (this.showBack) {
         this.determineResponse(e, key);
-      } else if (key == "enter") {
+      } else if (key == "enter" && this.show.enable_actions) {
         this.showAnswer();
       } else if (
         /^[a-z0-9]$/i.test(key) &&
@@ -510,7 +510,7 @@
 
     public async response(response) {
       if (this.show.fact) {
-        await studyStore.addToSchedule({
+        studyStore.addToSchedule({
           fact_id: this.show.fact.fact_id,
           typed: this.typed,
           response: response,

@@ -22,6 +22,23 @@ export default class MainModule extends VuexModule {
   isOnHomeScreenPopup: boolean | null = null;
   connectionError = false;
   schedulerError = false;
+  filteredStat: IComponents["Statistics"] | null = null;
+  savedStats: IComponents["Statistics"][] = [];
+  homeStats: IComponents["Statistics"][] = [];
+  homeLeaderboard: IComponents["Leaderboard"] | null = null;
+  savedLeaderboards: IComponents["Leaderboard"][] = [];
+  filteredLeaderboard: IComponents["Leaderboard"] | null = null;
+  types = [
+    { text: "Total Seen:", value: "total_seen" },
+    { text: "New Facts:", value: "new_facts" },
+    { text: "Reviewed Facts:", value: "reviewed_facts" },
+    { text: "Recall %:", value: "known_rate" },
+    { text: "New Recall %:", value: "new_known_rate" },
+    { text: "Review Recall %:", value: "review_known_rate" },
+    { text: "Minutes Spent:", value: "total_minutes" },
+    { text: "Minutes Spent (Front):", value: "elapsed_minutes_text" },
+  ];
+  today = new Date().toISOString();
 
   get hasAdminAccess() {
     return (
@@ -108,6 +125,46 @@ export default class MainModule extends VuexModule {
   @Mutation
   setSchedulerError(payload: boolean) {
     this.schedulerError = payload;
+  }
+
+  @Mutation
+  setSavedStats(payload: IComponents["Statistics"][]) {
+    this.savedStats = payload;
+  }
+
+  @Mutation
+  setSavedLeaderboards(payload: IComponents["Leaderboard"][]) {
+    this.savedLeaderboards = payload;
+  }
+
+  @Mutation
+  setFilteredStat(payload: IComponents["Statistics"]) {
+    this.filteredStat = payload;
+  }
+
+  @Mutation
+  setFilteredLeaderboard(payload: IComponents["Leaderboard"]) {
+    this.filteredLeaderboard = payload;
+  }
+
+  @Mutation
+  setHomeStats(payload: IComponents["Statistics"][]) {
+    this.homeStats = payload;
+  }
+
+  @Mutation
+  setHomeLeaderboard(payload: IComponents["Leaderboard"]) {
+    this.homeLeaderboard = payload;
+  }
+
+  @Mutation
+  addToLeaderboards(payload: IComponents["Leaderboard"]) {
+    this.savedLeaderboards.unshift(payload);
+  }
+
+  @Mutation
+  addToStats(payload: IComponents["Statistics"]) {
+    this.savedStats.unshift(payload);
   }
 
   @Action
@@ -579,6 +636,56 @@ export default class MainModule extends VuexModule {
       }
     } catch (error) {
       await mainStore.checkApiError(error);
+    }
+  }
+
+  @Action
+  async getHomeStatistics() {
+    try {
+      const response = await api.getHomeStats(this.token);
+      this.setHomeStats(response.data);
+    } catch (error) {
+      await this.checkApiError(error);
+    }
+  }
+  
+  @Action
+  async getSavedStatistics() {
+    try {
+      const response = await api.getSavedStats(this.token);
+      this.setSavedStats(response.data);
+    } catch (error) {
+      await this.checkApiError(error);
+    }
+  }
+
+  @Action
+  async getStatistic(payload: IComponents["StatSearch"]) {
+    try {
+      const response = await api.getUserStats(this.token, payload);
+      this.setFilteredStat(response.data);
+    } catch (error) {
+      await this.checkApiError(error);
+    }
+  }
+
+  @Action
+  async getHomeLeaderboard(payload: IComponents["LeaderboardSearch"]) {
+    try {
+      const response = await api.getLeaderboard(this.token, payload);
+      this.setHomeLeaderboard(response.data);
+    } catch (error) {
+      await this.checkApiError(error);
+    }
+  }
+
+  @Action
+  async getLeaderboard(payload: IComponents["LeaderboardSearch"]) {
+    try {
+      const response = await api.getLeaderboard(this.token, payload);
+      this.setFilteredLeaderboard(response.data);
+    } catch (error) {
+      await this.checkApiError(error);
     }
   }
 }

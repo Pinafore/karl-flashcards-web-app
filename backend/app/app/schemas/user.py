@@ -47,7 +47,7 @@ class UserInDBBase(UserBase):
     is_active: bool
     is_superuser: bool
     show_help: bool
-    
+
     class Config:
         orm_mode = True
 
@@ -56,7 +56,6 @@ class UserInDBBase(UserBase):
 class User(UserInDBBase):
     default_deck: Deck
     decks: List[Deck] = []
-    suspended_facts: List[Fact] = []
 
     class Config:
         orm_mode = True
@@ -67,8 +66,6 @@ class User(UserInDBBase):
         def get(self, item: Any, default: Any) -> Any:
             attribute = getattr(self._obj, item, default)
             if item == "decks":
-                attribute = list(attribute)
-            if item == "suspended_facts":
                 attribute = list(attribute)
             return attribute
 
