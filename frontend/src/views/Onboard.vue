@@ -94,7 +94,7 @@
   import { mainStore } from "@/store";
 
   @Component
-  export default class Login extends Vue {
+  export default class Onboard extends Vue {
     onboard = false;
 
     mounted() {

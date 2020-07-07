@@ -182,7 +182,7 @@
   import { mdiHeadCog, mdiFormatListNumbered } from "@mdi/js";
 
   @Component
-  export default class Login extends Vue {
+  export default class Index extends Vue {
     public appName = appName;
     mdiHeadCog = mdiHeadCog;
     mdiFormatListNumbered = mdiFormatListNumbered;
