@@ -431,42 +431,49 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
 
     def update_schedule(
             self, db: Session, *, user: models.User, db_obj: models.Fact, schedule: schemas.Schedule
-    ) -> bool:
-        response = schedule.response
-        date_studied = datetime.now(timezone('UTC')).isoformat()
-        details = {
-            "study_system": "karl",
-            "typed": schedule.typed,
-            "response": schedule.response,
-            "elapsed_seconds_text": schedule.elapsed_seconds_text,
-            "elapsed_seconds_answer": schedule.elapsed_seconds_answer
-        }
-        history_in = schemas.HistoryCreate(
-            time=date_studied,
-            user_id=user.id,
-            fact_id=db_obj.fact_id,
-            log_type=schemas.Log.study,
-            details=details
-        )
-        history = crud.history.create(db=db, obj_in=history_in)
-        payload_update = [schemas.KarlFact(
-            text=db_obj.text,
-            user_id=user.id,
-            fact_id=db_obj.fact_id,
-            history_id=history.id,
-            category=db_obj.category,
-            deck_name=db_obj.deck.title,
-            deck_id=db_obj.deck_id,
-            answer=db_obj.answer,
-            env=settings.ENVIRONMENT,
-            elapsed_seconds_text=schedule.elapsed_seconds_text,
-            elapsed_seconds_answer=schedule.elapsed_seconds_answer,
-            label=response).dict()]
-        request = requests.post(settings.INTERFACE + "api/karl/update", json=payload_update)
-        if 200 <= request.status_code < 300:
-            return True
-        else:
-            return False
+    ) -> Union[bool, requests.exceptions.RequestException, json.decoder.JSONDecodeError]:
+        try:
+            response = schedule.response
+            date_studied = datetime.now(timezone('UTC')).isoformat()
+            details = {
+                "study_system": "karl",
+                "typed": schedule.typed,
+                "response": schedule.response,
+                "elapsed_seconds_text": schedule.elapsed_seconds_text,
+                "elapsed_seconds_answer": schedule.elapsed_seconds_answer
+            }
+            history_in = schemas.HistoryCreate(
+                time=date_studied,
+                user_id=user.id,
+                fact_id=db_obj.fact_id,
+                log_type=schemas.Log.study,
+                details=details
+            )
+            history = crud.history.create(db=db, obj_in=history_in)
+            payload_update = [schemas.KarlFact(
+                text=db_obj.text,
+                user_id=user.id,
+                fact_id=db_obj.fact_id,
+                history_id=history.id,
+                category=db_obj.category,
+                deck_name=db_obj.deck.title,
+                deck_id=db_obj.deck_id,
+                answer=db_obj.answer,
+                env=settings.ENVIRONMENT,
+                elapsed_seconds_text=schedule.elapsed_seconds_text,
+                elapsed_seconds_answer=schedule.elapsed_seconds_answer,
+                label=response).dict()]
+            request = requests.post(settings.INTERFACE + "api/karl/update", json=payload_update)
+            if 200 <= request.status_code < 300:
+                return True
+            else:
+                return False
+        except requests.exceptions.RequestException as e:
+            capture_exception(e)
+            return e
+        except json.decoder.JSONDecodeError as e:
+            capture_exception(e)
+            return e
 
     def load_json_facts(self, db: Session, file: SpooledTemporaryFile, user: models.User) -> str:
         count = 0

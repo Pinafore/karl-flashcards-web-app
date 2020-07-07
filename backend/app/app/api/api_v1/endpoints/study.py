@@ -75,6 +75,11 @@ def update_schedule_set(
         if not fact:
             raise HTTPException(status_code=404, detail="Fact not found")
         success = crud.fact.update_schedule(db=db, user=current_user, db_obj=fact, schedule=fact_in)
+
+        if isinstance(success, requests.exceptions.RequestException):
+            raise HTTPException(status_code=555, detail="Connection to scheduler is down")
+        if isinstance(success, json.decoder.JSONDecodeError):
+            raise HTTPException(status_code=556, detail="Scheduler malfunction")
         successes.append(success)
     return successes
 
