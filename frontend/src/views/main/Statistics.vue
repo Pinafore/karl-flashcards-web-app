@@ -1,5 +1,6 @@
 <template>
   <v-container fluid>
+    <connection-popup></connection-popup>
     <v-card class="ma-3 mb-0 pa-3">
       <v-row no-gutters>
         <v-col>
@@ -183,8 +184,11 @@
   import { Component, Vue, Watch } from "vue-property-decorator";
   import { mainStore } from "@/store";
   import { IComponents } from "@/interfaces";
+  import ConnectionPopup from "@/views/ErrorPopup.vue";
 
-  @Component
+  @Component({
+    components: { ConnectionPopup },
+  })
   export default class Statistics extends Vue {
     loading = true;
     searchOptions: IComponents["StatSearch"] = {};
@@ -192,6 +196,8 @@
     endMenu = false;
 
     async mounted() {
+      mainStore.setConnectionError(false);
+      mainStore.setSchedulerError(false);
       await this.savedStatistics();
       await this.searchStatistic();
     }

@@ -1,5 +1,6 @@
 <template>
   <v-container fluid>
+    <connection-popup></connection-popup>
     <v-card class="ma-3 mb-0 pa-3">
       <v-card-title primary-title>
         <div class="headline primary--text">Filter Leaderboards</div>
@@ -124,8 +125,11 @@
   import { Component, Vue, Watch } from "vue-property-decorator";
   import { mainStore } from "@/store";
   import { IComponents } from "@/interfaces";
+  import ConnectionPopup from "@/views/ErrorPopup.vue";
 
-  @Component
+  @Component({
+    components: { ConnectionPopup },
+  })
   export default class Leaderboard extends Vue {
     loading = true;
     searchOptions: IComponents["LeaderboardSearch"] = { rank_type: "total_seen" };
@@ -133,6 +137,8 @@
     endMenu = false;
 
     async mounted() {
+      mainStore.setConnectionError(false);
+      mainStore.setSchedulerError(false);
       await this.searchLeaderboards();
     }
 

@@ -1,6 +1,7 @@
 <template>
   <v-container fluid style="max-width:1200px">
     <onboard></onboard>
+    <connection-popup></connection-popup>
     <v-card class="mx-3 my-1 py-1 px-3">
       <v-card-title primary-title class="mx-3 my-0 pa-0">
         <div class="headline primary--text">Learn</div>
@@ -277,49 +278,6 @@
     >
       <router-view name="edit"></router-view>
     </v-dialog>
-    <v-dialog
-      v-model="connectionError"
-      max-width="1000px"
-      scrollable
-      @click:outside="returnHome"
-    >
-      <v-card>
-        <v-card-title>
-          <h2>Scheduler Connection Error</h2>
-        </v-card-title>
-        <v-card-text>
-          Due to updates at the University of Maryland, College Park, the connection to
-          KAR³L's scheduler is currently down. During this brief period of time, you
-          will be unable to study facts or view statistics, but you may continue to
-          access all other functionality (such as the fact browser). Please check back
-          in a few hours and KAR³L will be ready again to schedule facts to review for
-          you.
-        </v-card-text>
-        <v-card-actions>
-          <v-btn @click="returnHome">Return to Home Screen</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-    <v-dialog
-      v-model="schedulerError"
-      max-width="1000px"
-      scrollable
-      @click:outside="returnHome"
-    >
-      <v-card>
-        <v-card-title>
-          <h2>Scheduler Error</h2>
-        </v-card-title>
-        <v-card-text>
-          There is a problem with the KAR³L scheduler and we are working on a solution.
-          Please check back in a few hours and KAR³L will be ready again to schedule
-          facts to review for you.
-        </v-card-text>
-        <v-card-actions>
-          <v-btn @click="returnHome">Return to Home Screen</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </v-container>
 </template>
 
@@ -327,9 +285,10 @@
   import { Component, Vue } from "vue-property-decorator";
   import { studyStore, mainStore } from "@/utils/store-accessor";
   import Onboard from "@/views/Onboard.vue";
+  import ConnectionPopup from "@/views/ErrorPopup.vue";
 
   @Component({
-    components: { Onboard },
+    components: { ConnectionPopup, Onboard },
   })
   export default class Learn extends Vue {
     showBack = false;
@@ -337,14 +296,6 @@
     retyped = "";
     dialog = false;
     editDialog = false;
-
-    get connectionError() {
-      return mainStore.connectionError;
-    }
-
-    get schedulerError() {
-      return mainStore.schedulerError;
-    }
 
     get facts() {
       return studyStore.study;
@@ -532,11 +483,6 @@
 
     returnLearn() {
       this.$router.back();
-    }
-    returnHome() {
-      mainStore.setConnectionError(false);
-      mainStore.setSchedulerError(false);
-      this.$router.push("/main/dashboard");
     }
   }
 </script>

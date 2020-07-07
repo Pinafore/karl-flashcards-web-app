@@ -13,7 +13,24 @@
         </v-card>
       </v-col>
     </v-row>
-    <v-row>
+    <v-row v-if="connectionError">
+      <v-col>
+        <v-card class="ma-3 pa-3">
+          <v-card-title primary-title>
+            <div class="headline primary--text">Statistics Unavailable</div>
+          </v-card-title>
+          <v-card-text>
+            Due to updates at the University of Maryland, College Park, the connection
+            to KAR³L's scheduler is currently down. During this brief period of time,
+            you will be unable to study facts or view statistics, but you may continue
+            to access all other functionality (such as the fact browser). Please check
+            back in a few hours and KAR³L will be ready again to schedule facts to
+            review for you.
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+    <v-row v-else>
       <v-col cols="12" md="8">
         <v-card class="mr-0 ml-3 pa-3">
           <v-card-title primary-title class="pb-0 justify-center">
@@ -140,6 +157,10 @@
 
     get leaderboard() {
       return mainStore.homeLeaderboard ?? { leaderboard: [] };
+    }
+
+    get connectionError() {
+      return mainStore.connectionError;
     }
   }
 </script>

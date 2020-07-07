@@ -644,6 +644,8 @@ export default class MainModule extends VuexModule {
     try {
       const response = await api.getHomeStats(this.token);
       this.setHomeStats(response.data);
+      this.setConnectionError(false);
+      this.setSchedulerError(false);
     } catch (error) {
       await this.checkApiError(error);
     }
@@ -654,6 +656,8 @@ export default class MainModule extends VuexModule {
     try {
       const response = await api.getSavedStats(this.token);
       this.setSavedStats(response.data);
+      this.setConnectionError(false);
+      this.setSchedulerError(false);
     } catch (error) {
       await this.checkApiError(error);
     }
@@ -664,6 +668,8 @@ export default class MainModule extends VuexModule {
     try {
       const response = await api.getUserStats(this.token, payload);
       this.setFilteredStat(response.data);
+      this.setConnectionError(false);
+      this.setSchedulerError(false);
     } catch (error) {
       await this.checkApiError(error);
     }
@@ -674,6 +680,8 @@ export default class MainModule extends VuexModule {
     try {
       const response = await api.getLeaderboard(this.token, payload);
       this.setHomeLeaderboard(response.data);
+      this.setConnectionError(false);
+      this.setSchedulerError(false);
     } catch (error) {
       await this.checkApiError(error);
     }
@@ -684,6 +692,8 @@ export default class MainModule extends VuexModule {
     try {
       const response = await api.getLeaderboard(this.token, payload);
       this.setFilteredLeaderboard(response.data);
+      this.setConnectionError(false);
+      this.setSchedulerError(false);
     } catch (error) {
       await this.checkApiError(error);
     }

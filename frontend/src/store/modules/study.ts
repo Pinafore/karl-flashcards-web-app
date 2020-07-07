@@ -3,6 +3,7 @@ import { Action, Module, Mutation, VuexModule } from "vuex-module-decorators";
 import { IComponents, IStudyShow, Permission } from "@/interfaces";
 import { mainStore } from "@/utils/store-accessor";
 import router from '@/router';
+import main from "@/store/modules/main";
 
 @Module({ name: "study" })
 export default class StudyModule extends VuexModule {
@@ -174,6 +175,8 @@ export default class StudyModule extends VuexModule {
         this.setStudy(response.data);
         await this.getNextShow();
       }
+      mainStore.setConnectionError(false);
+      mainStore.setSchedulerError(false);
     } catch (error) {
       await mainStore.checkApiError(error);
       this.setShowError();
@@ -327,6 +330,8 @@ export default class StudyModule extends VuexModule {
         await api.updateSchedule(mainStore.token, this.schedule);
         this.emptySchedule();
         await this.getNextShow();
+        mainStore.setConnectionError(false);
+        mainStore.setSchedulerError(false);
       } catch (error) {
         await mainStore.checkApiError(error);
       }
