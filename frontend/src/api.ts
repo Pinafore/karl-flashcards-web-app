@@ -192,10 +192,12 @@ export const api = {
   async getUserStats(token: string, data: IComponents["StatSearch"]) {
     let url = ``;
     if (data.date_end) {
-      url += `&date_end=${new Date(data.date_end).toISOString()}`;
+      const endDate =new Date(data.date_end);
+      endDate.setDate(endDate.getDate() + 1);
+      url += `&date_end=${endDate.toIsoString()}`;
     }
     if (data.date_start) {
-      url += `&date_start=${new Date(data.date_start).toISOString()}`;
+      url += `&date_start=${new Date(data.date_start).toIsoString()}`;
     }
     if (data.deck_id) {
       url += `&deck_id=${data.deck_id}`;
@@ -221,10 +223,12 @@ export const api = {
   async getLeaderboard(token: string, data: IComponents["LeaderboardSearch"]) {
     let url = ``;
     if (data.date_end) {
-      url += `&date_end=${data.date_end}`;
+      const endDate =new Date(data.date_end);
+      endDate.setDate(endDate.getDate() + 1);
+      url += `&date_end=${endDate.toIsoString()}`;
     }
     if (data.date_start) {
-      url += `&date_start=${data.date_start}`;
+      url += `&date_start=${new Date(data.date_start).toIsoString()}`;
     }
     if (data.deck_id) {
       url += `&deck_id=${data.deck_id}`;
@@ -245,3 +249,4 @@ export const api = {
     );
   }
 };
+

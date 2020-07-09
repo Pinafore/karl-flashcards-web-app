@@ -117,6 +117,8 @@
   import { Component, Vue } from "vue-property-decorator";
   import { mainStore } from "@/store";
 
+  import "@/utils/date.extensions";
+
   @Component
   export default class Dashboard extends Vue {
     loading = true;
@@ -146,7 +148,7 @@
       date.setDate(date.getDate());
       await mainStore.getHomeLeaderboard({
         rank_type: "total_seen",
-        date_start: date.toISOString(),
+        date_start: date.toIsoString(),
       });
       this.loading = false;
     }
