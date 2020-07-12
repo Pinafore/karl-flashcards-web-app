@@ -107,7 +107,7 @@
               disable-pagination
               disable-filtering
               hide-default-footer
-              class="elevation-1 mb-3 pa-1"
+              class="mb-3 pa-1"
               :headers="filteredLeaderboard.headers"
               item-key="id"
               :loading="loading"
