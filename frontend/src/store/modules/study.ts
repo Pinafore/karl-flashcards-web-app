@@ -143,7 +143,8 @@ export default class StudyModule extends VuexModule {
   @Action
   startTimer() {
     clearInterval(this.timer);
-    this.timer = setInterval(() => this.updateTimer(), 1000);
+    this.timer = setInterval(() => {if(this.time < 30) {this.updateTimer()}}, 1000);
+
   }
 
   @Mutation
