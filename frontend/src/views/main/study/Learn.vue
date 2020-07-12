@@ -286,6 +286,7 @@
   import { studyStore, mainStore } from "@/utils/store-accessor";
   import Onboard from "@/views/Onboard.vue";
   import ConnectionPopup from "@/views/ErrorPopup.vue";
+  import study from "@/store/modules/study";
 
   @Component({
     components: { ConnectionPopup, Onboard },
@@ -335,6 +336,9 @@
         await this.determine_decks(to.query.deck);
       }
       this.editDialog = to.name == "learn-edit" || to.name == "learn-report";
+      if (to.name == "learn") {
+        studyStore.startTimer();
+      }
       next();
     }
 
@@ -352,6 +356,7 @@
     }
 
     public async destroyed() {
+      studyStore.clearTimer();
       studyStore.setShowLoading();
       studyStore.emptySchedule();
       window.removeEventListener("keydown", this.handleKeyDown);
@@ -461,6 +466,7 @@
 
     public async response(response) {
       if (this.show.fact) {
+        studyStore.markBackTime();
         studyStore.addToSchedule({
           fact_id: this.show.fact.fact_id,
           typed: this.typed,

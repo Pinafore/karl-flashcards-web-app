@@ -19,7 +19,7 @@ export default class StudyModule extends VuexModule {
   };
   frontTime = 0;
   time = 0;
-  timer: number | undefined;
+  timer: number | undefined = undefined;
   backTime = 0;
 
   @Mutation
@@ -125,13 +125,24 @@ export default class StudyModule extends VuexModule {
   }
 
   @Mutation
-  resetTimer() {
-    clearInterval(this.timer);
+  clearTime() {
     this.time = 0;
   }
 
   @Action
+  clearTimer() {
+    clearInterval(this.timer);
+    this.clearTime();
+  }
+
+  @Action
+  pauseTimer() {
+    clearInterval(this.timer);
+  }
+
+  @Action
   startTimer() {
+    clearInterval(this.timer);
     this.timer = setInterval(() => this.updateTimer(), 1000);
   }
 
@@ -152,7 +163,7 @@ export default class StudyModule extends VuexModule {
 
   @Action
   async getNextShow() {
-    this.resetTimer();
+    this.clearTimer();
     if (this.study.length > 0) {
       this.setShow(this.study[0]);
       this.startTimer();
@@ -164,7 +175,7 @@ export default class StudyModule extends VuexModule {
 
   @Action
   async getStudyFacts() {
-    this.resetTimer();
+    this.clearTimer();
     try {
       this.setShowLoading();
       const response = await api.getStudyFacts(mainStore.token, this.deckIds ?? []);
@@ -201,7 +212,7 @@ export default class StudyModule extends VuexModule {
 
   @Action
   async suspendFact() {
-    this.resetTimer();
+    this.clearTimer();
     if (this.show.fact && this.show.enable_actions) {
       try {
         await api.suspendFact(mainStore.token, this.show.fact.fact_id);
@@ -218,7 +229,7 @@ export default class StudyModule extends VuexModule {
 
   @Action
   async reportFact(payload: IComponents["FactUpdate"]) {
-    this.resetTimer();
+    this.clearTimer();
     if (this.show.fact && this.show.enable_report) {
       try {
         await api.reportFact(mainStore.token, this.show.fact.fact_id, payload);
@@ -235,7 +246,7 @@ export default class StudyModule extends VuexModule {
 
   @Action
   async editFact(payload: IComponents["FactUpdate"]) {
-    this.resetTimer();
+    this.clearTimer();
     if (this.show.fact && !this.show.enable_report) {
       try {
         await api.updateFact(mainStore.token, this.show.fact.fact_id, payload);
@@ -252,7 +263,7 @@ export default class StudyModule extends VuexModule {
 
   @Action
   async editFactDialog() {
-    this.resetTimer();
+    this.pauseTimer();
     if (this.show.fact && !this.show.enable_report) {
       try {
         if (router.currentRoute.name == "learn") {
@@ -269,7 +280,7 @@ export default class StudyModule extends VuexModule {
 
   @Action
   async reportFactDialog() {
-    this.resetTimer();
+    this.pauseTimer();
     if (this.show.fact && this.show.enable_report) {
       try {
         if (router.currentRoute.name == "learn") {
@@ -286,7 +297,7 @@ export default class StudyModule extends VuexModule {
 
   @Action
   async deleteFact() {
-    this.resetTimer();
+    this.clearTimer();
     if (this.show.fact && this.show.enable_actions) {
       try {
         mainStore.addNotification({
@@ -306,7 +317,7 @@ export default class StudyModule extends VuexModule {
     if (this.show.fact && this.show.enable_actions) {
       try {
         this.markFrontTime();
-        this.resetTimer();
+        this.clearTimer();
         const response = await api.evalAnswer(
           mainStore.token,
           this.show.fact.fact_id,
@@ -326,7 +337,7 @@ export default class StudyModule extends VuexModule {
       try {
         this.setShowLoading();
         this.markBackTime();
-        this.resetTimer();
+        this.clearTimer();
         await api.updateSchedule(mainStore.token, this.schedule);
         this.emptySchedule();
         await this.getNextShow();
