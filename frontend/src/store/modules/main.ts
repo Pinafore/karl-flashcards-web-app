@@ -26,7 +26,7 @@ export default class MainModule extends VuexModule {
   filteredStat: IComponents["Statistics"] | null = null;
   savedStats: IComponents["Statistics"][] = [];
   homeStats: IComponents["Statistics"][] = [];
-  homeLeaderboard: IComponents["Leaderboard"] | null = null;
+  homeLeaderboards: IComponents["Leaderboard"][] = [];
   savedLeaderboards: IComponents["Leaderboard"][] = [];
   filteredLeaderboard: IComponents["Leaderboard"] | null = null;
   types = [
@@ -154,13 +154,18 @@ export default class MainModule extends VuexModule {
   }
 
   @Mutation
-  setHomeLeaderboard(payload: IComponents["Leaderboard"]) {
-    this.homeLeaderboard = payload;
+  setHomeLeaderboards(payload: IComponents["Leaderboard"][]) {
+    this.homeLeaderboards = payload;
   }
 
   @Mutation
   addToLeaderboards(payload: IComponents["Leaderboard"]) {
     this.savedLeaderboards.unshift(payload);
+  }
+
+  @Mutation
+  addToHomeLeaderboards(payload: IComponents["Leaderboard"]) {
+    this.homeLeaderboards.unshift(payload);
   }
 
   @Mutation
@@ -677,10 +682,14 @@ export default class MainModule extends VuexModule {
   }
 
   @Action
-  async getHomeLeaderboard(payload: IComponents["LeaderboardSearch"]) {
+  async getHomeLeaderboards(payload: IComponents["LeaderboardSearch"][]) {
     try {
-      const response = await api.getLeaderboard(this.token, payload);
-      this.setHomeLeaderboard(response.data);
+      const response = await api.getLeaderboard(this.token, payload[0]);
+      this.setHomeLeaderboards([]);
+      this.addToHomeLeaderboards(response.data);
+
+      const response2 = await api.getLeaderboard(this.token, payload[1]);
+      this.addToHomeLeaderboards(response2.data);
       this.setConnectionError(false);
       this.setSchedulerError(false);
     } catch (error) {

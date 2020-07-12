@@ -90,20 +90,50 @@
         <v-card class="ml-0 mr-3 pa-3">
           <v-card-title primary-title class="pb-3 justify-center">
             <div class="headline primary--text justify-center">
-              Today
+              Leaderboard
             </div>
           </v-card-title>
-          <v-data-table
-            disable-pagination
-            disable-filtering
+          <v-data-iterator
+            :items="leaderboards"
             hide-default-footer
-            class="elevation-1 mb-3 pa-1"
-            :headers="leaderboard.headers"
-            item-key="id"
+            disable-sort
+            disable-filtering
+            disable-pagination
             :loading="loading"
-            :items="leaderboard.leaderboard"
+            loading-text="Loading leaderboards..."
+            class="pa-1"
           >
-          </v-data-table>
+            <template v-slot:default="props">
+              <v-row class="justify-center">
+                <v-col
+                  v-for="item in props.items"
+                  :key="item.name"
+                  cols="12"
+                  xl="6"
+                  class="pa-2"
+                >
+                  <v-card>
+                    <v-card-title
+                      class="subheading font-weight-medium justify-center"
+                      >{{ item.name }}</v-card-title
+                    >
+                    <v-divider></v-divider>
+                    <v-data-table
+                      disable-pagination
+                      disable-filtering
+                      hide-default-footer
+                      class="mb-3 pa-1"
+                      :headers="item.headers"
+                      item-key="id"
+                      :loading="loading"
+                      :items="item.leaderboard"
+                    >
+                    </v-data-table>
+                  </v-card>
+                </v-col>
+              </v-row>
+            </template>
+          </v-data-iterator>
           <v-card-actions class="pa-0">
             <v-btn to="/main/leaderboards">More Leaderboards</v-btn>
           </v-card-actions>
@@ -146,10 +176,15 @@
       const date = new Date();
       date.setHours(0, 0, 0, 0);
       date.setDate(date.getDate());
-      await mainStore.getHomeLeaderboard({
-        rank_type: "total_seen",
-        date_start: date.toIsoString(),
-      });
+      await mainStore.getHomeLeaderboards([
+        {
+          rank_type: "total_seen",
+        },
+        {
+          rank_type: "total_seen",
+          date_start: date.toIsoString(),
+        },
+      ]);
       this.loading = false;
     }
 
@@ -157,8 +192,8 @@
       return mainStore.homeStats;
     }
 
-    get leaderboard() {
-      return mainStore.homeLeaderboard ?? { leaderboard: [] };
+    get leaderboards() {
+      return mainStore.homeLeaderboards ?? [];
     }
 
     get connectionError() {
