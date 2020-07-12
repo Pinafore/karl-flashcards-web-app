@@ -19,13 +19,14 @@ def get_user_stats(db: Session, user: models.user, *, date_start: datetime = Non
     schemas.Statistics, requests.exceptions.RequestException, json.decoder.JSONDecodeError]:
     parameters = {'user_id': user.id, 'env': settings.ENVIRONMENT}
     if date_start:
-        parameters['date_start'] = date_start.isoformat()
+        parameters['date_start'] = date_start
     if date_end:
-        parameters['date_end'] = date_end.isoformat()
+        parameters['date_end'] = date_end
     if deck_id:
         parameters['deck_id'] = deck_id
     try:
         request = requests.get(f"{settings.INTERFACE}api/karl/get_user_stats/", params=parameters)
+        logger.info(request.url)
         result_dict = request.json()
 
         name = create_name(db, date_start, date_end, deck_id)
@@ -60,6 +61,7 @@ def get_leaderboard(db: Session, rank_type: schemas.RankType, *, skip: int = Non
         parameters['date_end'] = date_end
     try:
         request = requests.get(f"{settings.INTERFACE}api/karl/leaderboard/", params=parameters)
+        logger.info(request.url)
         data = request.json()
 
         name = create_name(db, date_start, date_end, deck_id, rank_type)
@@ -99,6 +101,10 @@ def get_leaderboard(db: Session, rank_type: schemas.RankType, *, skip: int = Non
 def create_name(db: Session, date_start: datetime = None, date_end: datetime = None, deck_id: int = None,
                 rank_type: schemas.RankType = None):
     name = ""
+    if date_start:
+        date_start = date_start.astimezone()
+    if date_end:
+        date_end = date_end.astimezone()
 
     if deck_id:
         deck = crud.deck.get(db=db, id=deck_id)
@@ -109,7 +115,11 @@ def create_name(db: Session, date_start: datetime = None, date_end: datetime = N
         else:
             name = name + date_start.strftime("%m/%d/%y") + " - " + date_end.strftime("%m/%d/%y")
     elif date_start:
-        name = name + date_start.strftime("%m/%d/%y") + " - Present"
+        now = datetime.now(tz=date_start.tzinfo)
+        if now.date() == date_start.date():
+            name = name + "Today"
+        else:
+            name = name + date_start.strftime("%m/%d/%y") + " - Present"
     elif date_end:
         name = name + "Until " + date_end.strftime("%m/%d/%y")
     elif deck_id:

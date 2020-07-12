@@ -224,7 +224,8 @@ export const api = {
     let url = ``;
     if (data.date_end) {
       const endDate =new Date(data.date_end);
-      endDate.setDate(endDate.getDate() + 1);
+      endDate.setHours(23,59,59,999)
+
       url += `&date_end=${endDate.toIsoString()}`;
     }
     if (data.date_start) {
