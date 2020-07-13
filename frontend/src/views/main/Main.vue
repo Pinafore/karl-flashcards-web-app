@@ -37,14 +37,6 @@
             <v-list-item-title>Leaderboards</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        <v-list-item to="/main/profile/view">
-          <v-list-item-action>
-            <v-icon>mdi-account</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>Profile</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
       </v-list>
       <v-divider></v-divider>
       <v-list subheader>
@@ -134,20 +126,29 @@
           </v-list-item-content>
         </v-list-item>
       </v-list>
+      <v-divider></v-divider>
+      <v-list>
+        <v-list-item to="/main/profile/view">
+          <v-list-item-action>
+            <v-icon>mdi-account</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Profile</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item @click="logout">
+          <v-list-item-action>
+            <v-icon>mdi-close</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Logout</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
 
       <template v-slot:append>
         <v-list>
-          <v-list-item @click="logout">
-            <v-list-item-action>
-              <v-icon>mdi-close</v-icon>
-            </v-list-item-action>
-            <v-list-item-content>
-              <v-list-item-title>Logout</v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-
           <v-divider></v-divider>
-
           <v-list-item @click="switchShowDrawer">
             <v-list-item-action>
               <v-icon>
