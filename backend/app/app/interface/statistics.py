@@ -104,21 +104,26 @@ def get_leaderboard(db: Session, rank_type: schemas.RankType, user: models.user,
 
 def create_name(db: Session, date_start: datetime = None, date_end: datetime = None, deck_id: int = None):
     name = ""
-    if date_start:
-        date_start = date_start.astimezone()
-    if date_end:
-        date_end = date_end.astimezone()
 
     if deck_id:
         deck = crud.deck.get(db=db, id=deck_id)
         name = deck.title + ": "
+
+    now = datetime.now(tz=date_start.tzinfo) if date_start else None
+    date_start = date_start.astimezone() if date_start else None
+    date_end = date_end.astimezone() if date_end else None
+
     if date_start and date_end:
         if date_start.date() == date_end.date():
-            name = name + date_start.strftime("%m/%d/%y")
+            if now.date() == date_start.date():
+                name = name + "Today"
+            else:
+                name = name + date_start.strftime("%m/%d/%y")
         else:
             name = name + date_start.strftime("%m/%d/%y") + " - " + date_end.strftime("%m/%d/%y")
     elif date_start:
-        now = datetime.now(tz=date_start.tzinfo)
+        logger.info(now.date())
+        logger.info(date_start.date())
         if now.date() == date_start.date():
             name = name + "Today"
         else:
