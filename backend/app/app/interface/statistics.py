@@ -1,5 +1,6 @@
 import json
 import logging
+import time
 from datetime import datetime
 from typing import List, Union
 
@@ -60,15 +61,22 @@ def get_leaderboard(db: Session, rank_type: schemas.RankType, user: models.user,
     if date_end:
         parameters['date_end'] = date_end
     try:
+        begin_overall_start = time.time()
         request = requests.get(f"{settings.INTERFACE}api/karl/leaderboard/", params=parameters)
-        logger.info(request.url)
         data = request.json()
+        overall_end_time = time.time()
+        overall_total_time = overall_end_time - begin_overall_start
+        logger.info("get leaderboard: " + str(overall_total_time))
 
+        begin_overall_start = time.time()
         name = create_name(db, date_start, date_end, deck_id)
         details = create_details(rank_type, min_studied)
         headers = [schemas.DataTypeHeader(text="Rank", value="rank"),
                    schemas.DataTypeHeader(text="User", value="user.username"),
                    ]
+        overall_end_time = time.time()
+        overall_total_time = overall_end_time - begin_overall_start
+        logger.info("create details: " + str(overall_total_time))
         if rank_type == schemas.RankType.total_seen:
             headers.append(schemas.DataTypeHeader(text="Total Studied", value="value"))
         elif rank_type == schemas.RankType.new_facts:
@@ -85,12 +93,16 @@ def get_leaderboard(db: Session, rank_type: schemas.RankType, user: models.user,
             headers.append(schemas.DataTypeHeader(text="Minutes Spent", value="value"))
         elif rank_type == schemas.RankType.elapsed_minutes_text:
             headers.append(schemas.DataTypeHeader(text="Minutes Spent on Front", value="value"))
+        begin_overall_start = time.time()
         leaderboard = schemas.Leaderboard(
             leaderboard=[schemas.LeaderboardUser(user=crud.user.get(db=db, id=user["user_id"]), value=user["value"],
                                                  rank=user["rank"]) for
                          user in data["leaderboard"]],
             total=data["total"], name=name, rank_type=rank_type,
             headers=headers, details=details, user_place=data["user_place"])
+        overall_end_time = time.time()
+        overall_total_time = overall_end_time - begin_overall_start
+        logger.info("create leaderboard: " + str(overall_total_time))
         if data["user_id"]:
             leaderboard.user = crud.user.get(db=db, id=data["user_id"])
         return leaderboard
