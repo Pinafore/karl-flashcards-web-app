@@ -40,7 +40,7 @@ def get_user_stats(db: Session, user: models.user, *, date_start: datetime = Non
         return e
 
 
-def get_leaderboard(db: Session, rank_type: schemas.RankType, *, skip: int = None, limit: int = 10,
+def get_leaderboard(db: Session, rank_type: schemas.RankType, user: models.user, *, skip: int = None, limit: int = 10,
                     min_studied: int = 10, deck_id: int = None, date_start: datetime = None,
                     date_end: datetime = None) -> Union[schemas.Leaderboard,
                                                         requests.exceptions.RequestException,
@@ -50,7 +50,7 @@ def get_leaderboard(db: Session, rank_type: schemas.RankType, *, skip: int = Non
             or rank_type == schemas.RankType.review_known_rate:
         min_studied = 50
     parameters = {'rank_type': rank_type, 'skip': skip, 'limit': limit, 'min_studied': min_studied,
-                  'env': settings.ENVIRONMENT}
+                  'env': settings.ENVIRONMENT, 'user_id': user.id}
     if skip:
         parameters['skip'] = skip
     if deck_id:
@@ -64,7 +64,8 @@ def get_leaderboard(db: Session, rank_type: schemas.RankType, *, skip: int = Non
         logger.info(request.url)
         data = request.json()
 
-        name = create_name(db, date_start, date_end, deck_id, rank_type)
+        name = create_name(db, date_start, date_end, deck_id)
+        details = create_details(rank_type, min_studied)
         headers = [schemas.DataTypeHeader(text="Rank", value="rank"),
                    schemas.DataTypeHeader(text="User", value="user.username"),
                    ]
@@ -86,9 +87,12 @@ def get_leaderboard(db: Session, rank_type: schemas.RankType, *, skip: int = Non
             headers.append(schemas.DataTypeHeader(text="Minutes Spent on Front", value="value"))
         leaderboard = schemas.Leaderboard(
             leaderboard=[schemas.LeaderboardUser(user=crud.user.get(db=db, id=user["user_id"]), value=user["value"],
-                                                 rank=ind + 1) for
-                         ind, user in enumerate(data)], name=name, rank_type=rank_type,
-            headers=headers, details=f"Minimum {min_studied} facts reviewed")
+                                                 rank=user["rank"]) for
+                         user in data["leaderboard"]],
+            total=data["total"], name=name, rank_type=rank_type,
+            headers=headers, details=details, user_place=data["user_place"])
+        if data["user_id"]:
+            leaderboard.user = crud.user.get(db=db, id=data["user_id"])
         return leaderboard
     except requests.exceptions.RequestException as e:
         capture_exception(e)
@@ -98,8 +102,7 @@ def get_leaderboard(db: Session, rank_type: schemas.RankType, *, skip: int = Non
         return e
 
 
-def create_name(db: Session, date_start: datetime = None, date_end: datetime = None, deck_id: int = None,
-                rank_type: schemas.RankType = None):
+def create_name(db: Session, date_start: datetime = None, date_end: datetime = None, deck_id: int = None):
     name = ""
     if date_start:
         date_start = date_start.astimezone()
@@ -127,3 +130,8 @@ def create_name(db: Session, date_start: datetime = None, date_end: datetime = N
     else:
         name = "All Time"
     return name
+
+
+def create_details(rank_type: schemas.RankType, min_studied: int):
+    details = f"Minimum {min_studied} facts reviewed\nRank Type: {rank_type}"
+    return details

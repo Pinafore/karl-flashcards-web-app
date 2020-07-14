@@ -1,9 +1,9 @@
-from typing import List, Union
+from typing import List, Union, Optional
 
 from pydantic import BaseModel
 
 # Properties to return to client about statistics
-from app.schemas import User
+from app.schemas import User, RankType
 
 
 class LeaderboardUser(BaseModel):
@@ -19,7 +19,12 @@ class DataTypeHeader(BaseModel):
 
 class Leaderboard(BaseModel):
     leaderboard: List[LeaderboardUser]
+    total: int
     name: str
-    rank_type: str
     headers: List[DataTypeHeader]
     details: str
+    rank_type: RankType
+    user: Optional[User] = None
+    user_place: Optional[int] = None
+    skip: Optional[int] = 0
+    limit: Optional[int] = None

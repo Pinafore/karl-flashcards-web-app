@@ -12,5 +12,6 @@ from .schedule import Schedule
 from .statistics import Statistics
 from .field import Field
 from .file_props import FileProps
-from .leaderboard import LeaderboardUser, Leaderboard, DataTypeHeader
 from .rank_type import RankType
+from .leaderboard import LeaderboardUser, Leaderboard, DataTypeHeader
+

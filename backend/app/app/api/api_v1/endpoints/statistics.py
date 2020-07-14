@@ -101,13 +101,15 @@ def read_leaderboard(
         min_studied: int = 10,
         deck_id: int = None,
         date_start: datetime = None,
-        date_end: datetime = None
+        date_end: datetime = None,
+        current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Retrieves leaderboard of users since the specified start time, or all time otherwise
     """
 
-    top_users = interface.statistics.get_leaderboard(db=db, rank_type=rank_type, skip=skip, limit=limit,
+    top_users = interface.statistics.get_leaderboard(db=db, user=current_user, rank_type=rank_type, skip=skip,
+                                                     limit=limit,
                                                      min_studied=min_studied, deck_id=deck_id, date_start=date_start,
                                                      date_end=date_end)
     if isinstance(top_users, requests.exceptions.RequestException):
