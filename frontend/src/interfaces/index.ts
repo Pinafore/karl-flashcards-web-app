@@ -216,8 +216,12 @@ export interface IComponents {
   };
   Leaderboard: {
     leaderboard: IComponents["LeaderboardUser"][];
+    total: number;
     name: string;
-    rank_type: string;
     headers: DataTableHeader[];
+    details: string;
+    rank_type: string;
+    user?: IComponents["User"];
+    user_place?: number;
   };
 }

@@ -39,6 +39,16 @@ export default class MainModule extends VuexModule {
     { text: "Minutes Spent:", value: "total_minutes" },
     { text: "Minutes Spent (Front):", value: "elapsed_minutes_text" },
   ];
+  rankTypes = [
+    { text: "Total Studied", value: "total_seen" },
+    { text: "New Facts", value: "new_facts" },
+    { text: "Reviewed Facts", value: "reviewed_facts" },
+    { text: "Recall %", value: "known_rate" },
+    { text: "New Recall %", value: "new_known_rate" },
+    { text: "Review Recall %", value: "review_known_rate" },
+    { text: "Minutes Spent", value: "total_minutes" },
+    { text: "Minutes Spent (Front)", value: "elapsed_minutes_text" },
+  ];
   today = new Date().toIsoString();
 
   get hasAdminAccess() {

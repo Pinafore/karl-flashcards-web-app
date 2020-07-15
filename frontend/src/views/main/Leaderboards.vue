@@ -8,6 +8,18 @@
       <v-row>
         <v-col>
           <v-select
+            v-model="searchOptions.rank_type"
+            :items="rankTypes"
+            item-text="text"
+            item-value="value"
+            small-chips
+            label="Rank By"
+            hide-details
+            dense
+          ></v-select>
+        </v-col>
+        <v-col>
+          <v-select
             v-model="searchOptions.deck_id"
             :items="decks"
             item-text="title"
@@ -97,12 +109,15 @@
       </v-row>
       <v-row v-if="filteredLeaderboard">
         <v-col>
-          <v-card class="ml-0 mr-3 pa-3">
-            <v-card-title primary-title class="pb-3 justify-center">
+          <v-card class="pa-3">
+            <v-card-title primary-title class="pb-2 justify-center">
               <div class="headline primary--text justify-center">
                 {{ filteredLeaderboard.name }}
               </div>
             </v-card-title>
+            <pre class="px-2 text-center" style="font-family: 'Roboto', sans-serif">{{
+              filteredLeaderboard.details
+            }}</pre>
             <v-data-table
               disable-pagination
               disable-filtering
@@ -154,6 +169,10 @@
 
     get filteredLeaderboard() {
       return mainStore.filteredLeaderboard;
+    }
+
+    get rankTypes() {
+      return mainStore.rankTypes;
     }
 
     @Watch("searchOptions", { deep: true })

@@ -114,16 +114,31 @@
                 >
                   <v-card>
                     <v-card-title
-                      class="subheading font-weight-medium justify-center"
+                      class="subheading font-weight-medium justify-center pb-0"
                       >{{ item.name }}</v-card-title
                     >
+                    <pre
+                      class="px-2 mb-0 pt-1 pb-2 text-center"
+                      style="font-family: 'Roboto', sans-serif"
+                      >{{ item.details }}</pre
+                    >
                     <v-divider></v-divider>
+                    <v-select
+                      v-model="rankType"
+                      :items="rankTypes"
+                      item-text="text"
+                      item-value="value"
+                      label="Rank By"
+                      hide-details
+                      dense
+                      class="px-2 pt-3"
+                    ></v-select>
                     <v-data-table
                       disable-pagination
                       disable-filtering
                       disable-sort
                       hide-default-footer
-                      class="mb-3 pa-1"
+                      class="mb-3 pa-1 pt-0 px-2"
                       :headers="item.headers"
                       item-key="id"
                       :loading="loading"
@@ -153,6 +168,7 @@
   @Component
   export default class Dashboard extends Vue {
     loading = true;
+    rankType = "total_seen";
 
     get greetedUser() {
       const userProfile = mainStore.userProfile;
@@ -171,6 +187,10 @@
       return mainStore.types;
     }
 
+    get rankTypes() {
+      return mainStore.rankTypes;
+    }
+
     async mounted() {
       this.loading = true;
       await mainStore.getHomeStatistics();
@@ -179,10 +199,10 @@
       date.setDate(date.getDate());
       await mainStore.getHomeLeaderboards([
         {
-          rank_type: "total_seen",
+          rank_type: this.rankType,
         },
         {
-          rank_type: "total_seen",
+          rank_type: this.rankType,
           date_start: date.toIsoString(),
         },
       ]);
