@@ -6,13 +6,14 @@
         <v-spacer></v-spacer>
       </v-toolbar>
       <v-card-text>
-        <v-form @keyup.enter="submit">
+        <v-form autocomplete="on" @keyup.enter="submit">
           <v-text-field
             v-model="email"
             prepend-icon="mdi-account"
             name="login"
             label="Username/Email"
             type="text"
+            autocomplete="UserName"
             @keyup.enter="submit"
           ></v-text-field>
           <v-text-field
@@ -22,6 +23,7 @@
             name="password"
             label="Password"
             type="password"
+            autocomplete="password"
             @keyup.enter="submit"
           ></v-text-field>
         </v-form>
@@ -38,7 +40,7 @@
       </v-card-text>
       <v-card-actions>
         <v-btn @click="close">Close</v-btn>
-        <v-btn @click="signup">Create Account</v-btn>
+        <v-btn @click="signup">Sign Up</v-btn>
         <v-spacer></v-spacer>
         <v-btn @click.prevent="submit">Login</v-btn>
       </v-card-actions>
