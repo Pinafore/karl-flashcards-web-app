@@ -290,4 +290,7 @@
     width: 0;
     height: 0;
   }
+  .v-data-table-header.v-data-table-header-mobile {
+    display: none;
+  }
 </style>
