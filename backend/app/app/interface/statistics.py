@@ -97,7 +97,7 @@ def get_leaderboard(db: Session, rank_type: schemas.RankType, user: models.user,
         leaderboard = schemas.Leaderboard(
             leaderboard=[schemas.LeaderboardUser(user=crud.user.get(db=db, id=user["user_id"]), value=user["value"],
                                                  rank=user["rank"]) for
-                         user in data["leaderboard"]],
+                         user in data["leaderboard"] if crud.user.get(db=db, id=user["user_id"])],
             total=data["total"], name=name, rank_type=rank_type,
             headers=headers, details=details, user_place=data["user_place"])
         overall_end_time = time.time()
