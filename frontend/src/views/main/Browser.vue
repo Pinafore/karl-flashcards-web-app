@@ -43,7 +43,7 @@
                 dense
               ></v-select>
             </v-col>
-            <v-col cols="11" sm="3">
+            <v-col cols="10" sm="3">
               <v-select
                 v-model="selectedStatus"
                 :items="status"
@@ -55,7 +55,7 @@
                 dense
               ></v-select>
             </v-col>
-            <v-col align-self="center" cols="1" sm="1">
+            <v-col cols="2" sm="1">
               <v-tooltip bottom>
                 <template v-slot:activator="{ on, attrs }">
                   <v-btn icon v-bind="attrs" @click="searchAPI()" v-on="on">
