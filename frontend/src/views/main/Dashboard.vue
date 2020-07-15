@@ -104,6 +104,19 @@
             class="pa-1"
           >
             <template v-slot:default="props">
+              <v-row
+                ><v-select
+                  v-model="rankType"
+                  :items="rankTypes"
+                  item-text="text"
+                  item-value="value"
+                  label="Rank By"
+                  dense
+                  solo
+                  class="px-2 pt-2 pb-3"
+                  hide-details
+                ></v-select
+              ></v-row>
               <v-row class="justify-center">
                 <v-col
                   v-for="item in props.items"
@@ -123,16 +136,6 @@
                       >{{ item.details }}</pre
                     >
                     <v-divider></v-divider>
-                    <v-select
-                      v-model="rankType"
-                      :items="rankTypes"
-                      item-text="text"
-                      item-value="value"
-                      label="Rank By"
-                      hide-details
-                      dense
-                      class="px-2 pt-3"
-                    ></v-select>
                     <v-data-table
                       disable-pagination
                       disable-filtering
@@ -160,7 +163,7 @@
 </template>
 
 <script lang="ts">
-  import { Component, Vue } from "vue-property-decorator";
+  import { Component, Vue, Watch } from "vue-property-decorator";
   import { mainStore } from "@/store";
 
   import "@/utils/date.extensions";
@@ -194,6 +197,16 @@
     async mounted() {
       this.loading = true;
       await mainStore.getHomeStatistics();
+      await this.getLeaderboards();
+    }
+
+    @Watch("rankType")
+    onRankTypeChanged() {
+      this.getLeaderboards();
+    }
+
+    async getLeaderboards() {
+      this.loading = true;
       const date = new Date();
       date.setHours(0, 0, 0, 0);
       date.setDate(date.getDate());
@@ -208,7 +221,6 @@
       ]);
       this.loading = false;
     }
-
     get stats() {
       return mainStore.homeStats;
     }
