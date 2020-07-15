@@ -15,6 +15,7 @@ class LeaderboardUser(BaseModel):
 class DataTypeHeader(BaseModel):
     text: str
     value: str
+    width: Optional[str] = None
 
 
 class Leaderboard(BaseModel):
