@@ -216,14 +216,14 @@
           class="title primary--text py-2"
           :style="{ color: 'green !important' }"
         >
-          KAR³L Believes Your Answer Was Right (Enter to Accept)
+          KAR³L Believes Answer Correct (Enter to Accept, Or Override Below)
         </div>
         <div
           v-else
           class="title primary--text py-2"
           :style="{ color: 'red !important' }"
         >
-          KAR³L Believes Your Answer Was Wrong (Enter to Accept)
+          KAR³L Believes Answer Wrong (Enter to Accept, Or Override Below)
         </div>
         <v-text-field
           id="retype_answer"
