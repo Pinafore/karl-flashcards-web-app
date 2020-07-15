@@ -106,6 +106,7 @@
             <v-data-table
               disable-pagination
               disable-filtering
+              disable-sort
               hide-default-footer
               class="mb-3 pa-1"
               :headers="filteredLeaderboard.headers"
