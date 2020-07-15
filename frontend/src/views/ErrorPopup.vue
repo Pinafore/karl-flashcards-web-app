@@ -37,7 +37,7 @@
 </template>
 
 <script lang="ts">
-  import { Component, Vue } from "vue-property-decorator";
+  import { Component, Vue, Watch } from "vue-property-decorator";
   import { mainStore } from "@/store";
 
   @Component
@@ -46,6 +46,28 @@
     type = "";
 
     mounted() {
+      this.checkPopup();
+    }
+
+    get connectionError() {
+      return mainStore.connectionError;
+    }
+
+    get schedulerError() {
+      return mainStore.connectionError;
+    }
+
+    @Watch("connectionError")
+    onConnectionErrorChanged() {
+      this.checkPopup();
+    }
+
+    @Watch("schedulerError")
+    onSchedulerErrorChanged() {
+      this.checkPopup();
+    }
+
+    checkPopup() {
       this.popup = mainStore.connectionError || mainStore.schedulerError;
       if (mainStore.connectionError) {
         this.type = "connection";
