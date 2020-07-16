@@ -27,6 +27,7 @@ class User(Base):
     repetition_model = Column(Enum(Repetition), default=Repetition.leitner, nullable=False)
     default_deck_id = Column(Integer, ForeignKey("deck.id"), default=1)
     show_help = Column(Boolean(), default=True, nullable=False)
+    dark_mode = Column(Boolean(), default=False, nullable=False)
 
     default_deck = relationship("Deck", foreign_keys=default_deck_id)
     owned_facts = relationship("Fact", back_populates="owner")

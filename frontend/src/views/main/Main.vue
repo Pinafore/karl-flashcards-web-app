@@ -175,7 +175,7 @@
       <v-app-bar-nav-icon @click.stop="switchShowDrawer"></v-app-bar-nav-icon>
       <v-btn text x-large @click.stop="goHome">{{ appName }}</v-btn>
       <v-spacer></v-spacer>
-      <v-switch v-model="$vuetify.theme.dark" label="Dark Mode" hide-details></v-switch>
+      <v-switch v-model="darkMode" label="Dark Mode" hide-details></v-switch>
       <v-menu bottom left offset-y>
         <template v-slot:activator="{ on }">
           <v-btn icon v-on="on">
@@ -213,7 +213,7 @@
 </template>
 
 <script lang="ts">
-  import { Vue, Component } from "vue-property-decorator";
+  import { Vue, Component, Watch } from "vue-property-decorator";
   import { appName } from "@/env";
   import { mainStore } from "@/store";
   import {
@@ -259,6 +259,16 @@
 
     set showDrawer(value) {
       mainStore.setDashboardShowDrawer(value);
+    }
+
+    get darkMode() {
+      this.$vuetify.theme.dark = mainStore.userProfile?.dark_mode ?? false;
+      return mainStore.userProfile?.dark_mode;
+    }
+
+    set darkMode(set) {
+      this.$vuetify.theme.dark = set ?? false;
+      mainStore.updateUserProfile({ dark_mode: set });
     }
 
     public goHome() {

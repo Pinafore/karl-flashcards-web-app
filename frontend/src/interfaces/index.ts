@@ -165,6 +165,7 @@ export interface IComponents {
     decks?: IComponents["Deck"][];
     suspended_facts?: IComponents["Fact"][];
     facts?: IComponents["Fact"][];
+    dark_mode: boolean;
   };
   UserCreate: {
     email: string;
@@ -181,6 +182,7 @@ export interface IComponents {
     password?: string;
     default_deck_id?: number;
     show_help?: boolean;
+    dark_mode?: boolean;
   };
   ValidationError: { loc: string[]; msg: string; type: string };
   StatSearch: {
