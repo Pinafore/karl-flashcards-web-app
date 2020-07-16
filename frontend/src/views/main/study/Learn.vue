@@ -286,7 +286,6 @@
   import { studyStore, mainStore } from "@/utils/store-accessor";
   import Onboard from "@/views/Onboard.vue";
   import ConnectionPopup from "@/views/ErrorPopup.vue";
-  import study from "@/store/modules/study";
 
   @Component({
     components: { ConnectionPopup, Onboard },
