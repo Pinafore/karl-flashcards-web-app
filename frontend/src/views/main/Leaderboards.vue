@@ -117,15 +117,19 @@
               filteredLeaderboard.details
             }}</pre>
             <v-data-table
-              disable-pagination
               disable-filtering
               disable-sort
-              hide-default-footer
               class="mb-3 pa-1"
               :headers="filteredLeaderboard.headers"
               item-key="id"
               :loading="loading"
               :items="filteredLeaderboard.leaderboard"
+              :options.sync="options"
+              :server-items-length="filteredLeaderboard.total"
+              :footer-props="{
+                itemsPerPageOptions: [10, 25, 50, 100],
+                showFirstLastPage: true,
+              }"
             >
             </v-data-table>
           </v-card>
@@ -140,6 +144,7 @@
   import { mainStore } from "@/store";
   import { IComponents } from "@/interfaces";
   import ConnectionPopup from "@/views/ErrorPopup.vue";
+  import { DataOptions } from "vuetify";
 
   @Component({
     components: { ConnectionPopup },
@@ -149,6 +154,16 @@
     searchOptions: IComponents["LeaderboardSearch"] = { rank_type: "total_seen" };
     startMenu = false;
     endMenu = false;
+    options: DataOptions = {
+      groupBy: [],
+      groupDesc: [],
+      itemsPerPage: 25,
+      multiSort: false,
+      mustSort: false,
+      page: 1,
+      sortBy: [],
+      sortDesc: [],
+    };
 
     async mounted() {
       mainStore.setConnectionError(false);
@@ -173,8 +188,15 @@
       return mainStore.rankTypes;
     }
 
-    @Watch("searchOptions", { deep: true })
+    @Watch("searchOptions.rank_type")
     onSearchOptionsChanged() {
+      this.searchLeaderboards();
+    }
+
+    @Watch("options", { deep: true })
+    onOptionsChanged(value: DataOptions) {
+      this.searchOptions.skip = value.page * value.itemsPerPage - value.itemsPerPage;
+      this.searchOptions.limit = value.itemsPerPage;
       this.searchLeaderboards();
     }
 

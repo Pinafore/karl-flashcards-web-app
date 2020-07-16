@@ -240,6 +240,9 @@ export const api = {
     if (data.skip) {
       url += `&skip=${data.skip}`;
     }
+    if (data.limit) {
+      url += `&limit=${data.limit}`;
+    }
     if (data.min_studied) {
       url += `&min_studied=${data.min_studied}`;
     }
