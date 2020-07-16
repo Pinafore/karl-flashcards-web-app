@@ -97,8 +97,9 @@
   export default class Onboard extends Vue {
     onboard = false;
 
-    mounted() {
-      this.onboard = mainStore.userProfile?.show_help ?? true;
+    async mounted() {
+      await mainStore.getUserProfile();
+      this.onboard = mainStore.userProfile?.show_help ?? false;
     }
 
     noMoreHelp() {
