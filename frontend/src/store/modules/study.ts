@@ -337,8 +337,6 @@ export default class StudyModule extends VuexModule {
     if (this.show.fact && this.show.enable_actions) {
       try {
         this.setShowLoading();
-        this.markBackTime();
-        this.clearTimer();
         await api.updateSchedule(mainStore.token, this.schedule);
         this.emptySchedule();
         await this.getNextShow();
