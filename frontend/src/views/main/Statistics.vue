@@ -69,7 +69,6 @@
             :items="decks"
             item-text="title"
             item-value="id"
-            small-chips
             label="Decks"
             deletable-chips
             hide-details

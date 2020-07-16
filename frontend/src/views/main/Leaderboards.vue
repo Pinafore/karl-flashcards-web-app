@@ -12,7 +12,6 @@
             :items="rankTypes"
             item-text="text"
             item-value="value"
-            small-chips
             label="Rank By"
             hide-details
             dense
@@ -24,7 +23,6 @@
             :items="decks"
             item-text="title"
             item-value="id"
-            small-chips
             label="Decks"
             deletable-chips
             hide-details
