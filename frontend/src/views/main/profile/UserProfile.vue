@@ -6,6 +6,13 @@
       </v-card-title>
       <v-card-text>
         <div class="my-4">
+          <div class="subheading secondary--text">User ID</div>
+          <div v-if="userProfile && userProfile.id" class="title primary--text">
+            {{ userProfile.id }}
+          </div>
+          <div v-else class="title primary--text">-----</div>
+        </div>
+        <div class="my-4">
           <div class="subheading secondary--text">Username</div>
           <div v-if="userProfile && userProfile.username" class="title primary--text">
             {{ userProfile.username }}
