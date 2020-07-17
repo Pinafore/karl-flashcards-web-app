@@ -19,6 +19,7 @@
       </v-main>
       <router-view v-else />
       <NotificationsManager></NotificationsManager>
+      <ConnectionError></ConnectionError>
     </v-app>
   </div>
 </template>
@@ -27,10 +28,12 @@
   import { Component, Vue } from "vue-property-decorator";
   import NotificationsManager from "@/components/NotificationsManager.vue";
   import { mainStore } from "@/store";
+  import ConnectionError from "@/components/ConnectionError.vue";
 
   @Component({
     components: {
       NotificationsManager,
+      ConnectionError,
     },
   })
   export default class App extends Vue {
