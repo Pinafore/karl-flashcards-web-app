@@ -134,7 +134,7 @@
                       {{ item.details }}
                     </div>
                     <v-row justify="center pb-2">
-                      <div v-if="item.user_place !== undefined">
+                      <div v-if="item.user_place !== null">
                         Your Rank: {{ item.user_place + 1 }}
                       </div>
                       <div v-else class="text-center">
