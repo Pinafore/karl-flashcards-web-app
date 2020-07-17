@@ -113,9 +113,22 @@
                 {{ filteredLeaderboard.name }}
               </div>
             </v-card-title>
-            <pre class="px-2 text-center" style="font-family: 'Roboto', sans-serif">{{
-              filteredLeaderboard.details
-            }}</pre>
+            <div class="px-2 text-center">{{ filteredLeaderboard.details }}</div>
+            <v-row justify="center">
+              <v-btn
+                v-if="showGoToUser()"
+                class="px-2 mt-2 justify-center"
+                @click="goToUser()"
+                >Your Rank: {{ userRank() }} - See Page</v-btn
+              >
+              <div v-else-if="showRank()" class="px-2 text-center">
+                Your Rank: {{ userRank() }}
+              </div>
+              <div v-else class="px-2 text-center">
+                You Are Unranked
+              </div>
+            </v-row>
+
             <v-data-table
               disable-filtering
               disable-sort
@@ -204,6 +217,45 @@
       this.loading = true;
       await mainStore.getLeaderboard(this.searchOptions);
       this.loading = false;
+    }
+
+    showRank() {
+      return this.filteredLeaderboard?.user_place !== undefined;
+    }
+
+    showGoToUser() {
+      const place = this.filteredLeaderboard?.user_place ?? null;
+      if (place) {
+        return (
+          (this.options.page - 1) * this.options.itemsPerPage >= place ||
+          place >
+            (this.options.page - 1) * this.options.itemsPerPage +
+              this.options.itemsPerPage
+        );
+      } else {
+        return false;
+      }
+    }
+    goToUser() {
+      const place = this.filteredLeaderboard?.user_place ?? null;
+      if (place) {
+        this.options.page = Math.ceil(place / this.options.itemsPerPage);
+        this.searchOptions.skip =
+          Math.floor(place / this.options.itemsPerPage) * this.options.itemsPerPage;
+        this.searchOptions.limit = this.options.itemsPerPage;
+        this.searchLeaderboards();
+      }
+    }
+
+    userRank() {
+      const place = this.filteredLeaderboard?.user_place
+        ? this.filteredLeaderboard?.user_place + 1
+        : null;
+      if (place) {
+        return place;
+      } else {
+        return "N/A";
+      }
     }
 
     clearStartDate() {

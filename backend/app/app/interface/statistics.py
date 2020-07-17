@@ -70,7 +70,7 @@ def get_leaderboard(db: Session, rank_type: schemas.RankType, user: models.user,
 
         begin_overall_start = time.time()
         name = create_name(db, date_start, date_end, deck_id)
-        details = create_details(rank_type, min_studied)
+        details = create_details(min_studied)
         headers = [schemas.DataTypeHeader(text="Rank", value="rank", width="1%"),
                    schemas.DataTypeHeader(text="User", value="user.username", width="30%"),
                    ]
@@ -149,6 +149,6 @@ def create_name(db: Session, date_start: datetime = None, date_end: datetime = N
     return name
 
 
-def create_details(rank_type: schemas.RankType, min_studied: int):
-    details = f"Minimum {min_studied} Facts Reviewed\nRanked By {rank_type.replace('_', ' ').title()}"
+def create_details(min_studied: int):
+    details = f"Minimum {min_studied} Facts Reviewed"
     return details

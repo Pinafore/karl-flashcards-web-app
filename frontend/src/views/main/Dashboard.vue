@@ -130,11 +130,17 @@
                       class="subheading font-weight-medium justify-center pb-0"
                       >{{ item.name }}</v-card-title
                     >
-                    <pre
-                      class="px-2 mb-0 pt-1 pb-2 text-center"
-                      style="font-family: 'Roboto', sans-serif"
-                      >{{ item.details }}</pre
-                    >
+                    <div class="px-2 mb-0 pt-1 pb-2 text-center">
+                      {{ item.details }}
+                    </div>
+                    <v-row justify="center pb-2">
+                      <div v-if="item.user_place !== undefined">
+                        Your Rank: {{ item.user_place + 1 }}
+                      </div>
+                      <div v-else class="text-center">
+                        You Are Unranked
+                      </div>
+                    </v-row>
                     <v-divider></v-divider>
                     <v-data-table
                       disable-pagination

@@ -225,5 +225,6 @@ export interface IComponents {
     rank_type: string;
     user?: IComponents["User"];
     user_place?: number;
+    limit?: number;
   };
 }
