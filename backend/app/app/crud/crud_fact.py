@@ -439,9 +439,14 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 "study_system": "karl",
                 "typed": schedule.typed,
                 "response": schedule.response,
-                "elapsed_seconds_text": schedule.elapsed_seconds_text,
-                "elapsed_seconds_answer": schedule.elapsed_seconds_answer
             }
+            if schedule.elapsed_seconds_text:
+                details["elapsed_seconds_text"] = schedule.elapsed_seconds_text
+                details["elapsed_seconds_answer"] = schedule.elapsed_seconds_answer
+            else:
+                details["elapsed_milliseconds_text"] = schedule.elapsed_milliseconds_text
+                details["elapsed_milliseconds_answer"] = schedule.elapsed_milliseconds_answer
+
             history_in = schemas.HistoryCreate(
                 time=date_studied,
                 user_id=user.id,
@@ -462,7 +467,10 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 env=settings.ENVIRONMENT,
                 elapsed_seconds_text=schedule.elapsed_seconds_text,
                 elapsed_seconds_answer=schedule.elapsed_seconds_answer,
-                label=response).dict()]
+                elapsed_milliseconds_text=schedule.elapsed_milliseconds_text,
+                elapsed_milliseconds_answer=schedule.elapsed_milliseconds_answer,
+                label=response).dict(skip_defaults=True)]
+            logger.info(payload_update[0])
             request = requests.post(settings.INTERFACE + "api/karl/update", json=payload_update)
             if 200 <= request.status_code < 300:
                 return True

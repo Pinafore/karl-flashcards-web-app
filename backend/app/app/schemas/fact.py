@@ -26,6 +26,8 @@ class KarlFact(FactBase):
     env: str
     elapsed_seconds_text: Optional[int] = None
     elapsed_seconds_answer: Optional[int] = None
+    elapsed_milliseconds_text: Optional[int] = None
+    elapsed_milliseconds_answer: Optional[int] = None
 
 
 class InternalFactBase(FactBase):

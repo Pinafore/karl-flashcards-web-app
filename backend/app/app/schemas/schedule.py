@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -6,5 +8,7 @@ class Schedule(BaseModel):
     fact_id: int
     typed: str
     response: bool
-    elapsed_seconds_text: int
-    elapsed_seconds_answer: int
+    elapsed_seconds_text: Optional[int] = None
+    elapsed_seconds_answer: Optional[int] = None
+    elapsed_milliseconds_text: Optional[int] = None
+    elapsed_milliseconds_answer: Optional[int] = None

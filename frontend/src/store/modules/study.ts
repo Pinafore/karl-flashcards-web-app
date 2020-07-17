@@ -121,7 +121,7 @@ export default class StudyModule extends VuexModule {
 
   @Mutation
   updateTimer() {
-    this.time++;
+    this.time += 250;
   }
 
   @Mutation
@@ -143,7 +143,7 @@ export default class StudyModule extends VuexModule {
   @Action
   startTimer() {
     clearInterval(this.timer);
-    this.timer = setInterval(() => {if(this.time < 30) {this.updateTimer()}}, 1000);
+    this.timer = setInterval(() => {if(this.time < 30000) {this.updateTimer()}}, 250);
 
   }
 

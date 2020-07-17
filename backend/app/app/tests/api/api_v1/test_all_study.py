@@ -43,15 +43,15 @@ def test_update_schedule_set(
         data.append(Schedule(fact_id=fact.fact_id,
                              typed=random_lower_string(),
                              response=False,
-                             elapsed_seconds_text=10,
-                             elapsed_seconds_answer=10).dict())
+                             elapsed_milliseconds_text=10,
+                             elapsed_milliseconds_answer=10).dict())
     for idx in range(2):
         fact = create_random_fact_with_deck(db, user=normal_user_token_headers[1], deck=deck)
         data.append(Schedule(fact_id=fact.fact_id,
                              typed=fact.answer,
                              response=True,
-                             elapsed_seconds_text=10,
-                             elapsed_seconds_answer=10).dict())
+                             elapsed_milliseconds_text=10,
+                             elapsed_milliseconds_answer=10).dict())
     r = client.put(
         f"{settings.API_V1_STR}/study/", headers=normal_user_token_headers[0], json=data,
     )

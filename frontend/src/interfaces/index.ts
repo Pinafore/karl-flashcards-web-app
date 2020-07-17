@@ -132,8 +132,8 @@ export interface IComponents {
     fact_id: number;
     typed: string;
     response: boolean;
-    elapsed_seconds_text: number;
-    elapsed_seconds_answer: number;
+    elapsed_milliseconds_text: number;
+    elapsed_milliseconds_answer: number;
   };
   SuperUserCreate: {
     email: string;

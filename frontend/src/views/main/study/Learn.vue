@@ -470,8 +470,8 @@
           fact_id: this.show.fact.fact_id,
           typed: this.typed,
           response: response,
-          elapsed_seconds_text: this.frontTime,
-          elapsed_seconds_answer: this.backTime,
+          elapsed_milliseconds_text: this.frontTime,
+          elapsed_milliseconds_answer: this.backTime,
         });
         this.resetCard();
         await studyStore.updateSchedule();
