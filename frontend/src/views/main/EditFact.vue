@@ -289,10 +289,6 @@
       return decks;
     }
 
-    get publicDecks() {
-      return mainStore.publicDecks;
-    }
-
     get facts() {
       if (this.routeName.startsWith("learn")) {
         return [studyStore.show.fact];
