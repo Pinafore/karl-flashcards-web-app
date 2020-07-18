@@ -244,7 +244,7 @@
               >wrong ([)</v-btn
             >
           </v-col>
-          <v-col class="ma-1 pa-1 shrink">
+          <v-col id="response" class="ma-1 pa-1 shrink">
             <v-btn
               ref="good"
               :color="recommendation ? 'green' : ''"
@@ -255,7 +255,6 @@
         </v-row>
       </v-card-actions>
     </v-card>
-    <div id="response"></div>
     <v-dialog v-model="dialog" scrollable>
       <v-card>
         <v-card-title>
@@ -482,10 +481,12 @@
     }
 
     public scrollToResponseButtons() {
-      const container = this.$el.querySelector("#response");
-      if (container) {
-        container.scrollIntoView();
-      }
+      this.$nextTick(function() {
+        const container = this.$el.querySelector("#response");
+        if (container) {
+          container.scrollIntoView();
+        }
+      });
     }
 
     returnLearn() {
