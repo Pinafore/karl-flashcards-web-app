@@ -34,7 +34,7 @@
       <v-col cols="12" md="8">
         <v-card class="mr-0 ml-3 pa-3">
           <v-card-title primary-title class="pb-0 justify-center">
-            <div class="headline primary--text justify-center">Stats at a Glance</div>
+            <div class="headline primary--text justify-center">Stats</div>
           </v-card-title>
           <v-data-iterator
             :items="stats"
