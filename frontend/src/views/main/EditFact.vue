@@ -62,8 +62,17 @@
       </v-card-title>
       <v-card-text>
         <!-- eslint-disable-next-line vue/require-v-for-key -->
-        <div v-for="report in reports" :key="report.report_id" class="mt-4">
-          <v-card class="pa-4">
+        <div v-for="report in reports" :key="report.report_id">
+          <v-card
+            v-if="
+              report.text !== null ||
+                report.answer !== null ||
+                report.deck_id !== null ||
+                report.category !== null ||
+                report.identifier !== null
+            "
+            class="pa-4"
+          >
             <v-textarea
               v-show="report.text !== null"
               v-model="report.text"
@@ -100,7 +109,10 @@
               label="Identifier"
               type="identifier"
             ></v-text-field>
-            <v-btn @click="acceptReport(report)">Accept Changes</v-btn>
+            <v-btn class="mr-4" @click="acceptReport(report, false)"
+              >Accept Changes</v-btn
+            >
+            <v-btn @click="acceptReport(report, true)">Accept and Resolve</v-btn>
           </v-card>
         </div>
       </v-card-text>
@@ -241,7 +253,6 @@
     public async beforeRouteUpdate(to, from, next) {
       this.routeName = to.name;
       await this.determineRoute();
-      this.setEditedIndex();
       this.storedFact();
       next();
     }
@@ -334,10 +345,14 @@
     }
 
     close() {
-      this.$router.back();
+      if (this.routeName == "browse-resolve") {
+        this.$router.push({ name: "browse", query: { reported: "1" } });
+      } else {
+        this.$router.back();
+      }
     }
 
-    async acceptReport(report) {
+    async acceptReport(report, resolve) {
       if (this.reports && this.originalFact && this.fact) {
         if (report.text) this.fact.text = report.text;
         if (report.deck_id) this.fact.deck_id = report.deck_id;
@@ -346,10 +361,13 @@
         if (report.identifier) this.fact.identifier = report.identifier;
         this.reports = this.reports.filter((obj) => obj !== report);
       }
+      if (resolve) {
+        this.save();
+      }
     }
 
     async clearReport() {
-      this.wipeReport();
+      await this.wipeReport();
       this.close();
     }
 
@@ -370,7 +388,6 @@
         return;
       }
 
-      this.close();
       if (this.editedIndex > -1 && this.fact && this.originalFact) {
         const fact_update: IComponents["FactUpdate"] | IComponents["FactToReport"] = {};
         if (this.fact.text !== this.originalFact.text)
@@ -383,32 +400,49 @@
           fact_update.category = this.fact.category;
         if (this.fact.identifier !== this.originalFact.identifier)
           fact_update.identifier = this.fact.identifier;
-        if (this.routeName == "learn-edit") {
-          await studyStore.editFact(fact_update);
-        } else if (this.routeName == "browse-edit") {
-          await mainStore.updateFact({
-            id: this.fact.fact_id,
-            data: fact_update,
-          });
-          mainStore.updateFactInFacts({ index: this.editedIndex, fact: this.fact });
-        } else if (this.routeName == "browse-report") {
-          await mainStore.reportFact({
-            id: this.fact.fact_id,
-            data: fact_update,
-          });
-          if (this.facts[this.editedIndex] !== undefined) {
-            this.facts[this.editedIndex]!.reports = [fact_update];
-          }
-        } else if (this.routeName == "browse-resolve") {
+
+        if (this.routeName == "browse-resolve") {
           await mainStore.updateFact({
             id: this.fact.fact_id,
             data: fact_update,
           });
           mainStore.updateFactInFacts({ index: this.editedIndex, fact: this.fact });
           await this.wipeReport();
-        } else if (this.routeName == "learn-report") {
-          await studyStore.reportFact(fact_update);
+          this.nextReportedFact();
+        } else {
+          this.close();
+          if (this.routeName == "learn-edit") {
+            await studyStore.editFact(fact_update);
+          } else if (this.routeName == "browse-edit") {
+            await mainStore.updateFact({
+              id: this.fact.fact_id,
+              data: fact_update,
+            });
+            mainStore.updateFactInFacts({ index: this.editedIndex, fact: this.fact });
+          } else if (this.routeName == "browse-report") {
+            await mainStore.reportFact({
+              id: this.fact.fact_id,
+              data: fact_update,
+            });
+            if (this.facts[this.editedIndex] !== undefined) {
+              this.facts[this.editedIndex]!.reports = [fact_update];
+            }
+          } else if (this.routeName == "learn-report") {
+            await studyStore.reportFact(fact_update);
+          }
         }
+      }
+    }
+
+    nextReportedFact() {
+      this.editedIndex += 1;
+      if (this.facts[this.editedIndex] !== undefined) {
+        this.$router.push({
+          name: "browse-resolve",
+          params: { id: this.editedIndex.toString() },
+        });
+      } else {
+        this.close();
       }
     }
   }

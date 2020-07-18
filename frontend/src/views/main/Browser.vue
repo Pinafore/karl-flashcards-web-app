@@ -366,7 +366,11 @@
     }
 
     returnBrowser() {
-      this.$router.back();
+      if (this.$router.currentRoute.name == "browse-resolve") {
+        this.$router.push({ name: "browse", query: { reported: "1" } });
+      } else {
+        this.$router.back();
+      }
     }
   }
 </script>
