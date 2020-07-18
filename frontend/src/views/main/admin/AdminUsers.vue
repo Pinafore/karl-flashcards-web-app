@@ -43,6 +43,12 @@
         align: "left",
       },
       {
+        text: "Repetition Model",
+        sortable: true,
+        value: "repetition_model",
+        align: "left",
+      },
+      {
         text: "Is Active",
         sortable: true,
         value: "is_active",
