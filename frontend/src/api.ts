@@ -1,12 +1,18 @@
-import axios from "axios";
+import axios, { CancelTokenStatic } from "axios";
 import { apiUrl } from "@/env";
 import { IComponents } from "./interfaces";
+
+const CancelToken = axios.CancelToken;
+let cancel;
 
 function authHeaders(token: string) {
   return {
     headers: {
       Authorization: `Bearer ${token}`,
     },
+    cancelToken: new CancelToken(function executor(c) {
+      cancel = c;
+    }),
   };
 }
 
@@ -54,6 +60,7 @@ export const api = {
     });
   },
   async getFacts(token: string, data: IComponents["FactSearch"]) {
+    cancel()
     let url = ``;
     if (data.all) {
       url += `&all=${data.all}`;
