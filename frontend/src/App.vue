@@ -49,7 +49,7 @@
     }
 
     public async mounted() {
-      setInterval(this.checkForUpdate, 10000);
+      setInterval(this.checkForUpdate, 1000);
     }
 
     checkForUpdate() {
