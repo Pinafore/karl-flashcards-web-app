@@ -90,7 +90,7 @@ export default new VueRouter({
               component: () =>
                 import(
                   /* webpackChunkName: "main-statistics" */ "@/views/main/Statistics.vue"
-                  ),
+                ),
             },
             {
               path: "leaderboards",
@@ -98,7 +98,7 @@ export default new VueRouter({
               component: () =>
                 import(
                   /* webpackChunkName: "main-leaderboard" */ "@/views/main/Leaderboards.vue"
-                  ),
+                ),
             },
             {
               path: "browse",
@@ -129,11 +129,11 @@ export default new VueRouter({
                     default: () =>
                       import(
                         /* webpackChunkName: "main-browser" */ "@/views/main/Browser.vue"
-                        ),
+                      ),
                     edit: () =>
                       import(
                         /* webpackChunkName: "edit-fact" */ "@/views/main/EditFact.vue"
-                        ),
+                      ),
                   },
                 },
                 {
@@ -143,11 +143,11 @@ export default new VueRouter({
                     default: () =>
                       import(
                         /* webpackChunkName: "main-browser" */ "@/views/main/Browser.vue"
-                        ),
+                      ),
                     edit: () =>
                       import(
                         /* webpackChunkName: "edit-fact" */ "@/views/main/EditFact.vue"
-                        ),
+                      ),
                   },
                 },
               ],
@@ -250,11 +250,11 @@ export default new VueRouter({
                         default: () =>
                           import(
                             /* webpackChunkName: "main-learn" */ "@/views/main/study/Learn.vue"
-                            ),
+                          ),
                         edit: () =>
                           import(
                             /* webpackChunkName: "edit-fact" */ "@/views/main/EditFact.vue"
-                            ),
+                          ),
                       },
                     },
                     {
@@ -264,11 +264,11 @@ export default new VueRouter({
                         default: () =>
                           import(
                             /* webpackChunkName: "main-learn" */ "@/views/main/study/Learn.vue"
-                            ),
+                          ),
                         edit: () =>
                           import(
                             /* webpackChunkName: "edit-fact" */ "@/views/main/EditFact.vue"
-                            ),
+                          ),
                       },
                     },
                   ],

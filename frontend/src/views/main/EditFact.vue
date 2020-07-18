@@ -199,7 +199,6 @@
   import { mainStore, studyStore } from "@/store";
   import { required } from "vee-validate/dist/rules";
   import { ValidationProvider, ValidationObserver, extend } from "vee-validate";
-  import router from "@/router";
 
   // register validation rules
   extend("required", { ...required, message: "{_field_} can not be empty" });

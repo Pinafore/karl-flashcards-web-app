@@ -192,7 +192,7 @@ export const api = {
   async getUserStats(token: string, data: IComponents["StatSearch"]) {
     let url = ``;
     if (data.date_end) {
-      const endDate =new Date(data.date_end);
+      const endDate = new Date(data.date_end);
       endDate.setDate(endDate.getDate() + 1);
       url += `&date_end=${endDate.toIsoString()}`;
     }
@@ -223,8 +223,8 @@ export const api = {
   async getLeaderboard(token: string, data: IComponents["LeaderboardSearch"]) {
     let url = ``;
     if (data.date_end) {
-      const endDate =new Date(data.date_end);
-      endDate.setHours(23,59,59,999)
+      const endDate = new Date(data.date_end);
+      endDate.setHours(23, 59, 59, 999);
 
       url += `&date_end=${endDate.toIsoString()}`;
     }
@@ -251,6 +251,5 @@ export const api = {
       `${apiUrl}/api/statistics/leaderboard?${url}`,
       authHeaders(token),
     );
-  }
+  },
 };
-

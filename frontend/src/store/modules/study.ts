@@ -2,8 +2,7 @@ import { api } from "@/api";
 import { Action, Module, Mutation, VuexModule } from "vuex-module-decorators";
 import { IComponents, IStudyShow, Permission } from "@/interfaces";
 import { mainStore } from "@/utils/store-accessor";
-import router from '@/router';
-import main from "@/store/modules/main";
+import router from "@/router";
 
 @Module({ name: "study" })
 export default class StudyModule extends VuexModule {
@@ -94,13 +93,13 @@ export default class StudyModule extends VuexModule {
       this.show.text = payload.text;
     }
     if (payload.answer && this.show.fact) {
-      this.show.fact.answer = payload.answer
+      this.show.fact.answer = payload.answer;
     }
     if (payload.category && this.show.fact) {
-      this.show.fact.category = payload.category
+      this.show.fact.category = payload.category;
     }
     if (payload.identifier && this.show.fact) {
-      this.show.fact.identifier = payload.identifier
+      this.show.fact.identifier = payload.identifier;
     }
   }
 
@@ -143,8 +142,11 @@ export default class StudyModule extends VuexModule {
   @Action
   startTimer() {
     clearInterval(this.timer);
-    this.timer = setInterval(() => {if(this.time < 30000) {this.updateTimer()}}, 250);
-
+    this.timer = setInterval(() => {
+      if (this.time < 30000) {
+        this.updateTimer();
+      }
+    }, 250);
   }
 
   @Mutation
@@ -268,11 +270,10 @@ export default class StudyModule extends VuexModule {
     if (this.show.fact && !this.show.enable_report) {
       try {
         if (router.currentRoute.name == "learn") {
-          router.push({name: "learn-edit"})
+          router.push({ name: "learn-edit" });
         } else {
-          router.back()
+          router.back();
         }
-
       } catch (error) {
         await mainStore.checkApiError(error);
       }
@@ -285,11 +286,10 @@ export default class StudyModule extends VuexModule {
     if (this.show.fact && this.show.enable_report) {
       try {
         if (router.currentRoute.name == "learn") {
-          router.push({name: "learn-report"})
+          router.push({ name: "learn-report" });
         } else {
-          router.back()
+          router.back();
         }
-
       } catch (error) {
         await mainStore.checkApiError(error);
       }

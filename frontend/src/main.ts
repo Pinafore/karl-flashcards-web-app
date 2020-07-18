@@ -14,15 +14,17 @@ if (process.env.VUE_APP_ENV) {
     dsn: "https://ac296d2d7e8c4115ab8f2713520612cf@o283930.ingest.sentry.io/5259730",
     integrations: [new VueIntegration({ Vue, attachProps: true, logErrors: true })],
   });
-
 }
-
 
 Vue.config.productionTip = false;
 
-Vue.use(VueGtag, {
-  config: { id: "UA-170799823-1" },
-}, router);
+Vue.use(
+  VueGtag,
+  {
+    config: { id: "UA-170799823-1" },
+  },
+  router,
+);
 
 new Vue({
   router,

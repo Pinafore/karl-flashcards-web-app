@@ -6,7 +6,7 @@ import { VuexModule, Module, Mutation, Action } from "vuex-module-decorators";
 import { IComponents, IAppNotification } from "@/interfaces";
 import { UNAUTHORIZED } from "http-status-codes";
 import { mainStore } from "@/utils/store-accessor";
-import '@/utils/date.extensions';
+import "@/utils/date.extensions";
 
 @Module({ name: "main" })
 export default class MainModule extends VuexModule {
@@ -246,7 +246,7 @@ export default class MainModule extends VuexModule {
       this.addNotification(loadingNotification);
       const response = (
         await Promise.all([
-          api.updateMe(this.token, {show_help: payload}),
+          api.updateMe(this.token, { show_help: payload }),
           await new Promise((resolve, _reject) => setTimeout(() => resolve(), 500)),
         ])
       )[0];
@@ -316,7 +316,10 @@ export default class MainModule extends VuexModule {
   async checkApiError(payload: AxiosError) {
     if (payload.response) {
       if (payload.response.status === UNAUTHORIZED) {
-        this.addNotification({ content: "This action is unauthorized. You are logged out.", color: "error" });
+        this.addNotification({
+          content: "This action is unauthorized. You are logged out.",
+          color: "error",
+        });
         await this.logOut();
       }
       if (payload.response.status == 555) {
@@ -334,7 +337,7 @@ export default class MainModule extends VuexModule {
       router.push("/main/dashboard");
     } else if (router.currentRoute.path === "/sign-up") {
       router.push({
-        path: "main/add/public-decks"
+        path: "main/add/public-decks",
       });
     }
   }
@@ -597,7 +600,7 @@ export default class MainModule extends VuexModule {
   }
 
   @Action
-  async reportFact(payload: { id: number; data: IComponents["FactToReport"]}) {
+  async reportFact(payload: { id: number; data: IComponents["FactToReport"] }) {
     try {
       await api.reportFact(mainStore.token, payload.id, payload.data);
       mainStore.addNotification({
@@ -666,7 +669,7 @@ export default class MainModule extends VuexModule {
       await this.checkApiError(error);
     }
   }
-  
+
   @Action
   async getSavedStatistics() {
     try {

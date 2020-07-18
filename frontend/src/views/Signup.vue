@@ -100,7 +100,7 @@
 <script lang="ts">
   import { Component, Vue } from "vue-property-decorator";
   import { appName } from "@/env";
-  import { confirmed, email, required, min, max } from "vee-validate/dist/rules";
+  import { confirmed, email, required } from "vee-validate/dist/rules";
   import { extend, ValidationObserver, ValidationProvider } from "vee-validate";
   import { mainStore } from "@/utils/store-accessor";
   import { IComponents } from "@/interfaces";
