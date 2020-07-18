@@ -363,31 +363,33 @@
 
     public handleKeyDown(e: KeyboardEvent) {
       const key = e.key.toLowerCase();
-      if (e.altKey && (e.key == "s" || key == "ß")) {
-        this.suspend();
-      } else if (e.altKey && (key == "d" || key == "∂")) {
-        this.remove();
-      } else if (e.altKey && (key == "/" || key == "÷")) {
-        this.dialog = !this.dialog;
-      } else if (e.altKey && (key == "r" || key == "®")) {
-        this.report();
-      } else if (e.altKey && (key == "m" || key == "µ")) {
-        this.mark();
-      } else if (e.altKey && (key == "e" || key == "dead")) {
-        this.edit();
-      } else if (this.showBack) {
-        this.determineResponse(e, key);
-      } else if (key == "enter" && this.show.enable_actions) {
-        this.showAnswer();
-      } else if (
-        /^[a-z0-9]$/i.test(key) &&
-        !e.altKey &&
-        !e.metaKey &&
-        !e.shiftKey &&
-        !e.ctrlKey
-      ) {
-        //this.$ref.typed.$el.focus() doesn't work some reason
+      if (!this.editDialog) {
+        if (e.altKey && (e.key == "s" || key == "ß")) {
+          this.suspend();
+        } else if (e.altKey && (key == "d" || key == "∂")) {
+          this.remove();
+        } else if (e.altKey && (key == "/" || key == "÷")) {
+          this.dialog = !this.dialog;
+        } else if (e.altKey && (key == "r" || key == "®")) {
+          this.report();
+        } else if (e.altKey && (key == "m" || key == "µ")) {
+          this.mark();
+        } else if (e.altKey && (key == "e" || key == "dead")) {
+          this.edit();
+        } else if (this.showBack) {
+          this.determineResponse(e, key);
+        } else if (key == "enter" && this.show.enable_actions) {
+          this.showAnswer();
+        } else if (
+          /^[a-z0-9]$/i.test(key) &&
+          !e.altKey &&
+          !e.metaKey &&
+          !e.shiftKey &&
+          !e.ctrlKey
+        ) {
+          //this.$ref.typed.$el.focus() doesn't work some reason
         document.getElementById("answer")!.focus(); // eslint-disable-line
+        }
       }
     }
 
