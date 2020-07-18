@@ -5,7 +5,7 @@ import RouterComponent from "@/components/RouterComponent.vue";
 
 Vue.use(VueRouter);
 
-export default new VueRouter({
+const router = new VueRouter({
   mode: "history",
   base: process.env.BASE_URL,
   routes: [
@@ -323,3 +323,13 @@ export default new VueRouter({
     },
   ],
 });
+
+router.afterEach(() => {
+  navigator.serviceWorker.getRegistration().then((reg) => {
+    if (reg !== undefined) {
+      reg.update();
+    }
+  });
+});
+
+export default router;
