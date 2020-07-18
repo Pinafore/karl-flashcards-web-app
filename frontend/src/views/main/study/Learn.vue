@@ -2,7 +2,7 @@
   <v-container fluid style="max-width:1200px">
     <onboard></onboard>
     <connection-popup></connection-popup>
-    <v-card class="mx-3 my-1 py-1 px-3">
+    <v-card class="mx-3 my-1 py-1 px-0 px-sm-3">
       <v-card-title primary-title class="mx-3 my-0 pa-0">
         <div class="headline primary--text">Learn</div>
         <v-spacer></v-spacer>
@@ -159,8 +159,8 @@
         </span>
       </v-card-title>
     </v-card>
-    <v-card class="my-2 mx-3 px-3 py-3">
-      <v-card-title class="py-2 pb-0">
+    <v-card class="my-2 mx-3 px-3 py-4 pb-5">
+      <v-card-title class="py-0">
         <div
           v-if="
             show.enable_actions &&
@@ -174,43 +174,44 @@
           Category: {{ show.fact.category }}
         </div>
         <div v-else class="title">Front</div>
+
         <div
           v-if="show.enable_actions && show.fact && show.fact.identifier"
           class="title"
         >
-          &nbsp; — Identify {{ show.fact.identifier }}
+          <span class="hidden-xs-only">—</span>Identify {{ show.fact.identifier }}
         </div>
         <div v-show="show.marked" style="margin-left: auto;">&#11088;&nbsp;</div>
       </v-card-title>
-      <v-card-text class="pb-2">
+      <v-card-text class="pb-0 pt-1">
         <div class="title primary--text">
           {{ show.text }}
         </div>
       </v-card-text>
-      <v-card-text v-show="show.enable_actions" class="pt-3">
+      <v-card-text v-show="show.enable_actions" class="py-2">
         <v-text-field
           id="answer"
           v-model="typed"
           solo
           label="Recommended - Type Answer (Press any letter to focus)"
           autofocus
-          class="hide-details"
+          hide-details="auto"
           @keydown="keyHandler"
         ></v-text-field>
       </v-card-text>
-      <v-card-actions v-show="show.enable_actions">
+      <v-card-actions v-show="show.enable_actions && !showBack" class="px-4 pt-3 pb-2">
         <v-btn @click="showAnswer">Show Answer (Enter)</v-btn>
       </v-card-actions>
     </v-card>
-    <v-card v-show="showBack && show.enable_actions" class="my-2 mx-3 px-3 py-2">
-      <v-card-title class="py-2 pb-0">
+    <v-card v-show="showBack && show.enable_actions" class="my-2 mx-3 px-3 py-4">
+      <v-card-title class="py-0">
         <div class="title">Back</div>
       </v-card-title>
-      <v-card-text class="pt-2 pb-0">
-        <div class="title primary--text py-2">
+      <v-card-text class="pb-0 pt-1">
+        <div class="title primary--text">
           Answer: {{ show.fact && show.fact.answer }}
         </div>
-        <div class="title pb-2">You typed: '{{ typed }}'</div>
+        <div class="title">You typed: '{{ typed }}'</div>
         <div
           v-if="recommendation"
           class="title primary--text py-2"
@@ -218,36 +219,36 @@
         >
           KAR³L Believes Answer Correct (Enter to Accept, Or Override Below)
         </div>
-        <div
-          v-else
-          class="title primary--text py-2"
-          :style="{ color: 'red !important' }"
-        >
+        <div v-else class="title primary--text" :style="{ color: 'red !important' }">
           KAR³L Believes Answer Wrong (Enter to Accept, Or Override Below)
         </div>
+      </v-card-text>
+      <v-card-text v-show="show.enable_actions" class="py-2">
         <v-text-field
           id="retype_answer"
           v-model="retyped"
           solo
           label="Optional - Retype Answer (Press any letter to focus)"
           autofocus
-          class="hide-details pt-3"
+          hide-details="auto"
         ></v-text-field>
       </v-card-text>
-      <v-card-actions class="pt-0">
-        <v-row class="shrink">
-          <v-col class="ma-1 pa-1 shrink">
+      <v-card-actions class="pt-3 pb-1 px-5">
+        <v-row class="shrink" justify="space-around">
+          <v-col cols="5" sm="auto" class="ma-1 pa-1 py-0 shrink">
             <v-btn
               ref="again"
               :color="!recommendation ? 'red' : ''"
+              class="px-2"
               @click="response(false)"
               >wrong ([)</v-btn
             >
           </v-col>
-          <v-col id="response" class="ma-1 pa-1 shrink">
+          <v-col id="response" cols="5" sm="auto" class="ma-1 pa-1 py-0 shrink">
             <v-btn
               ref="good"
               :color="recommendation ? 'green' : ''"
+              class="px-2"
               @click="response(true)"
               >right (])</v-btn
             >
