@@ -54,7 +54,7 @@
     }
 
     get schedulerError() {
-      return mainStore.connectionError;
+      return mainStore.schedulerError;
     }
 
     @Watch("connectionError")
