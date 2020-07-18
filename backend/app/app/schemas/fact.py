@@ -21,7 +21,7 @@ class KarlFact(FactBase):
     answer: str
     deck_name: str
     deck_id: int
-    label: Optional[str] = None
+    label: Optional[bool] = None
     history_id: Optional[int] = None
     env: str
     elapsed_seconds_text: Optional[int] = None
