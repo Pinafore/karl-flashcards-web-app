@@ -6,8 +6,10 @@
         Decks
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn to="/main/add/deck">Add Deck</v-btn>
+
       <v-card-actions>
+        <v-btn v-show="!checkAllDecks()" @click="deleteDecks">Delete</v-btn>
+        <v-btn to="/main/add/deck">Add Deck</v-btn>
         <v-btn v-if="checkAllDecks()" to="/main/study/learn">Study All</v-btn>
         <v-btn v-else color="primary" @click="openDecks()">Study Selected</v-btn>
       </v-card-actions>
@@ -73,6 +75,15 @@
         path: "/main/study/learn",
         query: { deck: String(deck.id) },
       });
+    }
+
+    public async deleteDecks() {
+      const selectedIds = this.selected.map((a) => a.id);
+      if (selectedIds.length > 0) {
+        await mainStore.deleteDecks({ ids: selectedIds });
+        this.selected = [];
+        await mainStore.getUserProfile();
+      }
     }
   }
 </script>

@@ -639,6 +639,21 @@ export default class MainModule extends VuexModule {
   }
 
   @Action
+  async deleteDecks(payload: {ids: number[]} ) {
+    try {
+      for(const id of payload.ids) {
+        await api.deleteDeck(mainStore.token, id);
+      }
+      mainStore.addNotification({
+        content: "Deck(s) deleted",
+        color: "success",
+      });
+    } catch (error) {
+      await mainStore.checkApiError(error);
+    }
+  }
+
+  @Action
   async deleteFact(payload: { id: number; todo: boolean }) {
     try {
       await api.deleteFact(mainStore.token, payload.id);

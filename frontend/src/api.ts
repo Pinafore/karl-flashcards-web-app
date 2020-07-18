@@ -113,6 +113,9 @@ export const api = {
   async createDeck(token: string, data: IComponents["DeckCreate"]) {
     return axios.post(`${apiUrl}/api/decks/`, data, authHeaders(token));
   },
+  async deleteDeck(token: string, deckId: number) {
+    return axios.delete(`${apiUrl}/api/decks/${deckId}`, authHeaders(token));
+  },
   async suspendFact(token: string, factId: number) {
     const url = `${apiUrl}/api/facts/suspend/${factId}`;
     return axios.put<IComponents["Fact"]>(url, null, authHeaders(token));
