@@ -133,7 +133,7 @@
                     <div class="px-2 mb-0 pt-1 pb-2 text-center">
                       {{ item.details }}
                     </div>
-                    <v-row justify="center pb-2">
+                    <v-row class="justify-center pb-2">
                       <div v-if="item.user_place !== null">
                         Your Rank: {{ item.user_place + 1 }}
                       </div>
