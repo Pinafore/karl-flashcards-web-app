@@ -20,6 +20,7 @@
       <router-view v-else />
       <NotificationsManager></NotificationsManager>
       <ConnectionError></ConnectionError>
+      <UpdateAvailable></UpdateAvailable>
     </v-app>
   </div>
 </template>
@@ -29,9 +30,11 @@
   import NotificationsManager from "@/components/NotificationsManager.vue";
   import { mainStore } from "@/store";
   import ConnectionError from "@/components/ConnectionError.vue";
+  import UpdateAvailable from "@/components/UpdateAvailable.vue";
 
   @Component({
     components: {
+      UpdateAvailable,
       NotificationsManager,
       ConnectionError,
     },
