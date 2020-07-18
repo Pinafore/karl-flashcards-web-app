@@ -47,5 +47,17 @@
     public async created() {
       await mainStore.checkLoggedIn();
     }
+
+    public async mounted() {
+      setInterval(this.checkForUpdate, 10000);
+    }
+
+    checkForUpdate() {
+      navigator.serviceWorker.getRegistration().then((reg) => {
+        if (reg !== undefined) {
+          reg.update();
+        }
+      });
+    }
   }
 </script>
