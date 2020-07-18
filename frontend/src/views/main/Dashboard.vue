@@ -138,7 +138,7 @@
                         Your Rank: {{ item.user_place + 1 }}
                       </div>
                       <div v-else class="text-center">
-                        You Are Unranked
+                        Your Rank: N/A
                       </div>
                     </v-row>
                     <v-divider></v-divider>

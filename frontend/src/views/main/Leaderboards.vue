@@ -125,7 +125,7 @@
                 Your Rank: {{ userRank() }}
               </div>
               <div v-else class="px-2 text-center">
-                You Are Unranked
+                Your Rank: N/A
               </div>
             </v-row>
 
