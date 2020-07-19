@@ -201,7 +201,7 @@
       return mainStore.rankTypes;
     }
 
-    @Watch("searchOptions.rank_type")
+    @Watch("searchOptions", { deep: true })
     onSearchOptionsChanged() {
       this.searchLeaderboards();
     }
@@ -220,7 +220,8 @@
     }
 
     showRank() {
-      return this.filteredLeaderboard?.user_place !== undefined;
+      const place = this.filteredLeaderboard?.user_place ?? null;
+      return place !== null;
     }
 
     showGoToUser() {
@@ -248,9 +249,10 @@
     }
 
     userRank() {
-      const place = this.filteredLeaderboard?.user_place
-        ? this.filteredLeaderboard?.user_place + 1
-        : null;
+      const place =
+        this.filteredLeaderboard?.user_place !== undefined
+          ? this.filteredLeaderboard?.user_place + 1
+          : null;
       if (place) {
         return place;
       } else {
