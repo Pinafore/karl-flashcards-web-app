@@ -20,6 +20,7 @@
                 :error-messages="errors[0]"
                 required
                 name="username"
+                autocomplete="username"
               ></v-text-field>
             </validation-provider>
             <validation-provider
@@ -34,6 +35,7 @@
                 label="Email"
                 type="email"
                 name="email"
+                autocomplete="email"
                 required
               ></v-text-field>
             </validation-provider>
@@ -50,7 +52,8 @@
                 type="password"
                 label="Password"
                 :error-messages="errors"
-                autocomplete="off"
+                name="password"
+                autocomplete="new-password"
               ></v-text-field>
             </validation-provider>
             <validation-provider
@@ -66,8 +69,9 @@
                 prepend-icon="mdi-lock"
                 type="password"
                 label="Confirm Password"
+                name="password"
                 :error-messages="errors"
-                autocomplete="off"
+                autocomplete="new-password"
               ></v-text-field>
             </validation-provider>
 

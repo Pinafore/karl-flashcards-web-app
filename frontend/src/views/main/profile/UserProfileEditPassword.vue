@@ -33,6 +33,8 @@
                   type="password"
                   label="Password"
                   :error-messages="errors"
+                  name="password"
+                  autocomplete="new-password"
                 ></v-text-field>
               </validation-provider>
 
@@ -49,6 +51,8 @@
                   type="password"
                   label="Confirm Password"
                   :error-messages="errors"
+                  name="password"
+                  autocomplete="new-password"
                 ></v-text-field>
               </validation-provider>
             </template>

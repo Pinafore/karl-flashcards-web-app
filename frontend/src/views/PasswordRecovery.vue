@@ -26,6 +26,8 @@
                       prepend-icon="mdi-account"
                       :error-messages="errors[0]"
                       required
+                      name="email"
+                      autocomplete="email"
                       @keyup.enter="onSubmit"
                     ></v-text-field>
                   </validation-provider>

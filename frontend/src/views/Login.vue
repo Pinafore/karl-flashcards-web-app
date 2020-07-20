@@ -10,10 +10,10 @@
           <v-text-field
             v-model="email"
             prepend-icon="mdi-account"
-            name="login"
+            name="username"
             label="Username/Email"
             type="text"
-            autocomplete="UserName"
+            autocomplete="username"
             @keyup.enter="submit"
           ></v-text-field>
           <v-text-field
@@ -23,7 +23,7 @@
             name="password"
             label="Password"
             type="password"
-            autocomplete="password"
+            autocomplete="current-password"
             @keyup.enter="submit"
           ></v-text-field>
         </v-form>

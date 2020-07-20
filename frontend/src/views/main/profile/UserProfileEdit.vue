@@ -13,6 +13,8 @@
                 label="Username"
                 :error-messages="errors[0]"
                 required
+                name="username"
+                autocomplete="username"
               ></v-text-field>
             </validation-provider>
             <validation-provider
@@ -26,6 +28,8 @@
                 type="email"
                 :error-messages="errors[0]"
                 required
+                name="email"
+                autocomplete="email"
               ></v-text-field>
             </validation-provider>
           </v-card-text>
