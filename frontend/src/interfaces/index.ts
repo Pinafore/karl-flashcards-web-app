@@ -1,7 +1,5 @@
 import { DataTableHeader } from "vuetify";
 
-import "@/utils/date.extensions";
-
 export interface IAppNotification {
   content: string;
   color?: string;

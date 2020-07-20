@@ -6,7 +6,7 @@ import { VuexModule, Module, Mutation, Action } from "vuex-module-decorators";
 import { IComponents, IAppNotification } from "@/interfaces";
 import { UNAUTHORIZED } from "http-status-codes";
 import { mainStore } from "@/utils/store-accessor";
-import "@/utils/date.extensions";
+import { format, startOfDay } from "date-fns";
 
 @Module({ name: "main" })
 export default class MainModule extends VuexModule {
@@ -49,7 +49,9 @@ export default class MainModule extends VuexModule {
     { text: "Minutes Spent", value: "total_minutes" },
     { text: "Minutes Spent (Front)", value: "elapsed_minutes_text" },
   ];
-  today = new Date().toIsoString();
+  today = format(startOfDay(new Date()), "yyyy-MM-dd'T'HH:mm:ss.SSSxxxx");
+  // today = format(new Date(), 'xxxx');
+  // today = new Date().toIsoString();
 
   get hasAdminAccess() {
     return (

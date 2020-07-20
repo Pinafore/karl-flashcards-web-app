@@ -1,6 +1,7 @@
 import axios, { CancelTokenStatic } from "axios";
 import { apiUrl } from "@/env";
 import { IComponents } from "./interfaces";
+import { endOfDay, format, parse, startOfDay } from "date-fns";
 
 const CancelToken = axios.CancelToken;
 let cancel;
@@ -201,13 +202,12 @@ export const api = {
   },
   async getUserStats(token: string, data: IComponents["StatSearch"]) {
     let url = ``;
-    if (data.date_end) {
-      const endDate = new Date(data.date_end);
-      endDate.setDate(endDate.getDate() + 1);
-      url += `&date_end=${endDate.toIsoString()}`;
-    }
+
     if (data.date_start) {
-      url += `&date_start=${new Date(data.date_start).toIsoString()}`;
+      url += `&date_start=${format(startOfDay(parse(data.date_start, "yyyy-MM-dd", new Date())), "yyyy-MM-dd'T'HH:mm:ss.SSSxxxx")}`;
+    }
+    if (data.date_end) {
+      url += `&date_end=${format(endOfDay(new Date(data.date_end)), "yyyy-MM-dd'T'HH:mm:ss.SSSxxxx")}`;
     }
     if (data.deck_id) {
       url += `&deck_id=${data.deck_id}`;
@@ -232,14 +232,11 @@ export const api = {
   },
   async getLeaderboard(token: string, data: IComponents["LeaderboardSearch"]) {
     let url = ``;
-    if (data.date_end) {
-      const endDate = new Date(data.date_end);
-      endDate.setHours(23, 59, 59, 999);
-
-      url += `&date_end=${endDate.toIsoString()}`;
-    }
     if (data.date_start) {
-      url += `&date_start=${new Date(data.date_start).toIsoString()}`;
+      url += `&date_start=${format(startOfDay(parse(data.date_start, "yyyy-MM-dd", new Date())), "yyyy-MM-dd'T'HH:mm:ss.SSSxxxx")}`;
+    }
+    if (data.date_end) {
+      url += `&date_end=${format(endOfDay(new Date(data.date_end)), "yyyy-MM-dd'T'HH:mm:ss.SSSxxxx")}`;
     }
     if (data.deck_id) {
       url += `&deck_id=${data.deck_id}`;

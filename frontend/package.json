@@ -16,6 +16,7 @@
     "@types/lodash.debounce": "^4.0.6",
     "axios": "^0.19.2",
     "core-js": "^3.6.4",
+    "date-fns": "^2.15.0",
     "http-status-codes": "^1.4.0",
     "lodash.debounce": "^4.0.8",
     "register-service-worker": "^1.6.2",

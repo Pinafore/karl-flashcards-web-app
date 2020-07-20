@@ -171,9 +171,7 @@
 <script lang="ts">
   import { Component, Vue, Watch } from "vue-property-decorator";
   import { mainStore } from "@/store";
-
-  import "@/utils/date.extensions";
-
+  import { format, startOfDay } from "date-fns";
   @Component
   export default class Dashboard extends Vue {
     loading = true;
@@ -213,16 +211,13 @@
 
     async getLeaderboards() {
       this.loading = true;
-      const date = new Date();
-      date.setHours(0, 0, 0, 0);
-      date.setDate(date.getDate());
       await mainStore.getHomeLeaderboards([
         {
           rank_type: this.rankType,
         },
         {
           rank_type: this.rankType,
-          date_start: date.toIsoString(),
+          date_start: format(startOfDay(new Date()), "yyyy-MM-dd'T'HH:mm:ss.SSSxxxx"),
         },
       ]);
       this.loading = false;
