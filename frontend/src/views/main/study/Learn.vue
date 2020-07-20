@@ -161,26 +161,32 @@
     </v-card>
     <v-card class="my-2 mx-3 px-3 py-4 pb-5">
       <v-card-title class="py-0">
-        <div
-          v-if="
-            show.enable_actions &&
-              show.fact &&
-              show.fact.category &&
-              show.fact.category.toString() !== 'None' &&
-              show.fact.category.toString() !== 'Other'
-          "
-          class="title"
-        >
-          Category: {{ show.fact.category }}
-        </div>
-        <div v-else class="title">Front</div>
+        <v-row no-gutters>
+          <v-col cols="12" sm="auto">
+            <div
+              v-if="
+                show.enable_actions &&
+                  show.fact &&
+                  show.fact.category &&
+                  show.fact.category.toString() !== 'None' &&
+                  show.fact.category.toString() !== 'Other'
+              "
+              class="title"
+            >
+              Category: {{ show.fact.category }}
+            </div>
+            <div v-else class="title">Front</div>
+          </v-col>
+          <v-col cols="12" sm="auto">
+            <div
+              v-if="show.enable_actions && show.fact && show.fact.identifier"
+              class="title"
+            >
+              <span class="hidden-xs-only">—</span>Identify {{ show.fact.identifier }}
+            </div>
+          </v-col>
+        </v-row>
 
-        <div
-          v-if="show.enable_actions && show.fact && show.fact.identifier"
-          class="title"
-        >
-          <span class="hidden-xs-only">—</span>Identify {{ show.fact.identifier }}
-        </div>
         <div v-show="show.marked" style="margin-left: auto;">&#11088;&nbsp;</div>
       </v-card-title>
       <v-card-text class="pb-0 pt-1">
