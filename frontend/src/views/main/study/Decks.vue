@@ -5,13 +5,15 @@
       <v-toolbar-title>
         Decks
       </v-toolbar-title>
-      <v-spacer></v-spacer>
+      <v-spacer class="hidden-xs-only"></v-spacer>
 
-      <v-card-actions>
+      <v-card-actions class="px-0 px-sm-auto">
         <v-btn v-show="!checkAllDecks()" @click="deleteDecks">Delete</v-btn>
         <v-btn to="/main/add/deck">Add Deck</v-btn>
         <v-btn v-if="checkAllDecks()" to="/main/study/learn">Study All</v-btn>
-        <v-btn v-else color="primary" @click="openDecks()">Study Selected</v-btn>
+        <v-btn v-else color="primary" @click="openDecks()"
+          >Study<span class="hidden-xs-only"> Selected</span></v-btn
+        >
       </v-card-actions>
     </v-toolbar>
     <v-data-table
