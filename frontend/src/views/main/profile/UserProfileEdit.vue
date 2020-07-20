@@ -33,6 +33,7 @@
               ></v-text-field>
             </validation-provider>
           </v-card-text>
+          <v-checkbox v-model="showTips" label="Show Tips"></v-checkbox>
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn @click="cancel">Cancel</v-btn>
@@ -72,12 +73,14 @@
     valid = true;
     username = "";
     email = "";
+    showTips = false;
 
     created() {
       const userProfile = mainStore.userProfile;
       if (userProfile) {
         this.username = userProfile.username;
         this.email = userProfile.email;
+        this.showTips = userProfile.show_help;
       }
     }
 
@@ -90,6 +93,7 @@
       if (userProfile) {
         this.username = userProfile.username;
         this.email = userProfile.email;
+        this.showTips = userProfile.show_help;
       }
       this.$refs.observer.reset();
     }
@@ -114,6 +118,11 @@
       if (userProfile && this.email != userProfile.email) {
         updatedProfile.email = this.email;
       }
+
+      if (userProfile && this.showTips != userProfile.show_help) {
+        updatedProfile.show_help = this.showTips;
+      }
+
       await mainStore.updateUserProfile(updatedProfile);
       await this.$router.push("/main/profile");
     }

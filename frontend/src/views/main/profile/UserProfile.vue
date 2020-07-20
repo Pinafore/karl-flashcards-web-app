@@ -19,12 +19,25 @@
           </div>
           <div v-else class="title primary--text">-----</div>
         </div>
-        <div class="my-3">
+        <div class="my-4">
           <div class="subheading secondary--text">Email</div>
           <div v-if="userProfile && userProfile.email" class="title primary--text">
             {{ userProfile.email }}
           </div>
           <div v-else class="title primary--text">-----</div>
+        </div>
+
+        <div class="my-3">
+          <div class="subheading secondary--text">Tips</div>
+          <div v-if="userProfile && userProfile.show_help" class="title primary--text">
+            Shown
+          </div>
+          <div v-if="userProfile && !userProfile.show_help" class="title primary--text">
+            Disabled
+          </div>
+          <div v-else class="title primary--text">
+            -----
+          </div>
         </div>
       </v-card-text>
       <v-card-actions>
