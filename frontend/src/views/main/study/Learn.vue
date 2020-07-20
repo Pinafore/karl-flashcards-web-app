@@ -160,7 +160,7 @@
       </v-card-title>
     </v-card>
     <v-card class="my-2 mx-3 px-3 py-4 pb-5">
-      <v-card-title id="front" class="py-0">
+      <v-card-title class="py-0">
         <v-row no-gutters>
           <v-col cols="12" sm="auto">
             <div
@@ -499,10 +499,7 @@
 
     public scrollToFront() {
       this.$nextTick(function() {
-        const container = this.$el.querySelector("#front");
-        if (container) {
-          container.scrollIntoView();
-        }
+        window.scrollTo(0, 0);
       });
     }
 
