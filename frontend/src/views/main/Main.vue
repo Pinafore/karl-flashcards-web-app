@@ -173,9 +173,15 @@
       app
     >
       <v-app-bar-nav-icon @click.stop="switchShowDrawer"></v-app-bar-nav-icon>
-      <v-btn text x-large @click.stop="goHome">{{ appName }}</v-btn>
+      <v-btn class="mx-n3" text x-large @click.stop="goHome">{{ appName }}</v-btn>
       <v-spacer></v-spacer>
-      <v-switch v-model="darkMode" label="Dark Mode" hide-details></v-switch>
+      <v-list-item class="justify-end px-2">
+        <v-icon>mdi-weather-sunny</v-icon>
+        <v-list-item-action>
+          <v-switch v-model="darkMode" inset></v-switch>
+        </v-list-item-action>
+        <v-icon class="pl-2">mdi-weather-night</v-icon>
+      </v-list-item>
       <v-menu bottom left offset-y>
         <template v-slot:activator="{ on }">
           <v-btn icon v-on="on">
