@@ -4,9 +4,7 @@
       <form @submit.prevent="onSubmit" @reset.prevent="onReset">
         <v-card class="elevation-24">
           <v-toolbar dark color="primary">
-            <v-toolbar-title
-              >Sign Up — {{ appName }} (IRB Form, Scroll Down To Sign Up!)
-            </v-toolbar-title>
+            <v-toolbar-title>Sign Up</v-toolbar-title>
             <v-spacer></v-spacer>
           </v-toolbar>
           <v-card-text>
