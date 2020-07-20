@@ -205,7 +205,7 @@
     <v-main>
       <router-view></router-view>
     </v-main>
-    <v-footer class="pa-3" fixed app>
+    <v-footer class="pa-3" app absolute>
       <v-spacer></v-spacer>
       <span>&copy; {{ appName }}</span>
     </v-footer>
