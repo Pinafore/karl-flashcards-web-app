@@ -16,18 +16,18 @@
           <v-expansion-panel>
             <v-expansion-panel-header>iOS</v-expansion-panel-header>
             <v-expansion-panel-content
-              >See the images below to show steps for adding KAR³L to the homescreen.
+              >The images below show steps for adding KAR³L to the homescreen.
               <v-row justify="space-around">
                 <v-col cols="6" sm="4" class="justify-center">
                   <v-img
                     max-width="300"
-                    :src="require('@/assets/share_button.jpg')"
+                    :src="require('@/assets/ios_button.jpg')"
                   ></v-img>
                 </v-col>
                 <v-col cols="6" sm="4" class="justify-center">
                   <v-img
                     max-width="300"
-                    :src="require('@/assets/share_screen.jpg')"
+                    :src="require('@/assets/ios_screen.jpg')"
                   ></v-img>
                 </v-col>
               </v-row>
