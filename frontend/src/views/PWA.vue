@@ -95,7 +95,9 @@
 
     async mounted() {
       await mainStore.getUserProfile();
-      this.pwa_tip = mainStore.userProfile?.pwa_tip ?? false;
+      this.pwa_tip =
+        (mainStore.userProfile?.pwa_tip ?? false) ||
+        this.$router.currentRoute.name === "pwa";
       if (this.$vuetify.breakpoint.xsOnly) {
         this.panel = [0, 1];
       } else {

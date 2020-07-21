@@ -31,7 +31,8 @@
       } else if (
         to.path === "/login" ||
         to.path === "/sign-up" ||
-        to.path === "/privacy-irb"
+        to.path === "/privacy-irb" ||
+        to.path === "/pwa"
       ) {
         mainStore.setisOnHomeScreenPopup(true);
         next();
