@@ -164,6 +164,7 @@ export interface IComponents {
     suspended_facts?: IComponents["Fact"][];
     facts?: IComponents["Fact"][];
     dark_mode: boolean;
+    pwa_tip: boolean;
   };
   UserCreate: {
     email: string;
@@ -181,6 +182,7 @@ export interface IComponents {
     default_deck_id?: number;
     show_help?: boolean;
     dark_mode?: boolean;
+    pwa_tip?: boolean;
   };
   ValidationError: { loc: string[]; msg: string; type: string };
   StatSearch: {

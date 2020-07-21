@@ -16,7 +16,8 @@ class UserBase(BaseModel):
     repetition_model: Optional[Repetition] = None
     show_help: Optional[bool] = None
     dark_mode: Optional[bool] = None
-    
+    pwa_tip: Optional[bool] = None
+
 
 # Properties to receive via API on creation
 class UserCreate(UserBase):
@@ -49,6 +50,7 @@ class UserInDBBase(UserBase):
     is_superuser: bool
     show_help: bool
     dark_mode: bool
+    pwa_tip: bool
 
     class Config:
         orm_mode = True

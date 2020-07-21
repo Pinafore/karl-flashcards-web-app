@@ -263,6 +263,29 @@ export default class MainModule extends VuexModule {
     }
   }
 
+
+  @Action
+  async updatePWA(payload: boolean) {
+    try {
+      const loadingNotification = { content: "saving", showProgress: true };
+      this.addNotification(loadingNotification);
+      const response = (
+        await Promise.all([
+          api.updateMe(this.token, { pwa_tip: payload }),
+          await new Promise((resolve, _reject) => setTimeout(() => resolve(), 500)),
+        ])
+      )[0];
+      this.setUserProfile(response.data);
+      this.removeNotification(loadingNotification);
+      this.addNotification({
+        content: "Profile successfully updated",
+        color: "success",
+      });
+    } catch (error) {
+      await this.checkApiError(error);
+    }
+  }
+
   @Action
   async checkLoggedIn() {
     if (!this.isLoggedIn) {

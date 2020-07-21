@@ -1,5 +1,6 @@
 <template>
   <v-container fluid>
+    <p-w-a v-if="showPWA"></p-w-a>
     <v-row>
       <v-col>
         <v-card class="ma-3 pa-3">
@@ -172,7 +173,10 @@
   import { Component, Vue, Watch } from "vue-property-decorator";
   import { mainStore } from "@/store";
   import { format, startOfDay } from "date-fns";
-  @Component
+  import PWA from "@/views/PWA.vue";
+  @Component({
+    components: { PWA },
+  })
   export default class Dashboard extends Vue {
     loading = true;
     rankType = "total_seen";
@@ -222,6 +226,7 @@
       ]);
       this.loading = false;
     }
+
     get stats() {
       return mainStore.homeStats;
     }
@@ -232,6 +237,15 @@
 
     get connectionError() {
       return mainStore.connectionError;
+    }
+
+    get showPWA() {
+      const stat = this.stats[2];
+      if (stat !== undefined) {
+        return this.stats[2].total_seen % 4 === 0 && this.stats[2].total_seen !== 0;
+      } else {
+        return false;
+      }
     }
   }
 </script>
