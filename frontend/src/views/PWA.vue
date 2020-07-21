@@ -4,24 +4,31 @@
       <v-card>
         <v-card-title>
           <h2>
-            Download <span class="hidden-sm-and-up"><br /></span>KAR³L!
+            <span class="hidden-xs-only">You Can </span>Download
+            <span class="hidden-sm-and-up"><br /></span>KAR³L!
           </h2>
         </v-card-title>
         <v-card-text>
-          KAR³L can be installed as both a native desktop and mobile app! See how below.
+          KAR³L can be installed as both a native desktop and mobile app! See
+          instructions below.
         </v-card-text>
         <v-expansion-panels v-model="panel" multiple>
           <v-expansion-panel>
             <v-expansion-panel-header>iOS</v-expansion-panel-header>
             <v-expansion-panel-content
-              >Follow the images below to press the correct buttons to add the app to
-              the homescreen.
-              <v-row>
-                <v-col cols="6">
-                  <v-img :src="require('@/assets/share_button.jpg')"></v-img>
+              >See the images below to show steps for adding KAR³L to the homescreen.
+              <v-row justify="space-around">
+                <v-col cols="6" sm="4" class="justify-center">
+                  <v-img
+                    max-width="300"
+                    :src="require('@/assets/share_button.jpg')"
+                  ></v-img>
                 </v-col>
-                <v-col cols="6">
-                  <v-img :src="require('@/assets/share_screen.jpg')"></v-img>
+                <v-col cols="6" sm="4" class="justify-center">
+                  <v-img
+                    max-width="300"
+                    :src="require('@/assets/share_screen.jpg')"
+                  ></v-img>
                 </v-col>
               </v-row>
             </v-expansion-panel-content>
