@@ -221,7 +221,7 @@
         },
         {
           rank_type: this.rankType,
-          date_start: format(startOfDay(new Date()), "yyyy-MM-dd'T'HH:mm:ss.SSSxxxx"),
+          date_start: format(startOfDay(new Date()), "yyyy-MM-dd"),
         },
       ]);
       this.loading = false;
