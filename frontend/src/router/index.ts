@@ -325,10 +325,8 @@ const router = new VueRouter({
 });
 
 router.afterEach(() => {
-  navigator.serviceWorker.getRegistration().then((reg) => {
-    if (reg !== undefined) {
-      reg.update();
-    }
+  navigator.serviceWorker.ready.then((reg) => {
+    reg.update().catch();
   });
 });
 
