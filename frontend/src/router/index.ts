@@ -337,7 +337,12 @@ const router = new VueRouter({
 
 router.afterEach(() => {
   navigator.serviceWorker.ready.then((reg) => {
-    reg.update().catch();
+    if (reg.installing === null) {
+      console.log("checking for update");
+      reg.update().catch();
+    } else {
+      console.log("installing");
+    }
   });
 });
 
