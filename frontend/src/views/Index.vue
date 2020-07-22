@@ -55,15 +55,28 @@
             </v-col>
           </v-row>
           <v-row justify="center" class="pa-3">
-            <v-btn
-              width="200px"
-              large
-              text
-              class="white--text text-h5 text-none"
-              @click="privacy"
-            >
-              IRB Privacy Form
-            </v-btn>
+            <v-col cols="auto">
+              <v-btn
+                width="200px"
+                large
+                text
+                class="white--text text-h5 text-none"
+                @click="download"
+              >
+                Download KAR³L!
+              </v-btn>
+            </v-col>
+            <v-col cols="auto">
+              <v-btn
+                width="200px"
+                large
+                text
+                class="white--text text-h5 text-none"
+                @click="privacy"
+              >
+                IRB Privacy Form
+              </v-btn>
+            </v-col>
           </v-row>
           <v-row justify="center" no-gutters>
             <v-col sm="5" cols="12">
@@ -196,6 +209,10 @@
 
     public privacy() {
       this.$router.push("/privacy-irb");
+    }
+
+    public download() {
+      this.$router.push("/pwa");
     }
   }
 </script>

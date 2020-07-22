@@ -1,6 +1,6 @@
 <template class="pa-0 ma-0">
   <v-main class="pa-0 ma-0">
-    <v-dialog v-model="pwa_tip" width="1000">
+    <v-dialog v-model="pwa_tip" width="1000" @click:outside="exit()">
       <v-card>
         <v-card-title>
           <h2>
@@ -68,7 +68,7 @@
               </v-btn>
             </v-col>
             <v-col>
-              <v-btn color="primary" text @click="pwa_tip = false">
+              <v-btn color="primary" text @click="exit">
                 Remind Me Later
               </v-btn>
             </v-col>
@@ -106,8 +106,18 @@
     }
 
     noMorePWA() {
+      if (this.$router.currentRoute.name === "pwa") {
+        this.$router.push("/landing");
+      }
       mainStore.updatePWA(false);
       this.pwa_tip = false;
+    }
+
+    exit() {
+      this.pwa_tip = false;
+      if (this.$router.currentRoute.name === "pwa") {
+        this.$router.push("/landing");
+      }
     }
   }
 </script>

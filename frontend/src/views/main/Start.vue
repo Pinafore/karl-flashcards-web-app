@@ -23,7 +23,7 @@
       }
     } else if (mainStore.isLoggedIn === false) {
       const visited = getVisited();
-      if (visited === null && to.path !== "/privacy-irb") {
+      if (visited === null && to.path !== "/privacy-irb" && to.path !== "/pwa") {
         mainStore.setisOnHomeScreenPopup(true);
         next("/privacy-irb");
       } else if (to.path === "/" || (to.path as string).startsWith("/main")) {
