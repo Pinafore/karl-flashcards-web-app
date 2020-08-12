@@ -137,7 +137,7 @@ export interface IComponents {
     email: string;
     username: string;
     is_active?: boolean;
-    repetition_model?: "leitner" | "sm-2" | "karl";
+    repetition_model?: "leitner" | "sm-2" | "karl" | "karl50" | "karl85";
     password: string;
     is_superuser?: boolean;
   };
@@ -145,7 +145,7 @@ export interface IComponents {
     email?: string;
     username?: string;
     is_active?: boolean;
-    repetition_model?: "leitner" | "sm-2" | "karl";
+    repetition_model?: "leitner" | "sm-2" | "karl" | "karl50" | "karl85";
     password?: string;
     default_deck_id?: number;
     is_superuser?: boolean;
@@ -155,7 +155,7 @@ export interface IComponents {
     email: string;
     username: string;
     is_active: boolean;
-    repetition_model?: "leitner" | "sm-2" | "karl";
+    repetition_model?: "leitner" | "sm-2" | "karl" | "karl50" | "karl85";
     id: number;
     is_superuser: boolean;
     show_help: boolean;
@@ -170,14 +170,14 @@ export interface IComponents {
     email: string;
     username: string;
     is_active?: boolean;
-    repetition_model?: "leitner" | "sm-2" | "karl";
+    repetition_model?: "leitner" | "sm-2" | "karl" | "karl50" | "karl85";
     password: string;
   };
   UserUpdate: {
     email?: string;
     username?: string;
     is_active?: boolean;
-    repetition_model?: "leitner" | "sm-2" | "karl";
+    repetition_model?: "leitner" | "sm-2" | "karl" | "karl50" | "karl85";
     password?: string;
     default_deck_id?: number;
     show_help?: boolean;
