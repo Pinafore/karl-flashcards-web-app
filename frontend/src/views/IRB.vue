@@ -31,7 +31,10 @@
             would like each day until the end of the experiment. While it is encouraged
             that you study every day, this is not required. We estimate that you will
             spend between 10 and 200 hours over the course of this study, depending on
-            your interest, which will continue to the end of June 2021.
+            your interest, which will continue to the end of June 2021. An optional
+            official group chat will allow users to provide quick user feedback and
+            discussion. External trivia performance data will be collected to help
+            measure the effects of this application.
           </p>
           <h3>Potential Risks and Discomforts</h3>
           <p style="text-align:left">
@@ -49,10 +52,11 @@
 
           <h3>Confidentiality</h3>
           <p style="text-align:left">
-            We will not ask you for any personal information beyond your email address.
-            Any potential loss of confidentiality will be minimized by storing data
-            securely in a password-protected account. After the end of the experiment,
-            data will be anonymized and released publicly.
+            We will not ask you for any personal information beyond your email address
+            and, if applicable, external trivia performance data. Any potential loss of
+            confidentiality will be minimized by storing data securely in a
+            password-protected account. After the end of the experiment, data will be
+            anonymized and released publicly.
           </p>
           <p style="text-align:left">
             If we write a report or article about this research project, your identity
