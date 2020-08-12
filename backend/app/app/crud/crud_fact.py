@@ -354,7 +354,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             user: models.User,
             deck_ids: List[int] = None,
             return_limit: Optional[int] = None,
-            send_limit: Optional[int] = 100,
+            send_limit: Optional[int] = 300,
     ) -> Union[List[schemas.Fact], requests.exceptions.RequestException, json.decoder.JSONDecodeError]:
         filters = schemas.FactSearch(deck_ids=deck_ids, limit=send_limit, randomize=True, studyable=True)
         query = crud.fact.build_facts_query(db=db, user=user, filters=filters)
