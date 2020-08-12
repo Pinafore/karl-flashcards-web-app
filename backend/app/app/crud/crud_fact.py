@@ -16,7 +16,6 @@ from sqlalchemy.orm import Session, Query
 from app import crud, models, schemas
 from app.core.config import settings
 from app.crud.base import CRUDBase
-from sqlalchemy import func
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -85,7 +84,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             user_id=user.id,
             fact_id=db_obj.fact_id,
             log_type=schemas.Log.delete,
-            details={"study_system": "karl"}
+            details={"study_system": user.repetition_model}
         )
         crud.history.create(db=db, obj_in=history_in)
         return db_obj
@@ -105,7 +104,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             user_id=user.id,
             fact_id=db_obj.fact_id,
             log_type=schemas.Log.suspend,
-            details={"study_system": "karl"}
+            details={"study_system": user.repetition_model}
         )
         crud.history.create(db=db, obj_in=history_in)
         return db_obj
@@ -126,7 +125,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             user_id=user.id,
             fact_id=db_obj.fact_id,
             log_type=schemas.Log.report,
-            details={"study_system": "karl"}
+            details={"study_system": user.repetition_model}
         )
         crud.history.create(db=db, obj_in=history_in)
         return db_obj
@@ -145,7 +144,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             user_id=user.id,
             fact_id=db_obj.fact_id,
             log_type=schemas.Log.mark,
-            details={"study_system": "karl"}
+            details={"study_system": user.repetition_model}
         )
         crud.history.create(db=db, obj_in=history_in)
         return db_obj
@@ -163,7 +162,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             user_id=user.id,
             fact_id=db_obj.fact_id,
             log_type=schemas.Log.undo_delete,
-            details={"study_system": "karl"}
+            details={"study_system": user.repetition_model}
         )
         crud.history.create(db=db, obj_in=history_in)
         return db_obj
@@ -181,7 +180,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             user_id=user.id,
             fact_id=db_obj.fact_id,
             log_type=schemas.Log.undo_suspend,
-            details={"study_system": "karl"}
+            details={"study_system": user.repetition_model}
         )
         crud.history.create(db=db, obj_in=history_in)
         return db_obj
@@ -200,7 +199,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             user_id=user.id,
             fact_id=db_obj.fact_id,
             log_type=schemas.Log.undo_report,
-            details={"study_system": "karl"}
+            details={"study_system": user.repetition_model}
         )
         crud.history.create(db=db, obj_in=history_in)
         return db_obj
@@ -218,7 +217,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             user_id=user.id,
             fact_id=db_obj.fact_id,
             log_type=schemas.Log.resolve_report,
-            details={"study_system": "karl"}
+            details={"study_system": user.repetition_model}
         )
         crud.history.create(db=db, obj_in=history_in)
         return db_obj
@@ -236,7 +235,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             user_id=user.id,
             fact_id=db_obj.fact_id,
             log_type=schemas.Log.undo_mark,
-            details={"study_system": "karl"}
+            details={"study_system": user.repetition_model}
         )
         crud.history.create(db=db, obj_in=history_in)
         return db_obj
@@ -372,6 +371,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 deck_id=each_card.deck_id,
                 user_id=user.id,
                 fact_id=each_card.fact_id,
+                repetition_model=user.repetition_model,
                 env=settings.ENVIRONMENT
             ).dict())
         eligible_fact_time = time.time() - karl_list_start
@@ -408,7 +408,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                             fact_schema.marked = retrieved_fact.is_marked(user)
                         facts.append(fact_schema)
             details = {
-                "study_system": "karl",
+                "study_system": user.repetition_model,
                 "first_fact": facts[0] if len(facts) != 0 else "empty",
                 "eligible_fact_time": query_time,
                 "scheduler_query_time": eligible_fact_time,
@@ -436,7 +436,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             response = schedule.response
             date_studied = datetime.now(timezone('UTC')).isoformat()
             details = {
-                "study_system": "karl",
+                "study_system": user.repetition_model,
                 "typed": schedule.typed,
                 "response": schedule.response,
             }
@@ -458,6 +458,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             payload_update = [schemas.KarlFact(
                 text=db_obj.text,
                 user_id=user.id,
+                repetition_model=user.repetition_model,
                 fact_id=db_obj.fact_id,
                 history_id=history.id,
                 category=db_obj.category,

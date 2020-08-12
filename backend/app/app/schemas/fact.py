@@ -3,6 +3,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel
 
+from app.schemas.repetition import Repetition
 from app.schemas.deck import Deck
 # Shared properties
 from app.schemas.permission import Permission
@@ -21,6 +22,7 @@ class KarlFact(FactBase):
     answer: str
     deck_name: str
     deck_id: int
+    repetition_model: Repetition
     label: Optional[bool] = None
     history_id: Optional[int] = None
     env: str

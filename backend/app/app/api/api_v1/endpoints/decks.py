@@ -85,7 +85,7 @@ def assign_decks(
         time=datetime.now(timezone('UTC')).isoformat(),
         user_id=current_user.id,
         log_type=schemas.Log.assign_viewer,
-        details={"study_system": "karl", "decks": deck_ids}
+        details={"study_system": user.repetition_model, "decks": deck_ids}
     )
     crud.history.create(db=db, obj_in=history_in)
     return decks
