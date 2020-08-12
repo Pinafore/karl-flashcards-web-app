@@ -112,6 +112,14 @@ const router = new VueRouter({
                 ),
             },
             {
+              path: "contact",
+              name: "contact",
+              component: () =>
+                import(
+                  /* webpackChunkName: "main-contact" */ "@/views/main/Contact.vue"
+                  ),
+            },
+            {
               path: "browse",
               name: "browse",
               component: () =>

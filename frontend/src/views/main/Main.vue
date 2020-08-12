@@ -136,6 +136,14 @@
             <v-list-item-title>Profile</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+        <v-list-item to="/main/contact">
+          <v-list-item-action>
+            <v-icon>mdi-contacts</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Contact</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
         <v-list-item @click="logout">
           <v-list-item-action>
             <v-icon>mdi-close</v-icon>
@@ -196,6 +204,14 @@
             <v-list-item-action>
               <v-icon>mdi-account</v-icon>
             </v-list-item-action>
+          </v-list-item>
+          <v-list-item to="/main/contact">
+            <v-list-item-action>
+              <v-icon>mdi-contacts</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>Contact</v-list-item-title>
+            </v-list-item-content>
           </v-list-item>
           <v-list-item @click="logout">
             <v-list-item-content>
