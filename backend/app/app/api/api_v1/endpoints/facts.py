@@ -6,7 +6,7 @@ from typing import Any, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Form
 from pytz import timezone
 from sqlalchemy.orm import Session
-from starlette.background import BackgroundTasks
+from fastapi import BackgroundTasks
 
 from app import crud, models, schemas
 from app.api import deps

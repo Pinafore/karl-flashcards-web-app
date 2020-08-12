@@ -1,5 +1,7 @@
 from typing import Any, List, Optional
 
+from fastapi import BackgroundTasks
+
 from app import crud, models, schemas
 from app.api import deps
 from app.core.config import settings
@@ -176,3 +178,19 @@ def update_user(
         )
     user = crud.user.update(db, db_obj=user, obj_in=user_in)
     return user
+
+
+@router.post("/bulk/reassign", response_model=bool)
+def reassign_schedulers(
+        *,
+        db: Session = Depends(deps.get_db),
+        background_tasks: BackgroundTasks,
+        current_user: models.User = Depends(deps.get_current_active_superuser),
+) -> Any:
+    """
+    Reassign the assigned scheduler for all users
+    """
+
+    background_tasks.add_task(crud.user.reassign_schedulers, db=db)
+
+    return True

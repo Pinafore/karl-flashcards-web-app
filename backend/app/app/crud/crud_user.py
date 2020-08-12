@@ -1,11 +1,16 @@
 import logging
+from datetime import datetime
 from typing import Any, Dict, Optional, Union
+
+from pytz import timezone
 
 from app import crud
 from app.core.security import get_password_hash, verify_password
 from app.crud.base import CRUDBase
 from app.models.user import User
+from app.schemas import Repetition, Log
 from app.schemas.user import UserCreate, UserUpdate, SuperUserCreate, SuperUserUpdate
+from app.schemas.history import HistoryCreate
 from sqlalchemy.orm import Session
 
 logging.basicConfig(level=logging.INFO)
@@ -85,6 +90,20 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
     def is_superuser(self, user: User) -> bool:
         return user.is_superuser
+
+    def reassign_schedulers(self, db: Session):
+        all_users = db.query(self.model).all()
+        for found_user in all_users:
+            old_repetition = found_user.repetition_model
+            found_user = crud.user.update(db, db_obj=found_user,
+                                          obj_in=UserUpdate(repetition_model=Repetition.select_model()))
+            history_in = HistoryCreate(
+                time=datetime.now(timezone('UTC')),
+                user_id=found_user.id,
+                log_type=Log.reassign_model,
+                details={"old_repetition_model": old_repetition, "new_repetition_model": found_user.repetition_model}
+            )
+            crud.history.create(db=db, obj_in=history_in)
 
 
 user = CRUDUser(User)

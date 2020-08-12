@@ -18,3 +18,4 @@ class Log(str, Enum):
     resolve_report = "resolve_report"
     clear_report_or_suspend = "clear_report_or_suspend"
     assign_viewer = "assign_viewer"
+    reassign_model = "reassign_model"
