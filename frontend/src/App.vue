@@ -53,14 +53,16 @@
     }
 
     checkForUpdate() {
-      navigator.serviceWorker.ready.then((reg) => {
-        if (reg.installing === null) {
-          console.log("checking for update");
-          reg.update().catch();
-        } else {
-          console.log("installing");
-        }
-      });
+      if (navigator.serviceWorker !== undefined) {
+        navigator.serviceWorker.ready.then((reg) => {
+          if (reg.installing === null) {
+            console.log("checking for update");
+            reg.update().catch();
+          } else {
+            console.log("installing");
+          }
+        });
+      }
     }
   }
 </script>
