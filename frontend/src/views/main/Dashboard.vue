@@ -32,7 +32,7 @@
       </v-col>
     </v-row>
     <v-row v-else>
-      <v-col cols="12" md="8">
+      <v-col cols="12" md="7">
         <v-card class="mr-3 mr-md-0 ml-3 pa-3">
           <v-card-title primary-title class="pb-0 justify-center">
             <div class="headline primary--text justify-center">Stats</div>
@@ -87,7 +87,7 @@
           </v-card-actions>
         </v-card>
       </v-col>
-      <v-col>
+      <v-col cols="12" md="5">
         <v-card class="ml-md-0 ml-3 mr-3 pa-3">
           <v-card-title primary-title class="pb-3 justify-center">
             <div class="headline primary--text justify-center">
