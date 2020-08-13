@@ -25,11 +25,13 @@
         }) as EventListener,
         { once: true },
       );
-      navigator.serviceWorker.addEventListener("controllerchange", () => {
-        if (this.refreshing) return;
-        this.refreshing = true;
-        window.location.reload();
-      });
+      if (navigator.serviceWorker !== undefined) {
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+          if (this.refreshing) return;
+          this.refreshing = true;
+          window.location.reload();
+        });
+      }
     }
 
     refreshApp() {
