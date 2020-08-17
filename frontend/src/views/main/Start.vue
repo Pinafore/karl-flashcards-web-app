@@ -16,9 +16,14 @@
     await mainStore.checkLoggedIn();
     if (mainStore.isLoggedIn) {
       mainStore.setisOnHomeScreenPopup(false);
-      if (to.path === "/login" || to.path === "/") {
+      if (to.path === "/login" || to.path === "/" || to.path === "/landing") {
+        mainStore.setisOnHomeScreenPopup(false);
         next("/main");
+      } else if (to.path === "/privacy-irb" || to.path === "/pwa") {
+        mainStore.setisOnHomeScreenPopup(true);
+        next();
       } else {
+        mainStore.setisOnHomeScreenPopup(false);
         next();
       }
     } else if (mainStore.isLoggedIn === false) {
