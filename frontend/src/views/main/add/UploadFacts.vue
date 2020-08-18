@@ -11,6 +11,9 @@
               KAR³L can import txt/tsv/csv files exported from other flashcard apps and
               allows you to map columns to different fields.
               <br />
+              <b>Note</b>: Facts added to public decks are NOT shared to other users and
+              remain private.
+              <br />
               <b>Warning</b>: Import may silently fail and stop if an unexpected error
               is encountered. Contact us if you believe this has occurred.
             </p>
