@@ -24,7 +24,7 @@ class UserCreate(UserBase):
     email: EmailStr
     username: str
     password: str
-    repetition_model: Repetition = Repetition.select_model()
+    repetition_model: Optional[Repetition] = None
 
 
 # Properties to receive on creation from super users

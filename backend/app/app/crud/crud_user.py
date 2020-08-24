@@ -28,12 +28,14 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         return db.query(User).filter(User.username == username).first()
 
     def create(self, db: Session, *, obj_in: UserCreate) -> User:
+        model = Repetition.select_model() if obj_in.repetition_model is None else obj_in.repetition_model
+        logger.info(model)
         db_obj = User(
             email=obj_in.email,
             hashed_password=get_password_hash(obj_in.password),
             username=obj_in.username,
             is_active=obj_in.is_active,
-            repetition_model=obj_in.repetition_model
+            repetition_model=model
         )
         db.add(db_obj)
         db.commit()
