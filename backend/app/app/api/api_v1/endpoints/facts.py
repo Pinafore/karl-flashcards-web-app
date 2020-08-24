@@ -170,7 +170,6 @@ def update_fact(
     Update a fact.
     """
     details = {
-        "study_system": user.repetition_model,
         "old_fact": perms.fact.__dict__,
         "fact_update": fact_in.dict(),
     }
