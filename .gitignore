@@ -2,3 +2,4 @@
 .DS_Store
 docker-stack.yml
 db-backups/
+cookiecutter-config-file.yml
