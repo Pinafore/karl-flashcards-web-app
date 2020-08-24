@@ -347,6 +347,13 @@ export default class MainModule extends VuexModule {
         });
         await this.logOut();
       }
+      if (payload.response.status === 503 || payload.response.status === 403 || payload.response.status === 401) {
+        this.addNotification({
+          content: "A temporary error occurred. Please log in again.",
+          color: "error",
+        });
+        await this.logOut();
+      }
       if (payload.response.status == 555) {
         this.setConnectionError(true);
       }
