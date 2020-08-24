@@ -28,8 +28,8 @@
           </v-card-subtitle>
           <v-card-text>
             Typing answers is recommended so KAR³L can automatically suggest an answer
-            evaluation. Press 'Enter' to follow KAR³L's suggestion. If you do not to
-            type or disagree with the evaluation, you may manually choose 'right' and
+            evaluation. Press 'Enter' to follow KAR³L's suggestion. If you do not type
+            or disagree with the evaluation, you may manually choose 'right' and
             'wrong'.
           </v-card-text>
           <v-card-subtitle>
