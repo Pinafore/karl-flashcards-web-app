@@ -1,7 +1,6 @@
 # KARL
 
 ## Before release
-
 - [x] Sentry backend environments
 - [x] Flashcard browser
 - [x] Tutorial
@@ -15,14 +14,67 @@
 - [x] Add stronger test cases in study.py
 - [x] Change Suspended to User_Fact (but only add special facts)
 - [x] Add SuperDeckCreate and move "public" there
-- [ ] Redesign home page
-- [ ] Stats page
-- [ ] Resolve reports
+- [x] Redesign home page
+- [x] Resolve reports
 - [x] Add logging for updates
-- [ ] Upload cards
+- [x] Upload cards
+- [x] Dedicated report screen + managing
+	- [x] Allow moving to any public deck rather than just ones you own
+- [x] Browser enhancements
+	- [x] Update row after making edits
+	- [x] Add a refresh button
+	- [x] Multi-word queries
+	- [x] Only run count when we reach limit
+- [x] System that records first visits to certain pages (public decks, learn, browser screen)
+- [x] Force hide scrollbar on the left
+	[html - Hide scroll bar, but while still being able to scroll - Stack Overflow](https://stackoverflow.com/a/49278385)
+- [x] Add Edit button (replaces Report button when owner)
+- [x] Field instead of line for fact text
+- [x] Autofill login/sign up field improvements
+- [x] Add opt-out for Google Analytics
+	- [x] [How to use Google Analytics in your Vue app with Vue-analytics](https://medium.com/js-dojo/how-to-use-google-analytics-in-your-vue-app-with-vue-analytics-9cdb913301d1)
+	- [x] [How to integrate Google Analytics on your Vue.js page » webdeasy.de](https://webdeasy.de/en/how-to-integrate-google-analytics-on-your-vue-js-page/)
+- [x] Add Google Analytics
+	- [x] npm install vue-gtag
+- [x] Add Sqlalchemy integration
+- [x] Upgrade Sentry SDK
+- [x] Add username and password length/character limitations
+- [x] Ensure refresh button is not off-center
+- [x] Allow users to rank by different options
+- [x] Button group for rank types
+- [x] Desktop PWA
+	- [x] http://hyrglobalsource.com/blog/2019/09/14/why-and-how-to-create-desktop-pwa/
+	- [x] iOS
+- [x] More dynamic error popup
+- [x] Make username field the username field
+- [x] Detect if offline
+	- [x] [Display offline page when app is offline (d2d9d3a4) · Commits · Julien Enselme / django-pwa · GitLab](https://gitlab.com/Jenselme/django-pwa/-/commit/d2d9d3a4aab1033fd9787beb76d4d05a47708b40)
+- [x] Gracefully handle updates
+	- [x] [Handling Service Worker updates in your Vue PWA - DEV](https://dev.to/drbragg/handling-service-worker-updates-in-your-vue-pwa-1pip#update-ui)
+- [x] More accurate time functionality
+- [x] Get id of the users in admin interface (and user profile)
+- [x] Go to user rank in leaderboard
+- [x] Delete decks
+- [x] Add an Accept and Resolve button
+	- [x] Go To Next
+- [x] Add a popup showing info about app install after 50 reviews
+- [x] Add option to turn tips back on
+- [x] Scroll up after enter
+- [x] Better looking dark mode
+- [x] Emails
+- [x] Stats page
 
 ### Bug Fixes
-
+- [x] iPhone does not show updates?
+- [x]  Fix end date bug in leaderboard/statistics
+- [x] Sign Up Screen cut off
+- [x] Fix identify new line bug
+- [x] Better Autoscroll to answer buttons
+- [x] Fix formatting issues
+- [x] Fix ranking error (shows #1 regardless)
+- [x] Familiar with karl popup still shows up after first click on public decks when u go to decks
+- [x] Don’t send password in emails
+- [x] Keyboard shortcuts
 - [x] Fix study bugs
 	- [x] Convert to SQLAlchemy
 - [x] Sentry add frontend
@@ -36,16 +88,22 @@
 - [x] Check if there are android-chrome and msapplicatin-icon and mstile icons
 - [x] Change name away from "frontend"
 - [x] Fix errors in npm run build
+- [x] Fix centering buttons
+- [x] Decks disappear after changing deck in a fact in browser
+- [x] [ and ] sometimes appears on back side
+- [x] rename IsOnLogin
+- [x] popup does not occur if connection breaks during study
 
-#### Waiting
-- [x] Figure out emails
+#### Not Reproducible
+- [ ] No momentum in the tips screens?
 
 ## Further Features
 
 - [x] iOS password file
 - [ ] Share facts
-- [ ] CI & CD, improved deployment
+- [ ] CI & CD, improved deployment process
 - [ ] Add undo
+- [ ] Dedicated buttons for mass changes (like moving facts)
 - [x] Rewrite get_eligible_facts to be fully sqlaclhemy orm
 - [x] System for updating current card metadata/correcting grammar errors
 
