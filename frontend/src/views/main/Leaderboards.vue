@@ -148,6 +148,17 @@
           </v-card>
         </v-col>
       </v-row>
+      <v-row v-else>
+        <v-col>
+          <v-card class="pa-3">
+            <v-card-title primary-title class="pb-2 justify-center">
+              <div class="headline primary--text justify-center">
+                Loading
+              </div>
+            </v-card-title>
+          </v-card>
+        </v-col>
+      </v-row>
     </v-card>
   </v-container>
 </template>
