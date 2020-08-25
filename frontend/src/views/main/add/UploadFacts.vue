@@ -75,7 +75,7 @@
               <validation-provider v-slot="{ errors }" name="Delimeter">
                 <v-text-field
                   v-model="delimeter"
-                  label="Field Seperator"
+                  label="Field Separator"
                   hint="By default, columns are separated by a tab. Specify a custom delimeter here (e.g ,)"
                   persistent-hint
                   :error-messages="errors[0]"
