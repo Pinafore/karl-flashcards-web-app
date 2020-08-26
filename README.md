@@ -1,5 +1,6 @@
 # KARL
 
+HSQuizbowl forum post: https://hsquizbowl.org/forums/viewtopic.php?f=123&p=379140&sid=8ae602e914bc1e56736a07030176c718
 ## Bugs
 
 ### Not Reproducible
