@@ -9,7 +9,7 @@ import * as Sentry from "@sentry/browser";
 import { Vue as VueIntegration } from "@sentry/integrations";
 import VueGtag from "vue-gtag";
 
-if (process.env.VUE_APP_ENV) {
+if (process.env.VUE_APP_ENV == "production") {
   Sentry.init({
     dsn: "https://ac296d2d7e8c4115ab8f2713520612cf@o283930.ingest.sentry.io/5259730",
     integrations: [new VueIntegration({ Vue, attachProps: true, logErrors: true })],
@@ -18,13 +18,15 @@ if (process.env.VUE_APP_ENV) {
 
 Vue.config.productionTip = false;
 
-Vue.use(
-  VueGtag,
-  {
-    config: { id: "UA-170799823-1" },
-  },
-  router,
-);
+if (process.env.VUE_APP_ENV == "production") {
+  Vue.use(
+    VueGtag,
+    {
+      config: { id: "UA-170799823-1" },
+    },
+    router,
+  );
+}
 
 new Vue({
   router,
