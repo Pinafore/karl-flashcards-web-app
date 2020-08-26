@@ -7,13 +7,10 @@
 
 ## Further Features
 
-- [x] iOS password file
 - [ ] Share facts
 - [ ] CI & CD, improved deployment process
 - [ ] Add undo
 - [ ] Dedicated buttons for mass changes (like moving facts)
-- [x] Rewrite get_eligible_facts to be fully sqlaclhemy orm
-- [x] System for updating current card metadata/correcting grammar errors
 
 # Development
 ## Backend Requirements
@@ -27,6 +24,8 @@
 * Node.js (with `npm`).
 
 ## Backend local development
+
+* Create an .env file 
 
 * Start the stack with Docker Compose:
 
