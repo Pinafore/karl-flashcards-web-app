@@ -470,7 +470,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 elapsed_seconds_answer=schedule.elapsed_seconds_answer,
                 elapsed_milliseconds_text=schedule.elapsed_milliseconds_text,
                 elapsed_milliseconds_answer=schedule.elapsed_milliseconds_answer,
-                label=response).dict(skip_defaults=True)]
+                label=response).dict(exclude_unset=True)]
             logger.info(payload_update[0])
             request = requests.post(settings.INTERFACE + "api/karl/update", json=payload_update)
             if 200 <= request.status_code < 300:
