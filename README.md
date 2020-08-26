@@ -13,6 +13,61 @@
 - [ ] Dedicated buttons for mass changes (like moving facts)
 
 # Development
+## Restrictions
+* Access to the hosted scheduler for development is restricted.
+  * A workaround is to disable calls to the scheduler during development. 
+
+## Env Files
+* An `.env` file should be created in the root folder and at `frontend/`
+* Use `openssl rand -hex 32` to replace `*****` slots
+
+### Example Root `.env` File
+```
+DOMAIN=localhost
+
+STACK_NAME=karl
+
+TRAEFIK_PUBLIC_NETWORK=traefik-public
+TRAEFIK_TAG=karl
+TRAEFIK_PUBLIC_TAG=traefik-public
+
+DOCKER_IMAGE_BACKEND=karl/backend
+DOCKER_IMAGE_CELERYWORKER=karl/celeryworker
+DOCKER_IMAGE_FRONTEND=karl/frontend
+
+# Backend
+BACKEND_CORS_ORIGINS=["http://localhost", "http://localhost:4200", "http://localhost:3000", "http://localhost:8080", "http://localhost:8081", "http://localhost:8082", "https://localhost", "https://localhost:4200", "https://localhost:3000", "https://localhost:8080", "http://dev.test", "https://test", "https://test", "http://local.dockertoolbox.tiangolo.com", "http://localhost.tiangolo.com", "http://dev.karl.qanta.org", "https://stag.karl.qanta.org", "https://karl.qanta.org", "http://192.168.1.202:8080/", "https://192.168.1.202:8080/"]
+PROJECT_NAME=KAR³L
+SECRET_KEY=[redacted]
+FIRST_SUPERUSER=learningwithkarl@gmail.com
+FIRST_SUPERUSER_PASSWORD=[redacted]
+SMTP_TLS=True
+SMTP_PORT=587
+SMTP_HOST=smtp.gmail.com
+SMTP_USER=[email]
+SMTP_PASSWORD=[redacted]
+TAG=dev
+
+USERS_OPEN_REGISTRATION=True
+
+SENTRY_DSN=
+INTERFACE=http://host.docker.internal:4000/
+
+# Flower
+FLOWER_BASIC_AUTH=root:[redacted]
+
+# Postgres
+POSTGRES_SERVER=db
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=[redacted]
+POSTGRES_DB=app
+
+# PgAdmin
+PGADMIN_LISTEN_PORT=5050
+PGADMIN_DEFAULT_EMAIL=[email]
+PGADMIN_DEFAULT_PASSWORD=[redacted]
+```
+
 ## Backend Requirements
 
 * [Docker](https://www.docker.com/).
