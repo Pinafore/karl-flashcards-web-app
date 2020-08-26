@@ -218,10 +218,10 @@
       await mainStore.getHomeLeaderboards([
         {
           rank_type: this.rankType,
+          date_start: format(startOfDay(new Date()), "yyyy-MM-dd"),
         },
         {
           rank_type: this.rankType,
-          date_start: format(startOfDay(new Date()), "yyyy-MM-dd"),
         },
       ]);
       this.loading = false;

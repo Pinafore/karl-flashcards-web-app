@@ -181,6 +181,24 @@ export default class MainModule extends VuexModule {
   }
 
   @Mutation
+  updateHomeLeaderboardToday(payload: IComponents["Leaderboard"]) {
+    if(this.homeLeaderboards.length == 2) {
+      this.homeLeaderboards[0] = payload;
+    } else {
+      this.homeLeaderboards = [payload]
+    }
+  }
+
+  @Mutation
+  updateHomeLeaderboardAllTime(payload: IComponents["Leaderboard"]) {
+    if(this.homeLeaderboards.length > 1) {
+      this.homeLeaderboards[1] = payload;
+    } else {
+      this.homeLeaderboards.push(payload)
+    }
+  }
+
+  @Mutation
   addToStats(payload: IComponents["Statistics"]) {
     this.savedStats.unshift(payload);
   }
@@ -746,11 +764,10 @@ export default class MainModule extends VuexModule {
   async getHomeLeaderboards(payload: IComponents["LeaderboardSearch"][]) {
     try {
       const response = await api.getLeaderboard(this.token, payload[0]);
-      this.setHomeLeaderboards([]);
-      this.addToHomeLeaderboards(response.data);
+      this.updateHomeLeaderboardToday(response.data);
 
       const response2 = await api.getLeaderboard(this.token, payload[1]);
-      this.addToHomeLeaderboards(response2.data);
+      this.updateHomeLeaderboardAllTime(response2.data);
       this.setConnectionError(false);
       this.setSchedulerError(false);
     } catch (error) {
