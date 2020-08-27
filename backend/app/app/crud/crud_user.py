@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Union, List
 
 from pytz import timezone
 
@@ -12,6 +12,7 @@ from app.schemas import Repetition, Log
 from app.schemas.user import UserCreate, UserUpdate, SuperUserCreate, SuperUserUpdate
 from app.schemas.history import HistoryCreate
 from sqlalchemy.orm import Session
+import numpy as np
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -27,15 +28,25 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     def get_by_username(self, db: Session, *, username: str) -> Optional[User]:
         return db.query(User).filter(User.username == username).first()
 
+    def get_all_with_status(self, db: Session, is_beta: Optional[bool]) -> List[User]:
+        if is_beta is None:
+            return db.query(User).all()
+        else:
+            return db.query(User).filter(User.beta_user == is_beta).all()
+
+    def get_count(self, db: Session, is_beta: bool):
+        return db.query(User).filter(User.beta_user == is_beta).count()
+
     def create(self, db: Session, *, obj_in: UserCreate) -> User:
-        model = Repetition.select_model() if obj_in.repetition_model is None else obj_in.repetition_model
+        model, assignment_method = self.assign_scheduler(db, obj_in)
         logger.info(model)
+        logger.info(assignment_method)
         db_obj = User(
             email=obj_in.email,
             hashed_password=get_password_hash(obj_in.password),
             username=obj_in.username,
             is_active=obj_in.is_active,
-            repetition_model=model
+            repetition_model=model,
         )
         db.add(db_obj)
         db.commit()
@@ -44,6 +55,17 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         db.refresh(db_obj)
         return db_obj
 
+    def assign_scheduler(self, db: Session, obj_in: UserCreate) -> (Repetition, str):
+        if obj_in.repetition_model:
+            return obj_in.repetition_model, "assigned"
+        if self.get_count(db, False) > 250:
+            return Repetition.select_model(), "random"
+        scheduler_counts = self.get_scheduler_counts(db, is_beta=False)
+        keys_list = list(scheduler_counts.keys())
+        params = [max(55 - scheduler_counts[i], 1) for i in keys_list]
+
+        return keys_list[int(np.argmax(np.random.dirichlet(params)))], "dirichlet"
+
     def super_user_create(self, db: Session, *, obj_in: SuperUserCreate) -> User:
         db_obj = User(
             email=obj_in.email,
@@ -51,7 +73,8 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             username=obj_in.username,
             is_superuser=obj_in.is_superuser,
             is_active=obj_in.is_active,
-            repetition_model=obj_in.repetition_model
+            repetition_model=obj_in.repetition_model,
+            beta_user=obj_in.beta_user
         )
         db.add(db_obj)
         db.commit()
@@ -106,6 +129,17 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
                 details={"old_repetition_model": old_repetition, "new_repetition_model": found_user.repetition_model}
             )
             crud.history.create(db=db, obj_in=history_in)
+
+    def get_scheduler_counts(self, db: Session, is_beta: Optional[bool] = None) -> {Repetition: int}:
+        all_users = self.get_all_with_status(db, is_beta)
+
+        scheduler_counts = {system: 0 for system in Repetition}
+        for found_user in all_users:
+            scheduler_counts[found_user.repetition_model] += 1
+        return scheduler_counts
+
+    def make_current_users_beta_testers(self, db: Session):
+        db.query(self.model).update({User.beta_user: True}, synchronize_session='evaluate')
 
 
 user = CRUDUser(User)

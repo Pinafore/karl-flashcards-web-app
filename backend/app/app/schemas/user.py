@@ -31,6 +31,7 @@ class UserCreate(UserBase):
 # Properties to receive on creation from super users
 class SuperUserCreate(UserCreate):
     is_superuser: bool = False
+    beta_user: bool = False
 
 
 # Properties to receive via API on update
