@@ -9,35 +9,32 @@ import * as Sentry from "@sentry/browser";
 import { Vue as VueIntegration } from "@sentry/integrations";
 import VueGtag from "vue-gtag";
 
+const IGNORE = [/ServiceWorker/, /service worker/];
+
+function shouldIgnoreException(s: string): boolean {
+  return IGNORE.find((pattern) => pattern.test(s)) != null;
+}
+
 if (process.env.VUE_APP_ENV == "production") {
   Sentry.init({
     dsn: "https://ac296d2d7e8c4115ab8f2713520612cf@o283930.ingest.sentry.io/5259730",
     integrations: [new VueIntegration({ Vue, attachProps: true, logErrors: true })],
     beforeSend: function(event, hint: Sentry.EventHint) {
       if (hint) {
-        const error = hint.originalException
-        if (typeof error === 'string') {
+        const error = hint.originalException;
+        if (typeof error === "string") {
           if (shouldIgnoreException(error)) {
-            return null
+            return null;
           }
         } else if (error instanceof Error) {
           if (shouldIgnoreException(error.message)) {
-            return null
+            return null;
           }
         }
       }
       return event;
-    }
+    },
   });
-}
-
-const IGNORE = [
-  /ServiceWorker/,
-  /service worker/
-];
-
-function shouldIgnoreException(s: string) : Boolean {
-  return IGNORE.find(pattern => pattern.test(s)) != null;
 }
 
 Vue.config.productionTip = false;
