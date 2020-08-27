@@ -61,7 +61,7 @@ export const api = {
     });
   },
   async getFacts(token: string, data: IComponents["FactSearch"]) {
-    cancel()
+    cancel();
     let url = ``;
     if (data.all) {
       url += `&all=${data.all}`;
@@ -204,10 +204,16 @@ export const api = {
     let url = ``;
 
     if (data.date_start) {
-      url += `&date_start=${format(startOfDay(parse(data.date_start, "yyyy-MM-dd", new Date())), "yyyy-MM-dd'T'HH:mm:ss.SSSxxxx")}`;
+      url += `&date_start=${format(
+        startOfDay(parse(data.date_start, "yyyy-MM-dd", new Date())),
+        "yyyy-MM-dd'T'HH:mm:ss.SSSxxxx",
+      )}`;
     }
     if (data.date_end) {
-      url += `&date_end=${format(endOfDay(new Date(data.date_end)), "yyyy-MM-dd'T'HH:mm:ss.SSSxxxx")}`;
+      url += `&date_end=${format(
+        endOfDay(new Date(data.date_end)),
+        "yyyy-MM-dd'T'HH:mm:ss.SSSxxxx",
+      )}`;
     }
     if (data.deck_id) {
       url += `&deck_id=${data.deck_id}`;
@@ -233,10 +239,16 @@ export const api = {
   async getLeaderboard(token: string, data: IComponents["LeaderboardSearch"]) {
     let url = ``;
     if (data.date_start) {
-      url += `&date_start=${format(startOfDay(parse(data.date_start, "yyyy-MM-dd", new Date())), "yyyy-MM-dd'T'HH:mm:ss.SSSxxxx")}`;
+      url += `&date_start=${format(
+        startOfDay(parse(data.date_start, "yyyy-MM-dd", new Date())),
+        "yyyy-MM-dd'T'HH:mm:ss.SSSxxxx",
+      )}`;
     }
     if (data.date_end) {
-      url += `&date_end=${format(endOfDay(new Date(data.date_end)), "yyyy-MM-dd'T'HH:mm:ss.SSSxxxx")}`;
+      url += `&date_end=${format(
+        endOfDay(new Date(data.date_end)),
+        "yyyy-MM-dd'T'HH:mm:ss.SSSxxxx",
+      )}`;
     }
     if (data.deck_id) {
       url += `&deck_id=${data.deck_id}`;

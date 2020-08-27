@@ -117,7 +117,7 @@ const router = new VueRouter({
               component: () =>
                 import(
                   /* webpackChunkName: "main-contact" */ "@/views/main/Contact.vue"
-                  ),
+                ),
             },
             {
               path: "browse",
@@ -344,7 +344,7 @@ const router = new VueRouter({
 });
 
 router.afterEach(() => {
-  if(navigator.serviceWorker !== undefined) {
+  if (navigator.serviceWorker !== undefined) {
     navigator.serviceWorker.ready.then((reg) => {
       if (reg.installing === null) {
         console.log("checking for update");
@@ -354,7 +354,6 @@ router.afterEach(() => {
       }
     });
   }
-
 });
 
 export default router;

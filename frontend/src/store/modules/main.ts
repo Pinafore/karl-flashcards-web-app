@@ -182,19 +182,19 @@ export default class MainModule extends VuexModule {
 
   @Mutation
   updateHomeLeaderboardToday(payload: IComponents["Leaderboard"]) {
-    if(this.homeLeaderboards.length == 2) {
+    if (this.homeLeaderboards.length == 2) {
       this.homeLeaderboards[0] = payload;
     } else {
-      this.homeLeaderboards = [payload]
+      this.homeLeaderboards = [payload];
     }
   }
 
   @Mutation
   updateHomeLeaderboardAllTime(payload: IComponents["Leaderboard"]) {
-    if(this.homeLeaderboards.length > 1) {
+    if (this.homeLeaderboards.length > 1) {
       this.homeLeaderboards[1] = payload;
     } else {
-      this.homeLeaderboards.push(payload)
+      this.homeLeaderboards.push(payload);
     }
   }
 
@@ -281,7 +281,6 @@ export default class MainModule extends VuexModule {
     }
   }
 
-
   @Action
   async updatePWA(payload: boolean) {
     try {
@@ -365,8 +364,12 @@ export default class MainModule extends VuexModule {
         });
         await this.logOut();
       }
-      if (payload.response.status === 503 || payload.response.status === 502 ||
-        payload.response.status === 403 || payload.response.status === 401) {
+      if (
+        payload.response.status === 503 ||
+        payload.response.status === 502 ||
+        payload.response.status === 403 ||
+        payload.response.status === 401
+      ) {
         this.addNotification({
           content: "A temporary error occurred. Please log in again.",
           color: "error",
@@ -690,9 +693,9 @@ export default class MainModule extends VuexModule {
   }
 
   @Action
-  async deleteDecks(payload: {ids: number[]} ) {
+  async deleteDecks(payload: { ids: number[] }) {
     try {
-      for(const id of payload.ids) {
+      for (const id of payload.ids) {
         await api.deleteDeck(mainStore.token, id);
       }
       mainStore.addNotification({
