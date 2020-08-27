@@ -17,6 +17,7 @@ class UserBase(BaseModel):
     show_help: Optional[bool] = None
     dark_mode: Optional[bool] = None
     pwa_tip: Optional[bool] = None
+    beta_user: Optional[bool] = None
 
 
 # Properties to receive via API on creation
@@ -51,6 +52,7 @@ class UserInDBBase(UserBase):
     show_help: bool
     dark_mode: bool
     pwa_tip: bool
+    beta_user: bool
 
     class Config:
         orm_mode = True

@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, Column, Integer, String, ForeignKey, Enum
+from sqlalchemy import Boolean, Column, Integer, String, ForeignKey, Enum, TIMESTAMP
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
 
@@ -29,6 +29,8 @@ class User(Base):
     show_help = Column(Boolean(), default=True, nullable=False)
     dark_mode = Column(Boolean(), default=False, nullable=False)
     pwa_tip = Column(Boolean(), default=False, nullable=False)
+    create_date = Column(TIMESTAMP(timezone=True))
+    beta_user = Column(Boolean(), default=False, nullable=False)
 
     default_deck = relationship("Deck", foreign_keys=default_deck_id)
     owned_facts = relationship("Fact", back_populates="owner")
