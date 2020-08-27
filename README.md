@@ -1,14 +1,7 @@
 # KARL
 
 HSQuizbowl forum post: https://hsquizbowl.org/forums/viewtopic.php?f=123&p=379140&sid=8ae602e914bc1e56736a07030176c718
-## Bugs
 
-### Not Reproducible
-- [ ] No momentum in the tips screens?
-
-### Known
-- [ ] Occasional freezing on iOS downloaded app (Apple bug, fixed in iOS 14)
-  - Workaround: use as Safari tab
 ## Further Features
 
 - [ ] Share facts
