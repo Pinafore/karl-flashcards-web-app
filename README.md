@@ -2,13 +2,6 @@
 
 HSQuizbowl forum post: https://hsquizbowl.org/forums/viewtopic.php?f=123&p=379140&sid=8ae602e914bc1e56736a07030176c718
 
-## Further Features
-
-- [ ] Share facts
-- [ ] CI & CD, improved deployment process
-- [ ] Add undo
-- [ ] Dedicated buttons for mass changes (like moving facts)
-
 # Development
 ## Restrictions
 * Access to the hosted scheduler for development is restricted.
