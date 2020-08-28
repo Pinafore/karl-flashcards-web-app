@@ -3,13 +3,16 @@
 HSQuizbowl forum post: https://hsquizbowl.org/forums/viewtopic.php?f=123&p=379140&sid=8ae602e914bc1e56736a07030176c718
 
 # Development
+
 ## Restrictions
-* Access to the hosted scheduler for development is restricted.
-  * A workaround is to disable calls to the scheduler during development. 
+Access to a hosted scheduler for development is restricted. The current workaround is to disable calls to the scheduler during development. When the scheduler portion of KAR³L is open-sourced, a self-hosted version of the scheduler can be hosted locally the port specified by the `INTERFACE` variable in the `.env` file.
 
 ## Env Files
-* An `.env` file should be created in the root folder and at `frontend/`
-* Use `openssl rand -hex 32` to replace `*****` slots
+
+The `.env` file is the one that contains all your configurations, generated keys and passwords, etc.
+
+* An `.env` file must in the root folder and in `frontend/`
+* Use `openssl rand -hex 32` to replace `[redacted]` slots
 
 ### Example Root `.env` File
 ```
@@ -26,7 +29,7 @@ DOCKER_IMAGE_CELERYWORKER=karl/celeryworker
 DOCKER_IMAGE_FRONTEND=karl/frontend
 
 # Backend
-BACKEND_CORS_ORIGINS=["http://localhost", "http://localhost:4200", "http://localhost:3000", "http://localhost:8080", "http://localhost:8081", "http://localhost:8082", "https://localhost", "https://localhost:4200", "https://localhost:3000", "https://localhost:8080", "http://dev.test", "https://test", "https://test", "http://local.dockertoolbox.tiangolo.com", "http://localhost.tiangolo.com", "http://dev.karl.qanta.org", "https://stag.karl.qanta.org", "https://karl.qanta.org", "http://192.168.1.202:8080/", "https://192.168.1.202:8080/"]
+BACKEND_CORS_ORIGINS=["http://localhost", "http://localhost:4200", "http://localhost:3000", "http://localhost:8080", "http://localhost:8081", "http://localhost:8082", "https://localhost", "https://localhost:4200", "https://localhost:3000", "https://localhost:8080", "http://dev.test", "https://test", "https://test", "http://local.dockertoolbox.tiangolo.com", "http://localhost.tiangolo.com", "http://dev.karl.qanta.org", "https://stag.karl.qanta.org", "https://karl.qanta.org]
 PROJECT_NAME=KAR³L
 SECRET_KEY=[redacted]
 FIRST_SUPERUSER=learningwithkarl@gmail.com
@@ -57,6 +60,23 @@ PGADMIN_LISTEN_PORT=5050
 PGADMIN_DEFAULT_EMAIL=[email]
 PGADMIN_DEFAULT_PASSWORD=[redacted]
 ```
+
+### Example `Frontend/` `.env` File
+
+```
+VUE_APP_DOMAIN_DEV=localhost
+# VUE_APP_DOMAIN_DEV=local.dockertoolbox.tiangolo.com
+# VUE_APP_DOMAIN_DEV=localhost.tiangolo.com
+# VUE_APP_DOMAIN_DEV=dev.karl.qanta.org
+VUE_APP_DOMAIN_STAG=stag.karl.qanta.org
+VUE_APP_DOMAIN_PROD=karl.qanta.org
+VUE_APP_NAME=KAR³L
+VUE_APP_ENV=development
+# VUE_APP_ENV=staging
+# VUE_APP_ENV=production
+```
+
+
 
 ## Backend Requirements
 
@@ -458,255 +478,6 @@ VUE_APP_ENV=development
 VUE_APP_ENV=staging
 ```
 
-### Removing the frontend
-If you are developing an API-only app and want to remove the frontend, you can do it easily:
-
-* Remove the `./frontend` directory.
-* In the `docker-compose.yml` file, remove the whole service / section `frontend`.
-* In the `docker-compose.override.yml` file, remove the whole service / section `frontend`.
-
-Done, you have a frontend-less (api-only) app. 🔥 🚀
-
-- - - -
-
-If you want, you can also remove the `FRONTEND` environment variables from:
-
-* `.env`
-* `.gitlab-ci.yml`
-* `./scripts/*.sh`
-
-But it would be only to clean them up, leaving them won't really have any effect either way.
-
-## Deployment
-You can deploy the stack to a Docker Swarm mode cluster with a main Traefik proxy, set up using the ideas from DockerSwarm.rocks, to get automatic HTTPS certificates, etc.
-
-And you can use CI (continuous integration) systems to do it automatically.
-
-But you have to configure a couple things first.
-
-### Traefik network
-This stack expects the public Traefik network to be named `traefik-public`, just as in the tutorials in DockerSwarm.rocks.
-
-If you need to use a different Traefik public network name, update it in the `docker-compose.yml` files, in the section:
-
-```YAML
-networks:
-  traefik-public:
-    external: true
-```
-
-Change `traefik-public` to the name of the used Traefik network. And then update it in the file `.env`:
-
-```bash
-TRAEFIK_PUBLIC_NETWORK=traefik-public
-```
-
-### Persisting Docker named volumes
-You need to make sure that each service (Docker container) that uses a volume is always deployed to the same Docker "node" in the cluster, that way it will preserve the data. Otherwise, it could be deployed to a different node each time, and each time the volume would be created in that new node before starting the service. As a result, it would look like your service was starting from scratch every time, losing all the previous data.
-
-That's specially important for a service running a database. But the same problem would apply if you were saving files in your main backend service (for example, if those files were uploaded by your users, or if they were created by your system).
-
-To solve that, you can put constraints in the services that use one or more data volumes (like databases) to make them be deployed to a Docker node with a specific label. And of course, you need to have that label assigned to one (only one) of your nodes.
-
-#### Adding services with volumes
-For each service that uses a volume (databases, services with uploaded files, etc) you should have a label constraint in your `docker-compose.yml` file.
-
-To make sure that your labels are unique per volume per stack (for example, that they are not the same for `prod` and `stag`) you should prefix them with the name of your stack and then use the same name of the volume.
-
-Then you need to have those constraints in your `docker-compose.yml` file for the services that need to be fixed with each volume.
-
-To be able to use different environments, like `prod` and `stag`, you should pass the name of the stack as an environment variable. Like:
-
-```bash
-STACK_NAME=stag-karl sh ./scripts/deploy.sh
-```
-
-To use and expand that environment variable inside the `docker-compose.yml` files you can add the constraints to the services like:
-
-```yaml
-version: '3'
-services:
-  db:
-    volumes:
-      - 'app-db-data:/var/lib/postgresql/data/pgdata'
-    deploy:
-      placement:
-        constraints:
-          - node.labels.${STACK_NAME}.app-db-data == true
-```
-
-note the `${STACK_NAME}`. In the script `./scripts/deploy.sh`, the `docker-compose.yml` would be converted, and saved to a file `docker-stack.yml` containing:
-
-```yaml
-version: '3'
-services:
-  db:
-    volumes:
-      - 'app-db-data:/var/lib/postgresql/data/pgdata'
-    deploy:
-      placement:
-        constraints:
-          - node.labels.karl.app-db-data == true
-```
-
-If you add more volumes to your stack, you need to make sure you add the corresponding constraints to the services that use that named volume.
-
-Then you have to create those labels in some nodes in your Docker Swarm mode cluster. You can use `docker-auto-labels` to do it automatically.
-
-#### `docker-auto-labels`
-You can use [`docker-auto-labels`](https://github.com/tiangolo/docker-auto-labels) to automatically read the placement constraint labels in your Docker stack (Docker Compose file) and assign them to a random Docker node in your Swarm mode cluster if those labels don't exist yet.
-
-To do that, you can install `docker-auto-labels`:
-
-```bash
-pip install docker-auto-labels
-```
-
-And then run it passing your `docker-stack.yml` file as a parameter:
-
-```bash
-docker-auto-labels docker-stack.yml
-```
-
-You can run that command every time you deploy, right before deploying, as it doesn't modify anything if the required labels already exist.
-
-#### (Optionally) adding labels manually
-If you don't want to use `docker-auto-labels` or for any reason you want to manually assign the constraint labels to specific nodes in your Docker Swarm mode cluster, you can do the following:
-
-* First, connect via SSH to your Docker Swarm mode cluster.
-
-* Then check the available nodes with:
-
-```console
-$ docker node ls
-
-
-// you would see an output like:
-
-ID                            HOSTNAME               STATUS              AVAILABILITY        MANAGER STATUS
-nfa3d4df2df34as2fd34230rm *   dog.example.com        Ready               Active              Reachable
-2c2sd2342asdfasd42342304e     cat.example.com        Ready               Active              Leader
-c4sdf2342asdfasd4234234ii     snake.example.com      Ready               Active              Reachable
-```
-
-then chose a node from the list. For example, `dog.example.com`.
-
-* Add the label to that node. Use as label the name of the stack you are deploying followed by a dot (`.`) followed by the named volume, and as value, just `true`, e.g.:
-
-```bash
-docker node update --label-add karl.app-db-data=true dog.example.com
-```
-
-* Then you need to do the same for each stack version you have. For example, for staging you could do:
-
-```bash
-docker node update --label-add stag-karl.app-db-data=true cat.example.com
-```
-
-### Deploy to a Docker Swarm mode cluster
-There are 3 steps:
-
-1. **Build** your app images
-2. Optionally, **push** your custom images to a Docker Registry
-3. **Deploy** your stack
-
-- - - -
-
-Here are the steps in detail:
-
-1. **Build your app images**
-
-* Set these environment variables, right before the next command:
-	* `TAG=prod`
-	* `FRONTEND_ENV=production`
-* Use the provided `scripts/build.sh` file with those environment variables:
-
-```bash
-TAG=prod FRONTEND_ENV=production bash ./scripts/build.sh
-```
-
-2. **Optionally, push your images to a Docker Registry**
-
-**Note**: if the deployment Docker Swarm mode "cluster" has more than one server, you will have to push the images to a registry or build the images in each server, so that when each of the servers in your cluster tries to start the containers it can get the Docker images for them, pulling them from a Docker Registry or because it has them already built locally.
-
-If you are using a registry and pushing your images, you can omit running the previous script and instead using this one, in a single shot.
-
-* Set these environment variables:
-	* `TAG=prod`
-	* `FRONTEND_ENV=production`
-* Use the provided `scripts/build-push.sh` file with those environment variables:
-
-```bash
-TAG=prod FRONTEND_ENV=production bash ./scripts/build-push.sh
-```
-
-3. **Deploy your stack**
-
-* Set these environment variables:
-	* `DOMAIN=karl.qanta.org`
-	* `TRAEFIK_TAG=karl`
-	* `STACK_NAME=karl`
-	* `TAG=prod`
-* Use the provided `scripts/deploy.sh` file with those environment variables:
-
-```bash
-DOMAIN=karl.qanta.org \
-TRAEFIK_TAG=karl \
-STACK_NAME=karl \
-TAG=prod \
-bash ./scripts/deploy.sh
-```
-
-- - - -
-
-If you change your mind and, for example, want to deploy everything to a different domain, you only have to change the `DOMAIN` environment variable in the previous commands. If you wanted to add a different version / environment of your stack, like "`preproduction`", you would only have to set `TAG=preproduction` in your command and update these other environment variables accordingly. And it would all work, that way you could have different environments and deployments of the same app in the same cluster.
-
-#### Deployment Technical Details
-Building and pushing is done with the `docker-compose.yml` file, using the `docker-compose` command. The file `docker-compose.yml` uses the file `.env` with default environment variables. And the scripts set some additional environment variables as well.
-
-The deployment requires using `docker stack` instead of `docker-swarm`, and it can't read environment variables or `.env` files. Because of that, the `deploy.sh` script generates a file `docker-stack.yml` with the configurations from `docker-compose.yml` and injecting the environment variables in it. And then uses it to deploy the stack.
-
-You can do the process by hand based on those same scripts if you wanted. The general structure is like this:
-
-```bash
-# Use the environment variables passed to this script, as TAG and FRONTEND_ENV
-# And re-create those variables as environment variables for the next command
-TAG=${TAG} \
-# Set the environment variable FRONTEND_ENV to the same value passed to this script with
-# a default value of "production" if nothing else was passed
-FRONTEND_ENV=${FRONTEND_ENV-production} \
-# The actual comand that does the work: docker-compose
-docker-compose \
-# Pass the file that should be used, setting explicitly docker-compose.yml avoids the
-# default of also using docker-compose.override.yml
--f docker-compose.yml \
-# Use the docker-compose sub command named "config", it just uses the docker-compose.yml
-# file passed to it and prints their combined contents
-# Put those contents in a file "docker-stack.yml", with ">"
-config > docker-stack.yml
-
-# The previous only generated a docker-stack.yml file,
-# but didn't do anything with it yet
-
-# docker-auto-labels makes sure the labels used for constraints exist in the cluster
-docker-auto-labels docker-stack.yml
-
-# Now this command uses that same file to deploy it
-docker stack deploy -c docker-stack.yml --with-registry-auth "${STACK_NAME}"
-```
-
-### Continuous Integration / Continuous Delivery
-If you use GitLab CI, the included `.gitlab-ci.yml` can automatically deploy it. You may need to update it according to your GitLab configurations.
-
-If you use any other CI / CD provider, you can base your deployment from that `.gitlab-ci.yml` file, as all the actual script steps are performed in `bash` scripts that you can easily re-use.
-
-GitLab CI is configured assuming 2 environments following GitLab flow:
-
-* `prod` (production) from the `production` branch.
-* `stag` (staging) from the `master` branch.
-
-If you need to add more environments, for example, you could imagine using a client-approved `preprod` branch, you can just copy the configurations in `.gitlab-ci.yml` for `stag` and rename the corresponding variables. The Docker Compose file and environment variables are configured to support as many environments as you need, so that you only need to modify `.gitlab-ci.yml` (or whichever CI system configuration you are using).
-
 ## Docker Compose files and env vars
 There is a main `docker-compose.yml` file with all the configurations that apply to the whole stack, it is used automatically by `docker-compose`.
 
@@ -722,15 +493,8 @@ They are designed to have the minimum repetition of code and configurations, so 
 
 Also, if you want to have another deployment environment, say `preprod`, you just have to change environment variables, but you can keep using the same Docker Compose files.
 
-### The .env file
-The `.env` file is the one that contains all your configurations, generated keys and passwords, etc.
-
-Depending on your workflow, you could want to exclude it from Git, for example if your project is public. In that case, you would have to make sure to set up a way for your CI tools to obtain it while building or deploying your project.
-
-One way to do it could be to add each environment variable to your CI/CD system, and updating the `docker-compose.yml` file to read that specific env var instead of reading the `.env` file.
-
 ## URLs
-These are the URLs that will be used and generated by the project.
+These are the URLs used and generated by the project.
 
 ### Production URLs
 Production URLs, from the branch `production`.
@@ -746,21 +510,6 @@ Automatic Alternative Docs (ReDoc): https://karl.qanta.org/redoc
 PGAdmin: https://pgadmin.karl.qanta.org
 
 Flower: https://flower.karl.qanta.org
-
-### Staging URLs
-Staging URLs, from the branch `master`.
-
-Frontend: https://stag.karl.qanta.org
-
-Backend: https://stag.karl.qanta.org/api/
-
-Automatic Interactive Docs (Swagger UI): https://stag.karl.qanta.org/docs
-
-Automatic Alternative Docs (ReDoc): https://stag.karl.qanta.org/redoc
-
-PGAdmin: https://pgadmin.stag.karl.qanta.org
-
-Flower: https://flower.stag.karl.qanta.org
 
 ### Development URLs
 Development URLs, for local development.
@@ -830,10 +579,14 @@ Flower: http://localhost.tiangolo.com:5555
 
 Traefik UI: http://localhost.tiangolo.com:8090
 
-## Full Stack FastAPI PostgreSQL
-This project was generated using https://github.com/tiangolo/full-stack-fastapi-postgresql with:
+## Credits
+
+### Full Stack FastAPI PostgreSQL
+
+This project and readme were partially generated using https://github.com/tiangolo/full-stack-fastapi-postgresql with:
 
 ```bash
 pip install cookiecutter
 cookiecutter https://github.com/tiangolo/full-stack-fastapi-postgresql
 ```
+
