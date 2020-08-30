@@ -174,12 +174,14 @@
   import { mainStore } from "@/store";
   import { format, startOfDay } from "date-fns";
   import PWA from "@/views/PWA.vue";
+  import { IAppNotification, IComponents } from "@/interfaces";
   @Component({
     components: { PWA },
   })
   export default class Dashboard extends Vue {
     loading = true;
     rankType = "total_seen";
+    leaderboards: IComponents["Leaderboard"][] = [];
 
     get greetedUser() {
       const userProfile = mainStore.userProfile;
@@ -225,15 +227,20 @@
         },
       ]);
       this.loading = false;
+
+      this.leaderboards = [];
+      this.$nextTick(function() {
+        this.leaderboards = mainStore.homeLeaderboards;
+      });
     }
 
     get stats() {
       return mainStore.homeStats;
     }
 
-    get leaderboards() {
-      return mainStore.homeLeaderboards ?? [];
-    }
+    // get homeLeaderboards() {
+    //   return mainStore.homeLeaderboards ?? [];
+    // }
 
     get connectionError() {
       return mainStore.connectionError;
