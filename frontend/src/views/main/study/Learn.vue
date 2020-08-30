@@ -475,6 +475,18 @@
     }
 
     public async response(response) {
+      if (response) {
+        mainStore.addNotification({
+          content: "Your evaluation: Right",
+          color: "success",
+        });
+      } else {
+        mainStore.addNotification({
+          content: "Your evaluation: Wrong",
+          color: "error",
+        });
+      }
+
       if (this.show.fact) {
         studyStore.markBackTime();
         studyStore.addToSchedule({
