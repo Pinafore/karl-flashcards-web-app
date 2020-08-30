@@ -305,10 +305,6 @@
 
     searchAPI(searchData: IComponents["FactSearch"]) {
       this.scrollToTop();
-      // const searchData: IComponents["FactSearch"] = {
-      //   limit: this.options.itemsPerPage,
-      //   skip: this.options.page * this.options.itemsPerPage - this.options.itemsPerPage,
-      // };
       if (this.search != "") {
         searchData.all = this.search;
       }
