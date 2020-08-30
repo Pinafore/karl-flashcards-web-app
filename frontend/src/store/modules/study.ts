@@ -75,7 +75,7 @@ export default class StudyModule extends VuexModule {
   @Mutation
   setShowError() {
     this.show = {
-      text: "A problem occurred, check back in later!",
+      text: "A problem occurred, please check back in later!",
       enable_report: false,
       enable_actions: false,
       marked: false,
