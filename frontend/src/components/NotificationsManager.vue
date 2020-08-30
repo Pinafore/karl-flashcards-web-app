@@ -1,13 +1,12 @@
 <template>
   <div>
     <v-snackbar v-model="show" :color="currentNotificationColor">
-      <v-progress-circular
-        v-show="showProgress"
-        class="ma-2"
-        indeterminate
-      ></v-progress-circular
-      >{{ currentNotificationContent }}
-      <v-btn text @click.native="close">Close</v-btn>
+      <v-row class="pl-4" align="center" justify="center">
+        <v-progress-circular v-show="showProgress" indeterminate></v-progress-circular>
+        <span class="text-body-1 pl-2">{{ currentNotificationContent }}</span>
+        <v-spacer></v-spacer>
+        <v-btn text @click.native="close">Close</v-btn>
+      </v-row>
     </v-snackbar>
   </div>
 </template>
