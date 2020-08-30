@@ -211,11 +211,11 @@
     </v-card>
     <v-card v-show="showBack && show.enable_actions" class="my-2 mx-3 px-3 py-4">
       <v-card-title class="py-0">
-        <div class="title">Back</div>
+        <div class="title">Answer</div>
       </v-card-title>
       <v-card-text class="pb-0 pt-1">
         <div class="title primary--text">
-          Answer: {{ show.fact && show.fact.answer }}
+          {{ show.fact && show.fact.answer }}
         </div>
         <div class="title">You typed: '{{ typed }}'</div>
         <div
@@ -223,10 +223,12 @@
           class="title primary--text py-2"
           :style="{ color: 'green !important' }"
         >
-          KAR³L Believes Answer Correct (Enter to Accept, Or Override Below)
+          KAR³L Believes Your Response Was Correct
+          <span class="hidden-xs-only">(Enter to Accept, Or Override Below)</span>
         </div>
         <div v-else class="title primary--text" :style="{ color: 'red !important' }">
-          KAR³L Believes Answer Wrong (Enter to Accept, Or Override Below)
+          KAR³L Believes Your Response Was Wrong
+          <span class="hidden-xs-only">(Enter to Accept, Or Override Below)</span>
         </div>
       </v-card-text>
       <v-card-text v-show="show.enable_actions" class="py-2">
