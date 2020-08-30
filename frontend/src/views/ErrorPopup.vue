@@ -30,7 +30,8 @@
         </v-card-title>
         <v-card-text>
           The Jeopardy! deck is currently unavailable and may not be selected for study.
-          All other public decks and imported decks remain available to study. Apologies
+          All other public decks remain available to study and users may still create
+          private decks or import them from or other flashcard apps like Anki. Apologies
           for the inconvenience caused.
         </v-card-text>
       </span>
