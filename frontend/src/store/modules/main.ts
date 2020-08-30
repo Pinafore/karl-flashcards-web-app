@@ -23,6 +23,7 @@ export default class MainModule extends VuexModule {
   isOnHomeScreenPopup: boolean | null = null;
   connectionError = false;
   schedulerError = false;
+  inaccessibleDeckError = false;
   filteredStat: IComponents["Statistics"] | null = null;
   savedStats: IComponents["Statistics"][] = [];
   homeStats: IComponents["Statistics"][] = [];
@@ -138,6 +139,11 @@ export default class MainModule extends VuexModule {
   @Mutation
   setSchedulerError(payload: boolean) {
     this.schedulerError = payload;
+  }
+
+  @Mutation
+  setInaccessibleDeckError(payload: boolean) {
+    this.inaccessibleDeckError = payload;
   }
 
   @Mutation
@@ -381,6 +387,11 @@ export default class MainModule extends VuexModule {
       }
       if (payload.response.status == 556) {
         this.setSchedulerError(true);
+      }
+
+      if (payload.response.status == 557) {
+        console.log("CHIEKN DFSDFSD")
+        this.setInaccessibleDeckError(true);
       }
     }
   }

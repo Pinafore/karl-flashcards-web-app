@@ -40,6 +40,8 @@ def get_next_set(
     if deck_ids is None:
         facts = crud.fact.get_study_set(db=db, user=user, return_limit=limit)
     else:
+        if 2 in deck_ids:
+            raise HTTPException(status_code=557, detail="This deck is currently unavailable")
         for deck_id in deck_ids:
             deck = crud.deck.get(db=db, id=deck_id)
             if not deck:

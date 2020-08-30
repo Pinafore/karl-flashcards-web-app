@@ -1,5 +1,5 @@
 <template class="pa-0 ma-0">
-  <v-dialog v-model="popup" max-width="1000px" @click:outside="returnHome">
+  <v-dialog v-model="popup" max-width="1000px" @click:outside="goBack">
     <v-card>
       <span v-if="type === 'connection'">
         <v-card-title>
@@ -24,13 +24,24 @@
           facts to review for you.
         </v-card-text>
       </span>
+      <span v-else-if="type === 'inaccessibleDeckError'">
+        <v-card-title>
+          <h2>Jeopardy! Deck Unavailable</h2>
+        </v-card-title>
+        <v-card-text>
+          The Jeopardy! deck is currently unavailable and may not be selected for study.
+          All other public decks and imported decks remain available to study. Apologies
+          for the inconvenience caused.
+        </v-card-text>
+      </span>
       <span v-else>
         <v-card-title>
           <h2>An Error Occurred</h2>
         </v-card-title>
       </span>
       <v-card-actions>
-        <v-btn @click="returnHome">Return to Home Screen</v-btn>
+        <v-btn v-if="type === 'inaccessibleDeckError'" @click="goBack">Return</v-btn>
+        <v-btn v-else @click="goBack">Return to Home Screen</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -49,12 +60,20 @@
       this.checkPopup();
     }
 
+    destroyed() {
+      mainStore.setInaccessibleDeckError(false);
+    }
+
     get connectionError() {
       return mainStore.connectionError;
     }
 
     get schedulerError() {
       return mainStore.schedulerError;
+    }
+
+    get inaccessibleDeckError() {
+      return mainStore.inaccessibleDeckError;
     }
 
     @Watch("connectionError")
@@ -67,18 +86,33 @@
       this.checkPopup();
     }
 
+    @Watch("inaccessibleDeckError")
+    onInaccessibleDeckErrorChanged() {
+      this.checkPopup();
+    }
+
     checkPopup() {
-      this.popup = mainStore.connectionError || mainStore.schedulerError;
+      this.popup =
+        mainStore.connectionError ||
+        mainStore.schedulerError ||
+        mainStore.inaccessibleDeckError;
       if (mainStore.connectionError) {
         this.type = "connection";
       } else if (mainStore.schedulerError) {
         this.type = "scheduler";
+      } else if (mainStore.inaccessibleDeckError) {
+        this.type = "inaccessibleDeckError";
       }
     }
 
-    returnHome() {
+    goBack() {
       this.popup = false;
-      this.$router.push("/main/dashboard");
+      if (this.type === "inaccessibleDeckError") {
+        mainStore.setInaccessibleDeckError(false);
+        this.$router.back();
+      } else {
+        this.$router.push("/main/dashboard");
+      }
     }
   }
 </script>

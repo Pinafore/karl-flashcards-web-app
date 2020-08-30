@@ -39,6 +39,8 @@ def read_facts(
     """
     if limit > 1000:
         raise HTTPException(status_code=445, detail="Too many facts requested. Please limit to <1000 facts.")
+    if deck_ids is not None and 2 in deck_ids:
+        raise HTTPException(status_code=557, detail="This deck is currently unavailable")
 
     if suspended and reported:
         studyable = True

@@ -253,6 +253,8 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                                 and_(models.Fact.deck_id == deck_owners.c.deck_id,
                                      models.Fact.user_id == deck_owners.c.owner_id)))
         facts_query = (user_facts.union(filtered_facts))
+        # Don't allow Jeopardy facts
+        facts_query = facts_query.filter(models.Fact.deck_id != 2)
         if filters.studyable:
             facts_query = (facts_query
                            .outerjoin(models.Deleted,
