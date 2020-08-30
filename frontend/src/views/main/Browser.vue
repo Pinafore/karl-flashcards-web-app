@@ -282,29 +282,33 @@
       const limit = value.itemsPerPage;
       const skip = value.page * value.itemsPerPage - value.itemsPerPage;
       const searchData: IComponents["FactSearch"] = { skip: skip, limit: limit };
-      this.getDataFromApi(searchData);
+      this.searchAPI(searchData);
     }
 
     @Watch("search", { deep: true })
     onSearchChanged() {
-      this.debounceSearch();
+      this.options.page = 1;
+      this.debounceSearch({ skip: 0, limit: this.options.itemsPerPage });
     }
 
     @Watch("selectedDecks", { deep: true })
     onSelectedDecksChanged() {
-      this.debounceDeck();
+      this.options.page = 1;
+      this.debounceDeck({ skip: 0, limit: this.options.itemsPerPage });
     }
 
     @Watch("selectedStatus", { deep: true })
     onSelectedStatusChanged() {
-      this.debounceSearch();
+      this.options.page = 1;
+      this.debounceSearch({ skip: 0, limit: this.options.itemsPerPage });
     }
 
-    searchAPI() {
-      const searchData: IComponents["FactSearch"] = {
-        limit: this.options.itemsPerPage,
-        skip: this.options.page * this.options.itemsPerPage - this.options.itemsPerPage,
-      };
+    searchAPI(searchData: IComponents["FactSearch"]) {
+      this.scrollToTop();
+      // const searchData: IComponents["FactSearch"] = {
+      //   limit: this.options.itemsPerPage,
+      //   skip: this.options.page * this.options.itemsPerPage - this.options.itemsPerPage,
+      // };
       if (this.search != "") {
         searchData.all = this.search;
       }
@@ -363,6 +367,10 @@
 
       this.facts.splice(index, 1);
       await mainStore.deleteFact({ id: item.fact_id, todo: todo });
+    }
+
+    public scrollToTop() {
+      window.scrollTo(0, 0);
     }
 
     returnBrowser() {
