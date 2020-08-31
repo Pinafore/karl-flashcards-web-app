@@ -39,7 +39,6 @@ SMTP_PORT=587
 SMTP_HOST=smtp.gmail.com
 SMTP_USER=[email]
 SMTP_PASSWORD=[redacted]
-TAG=dev
 
 USERS_OPEN_REGISTRATION=True
 
