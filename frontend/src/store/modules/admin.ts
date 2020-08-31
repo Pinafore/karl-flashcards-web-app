@@ -75,7 +75,6 @@ export default class AdminModule extends VuexModule {
           await new Promise((resolve, _reject) => setTimeout(() => resolve(), 500)),
         ])
       )[0];
-      mainStore.setUserProfile(response.data);
       mainStore.removeNotification(loadingNotification);
       mainStore.addNotification({
         content: "User successfully created",
