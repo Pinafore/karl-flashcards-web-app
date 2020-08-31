@@ -29,7 +29,7 @@ DOCKER_IMAGE_CELERYWORKER=karl/celeryworker
 DOCKER_IMAGE_FRONTEND=karl/frontend
 
 # Backend
-BACKEND_CORS_ORIGINS=["http://localhost", "http://localhost:4200", "http://localhost:3000", "http://localhost:8080", "http://localhost:8081", "http://localhost:8082", "https://localhost", "https://localhost:4200", "https://localhost:3000", "https://localhost:8080", "http://dev.test", "https://test", "https://test", "http://local.dockertoolbox.tiangolo.com", "http://localhost.tiangolo.com", "http://dev.karl.qanta.org", "https://stag.karl.qanta.org", "https://karl.qanta.org]
+BACKEND_CORS_ORIGINS=["http://localhost", "http://localhost:4200", "http://localhost:3000", "http://localhost:8080", "http://localhost:8081", "http://localhost:8082", "https://localhost", "https://localhost:4200", "https://localhost:3000", "https://localhost:8080", "http://dev.test", "https://test", "https://test", "http://local.dockertoolbox.tiangolo.com", "http://localhost.tiangolo.com", "http://dev.karl.qanta.org", "https://stag.karl.qanta.org", "https://karl.qanta.org"]
 PROJECT_NAME=KAR³L
 SECRET_KEY=[redacted]
 FIRST_SUPERUSER=learningwithkarl@gmail.com
