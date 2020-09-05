@@ -373,7 +373,6 @@ export default class MainModule extends VuexModule {
       if (
         payload.response.status === 503 ||
         payload.response.status === 502 ||
-        payload.response.status === 403 ||
         payload.response.status === 401
       ) {
         this.addNotification({
