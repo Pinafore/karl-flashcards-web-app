@@ -21,21 +21,38 @@ if (process.env.VUE_APP_ENV == "production") {
     integrations: [new VueIntegration({ Vue, attachProps: true, logErrors: true })],
     beforeSend: function(event, hint: Sentry.EventHint) {
       console.log("Processing before sending to Sentry")
+      console.log(event.message);
+      console.log(hint.originalException);
+      const error = hint.originalException;
+      if (error instanceof Error) {
+        console.log(error.message);
+      } else {
+        console.log("not instance of error")
+      }
       if (hint) {
         const error = hint.originalException;
         if (typeof error === "string") {
           if (shouldIgnoreException(error)) {
+            console.log("ignoring error");
             return null;
+          } else {
+            console.log("Not ignoring error 1");
           }
         } else if (error instanceof Error) {
           if (shouldIgnoreException(error.message)) {
+            console.log("ignoring error");
             return null;
+          } else {
+            console.log("Not ignoring error 2");
           }
         }
       }
       if(event.message) {
         if (shouldIgnoreException(event.message)) {
+          console.log("ignoring error");
           return null;
+        } else {
+          console.log("Not ignoring error 1");
         }
       }
       console.log("Sending Sentry event")
