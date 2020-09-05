@@ -6,9 +6,21 @@ from pydantic import BaseModel
 from app.schemas import User, RankType
 
 
+class IntOrFloat:
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, v):
+        if isinstance(v, float) or isinstance(v, int):
+            return v
+        raise TypeError('int or float required')
+
+
 class LeaderboardUser(BaseModel):
     user: User
-    value: Union[int, float]
+    value: IntOrFloat
     rank: int
 
 
