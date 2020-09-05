@@ -48,7 +48,7 @@
             <v-expansion-panel-header>Desktop</v-expansion-panel-header>
             <v-expansion-panel-content>
               Desktop KAR³L can currently be installed through either Chrome or
-              Microsoft Edge. If you visit KAR³L in these browsers, you can install
+              Microsoft Edge. If you visit KAR³L with these browsers, you can install
               KAR³L by clicking on the + button on the right edge of the address bar.
               <v-row>
                 <v-col cols="12">
