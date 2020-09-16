@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from app.schemas import User, RankType
 
 
-class IntOrFloat:
+class IntOrFloat(float):
     @classmethod
     def __get_validators__(cls):
         yield cls.validate
