@@ -76,7 +76,7 @@ def read_facts(
 
     fact_browser = schemas.FactBrowse(facts=new_facts, total=total)
     details = search.dict()
-    details["study_system"] = "karl"
+    details["study_system"] = current_user.repetition_model
     history_in = schemas.HistoryCreate(
         time=datetime.now(timezone('UTC')).isoformat(),
         user_id=current_user.id,
