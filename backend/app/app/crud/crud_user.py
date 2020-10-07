@@ -2,11 +2,15 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, Optional, Union, List
 
+import requests
+import json
 from pytz import timezone
+from sentry_sdk import capture_exception
 
 from app import crud
 from app.core.security import get_password_hash, verify_password
 from app.crud.base import CRUDBase
+from app.interface.reassignment import change_assignment
 from app.models.user import User
 from app.schemas import Repetition, Log
 from app.schemas.user import UserCreate, UserUpdate, SuperUserCreate, SuperUserUpdate
@@ -38,7 +42,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         return db.query(User).filter(User.beta_user == is_beta).count()
 
     def create(self, db: Session, *, obj_in: UserCreate) -> User:
-        model, assignment_method = self.assign_scheduler(db, obj_in)
+        model, assignment_method = self.assign_scheduler_to_new_user(db, obj_in)
         logger.info(model)
         logger.info(assignment_method)
         db_obj = User(
@@ -53,9 +57,11 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         deck = crud.deck.get(db=db, id=1)
         crud.deck.assign_viewer(db=db, db_obj=deck, user=db_obj)
         db.refresh(db_obj)
+
+        change_assignment(user=db_obj, repetition_model=model)
         return db_obj
 
-    def assign_scheduler(self, db: Session, obj_in: UserCreate) -> (Repetition, str):
+    def assign_scheduler_to_new_user(self, db: Session, obj_in: UserCreate) -> (Repetition, str):
         if obj_in.repetition_model:
             return obj_in.repetition_model, "assigned"
         if self.get_count(db, False) > 250:
@@ -116,12 +122,39 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     def is_superuser(self, user: User) -> bool:
         return user.is_superuser
 
+    def reassign_scheduler(self, db: Session, user: User, *,
+                           repetition_model: Repetition = None) -> Union[
+        User, requests.exceptions.RequestException, json.decoder.JSONDecodeError]:
+        try:
+            old_repetition = user.repetition_model
+            new_repetition = repetition_model if repetition_model else Repetition.select_model()
+            found_user = crud.user.update(db, db_obj=user,
+                                          obj_in=UserUpdate(repetition_model=new_repetition))
+            response = change_assignment(user=found_user, repetition_model=new_repetition)
+
+            history_in = HistoryCreate(
+                time=datetime.now(timezone('UTC')),
+                user_id=found_user.id,
+                log_type=Log.reassign_model,
+                details={"old_repetition_model": old_repetition, "new_repetition_model": found_user.repetition_model}
+            )
+            crud.history.create(db=db, obj_in=history_in)
+            return found_user
+        except requests.exceptions.RequestException as e:
+            capture_exception(e)
+            return e
+        except json.decoder.JSONDecodeError as e:
+            capture_exception(e)
+            return e
+
     def reassign_schedulers(self, db: Session):
         all_users = db.query(self.model).all()
         for found_user in all_users:
             old_repetition = found_user.repetition_model
+            new_repetition = Repetition.select_model()
             found_user = crud.user.update(db, db_obj=found_user,
-                                          obj_in=UserUpdate(repetition_model=Repetition.select_model()))
+                                          obj_in=UserUpdate(repetition_model=new_repetition))
+            change_assignment(user=found_user, repetition_model=new_repetition)
             history_in = HistoryCreate(
                 time=datetime.now(timezone('UTC')),
                 user_id=found_user.id,

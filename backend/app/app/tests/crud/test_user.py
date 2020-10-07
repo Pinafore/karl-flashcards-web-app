@@ -124,7 +124,7 @@ def test_repetition_model_assignment(db: Session) -> None:
         count += 1
     assert count == sm2_init_count
     for _ in range(karl_init_count):
-        create_user(db=db, repetition_model=Repetition.karl)
+        create_user(db=db, repetition_model=Repetition.karl100)
     for _ in range(leitner_init_count):
         create_user(db=db, repetition_model=Repetition.leitner)
     for _ in range(karl50_init_count):
@@ -136,7 +136,7 @@ def test_repetition_model_assignment(db: Session) -> None:
 
     assert schedule_counts[Repetition.sm2] == sm2_init_count
     assert schedule_counts[Repetition.leitner] == leitner_init_count
-    assert schedule_counts[Repetition.karl] == karl_init_count
+    assert schedule_counts[Repetition.karl100] == karl_init_count
     assert schedule_counts[Repetition.karl50] == karl50_init_count
     assert schedule_counts[Repetition.karl85] == karl85_init_count
 
@@ -154,7 +154,7 @@ def test_repetition_model_assignment(db: Session) -> None:
     print(updated_schedule_counts)
     assert each_count - 3 <= updated_schedule_counts[Repetition.sm2] <= each_count + 3
     assert each_count - 3 <= updated_schedule_counts[Repetition.leitner] <= each_count + 3
-    assert each_count - 3 <= updated_schedule_counts[Repetition.karl] <= each_count + 3
+    assert each_count - 3 <= updated_schedule_counts[Repetition.karl100] <= each_count + 3
     assert each_count - 3 <= updated_schedule_counts[Repetition.karl50] <= each_count + 3
     assert each_count - 3 <= updated_schedule_counts[Repetition.karl85] <= each_count + 3
 

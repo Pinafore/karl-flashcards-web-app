@@ -1,5 +1,7 @@
+import json
 from typing import Any, List, Optional
 
+import requests
 from fastapi import BackgroundTasks
 
 from app import crud, models, schemas
@@ -153,6 +155,50 @@ def read_user_by_id(
             status_code=400, detail="The user doesn't have enough privileges"
         )
     return user
+
+
+@router.put("/me/reassign", response_model=schemas.User)
+def reassign_scheduler_me(
+        *,
+        db: Session = Depends(deps.get_db),
+        repetition_model: Optional[schemas.Repetition],
+        current_user: models.User = Depends(deps.get_current_active_user),
+) -> Any:
+    """
+    Reassign current user to assigned scheduler or create random new assignment
+    """
+
+    response = crud.user.reassign_scheduler(db=db, user=current_user, repetition_model=repetition_model)
+
+    if isinstance(response, requests.exceptions.RequestException):
+        raise HTTPException(status_code=555, detail="Connection to scheduler is down")
+    if isinstance(response, json.decoder.JSONDecodeError):
+        raise HTTPException(status_code=556, detail="Scheduler malfunction")
+
+    return response
+
+
+@router.put("/{user_id}/reassign", response_model=schemas.User)
+def reassign_scheduler(
+        *,
+        db: Session = Depends(deps.get_db),
+        repetition_model: Optional[schemas.Repetition],
+        user_id: int,
+        current_user: models.User = Depends(deps.get_current_active_superuser),
+) -> Any:
+    """
+    Reassign user to assigned scheduler or create random new assignment
+    """
+
+    user = crud.user.get(db, id=user_id)
+    response = crud.user.reassign_scheduler(db=db, user=user, repetition_model=repetition_model)
+
+    if isinstance(response, requests.exceptions.RequestException):
+        raise HTTPException(status_code=555, detail="Connection to scheduler is down")
+    if isinstance(response, json.decoder.JSONDecodeError):
+        raise HTTPException(status_code=556, detail="Scheduler malfunction")
+
+    return response
 
 
 @router.put("/{user_id}", response_model=schemas.User)

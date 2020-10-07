@@ -5,7 +5,7 @@ from random import choice
 class Repetition(str, Enum):
     leitner = "leitner"
     sm2 = "sm-2"
-    karl = "karl"
+    karl100 = "karl100"
     karl50 = "karl50"
     karl85 = "karl85"
 
