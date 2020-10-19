@@ -70,7 +70,7 @@ def get_leaderboard(db: Session, rank_type: schemas.RankType, user: models.user,
 
         begin_overall_start = time.time()
         name = create_name(db, date_start, date_end, deck_id)
-        details = create_details(min_studied)
+        details = create_details(min_studied, rank_type)
         headers = [schemas.DataTypeHeader(text="Rank", value="rank", width="1%"),
                    schemas.DataTypeHeader(text="User", value="user.username", width="30%"),
                    ]
@@ -93,6 +93,8 @@ def get_leaderboard(db: Session, rank_type: schemas.RankType, user: models.user,
             headers.append(schemas.DataTypeHeader(text="Minutes Spent", value="value"))
         elif rank_type == schemas.RankType.elapsed_minutes_text:
             headers.append(schemas.DataTypeHeader(text="Minutes Spent on Front", value="value"))
+        elif rank_type == schemas.RankType.n_days_studied:
+            headers.append(schemas.DataTypeHeader(text="Days Studied", value="value"))
         begin_overall_start = time.time()
         leaderboard = schemas.Leaderboard(
             leaderboard=[schemas.LeaderboardUser(user=crud.user.get(db=db, id=user["user_id"]), value=user["value"],
@@ -149,6 +151,9 @@ def create_name(db: Session, date_start: datetime = None, date_end: datetime = N
     return name
 
 
-def create_details(min_studied: int):
-    details = f"Minimum {min_studied} Facts Reviewed"
+def create_details(min_studied: int, rank_type: schemas.RankType):
+    if rank_type == schemas.RankType.n_days_studied:
+        details = f"Minimum {min_studied} Facts Reviewed Each Day"
+    else:
+        details = f"Minimum {min_studied} Facts Reviewed"
     return details
