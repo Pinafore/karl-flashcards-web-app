@@ -197,6 +197,7 @@
       <v-card-text v-show="show.enable_actions" class="py-2">
         <v-text-field
           id="answer"
+          ref="answer"
           v-model="typed"
           solo
           label="Recommended - Type Answer (Press any letter to focus)"
@@ -234,6 +235,7 @@
       <v-card-text v-show="show.enable_actions" class="py-2">
         <v-text-field
           id="retype_answer"
+          ref="retype"
           v-model="retyped"
           solo
           label="Optional - Retype Answer (Press any letter to focus)"
@@ -245,7 +247,7 @@
         <v-row class="shrink" justify="space-around">
           <v-col cols="5" sm="auto" class="ma-1 pa-1 py-0 shrink">
             <v-btn
-              ref="again"
+              ref="wrong"
               :color="!recommendation ? 'red' : ''"
               class="px-2"
               @click="response(false)"
@@ -254,7 +256,7 @@
           </v-col>
           <v-col id="response" cols="5" sm="auto" class="ma-1 pa-1 py-0 shrink">
             <v-btn
-              ref="good"
+              ref="right"
               :color="recommendation ? 'green' : ''"
               class="px-2"
               @click="response(true)"
@@ -299,6 +301,12 @@
     components: { ConnectionPopup, Onboard },
   })
   export default class Learn extends Vue {
+    $refs!: {
+      answer: HTMLInputElement;
+      retype: HTMLInputElement;
+      right: HTMLButtonElement;
+      wrong: HTMLButtonElement;
+    };
     showBack = false;
     typed = "";
     retyped = "";
@@ -395,8 +403,9 @@
           !e.shiftKey &&
           !e.ctrlKey
         ) {
-          //this.$ref.typed.$el.focus() doesn't work some reason
-        document.getElementById("answer")!.focus(); // eslint-disable-line
+          this.$nextTick(() => {
+            this.$refs.answer.focus();
+          });
         }
       }
     }
@@ -415,7 +424,9 @@
         !e.shiftKey &&
         !e.ctrlKey
       ) {
-        document.getElementById("retype_answer")!.focus(); //eslint-disable-line
+        this.$nextTick(() => {
+          this.$refs.retype.focus();
+        });
       }
     }
 
