@@ -16,6 +16,7 @@
               }"
             >
               <v-text-field
+                ref="title"
                 v-model="title"
                 label="Deck Name"
                 required
@@ -58,6 +59,7 @@
   export default class CreateNewDeck extends Vue {
     $refs!: {
       observer: InstanceType<typeof ValidationObserver>;
+      title: HTMLInputElement;
     };
     public title = "";
 
@@ -75,6 +77,9 @@
     onReset() {
       this.title = "";
       this.$refs.observer.reset();
+      this.$nextTick(() => {
+        this.$refs.title.focus();
+      });
     }
 
     public cancel() {

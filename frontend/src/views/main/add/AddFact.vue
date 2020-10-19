@@ -17,6 +17,7 @@
                 }"
               >
                 <v-textarea
+                  ref="front"
                   v-model="front"
                   label="Front"
                   auto-grow
@@ -99,6 +100,7 @@
   })
   export default class CreateFact extends Vue {
     $refs!: {
+      front: HTMLInputElement;
       observer: InstanceType<typeof ValidationObserver>;
     };
 
@@ -122,7 +124,7 @@
       return userProfile && userProfile.decks ? userProfile.decks : [];
     }
 
-    onReset() {
+    onReset(resetDeck = true) {
       this.$refs.observer.reset();
 
       this.front = "";
@@ -130,9 +132,13 @@
       this.identifier = "";
       this.category = "";
       const userProfile = mainStore.userProfile;
-      if (userProfile && userProfile.default_deck) {
+      if (resetDeck && userProfile && userProfile.default_deck) {
         this.deck_id = userProfile.default_deck.id;
       }
+
+      this.$nextTick(() => {
+        this.$refs.front.focus();
+      });
     }
 
     cancel() {
@@ -156,11 +162,7 @@
         extra: { type: "user created" },
       };
       await mainStore.createFact(fact);
-      this.front = "";
-      this.back = "";
-      this.identifier = "";
-      this.category = "";
-      this.$refs.observer.reset();
+      this.onReset(false);
     }
   }
 </script>
