@@ -13,6 +13,7 @@ class StatisticsBase(BaseModel):
     known_rate: float
     new_known_rate: float
     review_known_rate: float
+    n_days_studied: int
 
 
 # Used to return statistics to users
