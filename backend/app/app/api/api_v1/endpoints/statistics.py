@@ -120,7 +120,7 @@ def read_leaderboard(
 
 
 @router.get("/visualizations", response_model=List[schemas.Visualization])
-def read_leaderboard(
+def read_visualization(
         *,
         db: Session = Depends(deps.get_db),
         deck_id: int = None,
