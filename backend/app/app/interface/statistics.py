@@ -116,6 +116,30 @@ def get_leaderboard(db: Session, rank_type: schemas.RankType, user: models.user,
         return e
 
 
+def get_user_visualizations(db: Session, user: models.user, *, date_start: datetime = None, date_end: datetime = None,
+                            deck_id: int = None) -> Union[
+    schemas.Visualization, requests.exceptions.RequestException, json.decoder.JSONDecodeError]:
+    parameters = {'user_id': user.id, 'env': settings.ENVIRONMENT}
+    if date_start:
+        parameters['date_start'] = date_start
+    if date_end:
+        parameters['date_end'] = date_end
+    if deck_id:
+        parameters['deck_id'] = deck_id
+    try:
+        request = requests.get(f"{settings.INTERFACE}api/karl/user_charts", params=parameters)
+        logger.info(request.url)
+        result_dict = request.json()
+        visualization = schemas.Visualization(**result_dict)
+        return visualization
+    except requests.exceptions.RequestException as e:
+        capture_exception(e)
+        return e
+    except json.decoder.JSONDecodeError as e:
+        capture_exception(e)
+        return e
+
+
 def create_name(db: Session, date_start: datetime = None, date_end: datetime = None, deck_id: int = None):
     name = ""
 

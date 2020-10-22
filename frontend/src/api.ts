@@ -271,4 +271,28 @@ export const api = {
       authHeaders(token),
     );
   },
+  async getUserVisualizations(token: string, data: IComponents["VisualizationSearch"]) {
+    let url = ``;
+
+    if (data.date_start) {
+      url += `&date_start=${format(
+        startOfDay(parse(data.date_start, "yyyy-MM-dd", new Date())),
+        "yyyy-MM-dd'T'HH:mm:ss.SSSxxxx",
+      )}`;
+    }
+    if (data.date_end) {
+      url += `&date_end=${format(
+        endOfDay(new Date(data.date_end)),
+        "yyyy-MM-dd'T'HH:mm:ss.SSSxxxx",
+      )}`;
+    }
+    if (data.deck_id) {
+      url += `&deck_id=${data.deck_id}`;
+    }
+    url = url.slice(1);
+    return axios.get<IComponents["Visualization"][]>(
+      `${apiUrl}/api/statistics/visualizations/?${url}`,
+      authHeaders(token),
+    );
+  },
 };

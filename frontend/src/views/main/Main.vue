@@ -37,6 +37,14 @@
             <v-list-item-title>Leaderboards</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+        <v-list-item to="/main/visualizations">
+          <v-list-item-action>
+            <v-icon>{{ mdiFormatListNumbered }}</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Visualizations</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
       </v-list>
       <v-divider></v-divider>
       <v-list subheader>

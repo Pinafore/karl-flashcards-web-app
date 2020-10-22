@@ -117,3 +117,25 @@ def read_leaderboard(
     if isinstance(top_users, json.decoder.JSONDecodeError):
         raise HTTPException(status_code=556, detail="Scheduler malfunction")
     return top_users
+
+
+@router.get("/visualizations", response_model=List[schemas.Visualization])
+def read_leaderboard(
+        *,
+        db: Session = Depends(deps.get_db),
+        deck_id: int = None,
+        date_start: datetime = None,
+        date_end: datetime = None,
+        current_user: models.User = Depends(deps.get_current_active_user),
+) -> Any:
+    """
+    Retrieves leaderboard of users since the specified start time, or all time otherwise
+    """
+
+    top_users = interface.statistics.get_user_visualizations(db=db, user=current_user, date_start=date_start,
+                                                             date_end=date_end, deck_id=deck_id)
+    if isinstance(top_users, requests.exceptions.RequestException):
+        raise HTTPException(status_code=555, detail="Connection to scheduler is down")
+    if isinstance(top_users, json.decoder.JSONDecodeError):
+        raise HTTPException(status_code=556, detail="Scheduler malfunction")
+    return top_users

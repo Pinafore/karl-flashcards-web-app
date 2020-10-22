@@ -30,6 +30,7 @@ export default class MainModule extends VuexModule {
   homeLeaderboards: IComponents["Leaderboard"][] = [];
   savedLeaderboards: IComponents["Leaderboard"][] = [];
   filteredLeaderboard: IComponents["Leaderboard"] | null = null;
+  visualizations: IComponents["Visualization"][] = [];
   types = [
     { text: "Total Seen:", value: "total_seen" },
     { text: "Days Studied", value: "n_days_studied" },
@@ -207,6 +208,11 @@ export default class MainModule extends VuexModule {
   @Mutation
   addToStats(payload: IComponents["Statistics"]) {
     this.savedStats.unshift(payload);
+  }
+
+  @Mutation
+  setVisualizations(payload: IComponents["Visualization"][]) {
+    this.visualizations= payload;
   }
 
   @Action
@@ -793,6 +799,21 @@ export default class MainModule extends VuexModule {
     try {
       const response = await api.getLeaderboard(this.token, payload);
       this.setFilteredLeaderboard(response.data);
+      this.setConnectionError(false);
+      this.setSchedulerError(false);
+    } catch (error) {
+      await this.checkApiError(error);
+    }
+  }
+
+  @Action
+
+
+  @Action
+  async getVisualizations(payload: IComponents["VisualizationSearch"]) {
+    try {
+      const response = await api.getUserVisualizations(this.token, payload);
+      this.setVisualizations(response.data);
       this.setConnectionError(false);
       this.setSchedulerError(false);
     } catch (error) {

@@ -190,6 +190,15 @@ export interface IComponents {
     date_end?: string;
     deck_id?: number;
   };
+  Visualization: {
+    name: string;
+    spec: object;
+  }
+  VisualizationSearch: {
+    date_start?: string;
+    date_end?: string;
+    deck_id?: number;
+  };
   Statistics: {
     name: string;
     user_id: number;

@@ -104,6 +104,14 @@ const router = new VueRouter({
                 ),
             },
             {
+              path: "visualizations",
+              name: "visualizations",
+              component: () =>
+                import(
+                  /* webpackChunkName: "main-visualizations" */ "@/views/main/Visualizations.vue"
+                  ),
+            },
+            {
               path: "leaderboards",
               name: "leaderboards",
               component: () =>
