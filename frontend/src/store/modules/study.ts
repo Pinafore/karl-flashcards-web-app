@@ -18,7 +18,7 @@ export default class StudyModule extends VuexModule {
   };
   frontTime = 0;
   time = 0;
-  timer: number | undefined = undefined;
+  timer: NodeJS.Timeout | undefined = undefined;
   backTime = 0;
 
   @Mutation
