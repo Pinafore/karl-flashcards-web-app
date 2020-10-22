@@ -120,12 +120,12 @@ def get_user_visualizations(db: Session, user: models.user, *, date_start: datet
                             deck_id: int = None) -> Union[
     schemas.Visualization, requests.exceptions.RequestException, json.decoder.JSONDecodeError]:
     parameters = {'user_id': user.id, 'env': settings.ENVIRONMENT}
-    if date_start:
-        parameters['date_start'] = date_start
-    if date_end:
-        parameters['date_end'] = date_end
-    if deck_id:
-        parameters['deck_id'] = deck_id
+    # if date_start:
+    #     parameters['date_start'] = date_start
+    # if date_end:
+    #     parameters['date_end'] = date_end
+    # if deck_id:
+    #     parameters['deck_id'] = deck_id
     try:
         request = requests.get(f"{settings.INTERFACE}api/karl/user_charts", params=parameters)
         logger.info(request.url)
