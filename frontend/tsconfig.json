@@ -2,7 +2,6 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
-    "strict": true,
     "jsx": "preserve",
     "importHelpers": true,
     "noUnusedLocals": false,
@@ -13,6 +12,7 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
+    "resolveJsonModule": true,
     "baseUrl": ".",
     "types": ["webpack-env", "jest", "vuetify"],
     "paths": {
