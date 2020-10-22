@@ -39,7 +39,7 @@
         </v-list-item>
         <v-list-item to="/main/visualizations">
           <v-list-item-action>
-            <v-icon>{{ mdiFormatListNumbered }}</v-icon>
+            <v-icon>{{ mdiChartScatterPlotHexbin }}</v-icon>
           </v-list-item-action>
           <v-list-item-content>
             <v-list-item-title>Visualizations</v-list-item-title>
@@ -250,6 +250,7 @@
     mdiUploadMultiple,
     mdiFormatListNumbered,
     mdiBookInformationVariant,
+    mdiChartScatterPlotHexbin,
   } from "@mdi/js";
 
   const routeGuardMain = async (to, _from, next) => {
@@ -270,6 +271,7 @@
     mdiUploadMultiple = mdiUploadMultiple;
     mdiBookInformationVariant = mdiBookInformationVariant;
     mdiFormatListNumbered = mdiFormatListNumbered;
+    mdiChartScatterPlotHexbin = mdiChartScatterPlotHexbin;
 
     public beforeRouteEnter(to, from, next) {
       routeGuardMain(to, from, next);
