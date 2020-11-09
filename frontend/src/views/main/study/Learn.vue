@@ -197,7 +197,7 @@
       <v-card-text v-show="show.enable_actions" class="py-2">
         <v-text-field
           id="answer"
-          ref="answer"
+          ref="answerfield"
           v-model="typed"
           solo
           label="Recommended - Type Answer (Press any letter to focus)"
@@ -302,7 +302,7 @@
   })
   export default class Learn extends Vue {
     $refs!: {
-      answer: HTMLInputElement;
+      answerfield: HTMLInputElement;
       retype: HTMLInputElement;
       right: HTMLButtonElement;
       wrong: HTMLButtonElement;
@@ -404,7 +404,7 @@
           !e.ctrlKey
         ) {
           this.$nextTick(() => {
-            this.$refs.answer.focus();
+            this.$refs.answerfield.focus();
           });
         }
       }
