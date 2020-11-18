@@ -58,6 +58,7 @@ export interface IComponents {
     reported?: boolean;
     permission?: Permission;
     reports?: IComponents["FactReported"][];
+    debug_id?: string;
   };
   FactCreate: {
     text: string;
@@ -128,6 +129,7 @@ export interface IComponents {
   Msg: { msg: string };
   Schedule: {
     fact_id: number;
+    debug_id: string;
     typed: string;
     response: boolean;
     elapsed_milliseconds_text: number;

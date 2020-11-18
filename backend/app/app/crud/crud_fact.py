@@ -385,6 +385,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             response_json = scheduler_response.json()
             card_order = response_json["order"]
             rationale = response_json["rationale"]
+            debug_id = response_json["debug_id"]
 
             query_time = time.time() - karl_query_start
             logger.info("query time: " + str(query_time))
@@ -397,6 +398,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                         retrieved_fact = self.get(db=db, id=int(each_karl_fact["fact_id"]))
                         fact_schema = self.get_schema_with_perm(db_obj=retrieved_fact, user=user)
                         fact_schema.rationale = rationale
+                        fact_schema.debug_id = debug_id
                         if retrieved_fact:
                             fact_schema.marked = True if user in retrieved_fact.markers else False
                         facts.append(fact_schema)
@@ -457,7 +459,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 details=details
             )
             history = crud.history.create(db=db, obj_in=history_in)
-            payload_update = [schemas.KarlFact(
+            payload_update = [schemas.KarlFactUpdate(
                 text=db_obj.text,
                 user_id=user.id,
                 repetition_model=user.repetition_model,
@@ -472,7 +474,8 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 elapsed_seconds_answer=schedule.elapsed_seconds_answer,
                 elapsed_milliseconds_text=schedule.elapsed_milliseconds_text,
                 elapsed_milliseconds_answer=schedule.elapsed_milliseconds_answer,
-                label=response).dict(exclude_unset=True)]
+                label=response,
+                debug_id=schedule.debug_id).dict(exclude_unset=True)]
             logger.info(payload_update[0])
             request = requests.post(settings.INTERFACE + "api/karl/update", json=payload_update)
             if 200 <= request.status_code < 300:

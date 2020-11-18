@@ -23,13 +23,17 @@ class KarlFact(FactBase):
     deck_name: str
     deck_id: int
     repetition_model: Repetition
-    label: Optional[bool] = None
-    history_id: Optional[int] = None
     env: str
+
+
+class KarlFactUpdate(KarlFact):
     elapsed_seconds_text: Optional[int] = None
     elapsed_seconds_answer: Optional[int] = None
     elapsed_milliseconds_text: Optional[int] = None
     elapsed_milliseconds_answer: Optional[int] = None
+    history_id: int
+    label: bool
+    debug_id: str
 
 
 class InternalFactBase(FactBase):
@@ -100,6 +104,7 @@ class Fact(FactInDBBase):
     suspended: Optional[bool] = None
     permission: Optional[Permission] = None
     reports: Optional[List[FactReported]] = None
+    debug_id: Optional[str] = None
 
 
 # Properties to return to client

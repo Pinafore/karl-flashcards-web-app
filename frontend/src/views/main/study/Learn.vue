@@ -502,6 +502,7 @@
         studyStore.markBackTime();
         studyStore.addToSchedule({
           fact_id: this.show.fact.fact_id,
+          debug_id: this.show.fact.debug_id ?? "unknown id",
           typed: this.typed,
           response: response,
           elapsed_milliseconds_text: this.frontTime,
