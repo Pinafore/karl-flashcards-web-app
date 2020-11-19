@@ -32,7 +32,7 @@ def evaluate_answer_cutoff(max_score: float) -> bool:
 
 
 def evaluate_answer(eval_fact: models.Fact, typed: str) -> bool:
-    answer_lines = eval_fact.answer_lines
-    logger.info("answer_lines: " + str(answer_lines))
-    max_score = run_tfidf(typed, answer_lines)
+    cleaned_typed = typed.lower().strip()
+    answer_lines = [answer_line.lower() for answer_line in eval_fact.answer_lines] + [cleaned_typed]
+    max_score = run_tfidf(cleaned_typed, answer_lines)
     return evaluate_answer_cutoff(max_score)
