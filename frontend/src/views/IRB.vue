@@ -30,11 +30,19 @@
             with. You are then encouraged to consistently study facts for as long as you
             would like each day until the end of the experiment. While it is encouraged
             that you study every day, this is not required. We estimate that you will
-            spend between 10 and 200 hours over the course of this study, depending on
+            spend between 10 and 500 hours over the course of this study, depending on
             your interest, which will continue to the end of June 2021. An optional
             official group chat will allow users to provide quick user feedback and
-            discussion. External trivia performance data will be collected to help
-            measure the effects of this application.
+            discussion. External trivia performance data and surveys will be collected
+            to help measure the effects of this application. We will have multiple
+            rounds of study in order to iterate and improve our scheduler. Throughout
+            these rounds, we will be gathering user feedback to help improve flashcard
+            suggestions. In phase two of the study, users will be able to test different
+            scheduler variants that will be modified over time rather than being
+            assigned randomly to an unchanged scheduler for the course of the
+            experiment. Future phases may involve a return to randomized trials to
+            provide more valuable quantitative data for analysis of improved scheduler
+            models.
           </p>
           <h3>Potential Risks and Discomforts</h3>
           <p style="text-align:left">
@@ -56,7 +64,10 @@
             and, if applicable, external trivia performance data. Any potential loss of
             confidentiality will be minimized by storing data securely in a
             password-protected account. After the end of the experiment, data will be
-            anonymized and released publicly.
+            anonymized and released publicly. We may ask you to participate in optional
+            surveys where you may optionally provide your name and link to public
+            statistics pages for trivia competitions, which we will incorporate into
+            evaluations of our scheduler performance.
           </p>
           <p style="text-align:left">
             If we write a report or article about this research project, your identity
@@ -67,7 +78,7 @@
           </p>
           <h3>Compensation</h3>
           <p style="text-align:left">
-            A $20 giftcard will be given to the five users who spend the most time
+            A $20 gift card will be given to the five users who spend the most time
             studying in the app over the course of the study, which will last until the
             end of June 2021. 10 other users who answer over 200 questions will be
             randomly selected to receive $10 gift cards. If you will earn $100 or more
