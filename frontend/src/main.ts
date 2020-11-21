@@ -9,7 +9,7 @@ import * as Sentry from "@sentry/browser";
 import { Vue as VueIntegration } from "@sentry/integrations";
 import VueGtag from "vue-gtag";
 
-const IGNORE = [/ServiceWorker/, /service worker/, /newestWorker/];
+const IGNORE = [/ServiceWorker/, /service worker/, /newestWorker/, /focus/];
 
 function shouldIgnoreException(s: string): boolean {
   return IGNORE.find((pattern) => pattern.test(s)) != null;
