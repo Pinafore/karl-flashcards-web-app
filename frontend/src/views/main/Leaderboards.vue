@@ -197,7 +197,9 @@
 
     get decks() {
       const userProfile = mainStore.userProfile;
-      return userProfile && userProfile.decks ? userProfile.decks : [];
+      return userProfile && userProfile.decks
+        ? [{ title: "All", public: false, id: 0 }].concat(userProfile.decks)
+        : [];
     }
 
     get today() {
@@ -214,6 +216,9 @@
 
     @Watch("searchOptions", { deep: true })
     onSearchOptionsChanged() {
+      if (this.searchOptions.deck_id == 0) {
+        this.searchOptions.deck_id = undefined;
+      }
       this.searchLeaderboards();
     }
 
