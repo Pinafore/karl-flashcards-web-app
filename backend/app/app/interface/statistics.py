@@ -124,8 +124,6 @@ def create_name(db: Session, date_start: datetime = None, date_end: datetime = N
         name = deck.title + ": "
 
     now = datetime.now(tz=date_start.tzinfo) if date_start else None
-    date_start = date_start.astimezone() if date_start else None
-    date_end = date_end.astimezone() if date_end else None
 
     if date_start and date_end:
         if date_start.date() == date_end.date():

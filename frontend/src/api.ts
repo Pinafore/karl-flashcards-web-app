@@ -211,7 +211,7 @@ export const api = {
     }
     if (data.date_end) {
       url += `&date_end=${format(
-        endOfDay(new Date(data.date_end)),
+        endOfDay(parse(data.date_end, "yyyy-MM-dd", new Date())),
         "yyyy-MM-dd'T'HH:mm:ss.SSSxxxx",
       )}`;
     }
@@ -246,7 +246,7 @@ export const api = {
     }
     if (data.date_end) {
       url += `&date_end=${format(
-        endOfDay(new Date(data.date_end)),
+        endOfDay(parse(data.date_end, "yyyy-MM-dd", new Date())),
         "yyyy-MM-dd'T'HH:mm:ss.SSSxxxx",
       )}`;
     }
