@@ -141,7 +141,7 @@ def test_repetition_model_assignment(db: Session) -> None:
     assert schedule_counts[Repetition.karl85] == karl85_init_count
 
     user_create = random_user_create()
-    assignment, assignment_method = crud.user.assign_scheduler(db, obj_in=user_create)
+    assignment, assignment_method = crud.user.assign_scheduler_to_new_user(db, obj_in=user_create)
     assert isinstance(assignment, Repetition)
     assert assignment_method == "dirichlet"
 
@@ -161,7 +161,7 @@ def test_repetition_model_assignment(db: Session) -> None:
     for _ in range(total_goal - dirichlet_stop):
         create_user(db=db)
     user_create = random_user_create()
-    assignment, assignment_method = crud.user.assign_scheduler(db, obj_in=user_create)
+    assignment, assignment_method = crud.user.assign_scheduler_to_new_user(db, obj_in=user_create)
     assert isinstance(assignment, Repetition)
     assert assignment_method == "random"
 
