@@ -388,6 +388,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             debug_id = response_json["debug_id"]
 
             query_time = time.time() - karl_query_start
+            logger.info(scheduler_response.request)
             logger.info("query time: " + str(query_time))
 
             facts = []
@@ -478,6 +479,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 debug_id=schedule.debug_id).dict(exclude_unset=True)]
             logger.info(payload_update[0])
             request = requests.post(settings.INTERFACE + "api/karl/update", json=payload_update)
+            logger.info(request.request)
             if 200 <= request.status_code < 300:
                 return True
             else:
