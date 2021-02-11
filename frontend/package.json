@@ -14,7 +14,7 @@
     "@sentry/browser": "^5.27.0",
     "@sentry/integrations": "^5.27.0",
     "@types/lodash.debounce": "^4.0.6",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "core-js": "^3.6.4",
     "date-fns": "^2.16.1",
     "http-status-codes": "^1.4.0",
