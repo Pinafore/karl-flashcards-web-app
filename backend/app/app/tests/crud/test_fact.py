@@ -81,12 +81,6 @@ def test_search_facts(db: Session) -> None:
     query = crud.fact.build_facts_query(db=db, user=user, filters=FactSearch(category="apple"))
     category_apple = crud.fact.get_eligible_facts(query=query)
     assert len(category_apple) == 0
-    query = crud.fact.build_facts_query(db=db, user=user, filters=FactSearch(category=""))
-    category_empty_string = crud.fact.get_eligible_facts(query=query)
-    assert len(category_empty_string) == 5
-    query = crud.fact.build_facts_query(db=db, user=user, filters=FactSearch())
-    category_null = crud.fact.get_eligible_facts(query=query)
-    assert len(category_null) == 5
 
     crud.fact.mark(db=db, db_obj=facts[0], user=user)
     query = crud.fact.build_facts_query(db=db, user=user, filters=FactSearch(marked=True))
