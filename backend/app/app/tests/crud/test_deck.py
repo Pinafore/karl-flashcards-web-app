@@ -1,7 +1,9 @@
 from app import crud
 from app.schemas.deck import DeckCreate
+from app.tests.utils.fact import create_random_fact_with_deck
 from app.tests.utils.user import create_random_user
 from app.tests.utils.utils import random_lower_string
+from app.schemas.fact import FactCreate, FactSearch
 from sqlalchemy.orm import Session
 
 
@@ -32,6 +34,20 @@ def test_find_or_create(db: Session) -> None:
     deck3 = crud.deck.find_or_create(db, proposed_deck="sdfasdf", user=user)
     assert len(user.decks) == 3
 
+
+def test_delete_deck(db: Session) -> None:
+    title = random_lower_string()
+    deck_in = DeckCreate(title=title)
+    user = create_random_user(db)
+    deck = crud.deck.create_with_owner(db=db, obj_in=deck_in, user=user)
+    create_random_fact_with_deck(db, user=user, deck=deck)
+    create_random_fact_with_deck(db, user=user, deck=deck)
+    query = crud.fact.build_facts_query(db=db, user=user, filters=FactSearch())
+    all_facts = crud.fact.get_eligible_facts(query=query)
+    assert len(all_facts) == 2
+    crud.deck.remove_for_user(db=db, db_obj=deck, user=user)
+    all_facts = crud.fact.get_eligible_facts(query=query)
+    assert len(all_facts) == 0
 # def test_get_deck(db: Session) -> None:
 #     title = random_lower_string()
 #     description = random_lower_string()

@@ -241,9 +241,12 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         return db_obj
 
     def build_facts_query(self, db: Session, *, user: models.User, filters: schemas.FactSearch = schemas.FactSearch()):
-        user_facts = (db.query(models.Fact).filter(models.Fact.user_id == user.id))
         visible_decks = (
             db.query(models.Deck.id).join(models.User_Deck).filter(models.User_Deck.owner_id == user.id).subquery())
+
+        user_facts = (db.query(models.Fact).join(visible_decks, models.Fact.deck_id == visible_decks.c.id).filter(
+            models.Fact.user_id == user.id))
+
         deck_owners = (db.query(models.User_Deck.deck_id, models.User_Deck.owner_id)
                        .outerjoin(visible_decks)
                        .filter(models.User_Deck.permissions == schemas.Permission.owner).subquery())

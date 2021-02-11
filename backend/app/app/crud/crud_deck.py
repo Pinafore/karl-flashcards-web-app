@@ -92,7 +92,7 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
             db_obj.users.remove(user)
             # db.add(db_obj)
             db.commit()
-            # db.refresh(db_obj)
+            db.refresh(db_obj)
         return db_obj
 
 
