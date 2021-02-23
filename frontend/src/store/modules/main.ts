@@ -212,7 +212,7 @@ export default class MainModule extends VuexModule {
 
   @Mutation
   setVisualizations(payload: IComponents["Visualization"][]) {
-    this.visualizations= payload;
+    this.visualizations = payload;
   }
 
   @Action

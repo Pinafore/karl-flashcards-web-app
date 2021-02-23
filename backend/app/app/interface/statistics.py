@@ -127,12 +127,13 @@ def get_user_visualizations(db: Session, user: models.user, *, date_start: datet
     # if deck_id:
     #     parameters['deck_id'] = deck_id
     try:
-        request = requests.get(f"{settings.INTERFACE}api/karl/user_charts", params=parameters)
+        request = requests.get(f"{settings.INTERFACE}api/karl/get_user_charts", params=parameters)
         logger.info(request.url)
         visualization_dict = request.json()
 
         visualizations = []
         for visualization in visualization_dict:
+            logger.info(visualization["specs"])
             visualizations.append(schemas.Visualization(**visualization))
         return visualizations
     except requests.exceptions.RequestException as e:

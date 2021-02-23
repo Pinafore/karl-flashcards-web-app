@@ -192,7 +192,7 @@ export interface IComponents {
   };
   Visualization: {
     name: string;
-    spec: object;
+    specs: string;
   }
   VisualizationSearch: {
     date_start?: string;

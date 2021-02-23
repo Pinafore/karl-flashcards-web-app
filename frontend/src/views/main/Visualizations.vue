@@ -179,10 +179,11 @@
 
     async searchVisualizations() {
       this.loading = true;
+      mainStore.setVisualizations([]);
       await mainStore.getVisualizations(this.searchOptions);
       this.loading = false;
       for (const viz of this.visualizations) {
-        await embed(`#${viz.name}`, viz.spec);
+        await embed(`#${viz.name}`, JSON.parse(viz.specs));
       }
     }
 
