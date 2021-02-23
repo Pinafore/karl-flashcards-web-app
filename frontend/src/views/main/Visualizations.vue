@@ -108,13 +108,7 @@
           >
             <template v-slot:default="props">
               <v-row>
-                <v-col
-                  v-for="item in props.items"
-                  :key="item.name"
-                  cols="12"
-                  lg="4"
-                  md="6"
-                >
+                <v-col v-for="item in props.items" :key="item.name">
                   <v-card>
                     <v-card-title
                       class="subheading font-weight-medium justify-center"
