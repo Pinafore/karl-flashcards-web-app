@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pytz import timezone
 from sqlalchemy.orm import Session
 
-from app import models, schemas, interface
+from app import models, schemas, interface, crud
 from app.api import deps
 
 router = APIRouter()
@@ -117,3 +117,26 @@ def read_leaderboard(
     if isinstance(top_users, json.decoder.JSONDecodeError):
         raise HTTPException(status_code=556, detail="Scheduler malfunction")
     return top_users
+
+
+@router.get("/typed", response_model=schemas.Fact)
+def read_historical_fact(
+        *,
+        db: Session = Depends(deps.get_db),
+        history_id: int = None,
+        debug_id: str = None,
+        current_user: models.User = Depends(deps.get_current_active_superuser),
+) -> Any:
+    """
+    Retrieves user typed answer for event
+    """
+    if history_id:
+        history_instance = crud.history.get(db=db, id=history_id)
+    elif debug_id:
+        history_instance = crud.history.get_with_debug(db=db, debug_id=debug_id)
+    else:
+        raise HTTPException(status_code=408, detail="Missing either history_id or debug_id")
+
+    fact = crud.fact.get(db=db, id=history_instance.fact_id)
+
+    return fact

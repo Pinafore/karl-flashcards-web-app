@@ -420,6 +420,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 "first_fact": facts[0] if len(facts) != 0 else "empty",
                 "eligible_fact_time": query_time,
                 "scheduler_query_time": eligible_fact_time,
+                "debug_id": debug_id,
             }
             history_in = schemas.HistoryCreate(
                 time=datetime.now(timezone('UTC')).isoformat(),
@@ -447,6 +448,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 "study_system": user.repetition_model,
                 "typed": schedule.typed,
                 "response": schedule.response,
+                "debug_id": schedule.debug_id,
             }
             if schedule.elapsed_seconds_text:
                 details["elapsed_seconds_text"] = schedule.elapsed_seconds_text
