@@ -119,7 +119,7 @@ def read_leaderboard(
     return top_users
 
 
-@router.get("/typed", response_model=schemas.Fact)
+@router.get("/typed", response_model=str)
 def read_historical_fact(
         *,
         db: Session = Depends(deps.get_db),
@@ -137,6 +137,7 @@ def read_historical_fact(
     else:
         raise HTTPException(status_code=408, detail="Missing either history_id or debug_id")
 
-    fact = crud.fact.get(db=db, id=history_instance.fact_id)
-
-    return fact
+    if "typed" in history_instance.details:
+        return history_instance.details["typed"]
+    else:
+        raise HTTPException(status_code=408, detail="Typed response missing (history instance is not a study)")
