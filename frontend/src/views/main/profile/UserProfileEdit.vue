@@ -32,6 +32,19 @@
                 autocomplete="email"
               ></v-text-field>
             </validation-provider>
+            <validation-provider
+              v-slot="{ errors }"
+              rules="required|between:0,100"
+              name="Target Recall Percentage"
+            >
+              <v-text-field
+                v-model="recallTarget"
+                label="Target Recall Percentage"
+                :error-messages="errors[0]"
+                required
+                name="Target Recall Percentage"
+              ></v-text-field>
+            </validation-provider>
           </v-card-text>
           <v-checkbox v-model="showTips" label="Show Tips"></v-checkbox>
           <v-card-actions>
@@ -52,12 +65,13 @@
   import { Component, Vue } from "vue-property-decorator";
   import { IComponents } from "@/interfaces";
   import { mainStore } from "@/store";
-  import { required, email } from "vee-validate/dist/rules";
+  import { required, email, between } from "vee-validate/dist/rules";
   import { ValidationProvider, ValidationObserver, extend } from "vee-validate";
 
   // register validation rules
   extend("required", { ...required, message: "{_field_} can not be empty" });
   extend("email", { ...email, message: "Invalid email address" });
+  extend("between", { ...between, message: "{_field_} must be between 0 and 100" });
 
   @Component({
     components: {
@@ -74,6 +88,7 @@
     username = "";
     email = "";
     showTips = false;
+    recallTarget = 0;
 
     created() {
       const userProfile = mainStore.userProfile;
@@ -81,6 +96,7 @@
         this.username = userProfile.username;
         this.email = userProfile.email;
         this.showTips = userProfile.show_help;
+        this.recallTarget = userProfile.recall_target;
       }
     }
 
@@ -94,6 +110,7 @@
         this.username = userProfile.username;
         this.email = userProfile.email;
         this.showTips = userProfile.show_help;
+        this.recallTarget = userProfile.recall_target;
       }
       this.$refs.observer.reset();
     }
@@ -117,6 +134,10 @@
       }
       if (userProfile && this.email != userProfile.email) {
         updatedProfile.email = this.email;
+      }
+
+      if (userProfile && this.recallTarget != userProfile.recall_target) {
+        updatedProfile.recall_target = this.recallTarget;
       }
 
       if (userProfile && this.showTips != userProfile.show_help) {

@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, Column, Integer, String, ForeignKey, Enum, TIMESTAMP
+from sqlalchemy import Boolean, Column, Integer, String, ForeignKey, Enum, TIMESTAMP, SmallInteger
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
 
@@ -31,6 +31,7 @@ class User(Base):
     pwa_tip = Column(Boolean(), default=False, nullable=False)
     create_date = Column(TIMESTAMP(timezone=True))
     beta_user = Column(Boolean(), default=False, nullable=False)
+    recall_target = Column(SmallInteger, default=85, nullable=True)
 
     default_deck = relationship("Deck", foreign_keys=default_deck_id)
     owned_facts = relationship("Fact", back_populates="owner")

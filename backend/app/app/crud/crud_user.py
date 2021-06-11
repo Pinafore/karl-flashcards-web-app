@@ -11,6 +11,7 @@ from app import crud
 from app.core.security import get_password_hash, verify_password
 from app.crud.base import CRUDBase
 from app.interface.reassignment import change_assignment
+from app.interface.scheduler import set_user_settings
 from app.models.user import User
 from app.schemas import Repetition, Log
 from app.schemas.user import UserCreate, UserUpdate, SuperUserCreate, SuperUserUpdate
@@ -51,6 +52,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             username=obj_in.username,
             is_active=obj_in.is_active,
             repetition_model=model,
+            recall_target=obj_in.recall_target,
         )
         db.add(db_obj)
         db.commit()
@@ -80,7 +82,8 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             is_superuser=obj_in.is_superuser,
             is_active=obj_in.is_active,
             repetition_model=obj_in.repetition_model,
-            beta_user=obj_in.beta_user
+            beta_user=obj_in.beta_user,
+            recall_target=obj_in.recall_target,
         )
         db.add(db_obj)
         db.commit()
@@ -99,6 +102,8 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
                 hashed_password = get_password_hash(update_data["password"])
                 del update_data["password"]
                 update_data["hashed_password"] = hashed_password
+            if update_data["recall_target"]:
+                set_user_settings(user=db_obj, new_settings=obj_in)
         return super().update(db, db_obj=db_obj, obj_in=update_data)
 
     def authenticate(self, db: Session, *, email: str, username: str, password: str) -> Optional[User]:

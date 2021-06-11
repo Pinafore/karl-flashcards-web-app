@@ -26,7 +26,6 @@
           </div>
           <div v-else class="title primary--text">-----</div>
         </div>
-
         <div class="my-3">
           <div class="subheading secondary--text">Tips</div>
           <div v-if="userProfile && userProfile.show_help" class="title primary--text">
@@ -34,6 +33,18 @@
           </div>
           <div v-if="userProfile && !userProfile.show_help" class="title primary--text">
             Disabled
+          </div>
+          <div v-else class="title primary--text">
+            -----
+          </div>
+        </div>
+        <div class="my-3">
+          <div class="subheading secondary--text">Target Recall Percentage</div>
+          <div
+            v-if="userProfile && userProfile.recall_target"
+            class="title primary--text"
+          >
+            {{ userProfile.recall_target }}%
           </div>
           <div v-else class="title primary--text">
             -----

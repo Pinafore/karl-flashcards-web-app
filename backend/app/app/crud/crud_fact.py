@@ -84,7 +84,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             user_id=user.id,
             fact_id=db_obj.fact_id,
             log_type=schemas.Log.delete,
-            details={"study_system": user.repetition_model}
+            details={"study_system": user.repetition_model, "recall_target": user.recall_target}
         )
         crud.history.create(db=db, obj_in=history_in)
         return db_obj
@@ -104,7 +104,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             user_id=user.id,
             fact_id=db_obj.fact_id,
             log_type=schemas.Log.suspend,
-            details={"study_system": user.repetition_model}
+            details={"study_system": user.repetition_model, "recall_target": user.recall_target}
         )
         crud.history.create(db=db, obj_in=history_in)
         return db_obj
@@ -125,7 +125,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             user_id=user.id,
             fact_id=db_obj.fact_id,
             log_type=schemas.Log.report,
-            details={"study_system": user.repetition_model}
+            details={"study_system": user.repetition_model, "recall_target": user.recall_target}
         )
         crud.history.create(db=db, obj_in=history_in)
         return db_obj
@@ -144,7 +144,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             user_id=user.id,
             fact_id=db_obj.fact_id,
             log_type=schemas.Log.mark,
-            details={"study_system": user.repetition_model}
+            details={"study_system": user.repetition_model, "recall_target": user.recall_target}
         )
         crud.history.create(db=db, obj_in=history_in)
         return db_obj
@@ -162,7 +162,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             user_id=user.id,
             fact_id=db_obj.fact_id,
             log_type=schemas.Log.undo_delete,
-            details={"study_system": user.repetition_model}
+            details={"study_system": user.repetition_model, "recall_target": user.recall_target}
         )
         crud.history.create(db=db, obj_in=history_in)
         return db_obj
@@ -180,7 +180,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             user_id=user.id,
             fact_id=db_obj.fact_id,
             log_type=schemas.Log.undo_suspend,
-            details={"study_system": user.repetition_model}
+            details={"study_system": user.repetition_model, "recall_target": user.recall_target}
         )
         crud.history.create(db=db, obj_in=history_in)
         return db_obj
@@ -199,7 +199,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             user_id=user.id,
             fact_id=db_obj.fact_id,
             log_type=schemas.Log.undo_report,
-            details={"study_system": user.repetition_model}
+            details={"study_system": user.repetition_model, "recall_target": user.recall_target}
         )
         crud.history.create(db=db, obj_in=history_in)
         return db_obj
@@ -217,7 +217,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             user_id=user.id,
             fact_id=db_obj.fact_id,
             log_type=schemas.Log.resolve_report,
-            details={"study_system": user.repetition_model}
+            details={"study_system": user.repetition_model, "recall_target": user.recall_target}
         )
         crud.history.create(db=db, obj_in=history_in)
         return db_obj
@@ -235,7 +235,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             user_id=user.id,
             fact_id=db_obj.fact_id,
             log_type=schemas.Log.undo_mark,
-            details={"study_system": user.repetition_model}
+            details={"study_system": user.repetition_model, "recall_target": user.recall_target}
         )
         crud.history.create(db=db, obj_in=history_in)
         return db_obj
@@ -421,6 +421,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 "eligible_fact_time": query_time,
                 "scheduler_query_time": eligible_fact_time,
                 "debug_id": debug_id,
+                "recall_target": user.recall_target,
             }
             history_in = schemas.HistoryCreate(
                 time=datetime.now(timezone('UTC')).isoformat(),
@@ -449,6 +450,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 "typed": schedule.typed,
                 "response": schedule.response,
                 "debug_id": schedule.debug_id,
+                "recall_target": user.recall_target,
             }
             if schedule.elapsed_seconds_text:
                 details["elapsed_seconds_text"] = schedule.elapsed_seconds_text

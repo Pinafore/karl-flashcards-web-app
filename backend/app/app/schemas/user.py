@@ -18,6 +18,7 @@ class UserBase(BaseModel):
     dark_mode: Optional[bool] = None
     pwa_tip: Optional[bool] = None
     beta_user: Optional[bool] = None
+    recall_target: Optional[int] = None
 
 
 # Properties to receive via API on creation
@@ -54,6 +55,7 @@ class UserInDBBase(UserBase):
     dark_mode: bool
     pwa_tip: bool
     beta_user: bool
+    recall_target: int
 
     class Config:
         orm_mode = True
