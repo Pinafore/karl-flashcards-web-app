@@ -31,7 +31,7 @@ class User(Base):
     pwa_tip = Column(Boolean(), default=False, nullable=False)
     create_date = Column(TIMESTAMP(timezone=True))
     beta_user = Column(Boolean(), default=False, nullable=False)
-    recall_target = Column(SmallInteger, default=85, nullable=False)
+    recall_target = Column(SmallInteger, default=-1, nullable=False)
 
     default_deck = relationship("Deck", foreign_keys=default_deck_id)
     owned_facts = relationship("Fact", back_populates="owner")
