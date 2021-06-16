@@ -1,7 +1,7 @@
 <template>
   <div>
     <Onboard></Onboard>
-    <Settings></Settings>
+    <RecallPopup></RecallPopup>
     <v-toolbar style="position: sticky; top: 0; z-index: 10;">
       <v-toolbar-title>
         Decks
@@ -36,10 +36,10 @@
   import { mainStore } from "@/utils/store-accessor";
   import { IComponents } from "@/interfaces";
   import Onboard from "@/views/Onboard.vue";
-  import Settings from "@/views/main/Settings.vue";
+  import RecallPopup from "@/views/main/RecallPopup.vue";
 
   @Component({
-    components: { Settings, Onboard },
+    components: { RecallPopup, Onboard },
   })
   export default class Decks extends Vue {
     public headers = [

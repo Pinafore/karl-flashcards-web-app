@@ -3,9 +3,21 @@
     <v-dialog v-model="popup" max-width="1000px" persistent @click:outside="goBack">
       <v-card>
         <v-card-title>
-          <h2>Set Target Recall Percentage</h2>
+          <h2>Phase 2: Set Target Recall Percentage</h2>
         </v-card-title>
         <v-card-text>
+          <p>
+            In KAR³L phase 2, we have randomly assigned all users to one of two new
+            scheduling systems. One scheduler allows you to adjust preferred level of
+            difficulty by specifying the ideal likelihood for getting your flashcards
+            correct should be (target recall percentage). This scheduler then shows
+            flashcards with recall probabilities closest to this target.
+          </p>
+          <p>
+            To maintain anonymity in scheduler assignments, we ask <b>all users</b> to
+            specify their target recall percentage. This setting may be adjusted later
+            in the User Profile screen.
+          </p>
           <validation-provider
             v-slot="{ errors }"
             rules="required|between:0,100"
@@ -20,6 +32,7 @@
             ></v-text-field>
           </validation-provider>
         </v-card-text>
+
         <v-card-actions class="pt-0">
           <v-spacer></v-spacer>
           <v-btn color="primary" text @click="onSubmit">
@@ -32,7 +45,7 @@
 </template>
 
 <script lang="ts">
-  import { Component, Vue, Watch } from "vue-property-decorator";
+  import { Component, Vue } from "vue-property-decorator";
   import { mainStore } from "@/store";
   import { IComponents } from "@/interfaces";
   import { between, required } from "vee-validate/dist/rules";
@@ -46,7 +59,7 @@
       ValidationProvider,
     },
   })
-  export default class Settings extends Vue {
+  export default class RecallPopup extends Vue {
     popup = false;
     recallTarget = 0;
 
@@ -64,7 +77,7 @@
     }
 
     get currentRecallTarget() {
-      return mainStore.userProfile?.recall_target;
+      return this.userProfile?.recall_target ?? -1;
     }
 
     goBack() {
@@ -74,7 +87,6 @@
     async onSubmit() {
       const success = await this.$refs.observer.validate();
       if (!success) {
-        print("SFLSDKJFJSLDFFAIL");
         return;
       }
       this.popup = false;

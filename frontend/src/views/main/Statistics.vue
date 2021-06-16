@@ -1,7 +1,7 @@
 <template>
   <v-container fluid>
     <connection-popup></connection-popup>
-    <Settings></Settings>
+    <RecallPopup></RecallPopup>
     <v-card class="ma-3 mb-0 pa-3">
       <v-row no-gutters>
         <v-col>
@@ -185,10 +185,10 @@
   import { mainStore } from "@/store";
   import { IComponents } from "@/interfaces";
   import ConnectionPopup from "@/views/ConnectionPopup.vue";
-  import Settings from "@/views/main/Settings.vue";
+  import RecallPopup from "@/views/main/RecallPopup.vue";
 
   @Component({
-    components: { ConnectionPopup, Settings },
+    components: { ConnectionPopup, RecallPopup },
   })
   export default class Statistics extends Vue {
     loading = true;
