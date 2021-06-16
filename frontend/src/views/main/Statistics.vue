@@ -1,6 +1,7 @@
 <template>
   <v-container fluid>
     <connection-popup></connection-popup>
+    <Settings></Settings>
     <v-card class="ma-3 mb-0 pa-3">
       <v-row no-gutters>
         <v-col>
@@ -184,9 +185,10 @@
   import { mainStore } from "@/store";
   import { IComponents } from "@/interfaces";
   import ConnectionPopup from "@/views/ConnectionPopup.vue";
+  import Settings from "@/views/main/Settings.vue";
 
   @Component({
-    components: { ConnectionPopup },
+    components: { ConnectionPopup, Settings },
   })
   export default class Statistics extends Vue {
     loading = true;

@@ -2,6 +2,7 @@
   <v-container fluid style="max-width:1200px">
     <onboard></onboard>
     <connection-popup></connection-popup>
+    <Settings></Settings>
     <v-card class="mx-3 my-1 py-1 px-0 px-sm-3">
       <v-card-title primary-title class="mx-3 my-0 pa-0">
         <div class="headline primary--text">Learn</div>
@@ -296,9 +297,10 @@
   import { studyStore, mainStore } from "@/utils/store-accessor";
   import Onboard from "@/views/Onboard.vue";
   import ConnectionPopup from "@/views/ConnectionPopup.vue";
+  import Settings from "@/views/main/Settings.vue";
 
   @Component({
-    components: { ConnectionPopup, Onboard },
+    components: { ConnectionPopup, Onboard, Settings },
   })
   export default class Learn extends Vue {
     $refs!: {

@@ -1,6 +1,7 @@
 <template>
   <v-container fluid>
     <p-w-a v-if="showPWA"></p-w-a>
+    <Settings></Settings>
     <v-row>
       <v-col>
         <v-card class="ma-3 pa-3">
@@ -174,9 +175,11 @@
   import { mainStore } from "@/store";
   import { format, startOfDay } from "date-fns";
   import PWA from "@/views/PWA.vue";
+  import Settings from "@/views/main/Settings.vue";
   import { IAppNotification, IComponents } from "@/interfaces";
+
   @Component({
-    components: { PWA },
+    components: { PWA, Settings },
   })
   export default class Dashboard extends Vue {
     loading = true;

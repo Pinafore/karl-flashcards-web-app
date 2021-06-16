@@ -1,6 +1,7 @@
 <template>
   <v-container fluid>
     <connection-popup></connection-popup>
+    <Settings></Settings>
     <v-card class="ma-3 mb-0 pa-3">
       <v-card-title primary-title>
         <div class="headline primary--text">Filter Leaderboards</div>
@@ -168,10 +169,11 @@
   import { mainStore } from "@/store";
   import { IComponents } from "@/interfaces";
   import ConnectionPopup from "@/views/ConnectionPopup.vue";
+  import Settings from "@/views/main/Settings.vue";
   import { DataOptions } from "vuetify";
 
   @Component({
-    components: { ConnectionPopup },
+    components: { ConnectionPopup, Settings },
   })
   export default class Leaderboard extends Vue {
     loading = true;
