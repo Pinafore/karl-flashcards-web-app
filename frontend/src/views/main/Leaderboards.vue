@@ -167,7 +167,7 @@
   import { Component, Vue, Watch } from "vue-property-decorator";
   import { mainStore } from "@/store";
   import { IComponents } from "@/interfaces";
-  import ConnectionPopup from "@/views/ErrorPopup.vue";
+  import ConnectionPopup from "@/views/ConnectionPopup.vue";
   import { DataOptions } from "vuetify";
 
   @Component({
