@@ -317,6 +317,7 @@
     retyped = "";
     dialog = false;
     editDialog = false;
+    pressed = false;
 
     get facts() {
       return studyStore.study;
@@ -348,6 +349,7 @@
       mainStore.setSchedulerError(false);
       await this.determine_decks(this.$router.currentRoute.query.deck);
       window.addEventListener("keydown", this.handleKeyDown);
+      window.addEventListener("keyup", this.resetKeyListener);
     }
 
     public beforeRouteEnter(to, from, next) {
@@ -385,11 +387,13 @@
       studyStore.setShowLoading();
       studyStore.emptySchedule();
       window.removeEventListener("keydown", this.handleKeyDown);
+      window.removeEventListener("keyup", this.resetKeyListener);
     }
 
     public handleKeyDown(e: KeyboardEvent) {
       const key = e.key.toLowerCase();
-      if (!this.editDialog) {
+      if (!this.editDialog && !this.pressed) {
+        this.pressed = true;
         if (e.altKey && (e.key == "s" || key == "ß")) {
           this.suspend();
         } else if (e.altKey && (key == "d" || key == "∂")) {
@@ -418,6 +422,10 @@
           });
         }
       }
+    }
+
+    public resetKeyListener(_: KeyboardEvent) {
+      this.pressed = false;
     }
 
     public determineResponse(e: KeyboardEvent, key: string) {
