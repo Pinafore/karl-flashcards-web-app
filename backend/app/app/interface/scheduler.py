@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 def set_user_settings(user: models.user, new_settings: schemas.UserUpdate) -> Union[
     int, requests.exceptions.RequestException, json.decoder.JSONDecodeError]:
-    parameters = {'user_id': user.id, 'env': settings.ENVIRONMENT, 'recall_target': new_settings.recall_target}
+    parameters = {'user_id': user.id, 'env': settings.ENVIRONMENT, 'recall_target': new_settings.recall_target / 100}
     try:
         request = requests.put(f"{settings.INTERFACE}api/karl/set_params/", params=parameters)
         logger.info(request.url)

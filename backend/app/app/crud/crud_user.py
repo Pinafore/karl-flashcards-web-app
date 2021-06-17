@@ -102,8 +102,8 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
                 hashed_password = get_password_hash(update_data["password"])
                 del update_data["password"]
                 update_data["hashed_password"] = hashed_password
-            if update_data["recall_target"]:
-                set_user_settings(user=db_obj, new_settings=obj_in)
+        if update_data["recall_target"]:
+            set_user_settings(user=db_obj, new_settings=obj_in)
         return super().update(db, db_obj=db_obj, obj_in=update_data)
 
     def authenticate(self, db: Session, *, email: str, username: str, password: str) -> Optional[User]:
