@@ -32,6 +32,7 @@ class User(Base):
     create_date = Column(TIMESTAMP(timezone=True))
     beta_user = Column(Boolean(), default=False, nullable=False)
     recall_target = Column(SmallInteger, default=-1, nullable=False)
+    test_mode = Column(Boolean(), default=False, nullable=False)
 
     default_deck = relationship("Deck", foreign_keys=default_deck_id)
     owned_facts = relationship("Fact", back_populates="owner")

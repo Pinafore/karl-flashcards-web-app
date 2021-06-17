@@ -168,6 +168,7 @@ export interface IComponents {
     dark_mode: boolean;
     pwa_tip: boolean;
     recall_target: number;
+    test_mode: boolean;
   };
   UserCreate: {
     email: string;
@@ -187,6 +188,7 @@ export interface IComponents {
     dark_mode?: boolean;
     pwa_tip?: boolean;
     recall_target?: number;
+    test_mode?: boolean;
   };
   ValidationError: { loc: string[]; msg: string; type: string };
   StatSearch: {
