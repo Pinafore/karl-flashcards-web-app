@@ -60,6 +60,9 @@
     },
   })
   export default class RecallPopup extends Vue {
+    $refs!: {
+      observer: InstanceType<typeof ValidationObserver>;
+    };
     popup = false;
     recallTarget = 0;
 
