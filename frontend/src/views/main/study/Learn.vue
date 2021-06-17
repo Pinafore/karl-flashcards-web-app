@@ -4,7 +4,10 @@
     <connection-popup></connection-popup>
     <RecallPopup></RecallPopup>
     <v-card class="mx-3 my-1 py-1 px-0 px-sm-3">
-      <v-card-title primary-title class="mx-3 my-0 pa-0">
+      <v-card-title v-if="isTestMode" primary-title class="mx-3 my-0 pa-0">
+        <div class="headline primary--text">Test Mode</div>
+      </v-card-title>
+      <v-card-title v-else primary-title class="mx-3 my-0 pa-0">
         <div class="headline primary--text">Learn</div>
         <v-spacer></v-spacer>
 
@@ -335,7 +338,12 @@
       return studyStore.recommendation;
     }
 
+    get isTestMode() {
+      return mainStore.userProfile?.test_mode ?? false;
+    }
+
     public async mounted() {
+      await mainStore.getUserProfile();
       mainStore.setConnectionError(false);
       mainStore.setSchedulerError(false);
       await this.determine_decks(this.$router.currentRoute.query.deck);
@@ -465,26 +473,36 @@
     }
 
     public async suspend() {
-      await studyStore.suspendFact();
-      this.resetCard();
+      if (!this.isTestMode) {
+        await studyStore.suspendFact();
+        this.resetCard();
+      }
     }
 
     public async edit() {
-      await studyStore.editFactDialog();
+      if (!this.isTestMode) {
+        await studyStore.editFactDialog();
+      }
     }
 
     public async report() {
-      await studyStore.reportFactDialog();
-      this.resetCard();
+      if (!this.isTestMode) {
+        await studyStore.reportFactDialog();
+        this.resetCard();
+      }
     }
 
     public async remove() {
-      await studyStore.deleteFact();
-      this.resetCard();
+      if (!this.isTestMode) {
+        await studyStore.deleteFact();
+        this.resetCard();
+      }
     }
 
     public async mark() {
-      await studyStore.markFact();
+      if (!this.isTestMode) {
+        await studyStore.markFact();
+      }
     }
 
     public async response(response) {
