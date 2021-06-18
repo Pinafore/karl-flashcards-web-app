@@ -33,7 +33,7 @@
 
     async mounted() {
       await mainStore.getUserProfile();
-      this.onboard = mainStore.userProfile?.test_mode ?? false;
+      this.popup = mainStore.userProfile?.test_mode ?? false;
     }
 
     startTesting() {
