@@ -1,6 +1,7 @@
 import json
 from typing import Any, List, Optional
 
+import logging
 import requests
 from fastapi import BackgroundTasks
 
@@ -12,6 +13,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 router = APIRouter()
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 @router.get("/", response_model=List[schemas.User])
@@ -97,6 +100,7 @@ def read_user_me(
     """
     Get current user.
     """
+    crud.user.test_mode_check(db, db_obj=current_user)
     return current_user
 
 

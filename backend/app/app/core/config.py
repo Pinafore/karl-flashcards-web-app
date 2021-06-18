@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     # "http://localhost:8080", "http://local.dockertoolbox.tiangolo.com"]'
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
     INTERFACE: str = "http://host.docker.internal:4000/"
+    TEST_MODE_TRIGGER: int = 250
+    TEST_MODE_PER_ROUND: int = 30
 
     @validator("INTERFACE")
     def get_interface(cls, v: Optional[str], values: Dict[str, Any]) -> str:

@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Optional, List
 
-from sqlalchemy import Column, ForeignKey, Integer, String, TIMESTAMP, ARRAY, cast, Index, func
+from sqlalchemy import Column, ForeignKey, Integer, String, TIMESTAMP, ARRAY, cast, Index, func, SmallInteger
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -35,6 +35,7 @@ class Fact(Base):
     category = Column(String, index=True)
     identifier = Column(String, index=True)
     answer_lines = Column(ARRAY(String), nullable=False)
+    test_mode = Column(SmallInteger)
     extra = Column(JSONB)
 
     owner = relationship("User", back_populates="owned_facts")

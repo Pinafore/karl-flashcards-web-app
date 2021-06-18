@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session, Query
 from app import crud, models, schemas
 from app.core.config import settings
 from app.crud.base import CRUDBase
+from app.schemas import Log
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -263,7 +264,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                            .outerjoin(models.Deleted,
                                       and_(models.Fact.fact_id == models.Deleted.fact_id,
                                            models.Deleted.user_id == user.id))
-                           .filter(models.Deleted.user_id == None)
+                           .filter(models.Deleted.user_id == None)  # keeps only facts join did not indicate deletion
                            .outerjoin(models.Reported,
                                       and_(models.Fact.fact_id == models.Reported.fact_id,
                                            models.Reported.user_id == user.id)
@@ -351,7 +352,29 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         logger.info("overall time facts: " + str(overall_total_time))
         return facts
 
-    def get_study_set(
+    def get_test_study_set(self, db: Session, *, user: models.User) -> List[schemas.Fact]:
+        facts = db.query(self.model).filter(models.Fact.test_mode == user.test_mode).outerjoin(models.History, and_(
+            models.Fact.fact_id == models.History.fact_id, models.History.user_id == user.id,
+            models.History.log_type == Log.test_study)).filter(models.History.id == None).order_by(func.random()).all()
+
+        # Alternative filter that is likely slower
+        # studied_test_facts = db.query(self.model.fact_id).join(models.History).filter(
+        #     models.History.user_id == user.id).filter(
+        #     models.History.log_type == Log.test_study)
+        # facts = db.query(self.model).filter(models.Fact.test_mode == user.test_mode).filter(
+        #     ~models.Fact.fact_id.in_(studied_test_facts)).order_by(func.random()).all()
+        history_in = schemas.HistoryCreate(
+            time=datetime.now(timezone('UTC')).isoformat(),
+            user_id=user.id,
+            log_type=schemas.Log.get_facts,
+            details={
+                "recall_target": user.recall_target,
+            }
+        )
+        crud.history.create(db=db, obj_in=history_in)
+        return facts
+
+    def get_normal_study_set(
             self,
             db: Session,
             *,

@@ -19,3 +19,5 @@ class Log(str, Enum):
     clear_report_or_suspend = "clear_report_or_suspend"
     assign_viewer = "assign_viewer"
     reassign_model = "reassign_model"
+    test_study = "test_study"
+    get_test_facts = "get_test_facts"

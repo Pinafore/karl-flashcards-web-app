@@ -8,6 +8,7 @@ from pytz import timezone
 from sentry_sdk import capture_exception
 
 from app import crud
+from app.core.config import settings
 from app.core.security import get_password_hash, verify_password
 from app.crud.base import CRUDBase
 from app.interface.reassignment import change_assignment
@@ -178,6 +179,15 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
     def make_current_users_beta_testers(self, db: Session):
         db.query(self.model).update({User.beta_user: True}, synchronize_session='evaluate')
+
+    def test_mode_check(self, db: Session, db_obj: User) -> bool:
+        return True
+        # if crud.history.get_user_study_count(user=db_obj) / settings.TEST_MODE_TRIGGER >= db_obj.test_mode:
+        #     if crud.history.get_user_test_study_count(user=db_obj) >= db_obj.test_mode * settings.TEST_MODE_PER_ROUND:
+        #         self.update(db, db_obj=db_obj, obj_in=UserUpdate(test_mode=db_obj.test_mode + 1))
+        #     return True
+        # else:
+        #     return False
 
 
 user = CRUDUser(User)
