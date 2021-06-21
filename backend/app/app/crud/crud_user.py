@@ -181,13 +181,14 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         db.query(self.model).update({User.beta_user: True}, synchronize_session='evaluate')
 
     def test_mode_check(self, db: Session, db_obj: User) -> bool:
-        return True
-        # if crud.history.get_user_study_count(user=db_obj) / settings.TEST_MODE_TRIGGER >= db_obj.test_mode:
-        #     if crud.history.get_user_test_study_count(user=db_obj) >= db_obj.test_mode * settings.TEST_MODE_PER_ROUND:
-        #         self.update(db, db_obj=db_obj, obj_in=UserUpdate(test_mode=db_obj.test_mode + 1))
-        #     return True
-        # else:
-        #     return False
+        # return True
+        if crud.history.get_user_study_count(user=db_obj) / settings.TEST_MODE_TRIGGER >= db_obj.next_test_mode:
+            if crud.history.get_user_test_study_count(
+                    user=db_obj) >= db_obj.next_test_mode * settings.TEST_MODE_PER_ROUND:
+                self.update(db, db_obj=db_obj, obj_in=UserUpdate(next_test_mode=db_obj.next_test_mode + 1))
+            return True
+        else:
+            return False
 
 
 user = CRUDUser(User)

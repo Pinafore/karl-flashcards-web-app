@@ -353,9 +353,12 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         return facts
 
     def get_test_study_set(self, db: Session, *, user: models.User) -> List[schemas.Fact]:
-        facts = db.query(self.model).filter(models.Fact.test_mode == user.test_mode).outerjoin(models.History, and_(
-            models.Fact.fact_id == models.History.fact_id, models.History.user_id == user.id,
-            models.History.log_type == Log.test_study)).filter(models.History.id == None).order_by(func.random()).all()
+        facts = db.query(self.model).filter(models.Fact.test_mode == user.next_test_mode).outerjoin(models.History,
+                                                                                                    and_(
+                                                                                                        models.Fact.fact_id == models.History.fact_id,
+                                                                                                        models.History.user_id == user.id,
+                                                                                                        models.History.log_type == Log.test_study)).filter(
+            models.History.id == None).order_by(func.random()).all()
 
         # Alternative filter that is likely slower
         # studied_test_facts = db.query(self.model.fact_id).join(models.History).filter(

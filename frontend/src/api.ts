@@ -113,7 +113,7 @@ export const api = {
       }
       url = url.slice(0, -1);
     }
-    return axios.get<IComponents["Fact"][]>(url, authHeaders(token));
+    return axios.get<IComponents["StudySet"]>(url, authHeaders(token));
   },
   async createFact(token: string, data: IComponents["FactCreate"]) {
     return axios.post(`${apiUrl}/api/facts/`, data, authHeaders(token));

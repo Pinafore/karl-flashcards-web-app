@@ -9,10 +9,10 @@
           In KAR³L phase 2, we ask users to periodically study a test set of general
           knowledge flashcards. This will allow us to perform a more rigorous evaluation
           of current and future scheduling systems. We expect each session of test mode
-          to generally taken less than fifteen minutes.
+          to generally take less than fifteen minutes. You may resume your regular study
+          after completing this test mode.
         </p>
       </v-card-text>
-
       <v-card-actions class="pt-0">
         <v-spacer></v-spacer>
         <v-btn color="primary" text @click="startTesting">
@@ -24,16 +24,25 @@
 </template>
 
 <script lang="ts">
-  import { Component, Vue } from "vue-property-decorator";
-  import { mainStore } from "@/store";
+  import { Component, Vue, Watch } from "vue-property-decorator";
+  import { mainStore, studyStore } from "@/store";
 
   @Component
   export default class TestPopup extends Vue {
     popup = false;
+    // May be good to have a popup when test mode is done
 
     async mounted() {
-      await mainStore.getUserProfile();
-      this.popup = mainStore.userProfile?.test_mode ?? false;
+      this.popup = this.isTestMode;
+    }
+
+    get isTestMode() {
+      return studyStore.isTestMode;
+    }
+
+    @Watch("isTestMode")
+    onIsTestModeChanged() {
+      this.popup = true;
     }
 
     startTesting() {

@@ -2,6 +2,7 @@
   <v-container fluid style="max-width:1200px">
     <onboard></onboard>
     <connection-popup></connection-popup>
+    <test-popup></test-popup>
     <RecallPopup></RecallPopup>
     <v-card class="mx-3 my-1 py-1 px-0 px-sm-3">
       <v-card-title v-if="isTestMode" primary-title class="mx-3 my-0 pa-0">
@@ -296,14 +297,15 @@
 </template>
 
 <script lang="ts">
-  import { Component, Vue } from "vue-property-decorator";
+  import { Component, Vue, Watch } from "vue-property-decorator";
   import { studyStore, mainStore } from "@/utils/store-accessor";
   import Onboard from "@/views/Onboard.vue";
   import ConnectionPopup from "@/views/ConnectionPopup.vue";
   import RecallPopup from "@/views/main/RecallPopup.vue";
+  import TestPopup from "@/views/main/TestPopup.vue";
 
   @Component({
-    components: { ConnectionPopup, Onboard, RecallPopup },
+    components: { TestPopup, ConnectionPopup, Onboard, RecallPopup },
   })
   export default class Learn extends Vue {
     $refs!: {
@@ -340,7 +342,7 @@
     }
 
     get isTestMode() {
-      return mainStore.userProfile?.test_mode ?? false;
+      return studyStore.isTestMode;
     }
 
     public async mounted() {
@@ -535,6 +537,7 @@
           response: response,
           elapsed_milliseconds_text: this.frontTime,
           elapsed_milliseconds_answer: this.backTime,
+          test_mode: this.isTestMode,
         });
         this.resetCard();
         await studyStore.updateSchedule();

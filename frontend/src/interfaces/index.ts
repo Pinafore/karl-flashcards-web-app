@@ -134,6 +134,7 @@ export interface IComponents {
     response: boolean;
     elapsed_milliseconds_text: number;
     elapsed_milliseconds_answer: number;
+    test_mode: number;
   };
   SuperUserCreate: {
     email: string;
@@ -168,7 +169,7 @@ export interface IComponents {
     dark_mode: boolean;
     pwa_tip: boolean;
     recall_target: number;
-    test_mode: boolean;
+    test_mode: number;
   };
   UserCreate: {
     email: string;
@@ -188,7 +189,7 @@ export interface IComponents {
     dark_mode?: boolean;
     pwa_tip?: boolean;
     recall_target?: number;
-    test_mode?: boolean;
+    test_mode?: number;
   };
   ValidationError: { loc: string[]; msg: string; type: string };
   StatSearch: {
@@ -232,5 +233,9 @@ export interface IComponents {
     user?: IComponents["User"];
     user_place?: number;
     limit?: number;
+  };
+  StudySet: {
+    facts: IComponents["Fact"][];
+    is_test_mode: boolean;
   };
 }

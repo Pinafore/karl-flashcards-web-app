@@ -14,4 +14,4 @@ from .field import Field
 from .file_props import FileProps
 from .rank_type import RankType
 from .leaderboard import LeaderboardUser, Leaderboard, DataTypeHeader
-
+from .study_set import StudySet
