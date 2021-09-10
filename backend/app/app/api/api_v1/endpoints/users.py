@@ -39,6 +39,11 @@ def create_user(
     Create new user.
     """
 
+    raise HTTPException(
+        status_code=512,
+        detail="New user sign up is currently disabled",
+    )
+
     user = crud.user.get_by_email(db, email=user_in.email)
     if user:
         raise HTTPException(
