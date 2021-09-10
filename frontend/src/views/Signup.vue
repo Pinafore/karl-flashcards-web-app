@@ -77,7 +77,7 @@
 
             <div v-if="signUpError">
               <v-alert :value="signUpError" transition="fade-transition" type="error">
-                A user with this email or username already exists
+                Sign up is currently disabled in preparation for phase 2 testing
               </v-alert>
             </div>
             <v-col class="caption text-right"
