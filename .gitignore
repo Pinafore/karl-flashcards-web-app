@@ -4,3 +4,4 @@ docker-stack.yml
 db-backups/
 cookiecutter-config-file.yml
 .git.bfg-report/
+.idea/
