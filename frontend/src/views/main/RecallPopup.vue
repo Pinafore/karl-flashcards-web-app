@@ -15,8 +15,9 @@
           </p>
           <p>
             To maintain anonymity in scheduler assignments, we ask <b>all users</b> to
-            specify their target recall percentage. This setting may be adjusted later
-            in the User Profile screen.
+            specify their target recall percentage even though not all schedulers are
+            affected by the setting. This setting may be adjusted later in the User
+            Profile screen.
           </p>
           <validation-provider
             v-slot="{ errors }"
