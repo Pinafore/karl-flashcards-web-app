@@ -98,12 +98,11 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             update_data = obj_in
         else:
             update_data = obj_in.dict(exclude_unset=True)
-        if obj_in.password:
-            if update_data["password"]:
-                hashed_password = get_password_hash(update_data["password"])
-                del update_data["password"]
-                update_data["hashed_password"] = hashed_password
-        if update_data["recall_target"]:
+        if obj_in.password and update_data["password"]:
+            hashed_password = get_password_hash(update_data["password"])
+            del update_data["password"]
+            update_data["hashed_password"] = hashed_password
+        if obj_in.recall_target and update_data["recall_target"]:
             set_user_settings(user=db_obj, new_settings=obj_in)
         return super().update(db, db_obj=db_obj, obj_in=update_data)
 
