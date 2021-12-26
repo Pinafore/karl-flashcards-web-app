@@ -39,7 +39,9 @@
           </div>
         </div>
         <div class="my-3">
-          <div class="subheading secondary--text">Target Recall Percentage</div>
+          <div class="subheading secondary--text">
+            Target Recall Percentage (Only Affects Certain Randomly Assigned Users)
+          </div>
           <div
             v-if="userProfile && userProfile.recall_target"
             class="title primary--text"

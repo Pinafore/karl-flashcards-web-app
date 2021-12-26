@@ -39,7 +39,7 @@
             >
               <v-text-field
                 v-model="recallTarget"
-                label="Target Recall Percentage"
+                label="Target Recall Percentage (Only Affects Certain Randomly Assigned Users)"
                 :error-messages="errors[0]"
                 required
                 name="Target Recall Percentage"
