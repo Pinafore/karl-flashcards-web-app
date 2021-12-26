@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional, List, Any, Type
 
 from pydantic import BaseModel, EmailStr
@@ -20,6 +21,7 @@ class UserBase(BaseModel):
     beta_user: Optional[bool] = None
     recall_target: Optional[int] = None
     next_test_mode: Optional[int] = None
+    last_test_date: Optional[datetime] = None
 
 
 # Properties to receive via API on creation
