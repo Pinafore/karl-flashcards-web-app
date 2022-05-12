@@ -353,13 +353,42 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         return facts
 
     def get_test_study_set(self, db: Session, *, user: models.User) -> List[schemas.Fact]:
-        facts = db.query(self.model)\
-            .filter(models.Fact.test_mode == user.next_test_mode).outerjoin(
-            models.History, and_(
-                models.Fact.fact_id == models.History.fact_id,
-                models.History.user_id == user.id,
-                models.History.log_type == Log.test_study)).filter(
+        LIMIT = 20
+        new_facts = db.query(self.model) \
+            .filter(models.Fact.test_mode == True).outerjoin(
+            models.Test_History, and_(
+                models.Fact.fact_id == models.Test_History.fact_id,
+                models.Test_History.user_id == user.id)).filter(
             models.History.id == None).order_by(func.random()).all()
+        print(new_facts)
+        old_facts = db.query(self.model) \
+            .filter(models.Fact.test_mode == True).join(
+            models.Test_History, and_(
+                models.Fact.fact_id == models.Test_History.fact_id,
+                models.Test_History.user_id == user.id,
+                models.Test_History.correct == False)).order_by(func.random()).all()
+        print(len(old_facts))
+
+        len_new_facts = len(new_facts)
+        len_old_facts = len(old_facts)
+        if len_new_facts >= 10 and len_old_facts >= 10:
+            facts = new_facts[:10] + old_facts[:10]
+        elif len_new_facts < 10:
+            facts = new_facts + old_facts[:LIMIT - len_new_facts]
+        elif len_old_facts < 10:
+            facts = old_facts + new_facts[:LIMIT - len_old_facts]
+        else:
+            print("Test Set Should Always Be Above 20: ", len_old_facts + len_new_facts)
+            facts = old_facts + new_facts
+        # facts = db.query(self.model)\
+        #     .filter(models.Fact.test_mode == user.next_test_mode).outerjoin(
+        #     models.History, and_(
+        #         models.Fact.fact_id == models.History.fact_id,
+        #         models.History.user_id == user.id,
+        #         models.History.log_type == Log.test_study)).filter(
+        #     models.History.id == None).order_by(func.random()).all()
+        # Most of this code is to ensure that students are only studying the flashcards
+        # they have not already studied during test mode
 
         # Alternative filter that is likely slower
         # studied_test_facts = db.query(self.model.fact_id).join(models.History).filter(
@@ -370,7 +399,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         history_in = schemas.HistoryCreate(
             time=datetime.now(timezone('UTC')).isoformat(),
             user_id=user.id,
-            log_type=schemas.Log.get_facts,
+            log_type=schemas.Log.get_test_facts,
             details={
                 "recall_target": user.recall_target,
             }

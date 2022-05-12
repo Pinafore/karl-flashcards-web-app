@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from .deck import Deck  # noqa: F401
     from .fact import Fact  # noqa: F401
     from .user_deck import User_Deck  # noqa: F401
+    from .test_history import Test_History  # noqa: F401
 
 
 class User(Base):
@@ -44,3 +45,4 @@ class User(Base):
     user_decks = relationship("User_Deck", back_populates="user", cascade="all, delete-orphan")
     decks = association_proxy('user_decks', 'deck')
     marked_facts = association_proxy('marks', 'marked_fact')
+    test_history = relationship("Test_History", back_populates="user")

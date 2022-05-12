@@ -7,3 +7,4 @@ from .user import User
 from .user_deck import User_Deck
 from .reported import Reported
 from .deleted import Deleted
+from .test_history import Test_History

@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Optional, List
 
-from sqlalchemy import Column, ForeignKey, Integer, String, TIMESTAMP, ARRAY, cast, Index, func, SmallInteger
+from sqlalchemy import Column, ForeignKey, Integer, String, TIMESTAMP, ARRAY, cast, Index, func, Boolean
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from .suspended import Suspended  # noqa: F401
     from .deck import Deck  # noqa: F401
     from .history import History  # noqa: F401
+    from .test_history import Test_History  # noqa: F401
 
 
 def create_tsvector(*args):
@@ -35,7 +36,7 @@ class Fact(Base):
     category = Column(String, index=True)
     identifier = Column(String, index=True)
     answer_lines = Column(ARRAY(String), nullable=False)
-    test_mode = Column(SmallInteger)
+    test_mode = Column(Boolean(), default=False, nullable=True)
     extra = Column(JSONB)
 
     owner = relationship("User", back_populates="owned_facts")
@@ -45,6 +46,7 @@ class Fact(Base):
     deleters = association_proxy('deletions', 'deleter')
     reporters = association_proxy('reporteds', 'reporter')
     markers = association_proxy('marks', 'marker')
+    test_history = relationship("Test_History", back_populates="fact")
 
     __ts_vector__ = create_tsvector(
         cast(func.coalesce(text, ''), postgresql.TEXT),
