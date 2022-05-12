@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get("/", response_model=List[schemas.Fact])
+@router.get("/", response_model=schemas.StudySet)
 def get_next_set(
         db: Session = Depends(deps.get_db),
         user_id: Optional[int] = None,
@@ -36,8 +36,8 @@ def get_next_set(
             raise HTTPException(status_code=400, detail="This user does not have the necessary permissions")
     else:
         user = current_user
-
-    if crud.user.test_mode_check(db, db_obj=user):
+    is_test_mode = crud.user.test_mode_check(db, db_obj=user)
+    if is_test_mode:
         facts = crud.fact.get_test_study_set(db=db, user=user)
     elif deck_ids is None:
         facts = crud.fact.get_normal_study_set(db=db, user=user, return_limit=limit)
@@ -59,7 +59,7 @@ def get_next_set(
         raise HTTPException(status_code=555, detail="Connection to scheduler is down")
     if isinstance(facts, json.decoder.JSONDecodeError):
         raise HTTPException(status_code=556, detail="Scheduler malfunction")
-    return facts
+    return schemas.StudySet(facts=facts, in_test_mode=is_test_mode)
 
 
 @router.put("/", response_model=List[bool])
