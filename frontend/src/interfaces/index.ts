@@ -236,6 +236,6 @@ export interface IComponents {
   };
   StudySet: {
     facts: IComponents["Fact"][];
-    is_test_mode: boolean;
+    in_test_mode: boolean;
   };
 }

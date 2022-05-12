@@ -5,7 +5,7 @@
     <test-popup></test-popup>
     <RecallPopup></RecallPopup>
     <v-card class="mx-3 my-1 py-1 px-0 px-sm-3">
-      <v-card-title v-if="isTestMode" primary-title class="mx-3 my-0 pa-0">
+      <v-card-title v-if="inTestMode" primary-title class="mx-3 my-0 pa-0">
         <div class="headline primary--text">Test Mode</div>
       </v-card-title>
       <v-card-title v-else primary-title class="mx-3 my-0 pa-0">
@@ -341,8 +341,8 @@
       return studyStore.recommendation;
     }
 
-    get isTestMode() {
-      return studyStore.isTestMode;
+    get inTestMode() {
+      return studyStore.inTestMode;
     }
 
     public async mounted() {
@@ -483,34 +483,34 @@
     }
 
     public async suspend() {
-      if (!this.isTestMode) {
+      if (!this.inTestMode) {
         await studyStore.suspendFact();
         this.resetCard();
       }
     }
 
     public async edit() {
-      if (!this.isTestMode) {
+      if (!this.inTestMode) {
         await studyStore.editFactDialog();
       }
     }
 
     public async report() {
-      if (!this.isTestMode) {
+      if (!this.inTestMode) {
         await studyStore.reportFactDialog();
         this.resetCard();
       }
     }
 
     public async remove() {
-      if (!this.isTestMode) {
+      if (!this.inTestMode) {
         await studyStore.deleteFact();
         this.resetCard();
       }
     }
 
     public async mark() {
-      if (!this.isTestMode) {
+      if (!this.inTestMode) {
         await studyStore.markFact();
       }
     }
@@ -537,7 +537,7 @@
           response: response,
           elapsed_milliseconds_text: this.frontTime,
           elapsed_milliseconds_answer: this.backTime,
-          test_mode: this.isTestMode,
+          test_mode: this.inTestMode,
         });
         this.resetCard();
         await studyStore.updateSchedule();

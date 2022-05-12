@@ -33,14 +33,14 @@
     // May be good to have a popup when test mode is done
 
     async mounted() {
-      this.popup = this.isTestMode;
+      this.popup = this.inTestMode;
     }
 
-    get isTestMode() {
-      return studyStore.isTestMode;
+    get inTestMode() {
+      return studyStore.inTestMode;
     }
 
-    @Watch("isTestMode")
+    @Watch("inTestMode")
     onIsTestModeChanged() {
       this.popup = true;
     }

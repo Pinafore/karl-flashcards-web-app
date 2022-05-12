@@ -20,7 +20,7 @@ export default class StudyModule extends VuexModule {
   time = 0;
   timer: NodeJS.Timeout | undefined = undefined;
   backTime = 0;
-  isTestMode = false;
+  inTestMode = false;
 
   @Mutation
   setDeckIds(payload) {
@@ -131,7 +131,7 @@ export default class StudyModule extends VuexModule {
 
   @Mutation
   setIsTestMode(payload: boolean) {
-    this.isTestMode = payload;
+    this.inTestMode = payload;
   }
 
   @Action
@@ -194,17 +194,20 @@ export default class StudyModule extends VuexModule {
     try {
       this.setShowLoading();
       const response = await api.getStudyFacts(mainStore.token, this.deckIds ?? []);
+      console.log(response.data);
       if (response.data.facts.length == 0) {
         this.setShowEmpty();
         this.setStudy([]);
       } else {
         this.setStudy(response.data.facts);
-        this.setIsTestMode(response.data.is_test_mode);
+        console.log(response.data.in_test_mode);
+        this.setIsTestMode(response.data.in_test_mode);
         await this.getNextShow();
       }
       mainStore.setConnectionError(false);
       mainStore.setSchedulerError(false);
     } catch (error) {
+      console.log(error);
       await mainStore.checkApiError(error);
       this.setShowError();
     }
