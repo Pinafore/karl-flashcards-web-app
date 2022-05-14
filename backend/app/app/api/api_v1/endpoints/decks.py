@@ -6,6 +6,7 @@ from app.api import deps
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pytz import timezone
 from sqlalchemy.orm import Session
+from app.core.config import settings
 
 router = APIRouter()
 
@@ -109,6 +110,21 @@ def update_deck(
         raise HTTPException(status_code=401, detail="Not enough permissions")
     deck = crud.deck.update(db=db, db_obj=deck, obj_in=deck_in)
     return deck
+
+
+@router.put("/test-deck", response_model=schemas.Deck)
+def update_test_deck_id(
+        *,
+        db: Session = Depends(deps.get_db),
+        current_user: models.User = Depends(deps.get_current_active_superuser),
+) -> int:
+    """
+    Update the saved deck id of the test deck
+    """
+    deck = crud.deck.find_or_create(db, proposed_deck="Test Mode", user=current_user, public=True)
+
+    settings.TEST_DECK_ID = deck.id
+    return settings.TEST_DECK_ID
 
 
 @router.get("/{deck_id}", response_model=schemas.Deck)

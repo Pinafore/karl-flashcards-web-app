@@ -9,3 +9,4 @@ from .reported import Reported
 from .deleted import Deleted
 from .test_history import Test_History
 from .session_fact import Session_Fact
+from .studyset import StudySet

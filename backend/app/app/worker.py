@@ -125,7 +125,7 @@ def create_test_mode_facts() -> str:
     if user:
         dirname = os.path.dirname(os.path.abspath(__file__))
         filename = os.path.join(dirname, "./data/jeopardy.json")
-        deck = crud.deck.find_or_create(db, proposed_deck="Jeopardy", user=user, public=True)
+        deck = crud.deck.find_or_create(db, proposed_deck="Test Mode", user=user, public=True)
         with open(filename, "r") as file:
             json_data = json.load(file)
             # there seems to be 216930 jeopardy questions
@@ -152,5 +152,5 @@ def create_test_mode_facts() -> str:
                     )
                     crud.fact.create_with_owner(db, obj_in=fact_in, user=user)
                     count += 1
-        return f"{count} quizbowl questions loaded"
+        return f"{count} quizbowl questions loaded to deck: {deck.title}"
     return f"superuser does not exist yet"

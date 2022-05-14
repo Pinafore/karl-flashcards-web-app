@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     INTERFACE: str = "http://host.docker.internal:4000/"
     TEST_MODE_TRIGGER: int = 250
     TEST_MODE_PER_ROUND: int = 30
+    DEFAULT_DECK_ID: int = 1
+    TEST_DECK_ID: int = -1
 
     @validator("INTERFACE")
     def get_interface(cls, v: Optional[str], values: Dict[str, Any]) -> str:

@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from .fact import Fact  # noqa: F401
     from .user_deck import User_Deck  # noqa: F401
     from .test_history import Test_History  # noqa: F401
-    from .session import Session  # noqa: F401
+    from .studyset import StudySet  # noqa: F401
 
 
 class User(Base):
@@ -47,4 +47,4 @@ class User(Base):
     decks = association_proxy('user_decks', 'deck')
     marked_facts = association_proxy('marks', 'marked_fact')
     test_history = relationship("Test_History", back_populates="user")
-    sessions = relationship("Session", back_populates="user")
+    sessions = relationship("StudySet", back_populates="user")

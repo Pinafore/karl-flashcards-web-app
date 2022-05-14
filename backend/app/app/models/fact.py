@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from .history import History  # noqa: F401
     from .test_history import Test_History  # noqa: F401
     from .session_fact import Session_Fact  # noqa: F401
+    from .studyset import StudySet
 
 
 def create_tsvector(*args):
@@ -48,7 +49,7 @@ class Fact(Base):
     reporters = association_proxy('reporteds', 'reporter')
     markers = association_proxy('marks', 'marker')
     test_history = relationship("Test_History", back_populates="fact")
-    sessions = association_proxy('session_facts', 'session')
+    study_sets = association_proxy('session_facts', 'studyset')
     session_facts = relationship("Session_Fact", back_populates="fact")
 
     __ts_vector__ = create_tsvector(

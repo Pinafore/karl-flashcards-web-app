@@ -38,9 +38,9 @@ def get_next_set(
         user = current_user
     in_test_mode = crud.user.test_mode_check(db, db_obj=user)
     if in_test_mode:
-        facts = crud.fact.get_test_study_set(db=db, user=user)
+        facts = crud.fact.get_test_facts(db=db, user=user)
     elif deck_ids is None:
-        facts = crud.fact.get_normal_study_set(db=db, user=user, return_limit=limit)
+        facts = crud.fact.get_study_set_facts(db=db, user=user, return_limit=limit)
     else:
         if 2 in deck_ids:
             raise HTTPException(status_code=557, detail="This deck is currently unavailable")
@@ -53,13 +53,13 @@ def get_next_set(
                                     detail="This user does not have the necessary permission to access one or more"
                                            " of the specified decks")
 
-        facts = crud.fact.get_normal_study_set(db=db, user=user, deck_ids=deck_ids, return_limit=limit)
+        facts = crud.fact.get_study_set_facts(db=db, user=user, deck_ids=deck_ids, return_limit=limit)
 
     if isinstance(facts, requests.exceptions.RequestException):
         raise HTTPException(status_code=555, detail="Connection to scheduler is down")
     if isinstance(facts, json.decoder.JSONDecodeError):
         raise HTTPException(status_code=556, detail="Scheduler malfunction")
-    return schemas.StudySet(facts=facts, in_test_mode=in_test_mode)
+    return schemas.StudySet(facts=facts, is_test=in_test_mode)
 
 
 @router.put("/", response_model=List[bool])
