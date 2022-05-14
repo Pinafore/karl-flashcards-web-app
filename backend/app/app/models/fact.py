@@ -36,7 +36,7 @@ class Fact(Base):
     category = Column(String, index=True)
     identifier = Column(String, index=True)
     answer_lines = Column(ARRAY(String), nullable=False)
-    test_mode = Column(Boolean(), default=False, nullable=True)
+    test_mode = Column(Boolean(), default=False, nullable=False)
     extra = Column(JSONB)
 
     owner = relationship("User", back_populates="owned_facts")
@@ -47,6 +47,8 @@ class Fact(Base):
     reporters = association_proxy('reporteds', 'reporter')
     markers = association_proxy('marks', 'marker')
     test_history = relationship("Test_History", back_populates="fact")
+    sessions = association_proxy('session_facts', 'session')
+    session_facts = relationship("Session_Fact", back_populates="fact")
 
     __ts_vector__ = create_tsvector(
         cast(func.coalesce(text, ''), postgresql.TEXT),

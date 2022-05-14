@@ -40,3 +40,4 @@ def init_db(db: Session) -> None:
         logger.info("Sending celery task")
         celery_app.send_task("app.worker.load_jeopardy_facts")
         celery_app.send_task("app.worker.load_quizbowl_facts")
+        celery_app.send_task("app.worker.create_test_mode_facts")

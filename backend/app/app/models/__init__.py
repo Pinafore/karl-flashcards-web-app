@@ -8,3 +8,4 @@ from .user_deck import User_Deck
 from .reported import Reported
 from .deleted import Deleted
 from .test_history import Test_History
+from .session_fact import Session_Fact

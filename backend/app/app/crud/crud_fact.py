@@ -258,7 +258,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                                      models.Fact.user_id == deck_owners.c.owner_id)))
         facts_query = (user_facts.union(filtered_facts))
         # Don't allow Jeopardy facts
-        facts_query = facts_query.filter(models.Fact.deck_id != 2)
+        # facts_query = facts_query.filter(models.Fact.deck_id != 2)
         if filters.studyable:
             facts_query = (facts_query
                            .outerjoin(models.Deleted,
@@ -354,20 +354,31 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
 
     def get_test_study_set(self, db: Session, *, user: models.User) -> List[schemas.Fact]:
         LIMIT = 20
+        # Get facts that have not been studied before
         new_facts = db.query(self.model) \
             .filter(models.Fact.test_mode == True).outerjoin(
-            models.Test_History, and_(
-                models.Fact.fact_id == models.Test_History.fact_id,
-                models.Test_History.user_id == user.id)).filter(
-            models.History.id == None).order_by(func.random()).all()
-        print(new_facts)
+            models.History, and_(
+                models.Fact.fact_id == models.History.fact_id,
+                models.History.user_id == user.id,
+                models.History.log_type == Log.test_study
+            )).filter(
+            models.History.id == None).order_by(func.random()).limit(LIMIT).all()
+        # new_facts = db.query(self.model) \
+        #     .filter(models.Fact.test_mode == True).outerjoin(
+        #     models.Test_History, and_(
+        #         models.Fact.fact_id == models.Test_History.fact_id,
+        #         models.Test_History.user_id == user.id)).filter(
+        #     models.Test_History.id == None).order_by(func.random()).all()
+        print("New facts:", new_facts)
+        # Get facts that have been previously studied before, but were answered incorrectly
         old_facts = db.query(self.model) \
             .filter(models.Fact.test_mode == True).join(
-            models.Test_History, and_(
-                models.Fact.fact_id == models.Test_History.fact_id,
-                models.Test_History.user_id == user.id,
-                models.Test_History.correct == False)).order_by(func.random()).all()
-        print(len(old_facts))
+            models.History, and_(
+                models.Fact.fact_id == models.History.fact_id,
+                models.History.user_id == user.id,
+                models.History.log_type == Log.test_study,
+                models.History.is_correct == False)).order_by(func.random()).limit(LIMIT).all()
+        print("Old facts:", old_facts)
 
         len_new_facts = len(new_facts)
         len_old_facts = len(old_facts)
@@ -515,13 +526,22 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 details["elapsed_milliseconds_text"] = schedule.elapsed_milliseconds_text
                 details["elapsed_milliseconds_answer"] = schedule.elapsed_milliseconds_answer
 
-            history_in = schemas.HistoryCreate(
-                time=date_studied,
-                user_id=user.id,
-                fact_id=db_obj.fact_id,
-                log_type=schemas.Log.study,
-                details=details
-            )
+            if db_obj.test_mode:
+                history_in = schemas.HistoryCreate(
+                    time=date_studied,
+                    user_id=user.id,
+                    fact_id=db_obj.fact_id,
+                    log_type=schemas.Log.test_study,
+                    details=details
+                )
+            else:
+                history_in = schemas.HistoryCreate(
+                    time=date_studied,
+                    user_id=user.id,
+                    fact_id=db_obj.fact_id,
+                    log_type=schemas.Log.study,
+                    details=details
+                )
             history = crud.history.create(db=db, obj_in=history_in)
             payload_update = [schemas.KarlFactUpdate(
                 text=db_obj.text,
@@ -539,7 +559,8 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 elapsed_milliseconds_text=schedule.elapsed_milliseconds_text,
                 elapsed_milliseconds_answer=schedule.elapsed_milliseconds_answer,
                 label=response,
-                debug_id=schedule.debug_id).dict(exclude_unset=True)]
+                debug_id=schedule.debug_id,
+                test_mode=db_obj.test_mode).dict(exclude_unset=True)]
             logger.info(payload_update[0])
             request = requests.post(settings.INTERFACE + "api/karl/update", json=payload_update)
             logger.info(request.request)

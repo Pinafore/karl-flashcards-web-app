@@ -162,6 +162,18 @@ def update_preloaded_facts(
     return True
 
 
+@router.put("/test-mode", response_model=bool)
+def create_test_mode_facts(
+        *,
+        current_user: models.User = Depends(deps.get_current_active_superuser),  # noqa
+) -> Any:
+    """
+    Update preloaded facts.
+    """
+    celery_app.send_task("app.worker.create_test_mode_facts")
+    return True
+
+
 @router.put("/{fact_id}", response_model=schemas.Fact)
 def update_fact(
         *,

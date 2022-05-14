@@ -13,6 +13,7 @@ class FactBase(BaseModel):
     text: Optional[str] = None
     answer: Optional[str] = None
     category: Optional[str] = None
+    test_mode: bool = False
 
 
 class KarlFact(FactBase):
@@ -34,12 +35,13 @@ class KarlFactUpdate(KarlFact):
     history_id: int
     label: bool
     debug_id: str
+    test_mode: bool
 
 
 class InternalFactBase(FactBase):
     deck_id: Optional[int] = None
     identifier: Optional[str] = None
-    answer_lines: List[str] = None
+    answer_lines: Optional[List[str]] = None
     extra: Optional[dict] = None
 
 
