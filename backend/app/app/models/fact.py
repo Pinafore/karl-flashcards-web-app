@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from .deck import Deck  # noqa: F401
     from .history import History  # noqa: F401
     from .test_history import Test_History  # noqa: F401
+    from .session_fact import Session_Fact  # noqa: F401
 
 
 def create_tsvector(*args):
