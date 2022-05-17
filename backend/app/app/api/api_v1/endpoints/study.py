@@ -36,30 +36,23 @@ def get_next_set(
             raise HTTPException(status_code=400, detail="This user does not have the necessary permissions")
     else:
         user = current_user
-    in_test_mode = crud.user.test_mode_check(db, db_obj=user)
-    if in_test_mode:
-        facts = crud.fact.get_test_facts(db=db, user=user)
-    elif deck_ids is None:
-        facts = crud.fact.get_study_set_facts(db=db, user=user, return_limit=limit)
-    else:
-        if 2 in deck_ids:
-            raise HTTPException(status_code=557, detail="This deck is currently unavailable")
-        for deck_id in deck_ids:
-            deck = crud.deck.get(db=db, id=deck_id)
-            if not deck:
-                raise HTTPException(status_code=404, detail="One or more of the specified decks does not exist")
-            if user not in deck.users:
-                raise HTTPException(status_code=450,
-                                    detail="This user does not have the necessary permission to access one or more"
-                                           " of the specified decks")
 
-        facts = crud.fact.get_study_set_facts(db=db, user=user, deck_ids=deck_ids, return_limit=limit)
+    study_set = crud.studyset.get_study_set(db, user=user, deck_ids=deck_ids, return_limit=limit)
+    # if in_test_mode:
+    #     facts = crud.fact.get_test_facts(db=db, user=user)
+    # elif deck_ids is None:
+    #     facts = crud.fact.get_study_set_facts(db=db, user=user, return_limit=limit)
+    # else:
+    #
+    #     facts = crud.fact.get_study_set_facts(db=db, user=user, deck_ids=deck_ids, return_limit=limit)
 
-    if isinstance(facts, requests.exceptions.RequestException):
+    if isinstance(study_set, HTTPException):
+        raise study_set
+    if isinstance(study_set, requests.exceptions.RequestException):
         raise HTTPException(status_code=555, detail="Connection to scheduler is down")
-    if isinstance(facts, json.decoder.JSONDecodeError):
+    if isinstance(study_set, json.decoder.JSONDecodeError):
         raise HTTPException(status_code=556, detail="Scheduler malfunction")
-    return schemas.StudySet(facts=facts, is_test=in_test_mode)
+    return study_set
 
 
 @router.put("/", response_model=List[bool])

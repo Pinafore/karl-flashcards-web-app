@@ -77,8 +77,7 @@ def load_jeopardy_facts() -> str:
                         deck_id=deck.id,
                         answer_lines=[fact["answer"]],
                         category=fact["category"],
-                        extra=extra,
-                        test_mode=False,
+                        extra=extra
                     )
                     crud.fact.create_with_owner(db, obj_in=fact_in, user=user)
                     fact_count += 1
@@ -125,7 +124,7 @@ def create_test_mode_facts() -> str:
     if user:
         dirname = os.path.dirname(os.path.abspath(__file__))
         filename = os.path.join(dirname, "./data/jeopardy.json")
-        deck = crud.deck.find_or_create(db, proposed_deck="Test Mode", user=user, public=True)
+        deck = crud.deck.get_create_test_deck(db, user)
         with open(filename, "r") as file:
             json_data = json.load(file)
             # there seems to be 216930 jeopardy questions
@@ -147,8 +146,7 @@ def create_test_mode_facts() -> str:
                         deck_id=deck.id,
                         answer_lines=[fact["answer"]],
                         category=fact["category"],
-                        extra=extra,
-                        test_mode=True,
+                        extra=extra
                     )
                     crud.fact.create_with_owner(db, obj_in=fact_in, user=user)
                     count += 1

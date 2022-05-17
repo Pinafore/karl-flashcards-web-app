@@ -1,6 +1,7 @@
 import logging
 from typing import List, Optional, Union, Dict, Any
 
+from app.core.config import settings
 from app.crud.base import CRUDBase
 from app.models import User, Deck
 from app.models.user_deck import User_Deck
@@ -63,6 +64,12 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
         if unowned:
             query = query.filter(not_(Deck.users.any(id=user.id)))
         return query.all()
+
+    def get_test_deck_id(self, db: Session, user: User) -> int:
+        return self.get_create_test_deck(db, user).id
+
+    def get_create_test_deck(self, db: Session, user: User) -> Deck:
+        return self.find_or_create(db, proposed_deck=settings.TEST_DECK_NAME, user=user, public=True)
 
     def find_or_create(
             self, db: Session, *, proposed_deck: str, user: User, public: bool = False

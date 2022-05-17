@@ -12,22 +12,15 @@ if TYPE_CHECKING:
     from .user import User  # noqa: F401
     from .user_deck import User_Deck  # noqa: F401
     from .studyset import StudySet  # noqa: F401
+from .session_deck import Session_Deck  # noqa: F401
 
 
 class Deck(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, index=True, nullable=False)
     public = Column(Boolean, nullable=False, default=False)
-    is_test = Column(Boolean, nullable=False, default=False)
 
     facts = relationship("Fact", back_populates="deck")
-    users = association_proxy('user_decks', 'user')
+    users = association_proxy("user_decks", "user")
     user_decks = relationship("User_Deck", back_populates="deck", cascade="all, delete-orphan")
-    session = relationship("StudySet", back_populates="deck")
-
-    __table_args__ = (
-        Index('ix_deck_is_test', is_test,
-              unique=True,
-              postgresql_where=(is_test == true())
-              ),
-    )
+    studysets = association_proxy("session_deck", "studyset", creator=lambda studyset: Session_Deck(studyset=studyset))

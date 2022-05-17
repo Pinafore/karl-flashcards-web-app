@@ -1,15 +1,17 @@
-from typing import List, Union, Optional
+from typing import List, Union, Optional, Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 
 # Properties to return to client about statistics
+from sqlalchemy.orm import Query
+
 from app.schemas import User, Fact, Deck
+from app import models
 
 
 class StudySetBase(BaseModel):
     is_test: bool = False
     user_id: int
-    deck_id: int
 
 
 class StudySetCreate(StudySetBase):
@@ -26,8 +28,8 @@ class StudySetInDBBase(StudySetBase):
 
 class StudySet(StudySetInDBBase):
     user: User
-    deck: Deck
-    facts: List[Fact]
+    all_decks: Any
+    all_facts: Any
     unstudied_facts: List[Fact]
     completed: bool
     num_facts: int

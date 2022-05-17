@@ -14,6 +14,7 @@ from sqlalchemy import and_, not_, func
 from sqlalchemy.orm import Session, Query
 
 from app import crud, models, schemas
+from app.crud import sqlalchemy_helper
 from app.core.config import settings
 from app.crud.base import CRUDBase
 from app.schemas import Log
@@ -304,26 +305,18 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                                                    models.Reported.user_id == user.id)
                                               )
                                    .filter(models.Reported.user_id == None))
-        if filters.all:
-            facts_query = facts_query.filter(
-                models.Fact.__ts_vector__.op('@@')(func.plainto_tsquery('english', filters.all)))
-        if filters.text:
-            facts_query = facts_query.filter(models.Fact.text.ilike(filters.text))
-        if filters.answer:
-            facts_query = facts_query.filter(models.Fact.answer.ilike(filters.answer))
-        if filters.category:
-            facts_query = facts_query.filter(models.Fact.category.ilike(filters.category))
-        if filters.identifier:
-            facts_query = facts_query.filter(models.Fact.identifier.ilike(filters.identifier))
-        if filters.deck_ids:
-            facts_query = facts_query.filter(models.Fact.deck_id.in_(filters.deck_ids))
-        if filters.deck_id:
-            facts_query = facts_query.filter(models.Fact.deck_id == filters.deck_id)
-        if filters.marked is not None:
-            if filters.marked:
-                facts_query = facts_query.filter(models.Fact.markers.any(id=user.id))
-            else:
-                facts_query = facts_query.filter(not_(models.Fact.markers.any(id=user.id)))
+        facts_query = crud.sqlalchemy_helper.filter_full_text_search(query=facts_query, query_str=filters.all)
+        facts_query = crud.sqlalchemy_helper.filter_ilike(query=facts_query, model_attr=models.Fact.text,
+                                                          filter_attr=filters.text)
+        facts_query = crud.sqlalchemy_helper.filter_ilike(query=facts_query, model_attr=models.Fact.answer,
+                                                          filter_attr=filters.answer)
+        facts_query = crud.sqlalchemy_helper.filter_ilike(query=facts_query, model_attr=models.Fact.category,
+                                                          filter_attr=filters.category)
+        facts_query = crud.sqlalchemy_helper.filter_ilike(query=facts_query, model_attr=models.Fact.identifier,
+                                                          filter_attr=filters.identifier)
+        facts_query = crud.sqlalchemy_helper.filter_deck_ids(query=facts_query, deck_ids=filters.deck_ids)
+        facts_query = crud.sqlalchemy_helper.filter_deck_id(query=facts_query, deck_id=filters.deck_id)
+        facts_query = crud.sqlalchemy_helper.filter_marked(query=facts_query, marked=filters.marked, user_id=user.id)
         if filters.randomize:
             facts_query = facts_query.order_by(func.random())
         return facts_query
@@ -352,44 +345,46 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         logger.info("overall time facts: " + str(overall_total_time))
         return facts
 
-    def get_test_facts(self, db: Session, *, user: models.User) -> List[schemas.Fact]:
-        LIMIT = 20
+    def get_test_facts(self, db: Session, *, user: models.User, return_limit: Optional[int] = 20) -> List[models.Fact]:
         # Get facts that have not been studied before
+        logger.info(crud.deck.get_test_deck_id(db=db, user=user))
+        test_deck_id = crud.deck.get_test_deck_id(db=db, user=user)
+        logger.info(db.query(self.model).filter(models.Fact.deck_id == test_deck_id).all())
         new_facts = db.query(self.model) \
-            .filter(models.Fact.test_mode == True).outerjoin(
+            .filter(models.Fact.deck_id == test_deck_id).outerjoin(
             models.History, and_(
                 models.Fact.fact_id == models.History.fact_id,
                 models.History.user_id == user.id,
                 models.History.log_type == Log.test_study
             )).filter(
-            models.History.id == None).order_by(func.random()).limit(LIMIT).all()
+            models.History.id == None).order_by(func.random()).limit(return_limit).all()
         # new_facts = db.query(self.model) \
         #     .filter(models.Fact.test_mode == True).outerjoin(
         #     models.Test_History, and_(
         #         models.Fact.fact_id == models.Test_History.fact_id,
         #         models.Test_History.user_id == user.id)).filter(
         #     models.Test_History.id == None).order_by(func.random()).all()
-        print("New facts:", new_facts)
+        logger.info("New facts:" + str(new_facts))
         # Get facts that have been previously studied before, but were answered incorrectly
         old_facts = db.query(self.model) \
-            .filter(models.Fact.test_mode == True).join(
+            .filter(models.Fact.deck_id == test_deck_id).join(
             models.History, and_(
                 models.Fact.fact_id == models.History.fact_id,
                 models.History.user_id == user.id,
                 models.History.log_type == Log.test_study,
-                models.History.is_correct == False)).order_by(func.random()).limit(LIMIT).all()
-        print("Old facts:", old_facts)
+                models.History.correct == False)).order_by(func.random()).limit(return_limit).all()
+        logger.info("Old facts:" + str(old_facts))
 
         len_new_facts = len(new_facts)
         len_old_facts = len(old_facts)
         if len_new_facts >= 10 and len_old_facts >= 10:
             facts = new_facts[:10] + old_facts[:10]
         elif len_new_facts < 10:
-            facts = new_facts + old_facts[:LIMIT - len_new_facts]
+            facts = new_facts + old_facts[:return_limit - len_new_facts]
         elif len_old_facts < 10:
-            facts = old_facts + new_facts[:LIMIT - len_old_facts]
+            facts = old_facts + new_facts[:return_limit - len_old_facts]
         else:
-            print("Test Set Should Always Be Above 20: ", len_old_facts + len_new_facts)
+            logger.info("Test Set Should Always Be Above 20: ", len_old_facts + len_new_facts)
             facts = old_facts + new_facts
 
         history_in = schemas.HistoryCreate(
@@ -447,26 +442,27 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             logger.info("query time: " + str(query_time))
 
             facts = []
-            if rationale != "<p>no fact received</p>":
-                reordered_karl_list = [karl_list[x] for x in card_order]
-                if return_limit:
-                    for _, each_karl_fact in zip(range(return_limit), reordered_karl_list):
-                        retrieved_fact = self.get(db=db, id=int(each_karl_fact["fact_id"]))
-                        fact_schema = self.get_schema_with_perm(db_obj=retrieved_fact, user=user)
-                        fact_schema.rationale = rationale
-                        fact_schema.debug_id = debug_id
-                        if retrieved_fact:
-                            fact_schema.marked = True if user in retrieved_fact.markers else False
-                        facts.append(fact_schema)
-                else:
-                    for each_karl_fact in reordered_karl_list:
-                        retrieved_fact = self.get(db=db, id=int(each_karl_fact["fact_id"]))
-                        fact_schema = self.get_schema_with_perm(db_obj=retrieved_fact, user=user)
-                        fact_schema.rationale = rationale
-                        # MARK: maybe not the most efficient solution for determining if user has marked a fact
-                        if retrieved_fact:
-                            fact_schema.marked = retrieved_fact.is_marked(user)
-                        facts.append(fact_schema)
+            # if rationale != "<p>no fact received</p>":
+            #     reordered_karl_list = [karl_list[x] for x in card_order]
+            #     # TODO: CONDENSE
+            #     if return_limit:
+            #         for _, each_karl_fact in zip(range(return_limit), reordered_karl_list):
+            #             retrieved_fact = self.get(db=db, id=int(each_karl_fact["fact_id"]))
+            #             fact_schema = self.get_schema_with_perm(db_obj=retrieved_fact, user=user)
+            #             fact_schema.rationale = rationale
+            #             fact_schema.debug_id = debug_id
+            #             if retrieved_fact:
+            #                 fact_schema.marked = True if user in retrieved_fact.markers else False
+            #             facts.append(fact_schema)
+            #     else:
+            #         for each_karl_fact in reordered_karl_list:
+            #             retrieved_fact = self.get(db=db, id=int(each_karl_fact["fact_id"]))
+            #             fact_schema = self.get_schema_with_perm(db_obj=retrieved_fact, user=user)
+            #             fact_schema.rationale = rationale
+            #             # MARK: maybe not the most efficient solution for determining if user has marked a fact
+            #             if retrieved_fact:
+            #                 fact_schema.marked = retrieved_fact.is_marked(user)
+            #             facts.append(fact_schema)
             details = {
                 "study_system": user.repetition_model,
                 "first_fact": facts[0] if len(facts) != 0 else "empty",
@@ -480,10 +476,9 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 user_id=user.id,
                 log_type=schemas.Log.get_facts,
                 details=details
-
             )
             crud.history.create(db=db, obj_in=history_in)
-            return facts
+            return eligible_facts
         except requests.exceptions.RequestException as e:
             capture_exception(e)
             return e
@@ -511,7 +506,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 details["elapsed_milliseconds_text"] = schedule.elapsed_milliseconds_text
                 details["elapsed_milliseconds_answer"] = schedule.elapsed_milliseconds_answer
 
-            if db_obj.test_mode:
+            if db_obj.deck_id == crud.deck.get_test_deck_id(db, user):
                 history_in = schemas.HistoryCreate(
                     time=date_studied,
                     user_id=user.id,
@@ -519,6 +514,8 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                     log_type=schemas.Log.test_study,
                     details=details
                 )
+                crud.history.create(db=db, obj_in=history_in)
+                return True
             else:
                 history_in = schemas.HistoryCreate(
                     time=date_studied,
@@ -527,32 +524,28 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                     log_type=schemas.Log.study,
                     details=details
                 )
-            history = crud.history.create(db=db, obj_in=history_in)
-            payload_update = [schemas.KarlFactUpdate(
-                text=db_obj.text,
-                user_id=user.id,
-                repetition_model=user.repetition_model,
-                fact_id=db_obj.fact_id,
-                history_id=history.id,
-                category=db_obj.category,
-                deck_name=db_obj.deck.title,
-                deck_id=db_obj.deck_id,
-                answer=db_obj.answer,
-                env=settings.ENVIRONMENT,
-                elapsed_seconds_text=schedule.elapsed_seconds_text,
-                elapsed_seconds_answer=schedule.elapsed_seconds_answer,
-                elapsed_milliseconds_text=schedule.elapsed_milliseconds_text,
-                elapsed_milliseconds_answer=schedule.elapsed_milliseconds_answer,
-                label=response,
-                debug_id=schedule.debug_id,
-                test_mode=db_obj.test_mode).dict(exclude_unset=True)]
-            logger.info(payload_update[0])
-            request = requests.post(settings.INTERFACE + "api/karl/update", json=payload_update)
-            logger.info(request.request)
-            if 200 <= request.status_code < 300:
-                return True
-            else:
-                return False
+                history = crud.history.create(db=db, obj_in=history_in)
+                payload_update = [schemas.KarlFactUpdate(
+                    text=db_obj.text,
+                    user_id=user.id,
+                    repetition_model=user.repetition_model,
+                    fact_id=db_obj.fact_id,
+                    history_id=history.id,
+                    category=db_obj.category,
+                    deck_name=db_obj.deck.title,
+                    deck_id=db_obj.deck_id,
+                    answer=db_obj.answer,
+                    env=settings.ENVIRONMENT,
+                    elapsed_seconds_text=schedule.elapsed_seconds_text,
+                    elapsed_seconds_answer=schedule.elapsed_seconds_answer,
+                    elapsed_milliseconds_text=schedule.elapsed_milliseconds_text,
+                    elapsed_milliseconds_answer=schedule.elapsed_milliseconds_answer,
+                    label=response,
+                    debug_id=schedule.debug_id).dict(exclude_unset=True)]
+                logger.info(payload_update[0])
+                request = requests.post(settings.INTERFACE + "api/karl/update", json=payload_update)
+                logger.info(request.request)
+                return 200 <= request.status_code < 300
         except requests.exceptions.RequestException as e:
             capture_exception(e)
             return e

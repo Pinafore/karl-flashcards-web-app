@@ -9,15 +9,11 @@ if TYPE_CHECKING:
     from .history import History  # noqa: F401
 
 
-# user_deck = Table("user_deck", Base.metadata,
-#                   Column("user_id", Integer, ForeignKey("user.id"), primary_key=True),
-#                   Column("deck_id", Integer, ForeignKey("deck.id"), primary_key=True)
-#                   )
 class Session_Fact(Base):
     studyset_id = Column(Integer, ForeignKey("studyset.id"), primary_key=True)
     fact_id = Column(Integer, ForeignKey("fact.fact_id"), primary_key=True)
     history_id = Column(Integer, ForeignKey("history.id"))
 
-    study_set = relationship("StudySet", back_populates="session_facts")
-    fact = relationship("Fact", back_populates="session_facts")
+    studyset = relationship("StudySet", back_populates="session_facts")
+    fact = relationship("Fact")
     history = relationship("History", uselist=False)

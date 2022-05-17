@@ -16,7 +16,7 @@ class BothHistoryBase(BaseModel):
 
 class HistoryBase(BothHistoryBase):
     log_type: Log
-    is_correct: bool
+    correct: Optional[bool] = None
 
 
 class TestHistoryBase(BothHistoryBase):

@@ -16,8 +16,8 @@ if TYPE_CHECKING:
     from .deck import Deck  # noqa: F401
     from .history import History  # noqa: F401
     from .test_history import Test_History  # noqa: F401
-    from .session_fact import Session_Fact  # noqa: F401
-    from .studyset import StudySet
+    from .studyset import StudySet  # noqa: F401
+from .session_fact import Session_Fact  # noqa: F401
 
 
 def create_tsvector(*args):
@@ -38,7 +38,6 @@ class Fact(Base):
     category = Column(String, index=True)
     identifier = Column(String, index=True)
     answer_lines = Column(ARRAY(String), nullable=False)
-    test_mode = Column(Boolean(), default=False, nullable=False)
     extra = Column(JSONB)
 
     owner = relationship("User", back_populates="owned_facts")
@@ -49,8 +48,7 @@ class Fact(Base):
     reporters = association_proxy('reporteds', 'reporter')
     markers = association_proxy('marks', 'marker')
     test_history = relationship("Test_History", back_populates="fact")
-    study_sets = association_proxy('session_facts', 'studyset')
-    session_facts = relationship("Session_Fact", back_populates="fact")
+    studysets = association_proxy('session_facts', 'studyset', creator=lambda studyset: Session_Fact(studyset=studyset))
 
     __ts_vector__ = create_tsvector(
         cast(func.coalesce(text, ''), postgresql.TEXT),

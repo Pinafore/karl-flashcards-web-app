@@ -1,6 +1,7 @@
 from typing import Optional
 
-from pydantic import BaseModel
+from fastapi import Query
+from pydantic import BaseModel, validator
 
 
 class DeckBase(BaseModel):

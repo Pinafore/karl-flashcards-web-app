@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
+from sqlalchemy.orm import Query
 
 from app.schemas.repetition import Repetition
 from app.schemas.deck import Deck
@@ -13,7 +14,6 @@ class FactBase(BaseModel):
     text: Optional[str] = None
     answer: Optional[str] = None
     category: Optional[str] = None
-    test_mode: bool = False
 
 
 class KarlFact(FactBase):
@@ -35,7 +35,6 @@ class KarlFactUpdate(KarlFact):
     history_id: int
     label: bool
     debug_id: str
-    test_mode: bool
 
 
 class InternalFactBase(FactBase):
@@ -107,6 +106,9 @@ class Fact(FactInDBBase):
     permission: Optional[Permission] = None
     reports: Optional[List[FactReported]] = None
     debug_id: Optional[str] = None
+
+    class Config:
+        orm_mode = True
 
 
 # Properties to return to client
