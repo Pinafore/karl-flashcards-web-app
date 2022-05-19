@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 def test_create_deck(
         client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
 ) -> None:
-    data = {"title": "Foo", "public": "false"}
+    data = {"title": "Foo", "deck_type": "public"}
     response = client.post(
         f"{settings.API_V1_STR}/decks/", headers=normal_user_token_headers[0], json=data,
     )
@@ -54,9 +54,9 @@ def test_read_open_decks(
 def test_assign_deck(
         client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
 ) -> None:
-    data = SuperDeckCreate(title="Public", public=True)
+    data = SuperDeckCreate(title="Public", deck_type=DeckType.public)
     deck = crud.deck.create(db=db, obj_in=data)
-    data2 = SuperDeckCreate(title="Public2", public=True)
+    data2 = SuperDeckCreate(title="Public2", deck_type=DeckType.public)
     deck2 = crud.deck.create(db=db, obj_in=data2)
     response = client.put(
         f"{settings.API_V1_STR}/decks/?deck_ids={deck.id}&deck_ids={deck2.id}",
@@ -68,8 +68,8 @@ def test_assign_deck(
     db.refresh(user)
     assert content[0]["title"] == deck.title
     assert content[1]["title"] == deck2.title
-    assert deck in user.decks
-    assert deck2 in user.decks
+    assert deck in user.all_decks
+    assert deck2 in user.all_decks
 
 
 def test_update_deck(

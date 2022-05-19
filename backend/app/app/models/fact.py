@@ -80,12 +80,12 @@ class Fact(Base):
         if user.is_superuser:
             return [FactReported.construct(report_id=ind, reporter_id=report.user_id,
                                            reporter_username=report.reporter.username, **report.suggestion)
-                    for ind, report in enumerate(self.reporteds)]
+                    for ind, report in enumerate(self.reporteds)]  # reporteds is user end
         else:
             return [FactReported.construct(report_id=ind, reporter_id=report.user_id,
                                            reporter_username=report.reporter.username, **report.suggestion)
                     for ind, report in enumerate(self.reporteds) if
-                    report.user_id == user.id]
+                    report.user_id == user.id]  # reporteds is user end
 
     @hybrid_method
     def is_marked(self, user: User) -> bool:

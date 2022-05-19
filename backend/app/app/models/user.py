@@ -1,13 +1,15 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 from sqlalchemy import Boolean, Column, Integer, String, ForeignKey, Enum, TIMESTAMP, SmallInteger
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 
 from app.db.base_class import Base
 from app.schemas.repetition import Repetition
 
 # from .user_deck import user_deck
+from app.schemas import DeckType, Deck
 
 if TYPE_CHECKING:
     from .suspended import Suspended  # noqa: F401
@@ -44,7 +46,11 @@ class User(Base):
     deleted_facts = association_proxy('deletions', 'deleted_fact')
     reported_facts = association_proxy('reporteds', 'reported_fact')
     user_decks = relationship("User_Deck", back_populates="user", cascade="all, delete-orphan")
-    decks = association_proxy('user_decks', 'deck')
+    all_decks = association_proxy('user_decks', 'deck')
     marked_facts = association_proxy('marks', 'marked_fact')
     test_history = relationship("Test_History", back_populates="user")
     sessions = relationship("StudySet", back_populates="user")
+
+    @hybrid_property
+    def decks(self) -> List[Deck]:
+        return [deck for deck in self.all_decks if deck.deck_type != DeckType.hidden]

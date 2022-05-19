@@ -235,7 +235,7 @@ export interface IComponents {
     limit?: number;
   };
   StudySet: {
-    facts: IComponents["Fact"][];
-    in_test_mode: boolean;
+    unstudied_facts: IComponents["Fact"][];
+    is_test: boolean;
   };
 }

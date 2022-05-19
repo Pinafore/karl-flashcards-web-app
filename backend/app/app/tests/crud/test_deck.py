@@ -11,11 +11,11 @@ def test_get_multi_by_owner(db: Session) -> None:
     title = random_lower_string()
     deck_in = DeckCreate(title=title)
     user = create_random_user(db)
-    decks1 = crud.deck.get_multi_by_owner(user=user, skip=1, limit=1)
-    decks2 = crud.deck.get_multi_by_owner(user=user, skip=None, limit=1)
+    decks1 = crud.deck.get_multi_by_owner(db, user=user, skip=1, limit=1)
+    decks2 = crud.deck.get_multi_by_owner(db, user=user, skip=None, limit=1)
     deck = crud.deck.create_with_owner(db=db, obj_in=deck_in, user=user)
-    decks3 = crud.deck.get_multi_by_owner(user=user, skip=1)
-    decks4 = crud.deck.get_multi_by_owner(user=user)
+    decks3 = crud.deck.get_multi_by_owner(db, user=user, skip=1)
+    decks4 = crud.deck.get_multi_by_owner(db, user=user)
     assert decks1 == []
     assert decks2[0].id == 1
     assert decks3 != []

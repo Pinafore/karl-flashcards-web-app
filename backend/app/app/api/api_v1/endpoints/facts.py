@@ -40,7 +40,7 @@ def read_facts(
     """
     if limit > 1000:
         raise HTTPException(status_code=445, detail="Too many facts requested. Please limit to <1000 facts.")
-    if deck_ids is not None and crud.deck.get_test_deck_id(db=db, user=current_user) in deck_ids:
+    if deck_ids is not None and crud.deck.get_test_deck_id(db=db) in deck_ids:
         raise HTTPException(status_code=557, detail="This deck is currently unavailable")
 
     if suspended and reported:
@@ -173,7 +173,7 @@ def create_test_mode_facts(
     Update preloaded facts.
     """
     celery_app.send_task("app.worker.create_test_mode_facts")
-    deck = crud.deck.get_create_test_deck(db=db, user=current_user)
+    deck = crud.deck.assign_test_deck(db, user=current_user)
     return deck
 
 

@@ -11,7 +11,7 @@ export default class StudyModule extends VuexModule {
   schedule: IComponents["Schedule"][] = [];
   recommendation = false;
   show: IStudyShow = {
-    text: "loading",
+    text: "Loading...",
     enable_report: false,
     enable_actions: false,
     marked: false,
@@ -195,13 +195,13 @@ export default class StudyModule extends VuexModule {
       this.setShowLoading();
       const response = await api.getStudyFacts(mainStore.token, this.deckIds ?? []);
       console.log(response.data);
-      if (response.data.facts.length == 0) {
+      if (response.data.unstudied_facts.length == 0) {
         this.setShowEmpty();
         this.setStudy([]);
       } else {
-        this.setStudy(response.data.facts);
-        console.log(response.data.in_test_mode);
-        this.setIsTestMode(response.data.in_test_mode);
+        this.setStudy(response.data.unstudied_facts);
+        console.log(response.data.is_test);
+        this.setIsTestMode(response.data.is_test);
         await this.getNextShow();
       }
       mainStore.setConnectionError(false);

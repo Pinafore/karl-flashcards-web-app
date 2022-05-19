@@ -6,6 +6,8 @@ from app.core.config import settings
 from app.db import base  # noqa: F401
 from sqlalchemy.orm import Session
 
+from app.schemas import DeckType
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -23,7 +25,7 @@ def init_db(db: Session) -> None:
 
     user = crud.user.get_by_email(db, email=settings.FIRST_SUPERUSER)
     if not user:
-        deck = crud.deck.create(db, obj_in=schemas.SuperDeckCreate(title="Default", public=True))
+        deck = crud.deck.create(db, obj_in=schemas.SuperDeckCreate(title="Default", deck_type=DeckType.public))
         # deck = models.Deck(id=1, title="Default")
         # db.add(deck)
         # db.commit()

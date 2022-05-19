@@ -52,7 +52,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                       ) -> Union[
         schemas.StudySet, requests.exceptions.RequestException, json.decoder.JSONDecodeError, HTTPException]:
         decks = []
-        test_deck_id = crud.deck.get_test_deck_id(db=db, user=user)
+        test_deck_id = crud.deck.get_test_deck_id(db=db)
         if deck_ids is not None:
             if test_deck_id in deck_ids:
                 return HTTPException(status_code=557, detail="This deck is currently unavailable")
@@ -66,13 +66,15 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                                                 " of the specified decks")
                 decks.append(deck)
         uncompleted_last_set = self.find_existing_study_set(db, user)
+        logger.info(uncompleted_last_set)
         if uncompleted_last_set:
+            logger.info("UNCOMPLETED")
             return uncompleted_last_set
         is_test_mode = crud.user.test_mode_check(db, db_obj=user)
         logger.info("test mode: " + str(is_test_mode))
         if is_test_mode:
             facts = crud.fact.get_test_facts(db, user=user)
-            decks = [crud.deck.get_create_test_deck(db, user)]
+            decks = [crud.deck.get_test_deck(db)]
         else:
             facts = crud.fact.get_study_set_facts(db, user=user, deck_ids=deck_ids, return_limit=return_limit,
                                                   send_limit=send_limit)
@@ -90,6 +92,9 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             return studyset
         else:
             return None
+
+    def update_session_fact(self, db: Session, fact: models.Fact, studyset: models.StudySet):
+        pass
 
 
 studyset = CRUDStudySet(models.StudySet)

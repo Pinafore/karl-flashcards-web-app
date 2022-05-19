@@ -1,3 +1,4 @@
+from .deck_type import DeckType
 from .fact import Fact, FactCreate, FactInDB, FactUpdate, KarlFact, KarlFactUpdate, FactSearch, FactBrowse, FactReported, FactToReport
 from .msg import Msg
 from .token import Token, TokenPayload

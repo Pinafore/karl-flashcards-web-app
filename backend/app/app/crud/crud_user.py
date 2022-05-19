@@ -34,8 +34,8 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     def get_by_username(self, db: Session, *, username: str) -> Optional[User]:
         return db.query(User).filter(User.username == username).first()
 
-    def get_all_with_status(self, db: Session, is_beta: Optional[bool]) -> List[User]:
-        if is_beta is None:
+    def get_all_with_status(self, db: Session, is_beta: Optional[bool] = False) -> List[User]:
+        if is_beta:
             return db.query(User).all()
         else:
             return db.query(User).filter(User.beta_user == is_beta).all()
@@ -57,10 +57,12 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         )
         db.add(db_obj)
         db.commit()
-        deck = crud.deck.get(db=db, id=1)
+        deck = crud.deck.get(db=db, id=settings.DEFAULT_DECK_ID)
         crud.deck.assign_viewer(db=db, db_obj=deck, user=db_obj)
         db.refresh(db_obj)
-
+        # Assign test
+        crud.deck.assign_test_deck(db=db, user=db_obj)
+        db.refresh(db_obj)
         change_assignment(user=db_obj, repetition_model=model)
         return db_obj
 

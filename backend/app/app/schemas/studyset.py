@@ -6,7 +6,6 @@ from pydantic import BaseModel, validator
 from sqlalchemy.orm import Query
 
 from app.schemas import User, Fact, Deck
-from app import models
 
 
 class StudySetBase(BaseModel):
@@ -28,8 +27,8 @@ class StudySetInDBBase(StudySetBase):
 
 class StudySet(StudySetInDBBase):
     user: User
-    all_decks: Any
-    all_facts: Any
+    all_decks: List[Deck]
+    all_facts: List[Fact]
     unstudied_facts: List[Fact]
     completed: bool
     num_facts: int

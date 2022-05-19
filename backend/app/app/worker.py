@@ -11,6 +11,8 @@ from app.db.session import SessionLocal
 from sentry_sdk.integrations.celery import CeleryIntegration
 from sqlalchemy.orm import Session
 
+from app.schemas import DeckType
+
 if settings.SENTRY_DSN:
     sentry_sdk.init(
         settings.SENTRY_DSN,
@@ -34,7 +36,7 @@ def load_quizbowl_facts() -> str:
         with open(filename, "r") as file:
             json_data = json.load(file)
             for fact in json_data:
-                crud.fact.create_fact(db, fact, user, True)
+                crud.fact.create_fact(db, fact, user, DeckType.public)
                 #     deck = crud.deck.find_or_create(db, proposed_deck=fact["deck"], user=user, public=True)
                 #     fact_in = schemas.FactCreate(
                 #             text=fact["text"],
@@ -58,7 +60,7 @@ def load_jeopardy_facts() -> str:
     if user:
         dirname = os.path.dirname(os.path.abspath(__file__))
         filename = os.path.join(dirname, "./data/jeopardy.json")
-        deck = crud.deck.find_or_create(db, proposed_deck="Jeopardy", user=user, public=True)
+        deck = crud.deck.find_or_create(db, proposed_deck="Jeopardy", user=user, deck_type=DeckType.public)
         with open(filename, "r") as file:
             json_data = json.load(file)
             fact_count = 0
@@ -124,7 +126,7 @@ def create_test_mode_facts() -> str:
     if user:
         dirname = os.path.dirname(os.path.abspath(__file__))
         filename = os.path.join(dirname, "./data/jeopardy.json")
-        deck = crud.deck.get_create_test_deck(db, user)
+        deck = crud.deck.assign_test_deck(db, user)
         with open(filename, "r") as file:
             json_data = json.load(file)
             # there seems to be 216930 jeopardy questions

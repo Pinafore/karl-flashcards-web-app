@@ -17,7 +17,7 @@ from app import crud, models, schemas
 from app.crud import sqlalchemy_helper
 from app.core.config import settings
 from app.crud.base import CRUDBase
-from app.schemas import Log
+from app.schemas import Log, DeckType
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -347,8 +347,8 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
 
     def get_test_facts(self, db: Session, *, user: models.User, return_limit: Optional[int] = 20) -> List[models.Fact]:
         # Get facts that have not been studied before
-        logger.info(crud.deck.get_test_deck_id(db=db, user=user))
-        test_deck_id = crud.deck.get_test_deck_id(db=db, user=user)
+        logger.info(crud.deck.get_test_deck_id(db=db))
+        test_deck_id = crud.deck.get_test_deck_id(db=db)
         logger.info(db.query(self.model).filter(models.Fact.deck_id == test_deck_id).all())
         new_facts = db.query(self.model) \
             .filter(models.Fact.deck_id == test_deck_id).outerjoin(
@@ -487,7 +487,8 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             return e
 
     def update_schedule(
-            self, db: Session, *, user: models.User, db_obj: models.Fact, schedule: schemas.Schedule
+            self, db: Session, *, user: models.User, db_obj: models.Fact, schedule: schemas.Schedule,
+            studyset: models.StudySet
     ) -> Union[bool, requests.exceptions.RequestException, json.decoder.JSONDecodeError]:
         try:
             response = schedule.response
@@ -506,7 +507,8 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 details["elapsed_milliseconds_text"] = schedule.elapsed_milliseconds_text
                 details["elapsed_milliseconds_answer"] = schedule.elapsed_milliseconds_answer
 
-            if db_obj.deck_id == crud.deck.get_test_deck_id(db, user):
+            crud.studyset.update_session_fact(db, fact=db_obj, studyset=studyset)
+            if db_obj.deck_id == crud.deck.get_test_deck_id(db):
                 history_in = schemas.HistoryCreate(
                     time=date_studied,
                     user_id=user.id,
@@ -557,7 +559,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         count = 0
         json_data = json.load(file)
         for fact_obj in json_data:
-            self.create_fact(db, fact_obj, user, False)
+            self.create_fact(db, fact_obj, user, DeckType.default)
             count += 1
         logger.info(f"{count} facts loaded from txt file")
 
@@ -586,8 +588,8 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 count += 1
         logger.info(f"{count} facts loaded from txt file")
 
-    def create_fact(self, db: Session, fact_obj: Any, user: models.User, public: bool):
-        deck = crud.deck.find_or_create(db, proposed_deck=fact_obj["deck"], user=user, public=public)
+    def create_fact(self, db: Session, fact_obj: Any, user: models.User, deck_type: DeckType):
+        deck = crud.deck.find_or_create(db, proposed_deck=fact_obj["deck"], user=user, deck_type=deck_type)
         fact_in = schemas.FactCreate(
             text=fact_obj["text"],
             answer=fact_obj["answer"],

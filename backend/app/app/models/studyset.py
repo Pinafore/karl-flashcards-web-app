@@ -29,17 +29,17 @@ class StudySet(Base):
     session_facts = relationship("Session_Fact", back_populates="studyset")
 
     @property
-    def num_facts(self) -> int:
+    def num_unstudied(self) -> int:
         return len(self.unstudied_facts)
 
     # https://docs.sqlalchemy.org/en/14/orm/extensions/hybrid.html
     @hybrid_property
     def completed(self) -> bool:
-        return self.num_facts != 0
+        return self.num_unstudied != 0
 
     @hybrid_property
     def unstudied_facts(self) -> List[schemas.Fact]:
-        return [schemas.Fact.from_orm(session_fact.fact) for session_fact in self.session_facts if
+        return [schemas.Fact.from_orm(session_fact.fact) for session_fact in self.session_facts if  # type: ignore
                 not session_fact.history_id]  # type: ignore
 
     @hybrid_property
@@ -47,5 +47,5 @@ class StudySet(Base):
         return [schemas.Fact.from_orm(fact) for fact in self.facts]  # type: ignore
 
     @hybrid_property
-    def all_decks(self) -> List[schemas.Fact]:
+    def all_decks(self) -> List[schemas.Deck]:
         return [schemas.Deck.from_orm(deck) for deck in self.decks]  # type: ignore

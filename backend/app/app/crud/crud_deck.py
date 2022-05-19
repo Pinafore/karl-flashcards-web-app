@@ -5,7 +5,7 @@ from app.core.config import settings
 from app.crud.base import CRUDBase
 from app.models import User, Deck
 from app.models.user_deck import User_Deck
-from app.schemas import Permission
+from app.schemas import Permission, DeckType
 from app.schemas.deck import DeckCreate, DeckUpdate, SuperDeckCreate, SuperDeckUpdate
 from sqlalchemy import not_
 from sqlalchemy.orm import Session
@@ -45,41 +45,52 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
         return db_obj
 
     def get_multi_by_owner(
-            self, *, user: User, skip: Optional[int] = None, limit: Optional[int] = None
+            self, db: Session, *, user: User, skip: Optional[int] = None, limit: Optional[int] = None
     ) -> List[Deck]:
+        decks = [deck for deck in user.decks if deck.id != self.get_test_deck_id(db=db)]
         if skip and limit:
-            return user.decks[skip:skip + limit]
+            decks = decks[skip:skip + limit]
         elif skip:
-            return user.decks[skip:]
+            decks = decks[skip:]  # Should check that skip is possible
         elif limit:
-            return user.decks[:limit]
-        else:
-            return user.decks
+            decks = decks[:limit]
+        return decks
 
     def get_public(
             self, db: Session, unowned: bool, user: User
     ) -> List[Deck]:
-        query = db.query(self.model).filter(Deck.public == true(), Deck.id != 1,
-                                            Deck.id != 2)  # Don't return "default" or Jeopardy
+        query = db.query(self.model).filter(Deck.deck_type == DeckType.public,
+                                            Deck.id != 1)
         if unowned:
             query = query.filter(not_(Deck.users.any(id=user.id)))
         return query.all()
 
-    def get_test_deck_id(self, db: Session, user: User) -> int:
-        return self.get_create_test_deck(db, user).id
+    def get_test_deck_id(self, db: Session) -> int:
+        return self.get_test_deck(db=db).id
 
-    def get_create_test_deck(self, db: Session, user: User) -> Deck:
-        return self.find_or_create(db, proposed_deck=settings.TEST_DECK_NAME, user=user, public=True)
+    def get_test_deck(self, db: Session) -> Optional[Deck]:
+        return db.query(self.model).filter(Deck.title == settings.TEST_DECK_NAME).first()
+
+    def assign_test_deck(self, db: Session, user: User) -> Deck:
+        deck = self.get_test_deck(db)
+        if deck:
+            if deck not in user.decks:
+                self.assign_viewer(db=db, db_obj=deck, user=user)
+        else:
+            self.create_with_owner(db=db,
+                                   obj_in=SuperDeckCreate(title=settings.TEST_DECK_NAME, deck_type=DeckType.hidden),
+                                   user=user)
+        return deck
 
     def find_or_create(
-            self, db: Session, *, proposed_deck: str, user: User, public: bool = False
+            self, db: Session, *, proposed_deck: str, user: User, deck_type: DeckType = DeckType.default
     ) -> Deck:
-        user_decks = self.get_multi_by_owner(user=user)
+        user_decks = self.get_multi_by_owner(db, user=user)
         owned_deck = [user_deck for user_deck in user_decks if user_deck.title == proposed_deck]
         if owned_deck:
             user_deck = owned_deck[0]
         else:
-            user_deck = self.create_with_owner(db=db, obj_in=SuperDeckCreate(title=proposed_deck, public=public),
+            user_deck = self.create_with_owner(db=db, obj_in=SuperDeckCreate(title=proposed_deck, deck_type=deck_type),
                                                user=user)
         return user_deck
 
