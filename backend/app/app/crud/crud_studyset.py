@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Any
 
 import requests
 import json
@@ -9,6 +9,10 @@ from app.crud.base import CRUDBase
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from app.core.config import settings
+import requests
+from pytz import timezone
+from datetime import datetime
+from sentry_sdk import capture_exception
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -82,19 +86,103 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         db_obj = self.create_with_facts(db, obj_in=schemas.StudySetCreate(is_test=is_test_mode, user_id=user.id),
                                         decks=decks,
                                         facts=facts)
+        db.commit()
         obj_out = schemas.StudySet.from_orm(db_obj)
         return obj_out
 
     def find_existing_study_set(self, db: Session, user: models.User) -> Optional[schemas.StudySet]:
         studyset: models.StudySet = db.query(models.StudySet).filter(models.StudySet.user_id == user.id).order_by(
             models.StudySet.id.desc()).first()
-        if studyset and studyset.completed:
+        if studyset and not studyset.completed:
             return studyset
         else:
             return None
 
-    def update_session_fact(self, db: Session, fact: models.Fact, studyset: models.StudySet):
-        pass
+    def update_session_facts(self, db: Session, schedules: List[schemas.Schedule], user: models.User,
+                             studyset_id: int) -> Any:
+        studyset = self.get(db=db, id=studyset_id)
+        if not studyset:
+            return HTTPException(status_code=404, detail="Studyset not found")
+        for schedule in schedules:
+            # fact = crud.fact.get(db=db, id=schedule.fact_id)
+            session_fact = db.query(models.Session_Fact).filter(models.Session_Fact.studyset_id == studyset_id).filter(
+                models.Session_Fact.fact_id == schedule.fact_id).first()
+            if not session_fact:
+                return HTTPException(status_code=404, detail="Fact not found")
+            history = self.record_study(db=db, user=user, session_fact=session_fact, schedule=schedule)
+            if isinstance(history, HTTPException):
+                return history
+            if isinstance(history, models.History):
+                session_fact.history_id = history.id
+                db.commit()
+
+    def record_study(
+            self, db: Session, *, user: models.User, session_fact: models.Session_Fact, schedule: schemas.Schedule
+    ) -> Union[models.History, HTTPException]:
+        try:
+            response = schedule.response
+            date_studied = datetime.now(timezone('UTC')).isoformat()
+            details = {
+                "study_system": user.repetition_model,
+                "typed": schedule.typed,
+                "response": schedule.response,
+                "debug_id": schedule.debug_id,
+                "recall_target": user.recall_target,
+            }
+            if schedule.elapsed_seconds_text:
+                details["elapsed_seconds_text"] = schedule.elapsed_seconds_text
+                details["elapsed_seconds_answer"] = schedule.elapsed_seconds_answer
+            else:
+                details["elapsed_milliseconds_text"] = schedule.elapsed_milliseconds_text
+                details["elapsed_milliseconds_answer"] = schedule.elapsed_milliseconds_answer
+            fact = session_fact.fact
+            if fact.deck_id == crud.deck.get_test_deck_id(db):
+                history_in = schemas.HistoryCreate(
+                    time=date_studied,
+                    user_id=user.id,
+                    fact_id=fact.fact_id,
+                    log_type=schemas.Log.test_study,
+                    details=details
+                )
+                history = crud.history.create(db=db, obj_in=history_in)
+            else:
+                history_in = schemas.HistoryCreate(
+                    time=date_studied,
+                    user_id=user.id,
+                    fact_id=fact.fact_id,
+                    log_type=schemas.Log.study,
+                    details=details
+                )
+                history = crud.history.create(db=db, obj_in=history_in)
+                payload_update = [schemas.KarlFactUpdate(
+                    text=fact.text,
+                    user_id=user.id,
+                    repetition_model=user.repetition_model,
+                    fact_id=fact.fact_id,
+                    history_id=history.id,
+                    category=fact.category,
+                    deck_name=fact.deck.title,
+                    deck_id=fact.deck_id,
+                    answer=fact.answer,
+                    env=settings.ENVIRONMENT,
+                    elapsed_seconds_text=schedule.elapsed_seconds_text,
+                    elapsed_seconds_answer=schedule.elapsed_seconds_answer,
+                    elapsed_milliseconds_text=schedule.elapsed_milliseconds_text,
+                    elapsed_milliseconds_answer=schedule.elapsed_milliseconds_answer,
+                    label=response,
+                    debug_id=schedule.debug_id).dict(exclude_unset=True)]
+                logger.info(payload_update[0])
+                request = requests.post(settings.INTERFACE + "api/karl/update", json=payload_update)
+                logger.info(request.request)
+                if not 200 <= request.status_code < 300:
+                    return HTTPException(status_code=556, detail="Scheduler malfunction")
+            return history
+        except requests.exceptions.RequestException as e:
+            capture_exception(e)
+            return HTTPException(status_code=555, detail="Connection to scheduler is down")
+        except json.decoder.JSONDecodeError as e:
+            capture_exception(e)
+            return HTTPException(status_code=556, detail="Scheduler malfunction")
 
 
 studyset = CRUDStudySet(models.StudySet)

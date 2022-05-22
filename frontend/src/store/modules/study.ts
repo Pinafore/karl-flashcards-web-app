@@ -1,12 +1,13 @@
 import { api } from "@/api";
 import { Action, Module, Mutation, VuexModule } from "vuex-module-decorators";
 import { IComponents, IStudyShow, Permission } from "@/interfaces";
-import { mainStore } from "@/utils/store-accessor";
+import { mainStore, studyStore } from "@/utils/store-accessor";
 import router from "@/router";
 
 @Module({ name: "study" })
 export default class StudyModule extends VuexModule {
   study: IComponents["Fact"][] = [];
+  studyset: IComponents["StudySet"] | null = null;
   deckIds: number[] | null = null;
   schedule: IComponents["Schedule"][] = [];
   recommendation = false;
@@ -86,6 +87,11 @@ export default class StudyModule extends VuexModule {
   @Mutation
   setStudy(payload: IComponents["Fact"][]) {
     this.study = payload;
+  }
+
+  @Mutation
+  setStudySet(payload: IComponents["StudySet"]) {
+    this.studyset = payload;
   }
 
   @Mutation
@@ -199,6 +205,7 @@ export default class StudyModule extends VuexModule {
         this.setShowEmpty();
         this.setStudy([]);
       } else {
+        this.setStudySet(response.data);
         this.setStudy(response.data.unstudied_facts);
         console.log(response.data.is_test);
         this.setIsTestMode(response.data.is_test);
@@ -350,10 +357,10 @@ export default class StudyModule extends VuexModule {
 
   @Action
   async updateSchedule() {
-    if (this.show.fact && this.show.enable_actions) {
+    if (this.show.fact && this.show.enable_actions && this.studyset) {
       try {
         this.setShowLoading();
-        await api.updateSchedule(mainStore.token, this.schedule);
+        await api.updateSchedule(mainStore.token, this.studyset.id, this.schedule);
         this.emptySchedule();
         await this.getNextShow();
         mainStore.setConnectionError(false);
@@ -361,6 +368,8 @@ export default class StudyModule extends VuexModule {
       } catch (error) {
         await mainStore.checkApiError(error);
       }
+    } else {
+      console.log("SDFSLDFJSLDJFLSDF");
     }
   }
 }

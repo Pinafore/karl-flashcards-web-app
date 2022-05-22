@@ -171,8 +171,16 @@ export const api = {
       authHeaders(token),
     );
   },
-  async updateSchedule(token: string, data: IComponents["Schedule"][]) {
-    return axios.put(`${apiUrl}/api/study/`, data, authHeaders(token));
+  async updateSchedule(
+    token: string,
+    studyset_id: number,
+    data: IComponents["Schedule"][],
+  ) {
+    return axios.put(
+      `${apiUrl}/api/study/?studyset_id=${studyset_id}`,
+      data,
+      authHeaders(token),
+    );
   },
   async updateFact(token: string, id: number, data: IComponents["FactUpdate"]) {
     return axios.put(`${apiUrl}/api/facts/${id}`, data, authHeaders(token));

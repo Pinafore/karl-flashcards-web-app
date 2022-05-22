@@ -59,6 +59,7 @@ def get_next_set(
 def update_schedule_set(
         *,
         db: Session = Depends(deps.get_db),
+        studyset_id: int = Query(...),
         facts_in: List[schemas.Schedule] = Body(...),
         current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
@@ -66,19 +67,24 @@ def update_schedule_set(
         Updates the schedules of the returned fact set using the current user's assigned schedule
     """
 
-    successes = []
-    for fact_in in facts_in:
-        fact = crud.fact.get(db=db, id=fact_in.fact_id)
-        if not fact:
-            raise HTTPException(status_code=404, detail="Fact not found")
-        success = crud.fact.update_schedule(db=db, user=current_user, db_obj=fact, schedule=fact_in)
-
-        if isinstance(success, requests.exceptions.RequestException):
-            raise HTTPException(status_code=555, detail="Connection to scheduler is down")
-        if isinstance(success, json.decoder.JSONDecodeError):
-            raise HTTPException(status_code=556, detail="Scheduler malfunction")
-        successes.append(success)
-    return successes
+    # successes = []
+    response = crud.studyset.update_session_facts(db=db, schedules=facts_in, user=current_user, studyset_id=studyset_id)
+    if isinstance(response, HTTPException):
+        raise response
+    else:
+        return response
+    # for fact_in in facts_in:
+    #     fact = crud.fact.get(db=db, id=fact_in.fact_id)
+    #     if not fact:
+    #         raise HTTPException(status_code=404, detail="Fact not found")
+    #     success = crud.fact.update_schedule(db=db, user=current_user, db_obj=fact, schedule=fact_in)
+    #
+    #     if isinstance(success, requests.exceptions.RequestException):
+    #         raise HTTPException(status_code=555, detail="Connection to scheduler is down")
+    #     if isinstance(success, json.decoder.JSONDecodeError):
+    #         raise HTTPException(status_code=556, detail="Scheduler malfunction")
+    #     successes.append(success)
+    # return successes
 
 
 @router.get("/evaluate", response_model=Optional[bool], summary="Evaluates accuracy of typed answer to the given fact")

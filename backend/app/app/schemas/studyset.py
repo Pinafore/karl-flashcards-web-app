@@ -32,6 +32,7 @@ class StudySet(StudySetInDBBase):
     unstudied_facts: List[Fact]
     completed: bool
     num_facts: int
+    num_unstudied: int
 
     class Config:
         orm_mode = True
