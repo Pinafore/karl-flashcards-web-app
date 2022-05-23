@@ -5,17 +5,21 @@
     <test-popup></test-popup>
     <RecallPopup></RecallPopup>
     <v-card class="mx-3 my-1 py-1 px-0 px-sm-3">
-      <v-card-title v-if="inTestMode" primary-title class="mx-3 my-0 pa-0">
-        <div class="headline primary--text">Test Mode</div>
-      </v-card-title>
-      <v-card-title v-else primary-title class="mx-3 my-0 pa-0">
-        <div class="headline primary--text">Learn</div>
+      <!--      <v-card-title  primary-title class="mx-3 my-0 pa-0">-->
+      <!--        <div class="headline primary&#45;&#45;text">Test Mode</div>-->
+      <!--      </v-card-title>-->
+      <v-card-title primary-title class="mx-3 my-0 pa-0">
+        <div v-if="inTestMode" class="headline primary--text">Test Mode</div>
+        <div v-else class="headline primary--text">Learn</div>
+        <div class="headline primary--text" style="margin-left: .5em">
+          ({{ current_study_num }} of {{ num_facts }})
+        </div>
         <v-spacer></v-spacer>
 
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
             <v-btn
-              v-if="$vuetify.breakpoint.mdAndDown"
+              v-if="$vuetify.breakpoint.lgAndDown"
               :disabled="!show.enable_actions"
               text
               icon
@@ -41,7 +45,7 @@
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
             <v-btn
-              v-if="$vuetify.breakpoint.mdAndDown"
+              v-if="$vuetify.breakpoint.lgAndDown"
               :disabled="!show.enable_actions"
               text
               icon
@@ -67,7 +71,7 @@
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
             <v-btn
-              v-if="$vuetify.breakpoint.mdAndDown"
+              v-if="$vuetify.breakpoint.lgAndDown"
               :disabled="!show.enable_actions"
               text
               icon
@@ -93,7 +97,7 @@
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
             <v-btn
-              v-if="$vuetify.breakpoint.mdAndDown"
+              v-if="$vuetify.breakpoint.lgAndDown"
               :disabled="!show.enable_actions"
               text
               icon
@@ -120,7 +124,7 @@
           <v-tooltip bottom>
             <template v-slot:activator="{ on, attrs }">
               <v-btn
-                v-if="$vuetify.breakpoint.mdAndDown"
+                v-if="$vuetify.breakpoint.lgAndDown"
                 text
                 icon
                 v-bind="attrs"
@@ -146,7 +150,7 @@
           <v-tooltip bottom>
             <template v-slot:activator="{ on, attrs }">
               <v-btn
-                v-if="$vuetify.breakpoint.mdAndDown"
+                v-if="$vuetify.breakpoint.lgAndDown"
                 text
                 icon
                 v-bind="attrs"
@@ -343,6 +347,18 @@
 
     get inTestMode() {
       return studyStore.inTestMode;
+    }
+
+    get num_unstudied() {
+      return studyStore.studyset?.num_unstudied ?? 0;
+    }
+
+    get num_facts() {
+      return studyStore.studyset?.num_facts ?? 0;
+    }
+
+    get current_study_num() {
+      return this.num_facts - this.num_unstudied + 1;
     }
 
     public async mounted() {

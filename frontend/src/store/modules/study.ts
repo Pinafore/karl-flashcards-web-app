@@ -39,6 +39,13 @@ export default class StudyModule extends VuexModule {
   }
 
   @Mutation
+  updateUnstudied() {
+    if (this.studyset) {
+      this.studyset.num_unstudied -= 1;
+    }
+  }
+
+  @Mutation
   setRecommendation(payload: boolean) {
     this.recommendation = payload;
   }
@@ -48,7 +55,7 @@ export default class StudyModule extends VuexModule {
     this.show = {
       text: payload.text,
       fact: payload,
-      enable_report: payload.permission === Permission.viewer,
+      enable_report: payload.permission === Permission.owner,
       enable_actions: true,
       marked: payload.marked ?? false,
     };
@@ -113,6 +120,9 @@ export default class StudyModule extends VuexModule {
   @Mutation
   removeFirstFact() {
     this.study.shift();
+    if (this.studyset) {
+      this.studyset.unstudied_facts.shift();
+    }
   }
 
   @Mutation
@@ -185,8 +195,8 @@ export default class StudyModule extends VuexModule {
   @Action
   async getNextShow() {
     this.clearTimer();
-    if (this.study.length > 0) {
-      this.setShow(this.study[0]);
+    if (this.studyset && this.studyset.unstudied_facts.length > 0) {
+      this.setShow(this.studyset.unstudied_facts[0]);
       this.startTimer();
       this.removeFirstFact();
     } else {
@@ -362,6 +372,7 @@ export default class StudyModule extends VuexModule {
         this.setShowLoading();
         await api.updateSchedule(mainStore.token, this.studyset.id, this.schedule);
         this.emptySchedule();
+        this.updateUnstudied();
         await this.getNextShow();
         mainStore.setConnectionError(false);
         mainStore.setSchedulerError(false);
