@@ -236,8 +236,13 @@ export interface IComponents {
   };
   StudySet: {
     id: number;
+    completed: boolean;
     unstudied_facts: IComponents["Fact"][];
+    all_decks: IComponents["Deck"][];
     all_facts: IComponents["Fact"][];
     is_test: boolean;
+    num_facts: number;
+    num_unstudied: number;
+    user: IComponents["User"];
   };
 }

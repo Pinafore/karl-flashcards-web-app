@@ -3,6 +3,7 @@ from typing import List, Optional, Union, Dict, Any
 
 from app.core.config import settings
 from app.crud.base import CRUDBase
+from app import crud, models
 from app.models import User, Deck
 from app.models.user_deck import User_Deck
 from app.schemas import Permission, DeckType
@@ -108,7 +109,9 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
     ) -> Deck:
         if user in db_obj.users:
             db_obj.users.remove(user)
-            # db.add(db_obj)
+            existing_studyset = crud.studyset.find_existing_study_set(db, user)
+            if isinstance(existing_studyset, models.StudySet):
+                crud.studyset.mark_retired(db, db_obj=existing_studyset)
             db.commit()
             db.refresh(db_obj)
         return db_obj

@@ -20,6 +20,7 @@ def get_next_set(
         db: Session = Depends(deps.get_db),
         user_id: Optional[int] = None,
         deck_ids: Optional[List[int]] = Query(None),
+        force_new: bool = False,
         limit: int = 1,
         current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
@@ -37,7 +38,7 @@ def get_next_set(
     else:
         user = current_user
 
-    study_set = crud.studyset.get_study_set(db, user=user, deck_ids=deck_ids, return_limit=limit)
+    study_set = crud.studyset.get_study_set(db, user=user, deck_ids=deck_ids, return_limit=limit, force_new=force_new)
     # if in_test_mode:
     #     facts = crud.fact.get_test_facts(db=db, user=user)
     # elif deck_ids is None:

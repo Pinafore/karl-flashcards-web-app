@@ -21,6 +21,8 @@ class StudySet(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False, index=True)
     is_test = Column(Boolean, nullable=False, default=False, index=True)
+    debug_id = Column(Integer)
+    retired = Column(Boolean)
 
     decks = association_proxy("session_decks", "deck", creator=lambda deck: Session_Deck(deck=deck))
     session_decks = relationship("Session_Deck", back_populates="studyset")
@@ -39,17 +41,17 @@ class StudySet(Base):
     # https://docs.sqlalchemy.org/en/14/orm/extensions/hybrid.html
     @hybrid_property
     def completed(self) -> bool:
-        return self.num_unstudied == 0
+        return self.num_unstudied == 0 or self.retired is True  # Retired checks if deck was deleted!
 
     @hybrid_property
     def unstudied_facts(self) -> List[Fact]:
-        return [session_fact.fact for session_fact in self.session_facts if  # type: ignore
+        return [session_fact for session_fact in self.session_facts if  # type: ignore
                 not session_fact.history_id]  # type: ignore
 
     # Some reason list comprehension is necessary for pydantic to see models
     @hybrid_property
     def all_facts(self) -> List[Fact]:
-        return [fact for fact in self.facts]  # type: ignore
+        return [session_fact for session_fact in self.session_facts] or []
 
     @hybrid_property
     def all_decks(self) -> List[Deck]:

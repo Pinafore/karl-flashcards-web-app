@@ -175,7 +175,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
         scheduler_counts = {system: 0 for system in Repetition}
         for found_user in all_users:
-            scheduler_counts[found_user.repetition_model] += 1
+            scheduler_counts[found_user.repetition_model] += 1  # type: ignore
         return scheduler_counts
 
     def make_current_users_beta_testers(self, db: Session):

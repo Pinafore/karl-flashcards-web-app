@@ -2,11 +2,13 @@ import json
 import logging
 import time
 from datetime import datetime
+from itertools import islice
 from tempfile import SpooledTemporaryFile
 from typing import List, Union, Dict, Any, Optional
 
 import pandas
 import requests
+from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from pytz import timezone
 from sentry_sdk import capture_exception
@@ -333,7 +335,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
 
     def get_eligible_facts(
             self, query: Query, skip: int = None, limit: int = None
-    ) -> List[models.Fact]:
+    ) -> List[schemas.Fact]:
         begin_overall_start = time.time()
         if skip:
             query = query.offset(skip)
@@ -398,7 +400,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         crud.history.create(db=db, obj_in=history_in)
         return facts
 
-    def get_study_set_facts(
+    def get_ordered_schedule(
             self,
             db: Session,
             *,
@@ -406,10 +408,11 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             deck_ids: List[int] = None,
             return_limit: Optional[int] = None,
             send_limit: Optional[int] = 300,
-    ) -> Union[List[schemas.Fact], requests.exceptions.RequestException, json.decoder.JSONDecodeError]:
+    ) -> Union[List[models.Fact], requests.exceptions.RequestException, json.decoder.JSONDecodeError]:
         filters = schemas.FactSearch(deck_ids=deck_ids, limit=send_limit, randomize=True, studyable=True)
         query = crud.fact.build_facts_query(db=db, user=user, filters=filters)
         eligible_facts = self.get_eligible_facts(query=query, limit=send_limit)
+        logger.info(eligible_facts)
         if not eligible_facts:
             return []
         karl_list = []
@@ -441,31 +444,17 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             logger.info(scheduler_response.request)
             logger.info("query time: " + str(query_time))
 
-            facts = []
-            # if rationale != "<p>no fact received</p>":
-            #     reordered_karl_list = [karl_list[x] for x in card_order]
-            #     # TODO: CONDENSE
-            #     if return_limit:
-            #         for _, each_karl_fact in zip(range(return_limit), reordered_karl_list):
-            #             retrieved_fact = self.get(db=db, id=int(each_karl_fact["fact_id"]))
-            #             fact_schema = self.get_schema_with_perm(db_obj=retrieved_fact, user=user)
-            #             fact_schema.rationale = rationale
-            #             fact_schema.debug_id = debug_id
-            #             if retrieved_fact:
-            #                 fact_schema.marked = True if user in retrieved_fact.markers else False
-            #             facts.append(fact_schema)
-            #     else:
-            #         for each_karl_fact in reordered_karl_list:
-            #             retrieved_fact = self.get(db=db, id=int(each_karl_fact["fact_id"]))
-            #             fact_schema = self.get_schema_with_perm(db_obj=retrieved_fact, user=user)
-            #             fact_schema.rationale = rationale
-            #             # MARK: maybe not the most efficient solution for determining if user has marked a fact
-            #             if retrieved_fact:
-            #                 fact_schema.marked = retrieved_fact.is_marked(user)
-            #             facts.append(fact_schema)
+            if rationale == "<p>no fact received</p>":
+                raise HTTPException(status_code=558, detail="No Facts Received From Scheduler")
+            # Generator idea adapted from https://stackoverflow.com/a/42393595
+            order_generator = (eligible_facts[x] for x in card_order)  # eligible facts instead?
+            ordered_schedules = list(islice(order_generator, return_limit))
+            logger.info("ordered schedules" + str(ordered_schedules))
+            logger.info("debug id: " + debug_id)
+            # Modify to save all facts in session
             details = {
                 "study_system": user.repetition_model,
-                "first_fact": facts[0] if len(facts) != 0 else "empty",
+                "first_fact": ordered_schedules[0] if len(ordered_schedules) != 0 else "empty",
                 "eligible_fact_time": query_time,
                 "scheduler_query_time": eligible_fact_time,
                 "debug_id": debug_id,
@@ -478,7 +467,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 details=details
             )
             crud.history.create(db=db, obj_in=history_in)
-            return eligible_facts
+            return ordered_schedules
         except requests.exceptions.RequestException as e:
             capture_exception(e)
             return e

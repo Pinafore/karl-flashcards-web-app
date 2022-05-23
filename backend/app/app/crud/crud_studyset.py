@@ -26,24 +26,26 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
     #     db.refresh(db_obj)
     #     return db_obj
 
-    def create_with_facts(self, db: Session, *, obj_in: schemas.StudySetCreate, facts: List[models.Fact],
+    def create_with_facts(self, db: Session, *, obj_in: schemas.StudySetCreate, facts: Optional[List[models.Fact]],
                           decks: Optional[List[models.Deck]]):
         db_obj = self.create(db, obj_in=obj_in)
         db.refresh(db_obj)
         # Not append because facts and decks are lists
-        db_obj.decks.extend(decks)
-        db_obj.facts.extend(facts)
+        if decks:
+            db_obj.decks.extend(decks)
+        if facts:
+            db_obj.facts.extend(facts)
         db.commit()
         db.refresh(db_obj)
         return db_obj
 
-    def assign_facts(self, db: Session, *, db_obj: models.StudySet, facts: List[models.Fact]) -> None:
-        for fact in facts:
-            self.assign_fact(db, db_obj=db_obj, fact=fact)
-
-    def assign_fact(self, db: Session, *, db_obj: models.StudySet, fact: models.Fact) -> None:
+    def create_session_fact(self, db: Session, *, db_obj: models.StudySet, fact: models.Fact) -> None:
         session_fact = models.Session_Fact(studyset_id=db_obj.id, fact_id=fact.fact_id)
         db.add(session_fact)
+        db.commit()
+
+    def mark_retired(self, db: Session, db_obj: models.StudySet) -> None:
+        db_obj.retired = True
         db.commit()
 
     def get_study_set(self,
@@ -53,8 +55,9 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                       deck_ids: List[int] = None,
                       return_limit: Optional[int] = None,
                       send_limit: Optional[int] = 300,
+                      force_new: bool,
                       ) -> Union[
-        schemas.StudySet, requests.exceptions.RequestException, json.decoder.JSONDecodeError, HTTPException]:
+        models.StudySet, requests.exceptions.RequestException, json.decoder.JSONDecodeError, HTTPException]:
         decks = []
         test_deck_id = crud.deck.get_test_deck_id(db=db)
         if deck_ids is not None:
@@ -72,25 +75,28 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         uncompleted_last_set = self.find_existing_study_set(db, user)
         logger.info(uncompleted_last_set)
         if uncompleted_last_set:
-            logger.info("UNCOMPLETED")
-            return uncompleted_last_set
+            # if force_new and not uncompleted_last_set.is_test:
+            if force_new:
+                self.mark_retired(db, db_obj=uncompleted_last_set)
+            else:
+                return uncompleted_last_set
         is_test_mode = crud.user.test_mode_check(db, db_obj=user)
         logger.info("test mode: " + str(is_test_mode))
         if is_test_mode:
             facts = crud.fact.get_test_facts(db, user=user)
-            decks = [crud.deck.get_test_deck(db)]
+            test_deck = crud.deck.get_test_deck(db)
+            decks = [test_deck] if test_deck is not None else []
         else:
-            facts = crud.fact.get_study_set_facts(db, user=user, deck_ids=deck_ids, return_limit=return_limit,
-                                                  send_limit=send_limit)
+            facts = crud.fact.get_ordered_schedule(db, user=user, deck_ids=deck_ids, return_limit=return_limit,
+                                                   send_limit=send_limit)
         logger.info(facts)
         db_obj = self.create_with_facts(db, obj_in=schemas.StudySetCreate(is_test=is_test_mode, user_id=user.id),
                                         decks=decks,
                                         facts=facts)
         db.commit()
-        obj_out = schemas.StudySet.from_orm(db_obj)
-        return obj_out
+        return db_obj
 
-    def find_existing_study_set(self, db: Session, user: models.User) -> Optional[schemas.StudySet]:
+    def find_existing_study_set(self, db: Session, user: models.User) -> Optional[models.StudySet]:
         studyset: models.StudySet = db.query(models.StudySet).filter(models.StudySet.user_id == user.id).order_by(
             models.StudySet.id.desc()).first()
         if studyset and not studyset.completed:

@@ -69,23 +69,22 @@ class Fact(Base):
     def permissions(self, user: User) -> Optional[Permission]:
         if self.user_id == user.id:
             return Permission.owner
-        for user_deck in user.user_decks:
+        for user_deck in user.user_decks:  # type: ignore # association proxy object is actually iterable
             if self.deck == user_deck.deck:
                 return user_deck.permissions
         else:
             return None
 
     @hybrid_method
-    def find_reports(self, user: User) -> Optional[List[FactReported]]:
+    def find_reports(self, user: User) -> List[FactReported]:
         if user.is_superuser:
             return [FactReported.construct(report_id=ind, reporter_id=report.user_id,
                                            reporter_username=report.reporter.username, **report.suggestion)
-                    for ind, report in enumerate(self.reporteds)]  # reporteds is user end
+                    for ind, report in enumerate(self.reporteds)]  # type: ignore # reporteds is user end
         else:
             return [FactReported.construct(report_id=ind, reporter_id=report.user_id,
                                            reporter_username=report.reporter.username, **report.suggestion)
-                    for ind, report in enumerate(self.reporteds) if
-                    report.user_id == user.id]  # reporteds is user end
+                    for ind, report in enumerate(self.reporteds) if report.user_id == user.id]  # type: ignore
 
     @hybrid_method
     def is_marked(self, user: User) -> bool:
@@ -94,3 +93,11 @@ class Fact(Base):
     @hybrid_method
     def is_suspended(self, user: User) -> bool:
         return True if user in self.suspenders else False
+
+    @hybrid_method
+    def is_deleted(self, user: User) -> bool:
+        return True if user in self.deleters else False
+
+    @hybrid_method
+    def is_reported(self, user: User) -> bool:
+        return True if user in self.reporters else False

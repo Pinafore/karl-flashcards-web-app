@@ -9,12 +9,12 @@ from app.db.base_class import Base
 from app.schemas.repetition import Repetition
 
 # from .user_deck import user_deck
-from app.schemas import DeckType, Deck
+from app.schemas import DeckType
+from .deck import Deck  # noqa: F401
 
 if TYPE_CHECKING:
     from .suspended import Suspended  # noqa: F401
     from .history import History  # noqa: F401
-    from .deck import Deck  # noqa: F401
     from .fact import Fact  # noqa: F401
     from .user_deck import User_Deck  # noqa: F401
     from .test_history import Test_History  # noqa: F401
@@ -53,4 +53,4 @@ class User(Base):
 
     @hybrid_property
     def decks(self) -> List[Deck]:
-        return [deck for deck in self.all_decks if deck.deck_type != DeckType.hidden]
+        return [deck for deck in self.all_decks if deck.deck_type != DeckType.hidden]  # Test if should be schema
