@@ -289,9 +289,6 @@ def mark_fact(
         fact = crud.fact.mark(db=perms.db, db_obj=perms.fact, user=perms.current_user)
     return fact
 
-    chicken = crud.fact.get_eligible_facts(db=db, user=user, filters=FactSearch(text="apple"))
-    assert len(chicken) == 1
-
 
 @router.delete("/report/all/{fact_id}", response_model=schemas.Fact)
 def clear_reports(

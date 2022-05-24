@@ -253,7 +253,8 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
     def build_facts_query(self, db: Session, *, user: models.User,
                           filters: schemas.FactSearch = schemas.FactSearch()) -> Query:
         visible_decks = (
-            db.query(models.Deck.id).join(models.User_Deck).filter(models.User_Deck.owner_id == user.id).subquery())
+            db.query(models.Deck.id).filter(models.Deck.deck_type != DeckType.hidden).join(models.User_Deck).filter(
+                models.User_Deck.owner_id == user.id).subquery())
 
         user_facts = (db.query(models.Fact).join(visible_decks, models.Fact.deck_id == visible_decks.c.id).filter(
             models.Fact.user_id == user.id))
@@ -267,8 +268,6 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                                 and_(models.Fact.deck_id == deck_owners.c.deck_id,
                                      models.Fact.user_id == deck_owners.c.owner_id)))
         facts_query = (user_facts.union(filtered_facts))
-        # Don't allow Jeopardy facts
-        # facts_query = facts_query.filter(models.Fact.deck_id != 2)
         if filters.studyable:
             facts_query = (facts_query
                            .outerjoin(models.Deleted,
@@ -342,7 +341,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
 
     def get_eligible_facts(
             self, query: Query, skip: int = None, limit: int = None
-    ) -> List[schemas.Fact]:
+    ) -> List[models.Fact]:
         begin_overall_start = time.time()
         if skip:
             query = query.offset(skip)
@@ -358,6 +357,9 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         # Get facts that have not been studied before
         logger.info(crud.deck.get_test_deck_id(db=db))
         test_deck_id = crud.deck.get_test_deck_id(db=db)
+        if test_deck_id is None:
+            raise HTTPException(560, detail="Test Deck ID Not Found")
+
         logger.info(db.query(self.model).filter(models.Fact.deck_id == test_deck_id).all())
         new_facts = db.query(self.model) \
             .filter(models.Fact.deck_id == test_deck_id).outerjoin(
@@ -406,6 +408,15 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         crud.history.create(db=db, obj_in=history_in)
         return facts
 
+    def create_scheduler_query(self, facts: List[models.Fact], user: models.User):
+        rev_karl_list_start = time.time()
+        scheduler_query = schemas.SchedulerQuery(facts=[schemas.KarlFact.from_orm(fact) for fact in facts],
+                                                 env=settings.ENVIRONMENT, repetition_model=user.repetition_model,
+                                                 user_id=user.id)
+        eligible_fact_time = time.time() - rev_karl_list_start
+        logger.info("scheduler query time: " + str(eligible_fact_time))
+        return scheduler_query
+
     def get_ordered_schedule(
             self,
             db: Session,
@@ -413,12 +424,12 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             user: models.User,
             deck_ids: List[int] = None,
             return_limit: Optional[int] = None,
-            send_limit: Optional[int] = 300,
+            send_limit: Optional[int] = None,
     ) -> Union[List[models.Fact], requests.exceptions.RequestException, json.decoder.JSONDecodeError]:
         filters = schemas.FactSearch(deck_ids=deck_ids, limit=send_limit, randomize=True, studyable=True)
         query = crud.fact.build_facts_query(db=db, user=user, filters=filters)
         eligible_facts = self.get_eligible_facts(query=query, limit=send_limit)
-        logger.info(eligible_facts)
+        logger.info("eligible fact length: " + str(len(eligible_facts)))
         if not eligible_facts:
             return []
         karl_list = []
@@ -430,13 +441,13 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 category=each_card.category,
                 deck_name=each_card.deck.title,
                 deck_id=each_card.deck_id,
-                user_id=user.id,
+                # user_id=user.id,
                 fact_id=each_card.fact_id,
-                repetition_model=user.repetition_model,
-                env=settings.ENVIRONMENT
+                # repetition_model=user.repetition_model,
+                # env=settings.ENVIRONMENT
             ).dict())
         eligible_fact_time = time.time() - karl_list_start
-        logger.info("eligible fact time: " + str(eligible_fact_time))
+        logger.info("old scheduler query time: " + str(eligible_fact_time))
 
         karl_query_start = time.time()
         try:

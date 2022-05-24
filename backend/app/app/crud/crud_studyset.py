@@ -54,7 +54,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                       user: models.User,
                       deck_ids: List[int] = None,
                       return_limit: Optional[int] = None,
-                      send_limit: Optional[int] = 300,
+                      send_limit: Optional[int] = None,
                       force_new: bool,
                       ) -> Union[
         models.StudySet, requests.exceptions.RequestException, json.decoder.JSONDecodeError, HTTPException]:

@@ -101,3 +101,7 @@ class Fact(Base):
     @hybrid_method
     def is_reported(self, user: User) -> bool:
         return True if user in self.reporters else False
+
+    @hybrid_property
+    def deck_name(self) -> str:
+        return self.deck.title

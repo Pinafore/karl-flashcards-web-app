@@ -17,14 +17,28 @@ class FactBase(BaseModel):
 
 
 class KarlFact(FactBase):
-    user_id: int
     fact_id: int
     text: str
     answer: str
     deck_name: str
     deck_id: int
+
+    class Config:
+        orm_mode = True
+
+
+class KarlFactList(KarlFact):
+    facts: List[KarlFact]
+
+    class Config:
+        orm_mode = True
+
+
+class SchedulerQuery(BaseModel):
+    facts: List[KarlFact]
     repetition_model: Repetition
     env: str
+    user_id: int
 
 
 class KarlFactUpdate(KarlFact):

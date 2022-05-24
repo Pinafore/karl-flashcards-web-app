@@ -66,11 +66,12 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
             query = query.filter(not_(Deck.users.any(id=user.id)))
         return query.all()
 
-    def get_test_deck_id(self, db: Session) -> int:
-        return self.get_test_deck(db=db).id
+    def get_test_deck_id(self, db: Session) -> Optional[int]:
+        deck = self.get_test_deck(db=db)
+        return deck.id if deck else None
 
     def get_test_deck(self, db: Session) -> Optional[Deck]:
-        return db.query(self.model).filter(Deck.title == settings.TEST_DECK_NAME).first()
+        return db.query(self.model).filter(Deck.deck_type == DeckType.hidden).first()
 
     def assign_test_deck(self, db: Session, user: User) -> Deck:
         deck = self.get_test_deck(db)
