@@ -10,7 +10,7 @@ def filter_deck_ids(query: query, deck_ids: Optional[List[int]]):
     return query.filter(models.Fact.deck_id.in_(deck_ids)) if deck_ids else query
 
 
-def filter_deck_id(query: query, deck_id: Optional[List[int]]):
+def filter_deck_id(query: query, deck_id: Optional[int]):
     return query.filter(models.Fact.deck_id == deck_id) if deck_id else query
 
 

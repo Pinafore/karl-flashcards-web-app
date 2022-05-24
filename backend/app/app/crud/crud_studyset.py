@@ -27,7 +27,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
     #     return db_obj
 
     def create_with_facts(self, db: Session, *, obj_in: schemas.StudySetCreate, facts: Optional[List[models.Fact]],
-                          decks: Optional[List[models.Deck]]):
+                          decks: Optional[List[models.Deck]]) -> models.StudySet:
         db_obj = self.create(db, obj_in=obj_in)
         db.refresh(db_obj)
         # Not append because facts and decks are lists

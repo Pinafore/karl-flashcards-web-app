@@ -31,7 +31,8 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         db_obj = db.query(self.model).filter(models.Fact.fact_id == id).first()
         return db_obj
 
-    def get_schema_with_perm(self, db_obj: models.Fact, user: models.User):
+    # noinspection PyCallingNonCallable
+    def get_schema_with_perm(self, db_obj: models.Fact, user: models.User) -> schemas.Fact:
         schema = schemas.Fact.from_orm(db_obj)
         schema.permission = db_obj.permissions(user)
         schema.marked = db_obj.is_marked(user)
@@ -44,10 +45,10 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
     ) -> models.Fact:
         obj_in_data = jsonable_encoder(obj_in)
         now = datetime.now(timezone('UTC')).isoformat()
-        db_obj = self.model(**obj_in_data,
-                            user_id=user.id,
-                            create_date=now,
-                            update_date=now)
+        db_obj = models.Fact(**obj_in_data,
+                             user_id=user.id,
+                             create_date=now,
+                             update_date=now)
         db.add(db_obj)
         db.commit()
         return db_obj
@@ -72,7 +73,10 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
     def update(
             self, db: Session, *, db_obj: models.Fact, obj_in: Union[schemas.FactUpdate, Dict[str, Any]]
     ) -> models.Fact:
-        update_data = obj_in.dict(exclude_unset=True)
+        if isinstance(obj_in, dict):
+            update_data = obj_in
+        else:
+            update_data = obj_in.dict(exclude_unset=True)
         update_data["update_date"] = datetime.now(timezone('UTC')).isoformat()
         return super().update(db, db_obj=db_obj, obj_in=update_data)
 
@@ -154,6 +158,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         crud.history.create(db=db, obj_in=history_in)
         return db_obj
 
+    # noinspection PyTypeChecker
     def undo_remove(
             self, db: Session, *, db_obj: models.Fact, user: models.User
     ) -> models.Fact:
@@ -245,7 +250,8 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         crud.history.create(db=db, obj_in=history_in)
         return db_obj
 
-    def build_facts_query(self, db: Session, *, user: models.User, filters: schemas.FactSearch = schemas.FactSearch()):
+    def build_facts_query(self, db: Session, *, user: models.User,
+                          filters: schemas.FactSearch = schemas.FactSearch()) -> Query:
         visible_decks = (
             db.query(models.Deck.id).join(models.User_Deck).filter(models.User_Deck.owner_id == user.id).subquery())
 
@@ -361,13 +367,8 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 models.History.log_type == Log.test_study
             )).filter(
             models.History.id == None).order_by(func.random()).limit(return_limit).all()
-        # new_facts = db.query(self.model) \
-        #     .filter(models.Fact.test_mode == True).outerjoin(
-        #     models.Test_History, and_(
-        #         models.Fact.fact_id == models.Test_History.fact_id,
-        #         models.Test_History.user_id == user.id)).filter(
-        #     models.Test_History.id == None).order_by(func.random()).all()
         logger.info("New facts:" + str(new_facts))
+
         # Get facts that have been previously studied before, but were answered incorrectly
         old_facts = db.query(self.model) \
             .filter(models.Fact.deck_id == test_deck_id).join(
@@ -480,7 +481,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             capture_exception(e)
             return e
 
-    def load_json_facts(self, db: Session, file: SpooledTemporaryFile, user: models.User) -> str:
+    def load_json_facts(self, db: Session, file: SpooledTemporaryFile, user: models.User) -> None:
         count = 0
         json_data = json.load(file)
         for fact_obj in json_data:
@@ -489,7 +490,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         logger.info(f"{count} facts loaded from txt file")
 
     def load_txt_facts(self, db: Session, file: SpooledTemporaryFile, user: models.User,
-                       props: schemas.FileProps) -> str:
+                       props: schemas.FileProps) -> None:
         count = 0
         with file as f:
             df = pandas.read_csv(f, sep=props.delimeter, names=props.headers, index_col=False)
@@ -513,7 +514,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 count += 1
         logger.info(f"{count} facts loaded from txt file")
 
-    def create_fact(self, db: Session, fact_obj: Any, user: models.User, deck_type: DeckType):
+    def create_fact(self, db: Session, fact_obj: Any, user: models.User, deck_type: DeckType) -> None:
         deck = crud.deck.find_or_create(db, proposed_deck=fact_obj["deck"], user=user, deck_type=deck_type)
         fact_in = schemas.FactCreate(
             text=fact_obj["text"],
