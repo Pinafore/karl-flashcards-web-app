@@ -1,5 +1,6 @@
 import json
 import logging
+import math
 import time
 from datetime import datetime
 from itertools import islice
@@ -379,12 +380,16 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
 
         len_new_facts = len(new_facts)
         len_old_facts = len(old_facts)
-        if len_new_facts >= 10 and len_old_facts >= 10:
-            facts = new_facts[:10] + old_facts[:10]
-        elif len_new_facts < 10:
-            facts = new_facts + old_facts[:return_limit - len_new_facts]
-        elif len_old_facts < 10:
-            facts = old_facts + new_facts[:return_limit - len_old_facts]
+        if return_limit:
+            lower_lim, upper_lim = math.floor(return_limit / 2), math.ceil(return_limit / 2)
+            if len_new_facts >= upper_lim and len_old_facts >= upper_lim:
+                facts = new_facts[:lower_lim] + old_facts[:upper_lim]
+            elif len_new_facts < upper_lim:
+                facts = new_facts + old_facts[:return_limit - len_new_facts]
+            elif len_old_facts < upper_lim:
+                facts = old_facts + new_facts[:return_limit - len_old_facts]
+            else:
+                raise HTTPException(559, detail="Test Set Creation Error")
         else:
             logger.info("Test Set Should Always Be Above 20: ", len_old_facts + len_new_facts)
             facts = old_facts + new_facts
