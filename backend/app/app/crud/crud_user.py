@@ -24,7 +24,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 import sys
 
-sys.setrecursionlimit(1500)
 
 
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):

@@ -21,7 +21,7 @@ def get_next_set(
         user_id: Optional[int] = None,
         deck_ids: Optional[List[int]] = Query(None),
         force_new: bool = False,
-        limit: int = 1,
+        limit: int = 5,
         current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """

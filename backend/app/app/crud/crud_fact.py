@@ -424,7 +424,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             user: models.User,
             deck_ids: List[int] = None,
             return_limit: Optional[int] = None,
-            send_limit: Optional[int] = None,
+            send_limit: Optional[int] = 1000,
     ) -> Union[List[models.Fact], requests.exceptions.RequestException, json.decoder.JSONDecodeError]:
         filters = schemas.FactSearch(deck_ids=deck_ids, limit=send_limit, randomize=True, studyable=True)
         query = crud.fact.build_facts_query(db=db, user=user, filters=filters)
@@ -441,10 +441,10 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 category=each_card.category,
                 deck_name=each_card.deck.title,
                 deck_id=each_card.deck_id,
-                # user_id=user.id,
+                user_id=user.id,
                 fact_id=each_card.fact_id,
-                # repetition_model=user.repetition_model,
-                # env=settings.ENVIRONMENT
+                repetition_model=user.repetition_model,
+                env=settings.ENVIRONMENT
             ).dict())
         eligible_fact_time = time.time() - karl_list_start
         logger.info("old scheduler query time: " + str(eligible_fact_time))
@@ -471,7 +471,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             # Modify to save all facts in session
             details = {
                 "study_system": user.repetition_model,
-                "first_fact": ordered_schedules[0] if len(ordered_schedules) != 0 else "empty",
+                "first_fact": schemas.Fact.from_orm(ordered_schedules[0]) if len(ordered_schedules) != 0 else "empty",
                 "eligible_fact_time": query_time,
                 "scheduler_query_time": eligible_fact_time,
                 "debug_id": debug_id,
@@ -481,7 +481,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 time=datetime.now(timezone('UTC')).isoformat(),
                 user_id=user.id,
                 log_type=schemas.Log.get_facts,
-                details=details
+                details=details,
             )
             crud.history.create(db=db, obj_in=history_in)
             return ordered_schedules

@@ -54,7 +54,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                       user: models.User,
                       deck_ids: List[int] = None,
                       return_limit: Optional[int] = None,
-                      send_limit: Optional[int] = None,
+                      send_limit: Optional[int] = 1000,
                       force_new: bool,
                       ) -> Union[
         models.StudySet, requests.exceptions.RequestException, json.decoder.JSONDecodeError, HTTPException]:
@@ -148,7 +148,8 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                     user_id=user.id,
                     fact_id=fact.fact_id,
                     log_type=schemas.Log.test_study,
-                    details=details
+                    correct=schedule.response,
+                    details=details,
                 )
                 history = crud.history.create(db=db, obj_in=history_in)
             else:
@@ -157,6 +158,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                     user_id=user.id,
                     fact_id=fact.fact_id,
                     log_type=schemas.Log.study,
+                    correct=schedule.response,
                     details=details
                 )
                 history = crud.history.create(db=db, obj_in=history_in)
