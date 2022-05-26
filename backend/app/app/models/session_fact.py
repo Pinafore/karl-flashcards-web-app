@@ -26,7 +26,11 @@ class Session_Fact(Base):
     history = relationship("History", uselist=False)
 
     @hybrid_property
-    def permissions(self) -> Optional[Permission]:
+    def completed(self) -> bool:
+        return self.history.correct if self.history and self.history.correct else False
+
+    @hybrid_property
+    def permission(self) -> Optional[Permission]:
         return self.fact.permissions(user=self.studyset.user)
 
     @hybrid_property
@@ -40,6 +44,10 @@ class Session_Fact(Base):
     @hybrid_property
     def suspended(self) -> bool:
         return self.fact.is_suspended(user=self.studyset.user)
+
+    @hybrid_property
+    def deleted(self) -> bool:
+        return self.fact.is_deleted(user=self.studyset.user)
 
     @hybrid_property
     def reported(self) -> bool:

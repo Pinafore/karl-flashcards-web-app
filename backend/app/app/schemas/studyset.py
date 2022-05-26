@@ -33,6 +33,9 @@ class StudySet(StudySetInDBBase):
     completed: bool
     num_facts: int
     num_unstudied: int
+    is_first_pass: bool
+    short_description: str
+    expanded_description: str
 
     class Config:
         orm_mode = True

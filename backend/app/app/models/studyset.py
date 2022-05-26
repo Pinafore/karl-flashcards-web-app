@@ -11,7 +11,6 @@ from app import schemas
 
 if TYPE_CHECKING:  # noqa: F401
     from .user import User  # noqa: F401
-from .fact import Fact
 from .deck import Deck
 from .session_fact import Session_Fact  # noqa: F401
 from .session_deck import Session_Deck  # noqa: F401
@@ -31,6 +30,10 @@ class StudySet(Base):
     session_facts = relationship("Session_Fact", back_populates="studyset")
 
     @property
+    def num_decks(self) -> int:
+        return len(self.decks)
+
+    @property
     def num_facts(self) -> int:
         return len(self.facts)
 
@@ -43,16 +46,49 @@ class StudySet(Base):
     def completed(self) -> bool:
         return self.num_unstudied == 0 or self.retired is True  # Retired checks if deck was deleted!
 
+    # Modify to include facts to study again?
     @hybrid_property
-    def unstudied_facts(self) -> List[Fact]:
+    def unstudied_facts(self) -> List[Session_Fact]:
         return [session_fact for session_fact in self.session_facts if  # type: ignore
-                not session_fact.history_id]  # type: ignore
+                not (
+                        session_fact.completed or session_fact.suspended or session_fact.reported or session_fact.deleted)]
 
+    # maybe change to return session_fact
     # Some reason list comprehension is necessary for pydantic to see models
     @hybrid_property
-    def all_facts(self) -> List[Fact]:
-        return [session_fact for session_fact in self.session_facts] or []
+    def all_facts(self) -> List[Session_Fact]:
+        return [session_fact for session_fact in self.session_facts if  # type: ignore
+                not (session_fact.suspended or session_fact.reported or session_fact.deleted)]
 
     @hybrid_property
     def all_decks(self) -> List[Deck]:
         return [deck for deck in self.decks]  # type: ignore
+
+    @hybrid_property
+    def is_first_pass(self) -> bool:
+        for fact in self.unstudied_facts:
+            if fact.history_id is None:
+                return True
+        return False
+
+    @hybrid_property
+    def short_description(self) -> str:
+        num_decks = len(self.decks)
+        if len(self.user.decks) == num_decks or num_decks == 0:
+            return f"Studying: All"
+        elif num_decks > 1:
+            return f"Studying: {num_decks} Decks"
+        else:
+            return f"Studying: {self.decks[0]}"
+
+    @hybrid_property
+    def expanded_description(self) -> str:
+        num_decks = len(self.decks)
+        num_facts = len(self.unstudied_facts)
+        num_unstudied = len(self.unstudied_facts)
+        if len(self.user.decks) == num_decks or num_decks == 0:
+            return_str = f"Decks: All"
+        else:
+            return_str = f"Decks: {', '.join(deck.title for deck in self.decks)}"
+        return_str += f"\nFacts: {num_facts} Total, {num_unstudied} Remaining\nFirst Pass:{self.is_first_pass}"
+        return return_str
