@@ -74,12 +74,14 @@ class StudySet(Base):
     @hybrid_property
     def short_description(self) -> str:
         num_decks = len(self.decks)
+        return_str = "" if self.is_first_pass else "Re-"
         if len(self.user.decks) == num_decks or num_decks == 0:
-            return f"Studying: All"
+            return_str += f"Studying: All"
         elif num_decks > 1:
-            return f"Studying: {num_decks} Decks"
+            return_str += f"Studying: {num_decks} Decks"
         else:
-            return f"Studying: {self.decks[0]}"
+            return_str += f"Studying: {self.decks[0].title}"
+        return return_str
 
     @hybrid_property
     def expanded_description(self) -> str:

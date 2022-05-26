@@ -108,23 +108,25 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                              studyset_id: int) -> Any:
         studyset = self.get(db=db, id=studyset_id)
         if not studyset:
-            return HTTPException(status_code=404, detail="Studyset not found")
+            raise HTTPException(status_code=404, detail="Studyset not found")
+        history_schemas = []
         for schedule in schedules:
             # fact = crud.fact.get(db=db, id=schedule.fact_id)
             session_fact = db.query(models.Session_Fact).filter(models.Session_Fact.studyset_id == studyset_id).filter(
                 models.Session_Fact.fact_id == schedule.fact_id).first()
             if not session_fact:
-                return HTTPException(status_code=404, detail="Fact not found")
+                raise HTTPException(status_code=404, detail="Fact not found")
             history = self.record_study(db=db, user=user, session_fact=session_fact, schedule=schedule)
-            if isinstance(history, HTTPException):
-                return history
-            if isinstance(history, models.History):
-                session_fact.history_id = history.id
-                db.commit()
+
+            # Mark that the session fact has been studied most recently here
+            session_fact.history_id = history.id
+            db.commit()
+            history_schemas.append(schemas.History.from_orm(history))
+        return schemas.ScheduleResponse(successes=history_schemas, session_complete=studyset.completed)
 
     def record_study(
             self, db: Session, *, user: models.User, session_fact: models.Session_Fact, schedule: schemas.Schedule
-    ) -> Union[models.History, HTTPException]:
+    ) -> Union[models.History]:
         try:
             response = schedule.response
             date_studied = datetime.now(timezone('UTC')).isoformat()
@@ -183,14 +185,14 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                 request = requests.post(settings.INTERFACE + "api/karl/update", json=payload_update)
                 logger.info(request.request)
                 if not 200 <= request.status_code < 300:
-                    return HTTPException(status_code=556, detail="Scheduler malfunction")
+                    raise HTTPException(status_code=556, detail="Scheduler malfunction")
             return history
         except requests.exceptions.RequestException as e:
             capture_exception(e)
-            return HTTPException(status_code=555, detail="Connection to scheduler is down")
+            raise HTTPException(status_code=555, detail="Connection to scheduler is down")
         except json.decoder.JSONDecodeError as e:
             capture_exception(e)
-            return HTTPException(status_code=556, detail="Scheduler malfunction")
+            raise HTTPException(status_code=556, detail="Scheduler malfunction")
 
 
 studyset = CRUDStudySet(models.StudySet)

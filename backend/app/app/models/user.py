@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional
 
 from sqlalchemy import Boolean, Column, Integer, String, ForeignKey, Enum, TIMESTAMP, SmallInteger
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -11,6 +11,8 @@ from app.schemas.repetition import Repetition
 # from .user_deck import user_deck
 from app.schemas import DeckType
 from .deck import Deck  # noqa: F401
+from app import crud
+from app.db.session import SessionLocal
 
 if TYPE_CHECKING:
     from .suspended import Suspended  # noqa: F401
@@ -18,7 +20,7 @@ if TYPE_CHECKING:
     from .fact import Fact  # noqa: F401
     from .user_deck import User_Deck  # noqa: F401
     from .test_history import Test_History  # noqa: F401
-    from .studyset import StudySet  # noqa: F401
+from .studyset import StudySet
 
 
 class User(Base):
@@ -54,3 +56,9 @@ class User(Base):
     @hybrid_property
     def decks(self) -> List[Deck]:
         return [deck for deck in self.all_decks if deck.deck_type != DeckType.hidden]  # Test if should be schema
+
+    @hybrid_property
+    def resume_studyset(self) -> bool:
+        db = SessionLocal()
+        study_set = crud.studyset.find_existing_study_set(db=db, user=self)  # type: ignore
+        return study_set is not None

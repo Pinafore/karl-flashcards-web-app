@@ -40,12 +40,20 @@
       </v-list>
       <v-divider></v-divider>
       <v-list subheader>
+        <v-list-item v-show="resumeAvail" to="/main/study/learn?resume=1">
+          <v-list-item-action>
+            <v-icon>mdi-play</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Resume Study</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
         <v-list-item to="/main/study/decks">
           <v-list-item-action>
             <v-icon>{{ mdiBookMultiple }}</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title>Decks</v-list-item-title>
+            <v-list-item-title>Create Study Set</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
         <v-list-item to="/main/study/learn">
@@ -277,6 +285,14 @@
 
     set showDrawer(value) {
       mainStore.setDashboardShowDrawer(value);
+    }
+
+    get resumeAvail() {
+      if (mainStore.userProfile) {
+        return mainStore.userProfile.resume_studyset;
+      } else {
+        return false;
+      }
     }
 
     get darkMode() {

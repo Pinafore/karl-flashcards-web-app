@@ -4,7 +4,7 @@
     <RecallPopup></RecallPopup>
     <v-toolbar style="position: sticky; top: 0; z-index: 10;">
       <v-toolbar-title>
-        Decks
+        New Study Set
       </v-toolbar-title>
       <v-spacer class="hidden-xs-only"></v-spacer>
 
@@ -17,6 +17,23 @@
         >
       </v-card-actions>
     </v-toolbar>
+    <v-card flat>
+      <v-card-text style="padding-bottom: 0px">
+        <p class="subheading">
+          Max Facts (Create a new study set after completion if you wish to keep
+          studying):
+        </p>
+        <v-radio-group v-model="selectedNum" row>
+          <v-radio
+            v-for="num in studyNumOptions"
+            :key="num"
+            :label="`${num} Facts`"
+            :value="num"
+          >
+          </v-radio>
+        </v-radio-group>
+      </v-card-text>
+    </v-card>
     <v-data-table
       v-model="selected"
       :headers="headers"
@@ -33,7 +50,7 @@
 
 <script lang="ts">
   import { Component, Vue } from "vue-property-decorator";
-  import { mainStore } from "@/utils/store-accessor";
+  import { mainStore, studyStore } from "@/utils/store-accessor";
   import { IComponents } from "@/interfaces";
   import Onboard from "@/views/Onboard.vue";
   import RecallPopup from "@/views/main/RecallPopup.vue";
@@ -51,6 +68,8 @@
       },
     ];
     selected: IComponents["Deck"][] = [];
+    studyNumOptions: number[] = [5, 10, 20, 30, 50];
+    selectedNum = 20;
 
     async mounted() {
       await mainStore.getUserProfile();
@@ -68,16 +87,18 @@
     public openDecks() {
       // Vue router takes in arrays only as strings
       const selectedIds = this.selected.map((a) => String(a.id));
+      // studyStore.updateSelectedNum(this.selectedNum);
       this.$router.push({
         path: "/main/study/learn",
-        query: { deck: selectedIds },
+        query: { deck: selectedIds, num: String(this.selectedNum) },
       });
     }
 
     public openDeck(deck) {
+      // studyStore.updateSelectedNum(this.selectedNum);
       this.$router.push({
         path: "/main/study/learn",
-        query: { deck: String(deck.id) },
+        query: { deck: String(deck.id), num: String(this.selectedNum) },
       });
     }
 

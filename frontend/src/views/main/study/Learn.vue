@@ -10,7 +10,10 @@
       <!--      </v-card-title>-->
       <v-card-title primary-title class="mx-3 my-0 pa-0">
         <div v-if="inTestMode" class="headline primary--text">Test Mode</div>
-        <div v-else-if="$vuetify.breakpoint.xsOnly" class="headline primary--text">
+        <div
+          v-else-if="$vuetify.breakpoint.xsOnly || studyset === null"
+          class="headline primary--text"
+        >
           Study
         </div>
         <div v-else class="headline primary--text">
@@ -378,6 +381,8 @@
       await mainStore.getUserProfile();
       mainStore.setConnectionError(false);
       mainStore.setSchedulerError(false);
+      this.updateSelectedNum(this.$router.currentRoute.query.num);
+      this.setResume(this.$router.currentRoute.query.resume);
       await this.determine_decks(this.$router.currentRoute.query.deck);
       window.addEventListener("keydown", this.handleKeyDown);
       window.addEventListener("keyup", this.resetKeyListener);
@@ -411,6 +416,18 @@
         studyStore.setDeckIds([]);
       }
       await studyStore.getNextShow();
+    }
+
+    public updateSelectedNum(payload: string | (string | null)[]) {
+      if (payload && payload !== undefined) {
+        studyStore.updateSelectedNum(payload);
+      }
+    }
+
+    public setResume(payload: string | (string | null)[]) {
+      if (payload && payload !== undefined) {
+        studyStore.setForceNew(payload);
+      }
     }
 
     public async destroyed() {

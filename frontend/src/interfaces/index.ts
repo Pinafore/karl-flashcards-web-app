@@ -170,6 +170,7 @@ export interface IComponents {
     pwa_tip: boolean;
     recall_target: number;
     test_mode: number;
+    resume_studyset: boolean;
   };
   UserCreate: {
     email: string;
@@ -246,5 +247,6 @@ export interface IComponents {
     user: IComponents["User"];
     short_description: string;
     expanded_description: string;
+    is_first_pass: string;
   };
 }

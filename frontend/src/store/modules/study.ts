@@ -23,6 +23,8 @@ export default class StudyModule extends VuexModule {
   timer: NodeJS.Timeout | undefined = undefined;
   backTime = 0;
   inTestMode = false;
+  forceNew = true;
+  selectedNum = 20;
 
   @Mutation
   setDeckIds(payload) {
@@ -32,6 +34,16 @@ export default class StudyModule extends VuexModule {
   @Mutation
   addToSchedule(payload) {
     this.schedule.push(payload);
+  }
+
+  @Mutation
+  updateSelectedNum(payload) {
+    this.selectedNum = payload;
+  }
+
+  @Mutation
+  setForceNew(payload) {
+    this.resume = payload;
   }
 
   @Mutation
@@ -218,7 +230,12 @@ export default class StudyModule extends VuexModule {
     this.clearTimer();
     try {
       this.setShowLoading();
-      const response = await api.getStudyFacts(mainStore.token, this.deckIds ?? []);
+      const response = await api.getStudyFacts(
+        mainStore.token,
+        this.deckIds ?? [],
+        this.selectedNum,
+        this.forceNew,
+      );
       if (response.data.unstudied_facts.length == 0) {
         this.setShowEmpty();
         this.setStudy([]);

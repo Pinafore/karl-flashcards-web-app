@@ -104,15 +104,22 @@ export const api = {
       authHeaders(token),
     );
   },
-  async getStudyFacts(token: string, deckIds: number[]) {
+  async getStudyFacts(
+    token: string,
+    deckIds: number[],
+    selectedNum: number,
+    forceNew: boolean,
+  ) {
     let url = `${apiUrl}/api/study/`;
+    url += `?`;
     if (deckIds.length > 0) {
-      url += `?`;
       for (const eachId in deckIds) {
         url += `deck_ids=${deckIds[eachId]}&`;
       }
       url = url.slice(0, -1);
     }
+    url += `&limit=${selectedNum}`;
+    url += `&force_new=${forceNew}`;
     return axios.get<IComponents["StudySet"]>(url, authHeaders(token));
   },
   async createFact(token: string, data: IComponents["FactCreate"]) {

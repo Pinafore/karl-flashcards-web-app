@@ -56,7 +56,7 @@ def get_next_set(
     return study_set
 
 
-@router.put("/", response_model=List[bool])
+@router.put("/", response_model=schemas.ScheduleResponse)
 def update_schedule_set(
         *,
         db: Session = Depends(deps.get_db),
@@ -70,10 +70,7 @@ def update_schedule_set(
 
     # successes = []
     response = crud.studyset.update_session_facts(db=db, schedules=facts_in, user=current_user, studyset_id=studyset_id)
-    if isinstance(response, HTTPException):
-        raise response
-    else:
-        return response
+    return response
     # for fact_in in facts_in:
     #     fact = crud.fact.get(db=db, id=fact_in.fact_id)
     #     if not fact:
