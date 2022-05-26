@@ -7,6 +7,7 @@ import router from "@/router";
 @Module({ name: "study" })
 export default class StudyModule extends VuexModule {
   study: IComponents["Fact"][] = [];
+  init_unstudied = 0;
   studyset: IComponents["StudySet"] | null = null;
   deckIds: number[] | null = null;
   schedule: IComponents["Schedule"][] = [];
@@ -46,6 +47,11 @@ export default class StudyModule extends VuexModule {
   }
 
   @Mutation
+  setInitUnstudied(payload) {
+    this.init_unstudied = payload;
+  }
+
+  @Mutation
   setRecommendation(payload: boolean) {
     this.recommendation = payload;
   }
@@ -55,7 +61,7 @@ export default class StudyModule extends VuexModule {
     this.show = {
       text: payload.text,
       fact: payload,
-      enable_report: payload.permission === Permission.owner,
+      enable_report: payload.permission !== Permission.owner,
       enable_actions: true,
       marked: payload.marked ?? false,
     };
@@ -119,7 +125,6 @@ export default class StudyModule extends VuexModule {
 
   @Mutation
   removeFirstFact() {
-    this.study.shift();
     if (this.studyset) {
       this.studyset.unstudied_facts.shift();
     }
@@ -194,6 +199,10 @@ export default class StudyModule extends VuexModule {
 
   @Action
   async getNextShow() {
+    console.log(this.studyset);
+    if (this.studyset) {
+      console.log(this.studyset.unstudied_facts.length);
+    }
     this.clearTimer();
     if (this.studyset && this.studyset.unstudied_facts.length > 0) {
       this.setShow(this.studyset.unstudied_facts[0]);
@@ -210,14 +219,13 @@ export default class StudyModule extends VuexModule {
     try {
       this.setShowLoading();
       const response = await api.getStudyFacts(mainStore.token, this.deckIds ?? []);
-      console.log(response.data);
       if (response.data.unstudied_facts.length == 0) {
         this.setShowEmpty();
         this.setStudy([]);
       } else {
         this.setStudySet(response.data);
         this.setStudy(response.data.unstudied_facts);
-        console.log(response.data.is_test);
+        this.setInitUnstudied(response.data.num_unstudied);
         this.setIsTestMode(response.data.is_test);
         await this.getNextShow();
       }
@@ -379,8 +387,6 @@ export default class StudyModule extends VuexModule {
       } catch (error) {
         await mainStore.checkApiError(error);
       }
-    } else {
-      console.log("SDFSLDFJSLDJFLSDF");
     }
   }
 }

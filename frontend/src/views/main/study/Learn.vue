@@ -10,8 +10,17 @@
       <!--      </v-card-title>-->
       <v-card-title primary-title class="mx-3 my-0 pa-0">
         <div v-if="inTestMode" class="headline primary--text">Test Mode</div>
-        <div v-else class="headline primary--text">Learn</div>
-        <div class="headline primary--text" style="margin-left: .5em">
+        <div v-else-if="$vuetify.breakpoint.xsOnly" class="headline primary--text">
+          Study
+        </div>
+        <div v-else class="headline primary--text">
+          {{ studyset.short_description }}
+        </div>
+        <div
+          v-show="show.text !== `Loading`"
+          class="headline primary--text"
+          style="margin-left: .5em"
+        >
           ({{ current_study_num }} of {{ num_facts }})
         </div>
         <v-spacer></v-spacer>
@@ -325,6 +334,10 @@
     editDialog = false;
     pressed = false;
 
+    get studyset() {
+      return studyStore.studyset;
+    }
+
     get facts() {
       return studyStore.study;
     }
@@ -350,15 +363,15 @@
     }
 
     get num_unstudied() {
-      return studyStore.studyset?.num_unstudied ?? 0;
+      return studyStore.studyset?.unstudied_facts.length ?? 0;
     }
 
     get num_facts() {
-      return studyStore.studyset?.num_facts ?? 0;
+      return studyStore.init_unstudied;
     }
 
     get current_study_num() {
-      return this.num_facts - this.num_unstudied + 1;
+      return this.num_facts - this.num_unstudied;
     }
 
     public async mounted() {

@@ -244,5 +244,7 @@ export interface IComponents {
     num_facts: number;
     num_unstudied: number;
     user: IComponents["User"];
+    short_description: string;
+    expanded_description: string;
   };
 }

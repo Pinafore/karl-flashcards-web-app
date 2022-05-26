@@ -387,11 +387,6 @@ export default class MainModule extends VuexModule {
       if (payload.response.status == 556) {
         this.setSchedulerError(true);
       }
-
-      if (payload.response.status == 557) {
-        console.log("CHIEKN DFSDFSD");
-        this.setInaccessibleDeckError(true);
-      }
     }
   }
 
