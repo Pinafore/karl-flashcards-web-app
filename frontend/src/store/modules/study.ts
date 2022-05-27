@@ -43,7 +43,7 @@ export default class StudyModule extends VuexModule {
 
   @Mutation
   setForceNew(payload) {
-    this.resume = payload;
+    this.forceNew = payload;
   }
 
   @Mutation
