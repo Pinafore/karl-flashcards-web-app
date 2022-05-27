@@ -11,7 +11,8 @@ from app.schemas.repetition import Repetition
 # from .user_deck import user_deck
 from app.schemas import DeckType
 from .deck import Deck  # noqa: F401
-from app import crud
+from .studyset import StudySet
+# from app.crud import studyset
 from app.db.session import SessionLocal
 
 if TYPE_CHECKING:
@@ -60,5 +61,7 @@ class User(Base):
     @hybrid_property
     def resume_studyset(self) -> bool:
         db = SessionLocal()
-        study_set = crud.studyset.find_existing_study_set(db=db, user=self)  # type: ignore
+        study_set = db.query(StudySet).filter(StudySet.user_id == self.id).order_by(
+            StudySet.id.desc()).first()
+        db.close()
         return study_set is not None
