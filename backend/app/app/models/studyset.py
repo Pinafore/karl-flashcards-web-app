@@ -76,11 +76,11 @@ class StudySet(Base):
         num_decks = len(self.decks)
         return_str = "" if self.is_first_pass else "Re-"
         if len(self.user.decks) == num_decks or num_decks == 0:
-            return_str += f"Studying: All"
+            return_str += f"Learn: All"
         elif num_decks > 1:
-            return_str += f"Studying: {num_decks} Decks"
+            return_str += f"Learn: {num_decks} Decks"
         else:
-            return_str += f"Studying: {self.decks[0].title}"
+            return_str += f"Learn: {self.decks[0].title}"
         return return_str
 
     @hybrid_property

@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid style="max-width:1200px">
+  <v-container fluid style="max-width:1250px">
     <onboard></onboard>
     <connection-popup></connection-popup>
     <test-popup></test-popup>
@@ -31,7 +31,7 @@
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
             <v-btn
-              v-if="$vuetify.breakpoint.lgAndDown"
+              v-if="$vuetify.breakpoint.mdAndDown"
               :disabled="!show.enable_actions"
               text
               icon
@@ -49,15 +49,15 @@
               @click="dialog = true"
               v-on="on"
             >
-              <v-icon>mdi-information</v-icon>Debug (Alt-/)
+              <v-icon>mdi-information</v-icon>Info: Alt-/
             </v-btn>
           </template>
-          <span>Debug (Alt-/)</span>
+          <span>Info (Alt-/)</span>
         </v-tooltip>
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
             <v-btn
-              v-if="$vuetify.breakpoint.lgAndDown"
+              v-if="$vuetify.breakpoint.mdAndDown"
               :disabled="!show.enable_actions"
               text
               icon
@@ -75,7 +75,7 @@
               @click="mark()"
               v-on="on"
             >
-              <v-icon left>mdi-star</v-icon>Favorite (Alt-M)
+              <v-icon left>mdi-star</v-icon>Mark: Alt-M
             </v-btn>
           </template>
           <span>Favorite (Alt-M)</span>
@@ -83,7 +83,7 @@
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
             <v-btn
-              v-if="$vuetify.breakpoint.lgAndDown"
+              v-if="$vuetify.breakpoint.mdAndDown"
               :disabled="!show.enable_actions"
               text
               icon
@@ -101,7 +101,7 @@
               @click="suspend()"
               v-on="on"
             >
-              <v-icon left>mdi-pause</v-icon>Suspend (Alt-S)
+              <v-icon left>mdi-pause</v-icon>Suspend: Alt-S
             </v-btn>
           </template>
           <span>Suspend (Alt-S)</span>
@@ -109,7 +109,7 @@
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
             <v-btn
-              v-if="$vuetify.breakpoint.lgAndDown"
+              v-if="$vuetify.breakpoint.mdAndDown"
               :disabled="!show.enable_actions"
               text
               icon
@@ -127,7 +127,7 @@
               @click="remove()"
               v-on="on"
             >
-              <v-icon left>mdi-delete</v-icon>Delete (Alt-D)
+              <v-icon left>mdi-delete</v-icon>Delete: Alt-D
             </v-btn>
           </template>
           <span>Delete (Alt-D)</span>
@@ -136,7 +136,7 @@
           <v-tooltip bottom>
             <template v-slot:activator="{ on, attrs }">
               <v-btn
-                v-if="$vuetify.breakpoint.lgAndDown"
+                v-if="$vuetify.breakpoint.mdAndDown"
                 text
                 icon
                 v-bind="attrs"
@@ -152,7 +152,7 @@
                 @click="report()"
                 v-on="on"
               >
-                <v-icon left>mdi-alert-octagon</v-icon>Report (Alt-R)
+                <v-icon left>mdi-alert-octagon</v-icon>Report: Alt-R
               </v-btn>
             </template>
             <span>Report (Alt-R)</span>
@@ -162,7 +162,7 @@
           <v-tooltip bottom>
             <template v-slot:activator="{ on, attrs }">
               <v-btn
-                v-if="$vuetify.breakpoint.lgAndDown"
+                v-if="$vuetify.breakpoint.mdAndDown"
                 text
                 icon
                 v-bind="attrs"
@@ -172,7 +172,7 @@
                 <v-icon>mdi-pencil</v-icon>
               </v-btn>
               <v-btn v-else class="ma-1 pa-2" v-bind="attrs" @click="edit()" v-on="on">
-                <v-icon left>mdi-pencil</v-icon>Edit (Alt-E)
+                <v-icon left>mdi-pencil</v-icon>Edit: Alt-E
               </v-btn>
             </template>
             <span>Edit (Alt-E)</span>
@@ -290,7 +290,7 @@
     <v-dialog v-model="dialog" scrollable>
       <v-card>
         <v-card-title>
-          <h2>Debug</h2>
+          <h2>Information and Debugging</h2>
         </v-card-title>
         <v-card-text>
           <!-- eslint-disable-next-line vue/no-v-html -->
@@ -426,7 +426,11 @@
 
     public setResume(payload: string | (string | null)[]) {
       if (payload && payload !== undefined) {
-        studyStore.setForceNew(payload);
+        if (payload === "1") {
+          studyStore.setForceNew(true);
+        } else {
+          studyStore.setForceNew(false);
+        }
       }
     }
 
