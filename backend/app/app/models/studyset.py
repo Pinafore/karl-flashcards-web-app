@@ -4,7 +4,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from app.db.base_class import Base
-from sqlalchemy import Column, Integer, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, ForeignKey, Boolean, TIMESTAMP, func
 from sqlalchemy.orm import relationship
 
 from app import schemas
@@ -19,6 +19,7 @@ from .session_deck import Session_Deck  # noqa: F401
 class StudySet(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False, index=True)
+    create_date = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
     is_test = Column(Boolean, nullable=False, default=False, index=True)
     debug_id = Column(Integer)
     retired = Column(Boolean)
