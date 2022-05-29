@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pytz import timezone
 from sqlalchemy.orm import Session
 from app.core.config import settings
+from app.schemas import DeckType
 
 router = APIRouter()
 
@@ -74,7 +75,7 @@ def assign_decks(
         if not deck:
             raise HTTPException(status_code=404, detail="Deck not found")
 
-        if deck.deck_type:
+        if deck.deck_type != DeckType.public:
             if deck not in current_user.decks:
                 deck = crud.deck.assign_viewer(db=db, db_obj=deck, user=current_user)
                 decks.append(deck)
@@ -120,7 +121,7 @@ def update_deck(
     deck = crud.deck.get(db=db, id=deck_id)
     if not deck:
         raise HTTPException(status_code=404, detail="Deck not found")
-    if not crud.user.is_superuser(current_user) and deck.deck_type:
+    if not crud.user.is_superuser(current_user) and deck.deck_type != DeckType.default:
         raise HTTPException(status_code=401, detail="Not enough permissions")
     deck = crud.deck.update(db=db, db_obj=deck, obj_in=deck_in)
     return deck
@@ -139,7 +140,7 @@ def read_deck(
     deck = crud.deck.get(db=db, id=deck_id)
     if not deck:
         raise HTTPException(status_code=404, detail="Deck not found")
-    if crud.user.is_superuser(current_user) or deck in current_user.decks or deck.deck_type:
+    if crud.user.is_superuser(current_user) or deck in current_user.decks or deck.deck_type != DeckType.default:
         return deck
     else:
         raise HTTPException(status_code=401, detail="Not enough permissions")

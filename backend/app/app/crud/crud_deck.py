@@ -97,7 +97,7 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
         return user_deck
 
     def update(
-            self, db: Session, *, db_obj: User, obj_in: Union[DeckUpdate, SuperDeckUpdate, Dict[str, Any]]
+            self, db: Session, *, db_obj: Deck, obj_in: Union[DeckUpdate, SuperDeckUpdate, Dict[str, Any]]
     ) -> Deck:
         if isinstance(obj_in, dict):
             update_data = obj_in

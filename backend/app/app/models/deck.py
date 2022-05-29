@@ -18,7 +18,7 @@ from .session_deck import Session_Deck  # noqa: F401
 class Deck(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
-    deck_type = Column(Enum(DeckType), nullable=False, default=False, index=True)
+    deck_type = Column(Enum(DeckType), nullable=False, default=DeckType.default, index=True)
 
     facts = relationship("Fact", back_populates="deck")
     users = association_proxy("user_decks", "user")
