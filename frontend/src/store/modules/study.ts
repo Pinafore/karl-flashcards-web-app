@@ -23,7 +23,7 @@ export default class StudyModule extends VuexModule {
   timer: NodeJS.Timeout | undefined = undefined;
   backTime = 0;
   inTestMode = false;
-  forceNew = true;
+  forceNew = false;
   selectedNum = 20;
 
   @Mutation
@@ -115,7 +115,7 @@ export default class StudyModule extends VuexModule {
   }
 
   @Mutation
-  setStudySet(payload: IComponents["StudySet"]) {
+  setStudySet(payload: IComponents["StudySet"] | null) {
     this.studyset = payload;
   }
 
@@ -227,6 +227,7 @@ export default class StudyModule extends VuexModule {
 
   @Action
   async getStudyFacts() {
+    this.setStudySet(null);
     this.clearTimer();
     try {
       this.setShowLoading();

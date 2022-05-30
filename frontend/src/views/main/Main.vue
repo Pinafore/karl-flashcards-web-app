@@ -40,12 +40,13 @@
       </v-list>
       <v-divider></v-divider>
       <v-list subheader>
-        <v-list-item v-show="resumeAvail" to="/main/study/learn?resume=1">
+        <v-list-item to="/main/study/learn">
           <v-list-item-action>
-            <v-icon>mdi-play</v-icon>
+            <v-icon>mdi-lightbulb-on</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title>Resume Study</v-list-item-title>
+            <v-list-item-title v-if="resumeAvail">Resume Study</v-list-item-title>
+            <v-list-item-title v-else>Quick Study (All)</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
         <v-list-item to="/main/study/decks">
@@ -53,15 +54,7 @@
             <v-icon>{{ mdiBookMultiple }}</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title>Create Study Set</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <v-list-item to="/main/study/learn">
-          <v-list-item-action>
-            <v-icon>mdi-lightbulb-on</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>Study All</v-list-item-title>
+            <v-list-item-title>New Study Set</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
         <v-list-item to="/main/browse">

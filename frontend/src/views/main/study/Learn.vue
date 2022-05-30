@@ -337,6 +337,10 @@
     editDialog = false;
     pressed = false;
 
+    get resume() {
+      return mainStore.userProfile?.resume_studyset;
+    }
+
     get studyset() {
       return studyStore.studyset;
     }
@@ -382,10 +386,12 @@
       mainStore.setConnectionError(false);
       mainStore.setSchedulerError(false);
       this.updateSelectedNum(this.$router.currentRoute.query.num);
-      this.setResume(this.$router.currentRoute.query.resume);
       await this.determine_decks(this.$router.currentRoute.query.deck);
       window.addEventListener("keydown", this.handleKeyDown);
       window.addEventListener("keyup", this.resetKeyListener);
+      if (this.studyset || this.resume) {
+        await studyStore.getStudyFacts();
+      }
     }
 
     public beforeRouteEnter(to, from, next) {
@@ -415,22 +421,11 @@
       } else {
         studyStore.setDeckIds([]);
       }
-      await studyStore.getNextShow();
     }
 
     public updateSelectedNum(payload: string | (string | null)[]) {
       if (payload && payload !== undefined) {
         studyStore.updateSelectedNum(payload);
-      }
-    }
-
-    public setResume(payload: string | (string | null)[]) {
-      if (payload && payload !== undefined) {
-        if (payload === "1") {
-          studyStore.setForceNew(true);
-        } else {
-          studyStore.setForceNew(false);
-        }
       }
     }
 

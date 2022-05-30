@@ -61,7 +61,7 @@ class User(Base):
     @hybrid_property
     def resume_studyset(self) -> bool:
         db = SessionLocal()
-        study_set = db.query(StudySet).filter(StudySet.user_id == self.id).order_by(
-            StudySet.id.desc()).first()
+        from app.crud import studyset
+        study_set = studyset.find_existing_study_set(db, self)
         db.close()
         return study_set is not None

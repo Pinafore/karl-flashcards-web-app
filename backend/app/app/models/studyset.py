@@ -95,3 +95,7 @@ class StudySet(Base):
             return_str = f"Decks: {', '.join(deck.title for deck in self.decks)}"
         return_str += f"\nFacts: {num_facts} Total, {num_unstudied} Remaining\nFirst Pass:{self.is_first_pass}"
         return return_str
+
+    @hybrid_property
+    def not_started(self) -> bool:
+        return self.num_unstudied == self.num_facts

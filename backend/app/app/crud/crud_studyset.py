@@ -99,7 +99,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
     def find_existing_study_set(self, db: Session, user: models.User) -> Optional[models.StudySet]:
         studyset: models.StudySet = db.query(models.StudySet).filter(models.StudySet.user_id == user.id).order_by(
             models.StudySet.id.desc()).first()
-        if studyset and not studyset.completed:
+        if studyset and not (studyset.completed or studyset.not_started):
             return studyset
         else:
             return None

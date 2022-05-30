@@ -87,7 +87,7 @@
     public openDecks() {
       // Vue router takes in arrays only as strings
       const selectedIds = this.selected.map((a) => String(a.id));
-      // studyStore.updateSelectedNum(this.selectedNum);
+      studyStore.setForceNew(true);
       this.$router.push({
         path: "/main/study/learn",
         query: { deck: selectedIds, num: String(this.selectedNum) },
@@ -95,7 +95,7 @@
     }
 
     public openDeck(deck) {
-      // studyStore.updateSelectedNum(this.selectedNum);
+      studyStore.setForceNew(true);
       this.$router.push({
         path: "/main/study/learn",
         query: { deck: String(deck.id), num: String(this.selectedNum) },

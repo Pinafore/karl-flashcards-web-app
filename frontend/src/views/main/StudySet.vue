@@ -2,18 +2,22 @@
   <v-dialog v-model="popup" max-width="1000px" persistent @click:outside="startTesting">
     <v-card>
       <v-card-title>
-        <h2>Old Study Set Found</h2>
+        <h2>Study Set Finished</h2>
       </v-card-title>
       <v-card-text>
         <p>
-          It looks like you didn't finish your last study set. Would you like to study
-          that one?
+          You've finished this study set! Would you like to continue with the same
+          settings to create a new study set, or would you like to go back to the study
+          set screen?
         </p>
       </v-card-text>
       <v-card-actions class="pt-0">
         <v-spacer></v-spacer>
+        <v-btn color="primary" text @click="continueStudy">
+          Same Settings
+        </v-btn>
         <v-btn color="primary" text @click="startTesting">
-          Begin
+          Change Options
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -34,6 +38,10 @@
 
     get inTestMode() {
       return studyStore.inTestMode;
+    }
+
+    continueStudy() {
+      studyStore.getStudyFacts();
     }
 
     @Watch("inTestMode")
