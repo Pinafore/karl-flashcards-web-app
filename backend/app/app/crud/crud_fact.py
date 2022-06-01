@@ -487,10 +487,10 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             return ordered_schedules
         except requests.exceptions.RequestException as e:
             capture_exception(e)
-            return e
+            raise HTTPException(status_code=555, detail="Connection to scheduler is down")
         except json.decoder.JSONDecodeError as e:
             capture_exception(e)
-            return e
+            raise HTTPException(status_code=556, detail="Scheduler malfunction")
 
     def load_json_facts(self, db: Session, file: SpooledTemporaryFile, user: models.User) -> None:
         count = 0
