@@ -5,6 +5,9 @@
     <v-toolbar style="position: sticky; top: 0; z-index: 10;">
       <v-toolbar-title>
         New Study Set
+        <span v-show="resumeAvail" style="margin-left: .5em">
+          (Overrides Current Study Set!!)
+        </span>
       </v-toolbar-title>
       <v-spacer class="hidden-xs-only"></v-spacer>
 
@@ -78,6 +81,14 @@
     get decks() {
       const userProfile = mainStore.userProfile;
       return userProfile && userProfile.decks ? userProfile.decks : [];
+    }
+
+    get resumeAvail() {
+      if (mainStore.userProfile) {
+        return mainStore.userProfile.resume_studyset;
+      } else {
+        return false;
+      }
     }
 
     public checkAllDecks() {
