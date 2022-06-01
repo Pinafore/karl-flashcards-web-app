@@ -36,19 +36,24 @@
     }
 
     get isFinished() {
-      return studyStore.studyset !== null && studyStore.studyset?.num_unstudied == 0;
+      return (
+        studyStore.studyset !== null &&
+        studyStore.studyset.num_unstudied == 0 &&
+        studyStore.studyset.needs_restudy != true
+      );
     }
 
     continueStudy() {
       studyStore.getStudyFacts();
+      this.popup = false;
     }
 
     goToDeck() {
-      this.$router.push("/main/deck");
+      this.$router.push("/main/study/decks");
     }
 
-    @Watch("inTestMode")
-    onIsTestModeChanged() {
+    @Watch("isFinished")
+    onIsFinishedChanged() {
       this.popup = true;
     }
   }

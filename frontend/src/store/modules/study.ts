@@ -42,6 +42,13 @@ export default class StudyModule extends VuexModule {
   }
 
   @Mutation
+  setRestudy() {
+    if (this.studyset) {
+      this.studyset.needs_restudy = true;
+    }
+  }
+
+  @Mutation
   setForceNew(payload) {
     this.forceNew = payload;
   }
@@ -216,12 +223,14 @@ export default class StudyModule extends VuexModule {
       console.log(this.studyset.unstudied_facts.length);
     }
     this.clearTimer();
-    if (this.studyset && this.studyset.unstudied_facts.length > 0) {
-      this.setShow(this.studyset.unstudied_facts[0]);
-      this.startTimer();
-      this.removeFirstFact();
-    } else {
-      await this.getStudyFacts();
+    if (this.studyset) {
+      if (this.studyset.unstudied_facts.length > 0) {
+        this.setShow(this.studyset.unstudied_facts[0]);
+        this.startTimer();
+        this.removeFirstFact();
+      } else if (this.studyset.needs_restudy == true) {
+        await this.getStudyFacts();
+      }
     }
   }
 
@@ -237,6 +246,7 @@ export default class StudyModule extends VuexModule {
         this.selectedNum,
         this.forceNew,
       );
+      this.setForceNew(false);
       if (response.data.unstudied_facts.length == 0) {
         this.setShowEmpty();
         this.setStudy([]);

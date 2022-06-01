@@ -4,6 +4,7 @@
     <connection-popup></connection-popup>
     <test-popup></test-popup>
     <RecallPopup></RecallPopup>
+    <study-set></study-set>
     <v-card class="mx-3 my-1 py-1 px-0 px-sm-3">
       <!--      <v-card-title  primary-title class="mx-3 my-0 pa-0">-->
       <!--        <div class="headline primary&#45;&#45;text">Test Mode</div>-->
@@ -338,10 +339,6 @@
     editDialog = false;
     pressed = false;
 
-    get resume() {
-      return mainStore.userProfile?.resume_studyset;
-    }
-
     get studyset() {
       return studyStore.studyset;
     }
@@ -390,9 +387,7 @@
       await this.determine_decks(this.$router.currentRoute.query.deck);
       window.addEventListener("keydown", this.handleKeyDown);
       window.addEventListener("keyup", this.resetKeyListener);
-      if (this.studyset || this.resume) {
-        await studyStore.getStudyFacts();
-      }
+      await studyStore.getStudyFacts();
     }
 
     public beforeRouteEnter(to, from, next) {
@@ -568,6 +563,7 @@
           color: "success",
         });
       } else {
+        studyStore.setRestudy();
         mainStore.addNotification({
           content: "Your evaluation: Wrong",
           color: "error",

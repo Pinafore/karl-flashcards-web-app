@@ -248,5 +248,6 @@ export interface IComponents {
     short_description: string;
     expanded_description: string;
     is_first_pass: string;
+    needs_restudy?: boolean;
   };
 }
