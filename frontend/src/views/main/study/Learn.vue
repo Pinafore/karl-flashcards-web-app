@@ -319,9 +319,10 @@
   import ConnectionPopup from "@/views/ConnectionPopup.vue";
   import RecallPopup from "@/views/main/RecallPopup.vue";
   import TestPopup from "@/views/main/TestPopup.vue";
+  import StudySet from "@/views/main/StudySet.vue";
 
   @Component({
-    components: { TestPopup, ConnectionPopup, Onboard, RecallPopup },
+    components: { TestPopup, ConnectionPopup, Onboard, RecallPopup, StudySet },
   })
   export default class Learn extends Vue {
     $refs!: {

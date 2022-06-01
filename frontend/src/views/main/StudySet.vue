@@ -1,14 +1,13 @@
 <template class="pa-0 ma-0">
-  <v-dialog v-model="popup" max-width="1000px" persistent @click:outside="startTesting">
+  <v-dialog v-model="popup" max-width="1000px" persistent>
     <v-card>
       <v-card-title>
         <h2>Study Set Finished</h2>
       </v-card-title>
       <v-card-text>
         <p>
-          You've finished this study set! Would you like to continue with the same
-          settings to create a new study set, or would you like to go back to the study
-          set screen?
+          You've finished this study set! Would you like to create another set with the
+          same settings or change options for your next study set?
         </p>
       </v-card-text>
       <v-card-actions class="pt-0">
@@ -16,7 +15,7 @@
         <v-btn color="primary" text @click="continueStudy">
           Same Settings
         </v-btn>
-        <v-btn color="primary" text @click="startTesting">
+        <v-btn color="primary" text @click="goToDeck">
           Change Options
         </v-btn>
       </v-card-actions>
@@ -33,24 +32,24 @@
     popup = false;
 
     async mounted() {
-      this.popup = this.inTestMode;
+      this.popup = this.isFinished;
     }
 
-    get inTestMode() {
-      return studyStore.inTestMode;
+    get isFinished() {
+      return studyStore.studyset !== null && studyStore.studyset?.num_unstudied == 0;
     }
 
     continueStudy() {
       studyStore.getStudyFacts();
     }
 
+    goToDeck() {
+      this.$router.push("/main/deck");
+    }
+
     @Watch("inTestMode")
     onIsTestModeChanged() {
       this.popup = true;
-    }
-
-    startTesting() {
-      this.popup = false;
     }
   }
 </script>
