@@ -18,5 +18,5 @@ class Schedule(BaseModel):
 
 
 class ScheduleResponse(BaseModel):
-    successes: List[History]
+    # successes: List[History]
     session_complete: bool

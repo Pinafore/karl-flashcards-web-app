@@ -109,7 +109,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         studyset = self.get(db=db, id=studyset_id)
         if not studyset:
             raise HTTPException(status_code=404, detail="Studyset not found")
-        history_schemas = []
+        # history_schemas = []
         for schedule in schedules:
             # fact = crud.fact.get(db=db, id=schedule.fact_id)
             session_fact = db.query(models.Session_Fact).filter(models.Session_Fact.studyset_id == studyset_id).filter(
@@ -121,8 +121,8 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             # Mark that the session fact has been studied most recently here
             session_fact.history_id = history.id
             db.commit()
-            history_schemas.append(schemas.History.from_orm(history))
-        return schemas.ScheduleResponse(successes=history_schemas, session_complete=studyset.completed)
+            # history_schemas.append(schemas.History.from_orm(history))
+        return schemas.ScheduleResponse(session_complete=studyset.completed)
 
     def record_study(
             self, db: Session, *, user: models.User, session_fact: models.Session_Fact, schedule: schemas.Schedule
