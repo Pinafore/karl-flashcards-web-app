@@ -152,7 +152,7 @@ export default class StudyModule extends VuexModule {
   @Mutation
   loading() {
     this.show = {
-      text: "loading",
+      text: "Loading...",
       enable_report: false,
       enable_actions: false,
       marked: false,
