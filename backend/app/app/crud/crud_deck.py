@@ -79,7 +79,7 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
             if deck not in user.decks:
                 self.assign_viewer(db=db, db_obj=deck, user=user)
         else:
-            self.create_with_owner(db=db,
+            deck = self.create_with_owner(db=db,
                                    obj_in=SuperDeckCreate(title=settings.TEST_DECK_NAME, deck_type=DeckType.hidden),
                                    user=user)
         return deck
