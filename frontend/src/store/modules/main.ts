@@ -53,6 +53,8 @@ export default class MainModule extends VuexModule {
     { text: "Minutes Spent (Front)", value: "elapsed_minutes_text" },
   ];
   today = format(startOfDay(new Date()), "yyyy-MM-dd'T'HH:mm:ss.SSSxxxx");
+  onboarding: boolean | null = null;
+  recallPopup: boolean | null = null;
 
   get hasAdminAccess() {
     return (
@@ -92,6 +94,17 @@ export default class MainModule extends VuexModule {
   @Mutation
   setUserProfile(payload: IComponents["User"]) {
     this.userProfile = payload;
+    this.onboarding = this.userProfile.show_help;
+  }
+
+  @Mutation
+  setOnboarding(payload: boolean) {
+    this.onboarding = payload;
+  }
+
+  @Mutation
+  setRecallPopup(payload: boolean) {
+    this.recallPopup = payload;
   }
 
   @Mutation
@@ -479,6 +492,7 @@ export default class MainModule extends VuexModule {
       this.setUserProfile(response.data);
       return true;
     } catch (error) {
+      console.log(error);
       this.removeNotification(loadingNotification);
       this.setSignUpError(true);
       this.addNotification({ content: "An error occurred", color: "error" });

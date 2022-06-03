@@ -1,6 +1,6 @@
 <template class="pa-0 ma-0">
   <validation-observer ref="observer" v-slot="{ invalid }">
-    <v-dialog v-model="popup" max-width="1000px" persistent @click:outside="goBack">
+    <v-dialog v-model="recallPopup" max-width="1000px" persistent>
       <v-card>
         <v-card-title>
           <h2>Phase 2: Set Target Recall Percentage</h2>
@@ -46,7 +46,7 @@
 </template>
 
 <script lang="ts">
-  import { Component, Vue } from "vue-property-decorator";
+  import { Component, Vue, Watch } from "vue-property-decorator";
   import { mainStore } from "@/store";
   import { IComponents } from "@/interfaces";
   import { between, required } from "vee-validate/dist/rules";
@@ -64,17 +64,25 @@
     $refs!: {
       observer: InstanceType<typeof ValidationObserver>;
     };
-    popup = false;
     recallTarget = 0;
 
     async mounted() {
-      this.popup = this.isRequired || this.$router.currentRoute.name === "settings";
+      this.setPopup();
       this.recallTarget = this.currentRecallTarget;
     }
 
     get userProfile() {
       return mainStore.userProfile;
     }
+
+    get recallPopup() {
+      return mainStore.recallPopup;
+    }
+
+    setPopup() {
+      mainStore.setRecallPopup(this.isRequired || this.$router.currentRoute.name === "settings");
+    }
+
 
     get isRequired() {
       return this.currentRecallTarget == -1;
@@ -84,16 +92,12 @@
       return this.userProfile?.recall_target ?? -1;
     }
 
-    goBack() {
-      this.popup = !this.isRequired;
-    }
-
     async onSubmit() {
       const success = await this.$refs.observer.validate();
       if (!success) {
         return;
       }
-      this.popup = false;
+      mainStore.setRecallPopup(false);
 
       const updatedProfile: IComponents["UserUpdate"] = {};
 

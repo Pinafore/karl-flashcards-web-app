@@ -1,6 +1,6 @@
 <template class="pa-0 ma-0">
   <v-main class="pa-0 ma-0">
-    <v-dialog v-model="onboard" width="1000">
+    <v-dialog width="1000" v-model="onboard">
       <v-card>
         <v-card-title>
           <h2>Tips</h2>
@@ -10,7 +10,7 @@
           click "Add Decks" to continue
         </v-card-text>
         <v-card-text v-if="this.$router.currentRoute.name === 'decks'">
-          In your decks screen, you can select a specific deck or multiple decks to
+          In the create study set screen, you can select a specific deck or multiple decks to
           study facts from. Click the checkboxes next to the deck names in order to
           select multiple decks.
         </v-card-text>
@@ -80,7 +80,7 @@
         </v-card-text>
         <v-card-actions class="pt-0">
           <v-spacer></v-spacer>
-          <v-btn color="primary" text @click="onboard = false">
+          <v-btn color="primary" text @click="hideTip">
             Got it!
           </v-btn>
         </v-card-actions>
@@ -90,7 +90,7 @@
 </template>
 
 <script lang="ts">
-  import { Component, Vue } from "vue-property-decorator";
+  import { Component, Vue, Watch } from "vue-property-decorator";
   import { mainStore } from "@/store";
 
   @Component
@@ -99,12 +99,44 @@
 
     async mounted() {
       await mainStore.getUserProfile();
-      this.onboard = mainStore.userProfile?.show_help ?? false;
+      this.getUpdate();
+    }
+
+    get onboarding() {
+      return mainStore.onboarding;
+    }
+    getUpdate() {
+      if(this.$router.currentRoute.name === 'decks') {
+        console.log("Recall popup")
+        console.log(this.recallPopup)
+        console.log(this.show_help && !(this.recallPopup === true))
+        this.onboard = this.show_help && !(this.recallPopup === true);
+      } else {
+        this.onboard = this.show_help;
+      }
+    }
+    get recallPopup() {
+      return mainStore.recallPopup;
+    }
+
+    get show_help() {
+      return mainStore.userProfile?.show_help ?? false;
+    }
+
+    @Watch("recallPopup") 
+    recallPopupChanged(){
+      this.getUpdate();
     }
 
     noMoreHelp() {
       mainStore.updateUserHelp(false);
       this.onboard = false;
+      // mainStore.setOnboarding(false);
+    }
+
+    hideTip() {
+      this.onboard = false;
+      // mainStore.setOnboarding(false)
     }
   }
 </script>

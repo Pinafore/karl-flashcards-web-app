@@ -15,13 +15,13 @@
           v-else-if="$vuetify.breakpoint.xsOnly || studyset === null"
           class="headline primary--text"
         >
-          Study
+          Learn
         </div>
         <div v-else class="headline primary--text">
           {{ studyset.short_description }}
         </div>
         <div
-          v-show="show.text !== `Loading`"
+          v-show="show.text !== `Loading...`"
           class="headline primary--text"
           style="margin-left: .5em"
         >
@@ -511,9 +511,13 @@
       }
     }
     public async showAnswer() {
-      await studyStore.evaluateAnswer(this.typed);
-      this.showBack = true;
-      this.scrollToResponseButtons();
+      if (!this.inTestMode || this.typed.trimStart() != "") {
+        await studyStore.evaluateAnswer(this.typed);
+        this.showBack = true;
+        this.scrollToResponseButtons();
+      } else {
+        this.requireAnswerError();
+      }
     }
 
     public resetCard() {
@@ -554,6 +558,13 @@
       if (!this.inTestMode) {
         await studyStore.markFact();
       }
+    }
+
+    public requireAnswerError() {
+      mainStore.addNotification({
+          content: "In Test Mode, you must type your answer!",
+          color: "error",
+        });
     }
 
     public async response(response) {
