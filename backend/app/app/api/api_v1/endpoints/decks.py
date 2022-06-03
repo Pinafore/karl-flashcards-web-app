@@ -75,7 +75,7 @@ def assign_decks(
         if not deck:
             raise HTTPException(status_code=404, detail="Deck not found")
 
-        if deck.deck_type != DeckType.public:
+        if deck.deck_type == DeckType.public:
             if deck not in current_user.decks:
                 deck = crud.deck.assign_viewer(db=db, db_obj=deck, user=current_user)
                 decks.append(deck)
