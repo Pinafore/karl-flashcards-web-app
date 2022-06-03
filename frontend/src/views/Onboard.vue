@@ -131,12 +131,10 @@
     noMoreHelp() {
       mainStore.updateUserHelp(false);
       this.onboard = false;
-      // mainStore.setOnboarding(false);
     }
 
     hideTip() {
       this.onboard = false;
-      // mainStore.setOnboarding(false)
     }
   }
 </script>
