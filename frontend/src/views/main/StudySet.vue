@@ -57,7 +57,7 @@
 
     @Watch("isFinished")
     onIsFinishedChanged() {
-      this.popup = true;
+      this.popup = this.isFinished;
       setTimeout(() => {
         this.$refs.same.$el.focus();
       })
