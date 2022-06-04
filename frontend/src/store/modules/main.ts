@@ -55,6 +55,8 @@ export default class MainModule extends VuexModule {
   today = format(startOfDay(new Date()), "yyyy-MM-dd'T'HH:mm:ss.SSSxxxx");
   onboarding: boolean | null = null;
   recallPopup: boolean | null = null;
+  connectionPopup: boolean | null = null;
+  testModePopup: boolean | null = null;
 
   get hasAdminAccess() {
     return (
@@ -92,13 +94,23 @@ export default class MainModule extends VuexModule {
   }
 
   @Mutation
+  setConnectionPopup(payload: boolean) {
+    this.connectionPopup = payload;
+  }
+
+  @Mutation
+  setTestModePopup(payload: boolean) {
+    this.testModePopup = payload;
+  }
+
+  @Mutation
   setUserProfile(payload: IComponents["User"]) {
     this.userProfile = payload;
     this.onboarding = this.userProfile.show_help;
   }
 
   @Mutation
-  setOnboarding(payload: boolean) {
+  setOnboarding(payload: boolean | null) {
     this.onboarding = payload;
   }
 

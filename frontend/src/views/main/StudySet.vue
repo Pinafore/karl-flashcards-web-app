@@ -12,7 +12,7 @@
       </v-card-text>
       <v-card-actions class="pt-0">
         <v-spacer></v-spacer>
-        <v-btn color="primary" text @click="continueStudy">
+        <v-btn color="primary" ref="same" text @click="continueStudy">
           Same Settings
         </v-btn>
         <v-btn color="primary" text @click="goToDeck">
@@ -29,6 +29,9 @@
 
   @Component
   export default class StudySet extends Vue {
+    $refs!: {
+      same: HTMLInputElement;
+    };
     popup = false;
 
     async mounted() {
@@ -55,6 +58,9 @@
     @Watch("isFinished")
     onIsFinishedChanged() {
       this.popup = true;
+      setTimeout(() => {
+        this.$refs.same.$el.focus();
+      })
     }
   }
 </script>

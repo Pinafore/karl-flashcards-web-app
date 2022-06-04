@@ -1,5 +1,5 @@
 <template class="pa-0 ma-0">
-  <v-dialog v-model="popup" max-width="1000px" persistent @click:outside="startTesting">
+  <v-dialog v-model="testModePopup" max-width="1000px" persistent @click:outside="startTesting" @keydown.enter="startTesting">
     <v-card>
       <v-card-title>
         <h2>Phase 2: Test Mode</h2>
@@ -15,7 +15,8 @@
       </v-card-text>
       <v-card-actions class="pt-0">
         <v-spacer></v-spacer>
-        <v-btn color="primary" text @click="startTesting">
+        <v-btn 
+          ref="begin" color="primary" text @click="startTesting">
           Begin
         </v-btn>
       </v-card-actions>
@@ -29,24 +30,40 @@
 
   @Component
   export default class TestPopup extends Vue {
+    $refs!: {
+      begin: HTMLInputElement;
+    };
     popup = false;
     // May be good to have a popup when test mode is done
 
     async mounted() {
-      this.popup = this.inTestMode;
+      mainStore.setTestModePopup(this.inTestMode);
     }
 
     get inTestMode() {
       return studyStore.inTestMode;
     }
 
-    @Watch("inTestMode")
-    onIsTestModeChanged() {
-      this.popup = true;
+    get testModePopup() {
+      return mainStore.testModePopup;
     }
 
-    startTesting() {
-      this.popup = false;
+    @Watch("inTestMode")
+    onIsTestModeChanged() {
+      mainStore.setTestModePopup(true);
+      // this.$nextTick(() => {
+      //       this.$refs.begin.focus();
+      //     });
+      setTimeout(() => {
+        this.$refs.begin.$el.focus()
+      })
+
+    }
+
+    async startTesting() {
+      mainStore.setTestModePopup(false);
+      await new Promise(resolve => setTimeout(resolve, 100));
+      studyStore.setShowActions();
     }
   }
 </script>

@@ -1,6 +1,6 @@
 <template class="pa-0 ma-0">
   <v-main class="pa-0 ma-0">
-    <v-dialog width="1000" v-model="onboard">
+    <v-dialog width="1000" v-model="onboarding">
       <v-card>
         <v-card-title>
           <h2>Tips</h2>
@@ -80,7 +80,7 @@
         </v-card-text>
         <v-card-actions class="pt-0">
           <v-spacer></v-spacer>
-          <v-btn color="primary" text @click="hideTip">
+          <v-btn color="primary" ref="begin" text @click="hideTip">
             Got it!
           </v-btn>
         </v-card-actions>
@@ -91,28 +91,42 @@
 
 <script lang="ts">
   import { Component, Vue, Watch } from "vue-property-decorator";
-  import { mainStore } from "@/store";
+  import { mainStore, studyStore } from "@/store";
 
   @Component
   export default class Onboard extends Vue {
+    $refs!: {
+      begin: HTMLInputElement;
+    };
     onboard = false;
 
     async mounted() {
       await mainStore.getUserProfile();
       this.getUpdate();
+      
     }
 
     get onboarding() {
       return mainStore.onboarding;
     }
+
+    set onboarding(value) {
+      mainStore.setOnboarding(value);
+    }
+
     getUpdate() {
       if(this.$router.currentRoute.name === 'decks') {
         console.log("Recall popup")
         console.log(this.recallPopup)
         console.log(this.show_help && !(this.recallPopup === true))
-        this.onboard = this.show_help && !(this.recallPopup === true);
+        mainStore.setOnboarding(this.show_help && !(this.recallPopup === true));
       } else {
-        this.onboard = this.show_help;
+        mainStore.setOnboarding(this.show_help);
+      }
+      if (this.onboarding) {
+        setTimeout(() => {
+        this.$refs.begin.$el.focus();
+        })
       }
     }
     get recallPopup() {
@@ -128,13 +142,15 @@
       this.getUpdate();
     }
 
-    noMoreHelp() {
+    async noMoreHelp() {
       mainStore.updateUserHelp(false);
-      this.onboard = false;
+      await this.hideTip();
     }
 
-    hideTip() {
-      this.onboard = false;
+    async hideTip() {
+      mainStore.setOnboarding(false);
+      await new Promise(resolve => setTimeout(resolve, 100));
+      studyStore.setShowActions();
     }
   }
 </script>

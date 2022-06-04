@@ -6,9 +6,6 @@
     <RecallPopup></RecallPopup>
     <study-set></study-set>
     <v-card class="mx-3 my-1 py-1 px-0 px-sm-3">
-      <!--      <v-card-title  primary-title class="mx-3 my-0 pa-0">-->
-      <!--        <div class="headline primary&#45;&#45;text">Test Mode</div>-->
-      <!--      </v-card-title>-->
       <v-card-title primary-title class="mx-3 my-0 pa-0">
         <div v-if="inTestMode" class="headline primary--text">Test Mode</div>
         <div
@@ -222,11 +219,15 @@
           ref="answerfield"
           v-model="typed"
           solo
-          label="Recommended - Type Answer (Press any letter to focus)"
           autofocus
           hide-details="auto"
           @keydown="keyHandler"
-        ></v-text-field>
+        ><template v-slot:label>
+          <span v-if="inTestMode">Required (Test Mode) - </span>
+          <span v-else>Recommended - </span>
+          Type Answer (Press any letter to focus)
+        </template>
+        </v-text-field>
       </v-card-text>
       <v-card-actions v-show="show.enable_actions && !showBack" class="px-4 pt-3 pb-2">
         <v-btn @click="showAnswer">Show Answer (Enter)</v-btn>
@@ -240,7 +241,8 @@
         <div class="title primary--text">
           {{ show.fact && show.fact.answer }}
         </div>
-        <div class="title">You typed: '{{ typed }}'</div>
+        <span v-show="!inTestMode">
+          <div class="title" >You typed: '{{ typed }}'</div>
         <div
           v-if="recommendation"
           class="title primary--text py-2"
@@ -253,6 +255,7 @@
           KAR³L Believes Your Response Was Wrong
           <span class="hidden-xs-only">(Enter to Accept, Or Override Below)</span>
         </div>
+        </span>
       </v-card-text>
       <v-card-text v-show="show.enable_actions" class="py-2">
         <v-text-field
@@ -265,10 +268,11 @@
           hide-details="auto"
         ></v-text-field>
       </v-card-text>
-      <v-card-actions class="pt-3 pb-1 px-5">
+      <v-card-actions class="pt-3 pb-1 px-5" >
         <v-row class="shrink" justify="space-around">
-          <v-col cols="5" sm="auto" class="ma-1 pa-1 py-0 shrink">
+          <v-col cols="10" v-show="showResponseBtns">
             <v-btn
+              cols="5"
               ref="wrong"
               :color="!recommendation ? 'red' : ''"
               class="px-2"
@@ -276,15 +280,24 @@
               >wrong ([)</v-btn
             >
           </v-col>
-          <v-col id="response" cols="5" sm="auto" class="ma-1 pa-1 py-0 shrink">
+          <v-col v-show="showResponseBtns" id="response" cols="5" sm="auto" class="ma-1 pa-1 py-0 shrink">
             <v-btn
-              ref="right"
-              :color="recommendation ? 'green' : ''"
-              class="px-2"
-              @click="response(true)"
-              >right (])</v-btn
-            >
+                ref="right"
+                :color="recommendation ? 'green' : ''"
+                class="px-2"
+                @click="response(true)"
+                >right (])</v-btn
+              >
           </v-col>
+          <v-col v-show="!showResponseBtns" cols="5" sm="auto" class="ma-1 pa-1 py-0 shrink">
+              <v-btn
+                ref="continue"
+                class="px-2"
+                @click="response(false)"
+                >right (])</v-btn
+              >
+          </v-col>
+          
         </v-row>
       </v-card-actions>
     </v-card>
@@ -338,6 +351,7 @@
     dialog = false;
     editDialog = false;
     pressed = false;
+    showResponseBtns = true;
 
     get studyset() {
       return studyStore.studyset;
@@ -452,6 +466,7 @@
         } else if (this.showBack) {
           this.determineResponse(e, key);
         } else if (key == "enter" && this.show.enable_actions) {
+          console.log(mainStore.onboarding);
           this.showAnswer();
         } else if (
           /^[a-z0-9]$/i.test(key) &&
@@ -510,6 +525,13 @@
         e.preventDefault();
       }
     }
+
+    public async dontKnow() {
+      this.showResponseBtns = false;
+      this.showBack = true;
+      this.scrollToResponseButtons();
+    }
+
     public async showAnswer() {
       if (!this.inTestMode || this.typed.trimStart() != "") {
         await studyStore.evaluateAnswer(this.typed);
@@ -522,6 +544,7 @@
 
     public resetCard() {
       this.showBack = false;
+      this.showResponseBtns = true;
       this.typed = "";
       this.retyped = "";
       this.scrollToFront();
@@ -562,7 +585,7 @@
 
     public requireAnswerError() {
       mainStore.addNotification({
-          content: "In Test Mode, you must type your answer!",
+          content: "In Test Mode, you must type your answer or press don't know!",
           color: "error",
         });
     }

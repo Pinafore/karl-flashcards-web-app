@@ -77,13 +77,25 @@ export default class StudyModule extends VuexModule {
 
   @Mutation
   setShow(payload: IComponents["Fact"]) {
+    const popup = !( this.inTestMode || mainStore.recallPopup || mainStore.onboarding);
     this.show = {
       text: payload.text,
       fact: payload,
-      enable_report: payload.permission !== Permission.owner,
-      enable_actions: true,
+      enable_report: payload.permission !== Permission.owner && popup,
+      enable_actions: popup,
       marked: payload.marked ?? false,
     };
+  }
+  
+  @Mutation
+  setShowActions() {
+    if (mainStore.connectionPopup || mainStore.testModePopup || mainStore.recallPopup || mainStore.onboarding) {
+      this.show.enable_actions = false;
+    } else {
+      if (this.show.fact) {
+        this.show.enable_actions = true;
+      }
+    }
   }
 
   @Mutation

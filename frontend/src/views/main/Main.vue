@@ -40,7 +40,7 @@
       </v-list>
       <v-divider></v-divider>
       <v-list subheader>
-        <v-list-item to="/main/study/learn">
+        <v-list-item to="/main/study/learn" v-if="recallPopup">
           <v-list-item-action>
             <v-icon>mdi-lightbulb-on</v-icon>
           </v-list-item-action>
@@ -312,6 +312,14 @@
 
     public async logout() {
       await mainStore.userLogOut();
+    }
+
+    get recallPopup() {
+      if (mainStore.userProfile) {
+        return (mainStore.userProfile.recall_target ?? -1) != -1;
+      } else {
+        return false;
+      }
     }
   }
 </script>

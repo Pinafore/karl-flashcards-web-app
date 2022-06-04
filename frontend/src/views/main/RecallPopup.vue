@@ -47,7 +47,7 @@
 
 <script lang="ts">
   import { Component, Vue, Watch } from "vue-property-decorator";
-  import { mainStore } from "@/store";
+  import { mainStore, studyStore } from "@/store";
   import { IComponents } from "@/interfaces";
   import { between, required } from "vee-validate/dist/rules";
   import { ValidationProvider, ValidationObserver, extend } from "vee-validate";
@@ -106,6 +106,8 @@
       }
 
       await mainStore.updateUserProfile(updatedProfile);
+      await new Promise(resolve => setTimeout(resolve, 100));
+      studyStore.setShowActions();
     }
   }
 </script>
