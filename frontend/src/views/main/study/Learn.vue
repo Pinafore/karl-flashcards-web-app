@@ -25,8 +25,8 @@
           ({{ current_study_num }} of {{ num_facts }})
         </div>
         <v-spacer></v-spacer>
-
-        <v-tooltip bottom>
+        <span  v-show="!inTestMode">
+          <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
             <v-btn
               v-if="$vuetify.breakpoint.mdAndDown"
@@ -176,6 +176,8 @@
             <span>Edit (Alt-E)</span>
           </v-tooltip>
         </span>
+        </span>
+        
       </v-card-title>
     </v-card>
     <v-card class="my-2 mx-3 px-3 py-4 pb-5">
