@@ -231,6 +231,7 @@
       </v-card-text>
       <v-card-actions v-show="show.enable_actions && !showBack" class="px-4 pt-3 pb-2">
         <v-btn @click="showAnswer">Show Answer (Enter)</v-btn>
+        <v-btn @click="dontKnow">Don't Know (Shift-Enter)</v-btn>
       </v-card-actions>
     </v-card>
     <v-card v-show="showBack && show.enable_actions" class="my-2 mx-3 px-3 py-4">
@@ -270,9 +271,8 @@
       </v-card-text>
       <v-card-actions class="pt-3 pb-1 px-5" >
         <v-row class="shrink" justify="space-around">
-          <v-col cols="10" v-show="showResponseBtns">
+          <v-col cols="5" sm="auto" class="ma-1 pa-1 py-0 shrink" v-show="showResponseBtns">
             <v-btn
-              cols="5"
               ref="wrong"
               :color="!recommendation ? 'red' : ''"
               class="px-2"
@@ -294,7 +294,7 @@
                 ref="continue"
                 class="px-2"
                 @click="response(false)"
-                >right (])</v-btn
+                >continue (Enter)</v-btn
               >
           </v-col>
           
@@ -465,6 +465,8 @@
           this.edit();
         } else if (this.showBack) {
           this.determineResponse(e, key);
+        } else if (e.shiftKey && key == "enter" && this.show.enable_actions) {
+          this.showAnswer();
         } else if (key == "enter" && this.show.enable_actions) {
           console.log(mainStore.onboarding);
           this.showAnswer();
@@ -491,7 +493,7 @@
         this.response(this.recommendation);
       } else if (key == "[") {
         this.response(false);
-      } else if (key == "]") {
+      } else if (key == "]" && this.showResponseBtns) {
         this.response(true);
       } else if (
         /^[a-z0-9]$/i.test(key) &&
@@ -533,12 +535,12 @@
     }
 
     public async showAnswer() {
-      if (!this.inTestMode || this.typed.trimStart() != "") {
+      if (this.inTestMode && this.typed.trimStart() == "") {
+        this.requireAnswerError();
+      } else {
         await studyStore.evaluateAnswer(this.typed);
         this.showBack = true;
         this.scrollToResponseButtons();
-      } else {
-        this.requireAnswerError();
       }
     }
 

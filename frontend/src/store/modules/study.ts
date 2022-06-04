@@ -400,12 +400,17 @@ export default class StudyModule extends VuexModule {
       try {
         this.markFrontTime();
         this.clearTimer();
-        const response = await api.evalAnswer(
-          mainStore.token,
-          this.show.fact.fact_id,
-          typed,
-        );
-        this.setRecommendation(response.data);
+        if (typed.trimStart() == "") {
+          this.setRecommendation(false);
+        } else {
+          const response = await api.evalAnswer(
+            mainStore.token,
+            this.show.fact.fact_id,
+            typed,
+          );
+          this.setRecommendation(response.data);
+        }
+        
         this.startTimer();
       } catch (error) {
         await mainStore.checkApiError(error);
