@@ -81,7 +81,7 @@ export default class StudyModule extends VuexModule {
     this.show = {
       text: payload.text,
       fact: payload,
-      enable_report: payload.permission !== Permission.owner && popup,
+      enable_report: payload.permission === Permission.viewer && popup,
       enable_actions: popup,
       marked: payload.marked ?? false,
     };
