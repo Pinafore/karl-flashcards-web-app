@@ -51,9 +51,6 @@
     @Watch("inTestMode")
     onIsTestModeChanged() {
       mainStore.setTestModePopup(true);
-      // this.$nextTick(() => {
-      //       this.$refs.begin.focus();
-      //     });
       setTimeout(() => {
         (this.$refs.begin.$el as HTMLInputElement).focus();
       })
