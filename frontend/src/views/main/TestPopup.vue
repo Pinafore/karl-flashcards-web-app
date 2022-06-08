@@ -31,7 +31,7 @@
   @Component
   export default class TestPopup extends Vue {
     $refs!: {
-      begin: HTMLInputElement;
+      begin: Vue;
     };
     popup = false;
     // May be good to have a popup when test mode is done
@@ -55,7 +55,7 @@
       //       this.$refs.begin.focus();
       //     });
       setTimeout(() => {
-        this.$refs.begin.$el.focus()
+        (this.$refs.begin.$el as HTMLInputElement).focus();
       })
 
     }

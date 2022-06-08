@@ -96,7 +96,7 @@
   @Component
   export default class Onboard extends Vue {
     $refs!: {
-      begin: HTMLInputElement;
+      begin: Vue;
     };
     onboard = false;
 
@@ -125,7 +125,7 @@
       }
       if (this.onboarding) {
         setTimeout(() => {
-        this.$refs.begin.$el.focus();
+        (this.$refs.begin.$el as HTMLInputElement).focus();
         })
       }
     }

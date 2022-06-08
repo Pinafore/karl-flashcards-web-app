@@ -30,7 +30,7 @@
   @Component
   export default class StudySet extends Vue {
     $refs!: {
-      same: HTMLInputElement;
+      same: Vue;
     };
     popup = false;
 
@@ -59,7 +59,7 @@
     onIsFinishedChanged() {
       this.popup = this.isFinished;
       setTimeout(() => {
-        this.$refs.same.$el.focus();
+        (this.$refs.same.$el as HTMLInputElement).focus();
       })
     }
   }
