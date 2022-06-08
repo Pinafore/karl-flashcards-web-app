@@ -134,7 +134,7 @@ def create_test_mode_facts() -> str:
             for fact in itertools.islice(json_data, 20000, None, 100):
                 if count >= 1000:
                     break
-                if "<" not in fact["question"]:
+                if "<" not in fact["question"] and "seen here" not in fact["question"]:
                     extra = {
                         "type": "Jeopardy",
                         "air_date": fact["air_date"],
