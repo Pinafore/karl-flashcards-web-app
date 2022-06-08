@@ -11,7 +11,7 @@ export interface IStudyShow {
   fact?: IComponents["Fact"];
   enable_report: boolean;
   enable_actions: boolean;
-  enable_response: boolean;
+  enable_show_back: boolean;
   marked: boolean;
 }
 

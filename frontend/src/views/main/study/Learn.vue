@@ -191,7 +191,7 @@
           <v-col cols="12" sm="auto">
             <div
               v-if="
-                show.enable_actions &&
+                show.enable_show_back &&
                   show.fact &&
                   show.fact.category &&
                   show.fact.category.toString() !== 'None' &&
@@ -205,7 +205,7 @@
           </v-col>
           <v-col cols="12" sm="auto">
             <div
-              v-if="show.enable_actions && show.fact && show.fact.identifier"
+              v-if="show.enable_show_back && show.fact && show.fact.identifier"
               class="title"
             >
               <span class="hidden-xs-only">—</span>Identify {{ show.fact.identifier }}
@@ -220,7 +220,7 @@
           {{ show.text }}
         </div>
       </v-card-text>
-      <v-card-text v-show="show.enable_response" class="py-2">
+      <v-card-text v-show="show.enable_show_back" class="py-2">
         <v-text-field
           id="answer"
           ref="answerfield"
@@ -236,12 +236,12 @@
           </template>
         </v-text-field>
       </v-card-text>
-      <v-card-actions v-show="show.enable_response && !showBack" class="px-4 pt-3 pb-2">
+      <v-card-actions v-show="show.enable_show_back && !showBack" class="px-4 pt-3 pb-2">
         <v-btn @click="showAnswer">Show Answer (Enter)</v-btn>
         <v-btn @click="dontKnow">Don't Know (Shift-Enter)</v-btn>
       </v-card-actions>
     </v-card>
-    <v-card v-show="showBack && show.enable_actions" class="my-2 mx-3 px-3 py-4">
+    <v-card v-show="showBack && show.enable_show_back" class="my-2 mx-3 px-3 py-4">
       <v-card-title class="py-0">
         <div class="title">Answer</div>
       </v-card-title>
@@ -265,7 +265,7 @@
           </div>
         </span>
       </v-card-text>
-      <v-card-text v-show="show.enable_actions" class="py-2">
+      <v-card-text v-show="show.enable_show_back" class="py-2">
         <v-text-field
           id="retype_answer"
           ref="retype"
@@ -468,8 +468,13 @@
 
     public handleKeyDown(e: KeyboardEvent) {
       const key = e.key.toLowerCase();
+      console.log(e.shiftKey);
+      console.log(key);
+      console.log(e.shiftKey && key == "enter" && this.show.enable_show_back);
+      console.log();
       if (!this.editDialog && !this.pressed) {
         this.pressed = true;
+        console.log("GOING TO CHECK")
         if (e.altKey && (e.key == "s" || key == "ß")) {
           this.suspend();
         } else if (e.altKey && (key == "d" || key == "∂")) {
@@ -484,9 +489,11 @@
           this.edit();
         } else if (this.showBack) {
           this.determineResponse(e, key);
-        } else if (e.shiftKey && key == "enter" && this.show.enable_response) {
-          this.showAnswer();
-        } else if (key == "enter" && this.show.enable_response) {
+        } else if (e.shiftKey && key == "enter" && this.show.enable_show_back) {
+          console.log("SHIFT KEYE SDFSDF")
+          this.dontKnow();
+        } else if (key == "enter" && this.show.enable_show_back) {
+          console.log("SHIFT KEYE BITEDSFSDF SDFSDF")
           console.log(mainStore.onboarding);
           this.showAnswer();
         } else if (

@@ -16,7 +16,7 @@ export default class StudyModule extends VuexModule {
     text: "Loading...",
     enable_report: false,
     enable_actions: false,
-    enable_response: false,
+    enable_show_back: false,
     marked: false,
   };
   frontTime = 0;
@@ -78,13 +78,13 @@ export default class StudyModule extends VuexModule {
 
   @Mutation
   setShow(payload: IComponents["Fact"]) {
-    const popup = !(this.inTestMode || mainStore.recallPopup || mainStore.onboarding);
+    const popup = !(mainStore.recallPopup || mainStore.onboarding || mainStore.testModePopup);
     this.show = {
       text: payload.text,
       fact: payload,
       enable_report: payload.permission === Permission.viewer && popup,
-      enable_actions: popup,
-      enable_response: popup || this.inTestMode,
+      enable_actions: popup && !this.inTestMode,
+      enable_show_back: popup,
       marked: payload.marked ?? false,
     };
   }
@@ -111,7 +111,7 @@ export default class StudyModule extends VuexModule {
       text: "Loading...",
       enable_report: false,
       enable_actions: false,
-      enable_response: false,
+      enable_show_back: false,
       marked: false,
     };
   }
@@ -122,7 +122,7 @@ export default class StudyModule extends VuexModule {
       text: "You have finished studying these decks for now, check back in later!",
       enable_report: false,
       enable_actions: false,
-      enable_response: false,
+      enable_show_back: false,
       marked: false,
     };
   }
@@ -133,7 +133,7 @@ export default class StudyModule extends VuexModule {
       text: "A problem occurred, please check back in later!",
       enable_report: false,
       enable_actions: false,
-      enable_response: false,
+      enable_show_back: false,
       marked: false,
     };
   }
@@ -177,7 +177,7 @@ export default class StudyModule extends VuexModule {
       text: "Loading...",
       enable_report: false,
       enable_actions: false,
-      enable_response: false,
+      enable_show_back: false,
       marked: false,
     };
   }
@@ -407,7 +407,7 @@ export default class StudyModule extends VuexModule {
 
   @Action
   async evaluateAnswer(typed: string) {
-    if (this.show.fact && this.show.enable_actions) {
+    if (this.show.fact && this.show.enable_show_back) {
       try {
         this.markFrontTime();
         this.clearTimer();
@@ -431,7 +431,7 @@ export default class StudyModule extends VuexModule {
 
   @Action
   async updateSchedule() {
-    if (this.show.fact && this.show.enable_actions && this.studyset) {
+    if (this.show.fact && this.show.enable_show_back && this.studyset) {
       try {
         this.setShowLoading();
         await api.updateSchedule(mainStore.token, this.studyset.id, this.schedule);
