@@ -16,6 +16,7 @@ export default class StudyModule extends VuexModule {
     text: "Loading...",
     enable_report: false,
     enable_actions: false,
+    enable_response: false,
     marked: false,
   };
   frontTime = 0;
@@ -77,19 +78,25 @@ export default class StudyModule extends VuexModule {
 
   @Mutation
   setShow(payload: IComponents["Fact"]) {
-    const popup = !( this.inTestMode || mainStore.recallPopup || mainStore.onboarding);
+    const popup = !(this.inTestMode || mainStore.recallPopup || mainStore.onboarding);
     this.show = {
       text: payload.text,
       fact: payload,
       enable_report: payload.permission === Permission.viewer && popup,
       enable_actions: popup,
+      enable_response: popup || this.inTestMode,
       marked: payload.marked ?? false,
     };
   }
-  
+
   @Mutation
   setShowActions() {
-    if (mainStore.connectionPopup || mainStore.testModePopup || mainStore.recallPopup || mainStore.onboarding) {
+    if (
+      mainStore.connectionPopup ||
+      mainStore.testModePopup ||
+      mainStore.recallPopup ||
+      mainStore.onboarding
+    ) {
       this.show.enable_actions = false;
     } else {
       if (this.show.fact) {
@@ -104,6 +111,7 @@ export default class StudyModule extends VuexModule {
       text: "Loading...",
       enable_report: false,
       enable_actions: false,
+      enable_response: false,
       marked: false,
     };
   }
@@ -114,6 +122,7 @@ export default class StudyModule extends VuexModule {
       text: "You have finished studying these decks for now, check back in later!",
       enable_report: false,
       enable_actions: false,
+      enable_response: false,
       marked: false,
     };
   }
@@ -124,6 +133,7 @@ export default class StudyModule extends VuexModule {
       text: "A problem occurred, please check back in later!",
       enable_report: false,
       enable_actions: false,
+      enable_response: false,
       marked: false,
     };
   }
@@ -167,6 +177,7 @@ export default class StudyModule extends VuexModule {
       text: "Loading...",
       enable_report: false,
       enable_actions: false,
+      enable_response: false,
       marked: false,
     };
   }

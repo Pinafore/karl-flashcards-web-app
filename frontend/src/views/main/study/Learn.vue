@@ -25,159 +25,164 @@
           ({{ current_study_num }} of {{ num_facts }})
         </div>
         <v-spacer></v-spacer>
-        <span  v-show="!inTestMode">
-          <v-tooltip bottom>
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn
-              v-if="$vuetify.breakpoint.mdAndDown"
-              :disabled="!show.enable_actions"
-              text
-              icon
-              v-bind="attrs"
-              @click="dialog = true"
-              v-on="on"
-            >
-              <v-icon>mdi-information</v-icon>
-            </v-btn>
-            <v-btn
-              v-else
-              :disabled="!show.enable_actions"
-              class="ma-1 pa-2"
-              v-bind="attrs"
-              @click="dialog = true"
-              v-on="on"
-            >
-              <v-icon>mdi-information</v-icon>Info: Alt-/
-            </v-btn>
-          </template>
-          <span>Info (Alt-/)</span>
-        </v-tooltip>
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn
-              v-if="$vuetify.breakpoint.mdAndDown"
-              :disabled="!show.enable_actions"
-              text
-              icon
-              v-bind="attrs"
-              @click="mark()"
-              v-on="on"
-            >
-              <v-icon>mdi-star</v-icon>
-            </v-btn>
-            <v-btn
-              v-else
-              :disabled="!show.enable_actions"
-              class="ma-1 pa-2"
-              v-bind="attrs"
-              @click="mark()"
-              v-on="on"
-            >
-              <v-icon left>mdi-star</v-icon>Mark: Alt-M
-            </v-btn>
-          </template>
-          <span>Favorite (Alt-M)</span>
-        </v-tooltip>
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn
-              v-if="$vuetify.breakpoint.mdAndDown"
-              :disabled="!show.enable_actions"
-              text
-              icon
-              v-bind="attrs"
-              @click="suspend()"
-              v-on="on"
-            >
-              <v-icon>mdi-pause</v-icon>
-            </v-btn>
-            <v-btn
-              v-else
-              :disabled="!show.enable_actions"
-              class="ma-1 pa-2"
-              v-bind="attrs"
-              @click="suspend()"
-              v-on="on"
-            >
-              <v-icon left>mdi-pause</v-icon>Suspend: Alt-S
-            </v-btn>
-          </template>
-          <span>Suspend (Alt-S)</span>
-        </v-tooltip>
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn
-              v-if="$vuetify.breakpoint.mdAndDown"
-              :disabled="!show.enable_actions"
-              text
-              icon
-              v-bind="attrs"
-              @click="remove()"
-              v-on="on"
-            >
-              <v-icon>mdi-delete</v-icon>
-            </v-btn>
-            <v-btn
-              v-else
-              class="ma-1 pa-2"
-              :disabled="!show.enable_actions"
-              v-bind="attrs"
-              @click="remove()"
-              v-on="on"
-            >
-              <v-icon left>mdi-delete</v-icon>Delete: Alt-D
-            </v-btn>
-          </template>
-          <span>Delete (Alt-D)</span>
-        </v-tooltip>
-        <span v-if="show.enable_report">
+        <span v-show="!inTestMode">
           <v-tooltip bottom>
             <template v-slot:activator="{ on, attrs }">
               <v-btn
                 v-if="$vuetify.breakpoint.mdAndDown"
+                :disabled="!show.enable_actions"
                 text
                 icon
                 v-bind="attrs"
-                @click="report()"
+                @click="dialog = true"
                 v-on="on"
               >
-                <v-icon>mdi-alert-octagon</v-icon>
+                <v-icon>mdi-information</v-icon>
+              </v-btn>
+              <v-btn
+                v-else
+                :disabled="!show.enable_actions"
+                class="ma-1 pa-2"
+                v-bind="attrs"
+                @click="dialog = true"
+                v-on="on"
+              >
+                <v-icon>mdi-information</v-icon>Info: Alt-/
+              </v-btn>
+            </template>
+            <span>Info (Alt-/)</span>
+          </v-tooltip>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                v-if="$vuetify.breakpoint.mdAndDown"
+                :disabled="!show.enable_actions"
+                text
+                icon
+                v-bind="attrs"
+                @click="mark()"
+                v-on="on"
+              >
+                <v-icon>mdi-star</v-icon>
+              </v-btn>
+              <v-btn
+                v-else
+                :disabled="!show.enable_actions"
+                class="ma-1 pa-2"
+                v-bind="attrs"
+                @click="mark()"
+                v-on="on"
+              >
+                <v-icon left>mdi-star</v-icon>Mark: Alt-M
+              </v-btn>
+            </template>
+            <span>Favorite (Alt-M)</span>
+          </v-tooltip>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                v-if="$vuetify.breakpoint.mdAndDown"
+                :disabled="!show.enable_actions"
+                text
+                icon
+                v-bind="attrs"
+                @click="suspend()"
+                v-on="on"
+              >
+                <v-icon>mdi-pause</v-icon>
+              </v-btn>
+              <v-btn
+                v-else
+                :disabled="!show.enable_actions"
+                class="ma-1 pa-2"
+                v-bind="attrs"
+                @click="suspend()"
+                v-on="on"
+              >
+                <v-icon left>mdi-pause</v-icon>Suspend: Alt-S
+              </v-btn>
+            </template>
+            <span>Suspend (Alt-S)</span>
+          </v-tooltip>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                v-if="$vuetify.breakpoint.mdAndDown"
+                :disabled="!show.enable_actions"
+                text
+                icon
+                v-bind="attrs"
+                @click="remove()"
+                v-on="on"
+              >
+                <v-icon>mdi-delete</v-icon>
               </v-btn>
               <v-btn
                 v-else
                 class="ma-1 pa-2"
+                :disabled="!show.enable_actions"
                 v-bind="attrs"
-                @click="report()"
+                @click="remove()"
                 v-on="on"
               >
-                <v-icon left>mdi-alert-octagon</v-icon>Report: Alt-R
+                <v-icon left>mdi-delete</v-icon>Delete: Alt-D
               </v-btn>
             </template>
-            <span>Report (Alt-R)</span>
+            <span>Delete (Alt-D)</span>
           </v-tooltip>
+          <span v-if="show.enable_report">
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  v-if="$vuetify.breakpoint.mdAndDown"
+                  text
+                  icon
+                  v-bind="attrs"
+                  @click="report()"
+                  v-on="on"
+                >
+                  <v-icon>mdi-alert-octagon</v-icon>
+                </v-btn>
+                <v-btn
+                  v-else
+                  class="ma-1 pa-2"
+                  v-bind="attrs"
+                  @click="report()"
+                  v-on="on"
+                >
+                  <v-icon left>mdi-alert-octagon</v-icon>Report: Alt-R
+                </v-btn>
+              </template>
+              <span>Report (Alt-R)</span>
+            </v-tooltip>
+          </span>
+          <span v-else-if="show.enable_actions">
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  v-if="$vuetify.breakpoint.mdAndDown"
+                  text
+                  icon
+                  v-bind="attrs"
+                  @click="edit()"
+                  v-on="on"
+                >
+                  <v-icon>mdi-pencil</v-icon>
+                </v-btn>
+                <v-btn
+                  v-else
+                  class="ma-1 pa-2"
+                  v-bind="attrs"
+                  @click="edit()"
+                  v-on="on"
+                >
+                  <v-icon left>mdi-pencil</v-icon>Edit: Alt-E
+                </v-btn>
+              </template>
+              <span>Edit (Alt-E)</span>
+            </v-tooltip>
+          </span>
         </span>
-        <span v-else-if="show.enable_actions">
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn
-                v-if="$vuetify.breakpoint.mdAndDown"
-                text
-                icon
-                v-bind="attrs"
-                @click="edit()"
-                v-on="on"
-              >
-                <v-icon>mdi-pencil</v-icon>
-              </v-btn>
-              <v-btn v-else class="ma-1 pa-2" v-bind="attrs" @click="edit()" v-on="on">
-                <v-icon left>mdi-pencil</v-icon>Edit: Alt-E
-              </v-btn>
-            </template>
-            <span>Edit (Alt-E)</span>
-          </v-tooltip>
-        </span>
-        </span>
-        
       </v-card-title>
     </v-card>
     <v-card class="my-2 mx-3 px-3 py-4 pb-5">
@@ -215,7 +220,7 @@
           {{ show.text }}
         </div>
       </v-card-text>
-      <v-card-text v-show="show.enable_actions" class="py-2">
+      <v-card-text v-show="show.enable_response" class="py-2">
         <v-text-field
           id="answer"
           ref="answerfield"
@@ -224,14 +229,14 @@
           autofocus
           hide-details="auto"
           @keydown="keyHandler"
-        ><template v-slot:label>
-          <span v-if="inTestMode">Required (Test Mode) - </span>
-          <span v-else>Recommended - </span>
-          Type Answer (Press any letter to focus)
-        </template>
+          ><template v-slot:label>
+            <span v-if="inTestMode">Required (Test Mode) - </span>
+            <span v-else>Recommended - </span>
+            Type Answer (Press any letter to focus)
+          </template>
         </v-text-field>
       </v-card-text>
-      <v-card-actions v-show="show.enable_actions && !showBack" class="px-4 pt-3 pb-2">
+      <v-card-actions v-show="show.enable_response && !showBack" class="px-4 pt-3 pb-2">
         <v-btn @click="showAnswer">Show Answer (Enter)</v-btn>
         <v-btn @click="dontKnow">Don't Know (Shift-Enter)</v-btn>
       </v-card-actions>
@@ -245,19 +250,19 @@
           {{ show.fact && show.fact.answer }}
         </div>
         <span v-show="!inTestMode">
-          <div class="title" >You typed: '{{ typed }}'</div>
-        <div
-          v-if="recommendation"
-          class="title primary--text py-2"
-          :style="{ color: 'green !important' }"
-        >
-          KAR³L Believes Your Response Was Correct
-          <span class="hidden-xs-only">(Enter to Accept, Or Override Below)</span>
-        </div>
-        <div v-else class="title primary--text" :style="{ color: 'red !important' }">
-          KAR³L Believes Your Response Was Wrong
-          <span class="hidden-xs-only">(Enter to Accept, Or Override Below)</span>
-        </div>
+          <div class="title">You typed: '{{ typed }}'</div>
+          <div
+            v-if="recommendation"
+            class="title primary--text py-2"
+            :style="{ color: 'green !important' }"
+          >
+            KAR³L Believes Your Response Was Correct
+            <span class="hidden-xs-only">(Enter to Accept, Or Override Below)</span>
+          </div>
+          <div v-else class="title primary--text" :style="{ color: 'red !important' }">
+            KAR³L Believes Your Response Was Wrong
+            <span class="hidden-xs-only">(Enter to Accept, Or Override Below)</span>
+          </div>
         </span>
       </v-card-text>
       <v-card-text v-show="show.enable_actions" class="py-2">
@@ -271,9 +276,14 @@
           hide-details="auto"
         ></v-text-field>
       </v-card-text>
-      <v-card-actions class="pt-3 pb-1 px-5" >
+      <v-card-actions class="pt-3 pb-1 px-5">
         <v-row class="shrink" justify="space-around">
-          <v-col cols="5" sm="auto" class="ma-1 pa-1 py-0 shrink" v-show="showResponseBtns">
+          <v-col
+            cols="5"
+            sm="auto"
+            class="ma-1 pa-1 py-0 shrink"
+            v-show="showResponseBtns"
+          >
             <v-btn
               ref="wrong"
               :color="!recommendation ? 'red' : ''"
@@ -282,24 +292,31 @@
               >wrong ([)</v-btn
             >
           </v-col>
-          <v-col v-show="showResponseBtns" id="response" cols="5" sm="auto" class="ma-1 pa-1 py-0 shrink">
+          <v-col
+            v-show="showResponseBtns"
+            id="response"
+            cols="5"
+            sm="auto"
+            class="ma-1 pa-1 py-0 shrink"
+          >
             <v-btn
-                ref="right"
-                :color="recommendation ? 'green' : ''"
-                class="px-2"
-                @click="response(true)"
-                >right (])</v-btn
-              >
+              ref="right"
+              :color="recommendation ? 'green' : ''"
+              class="px-2"
+              @click="response(true)"
+              >right (])</v-btn
+            >
           </v-col>
-          <v-col v-show="!showResponseBtns" cols="5" sm="auto" class="ma-1 pa-1 py-0 shrink">
-              <v-btn
-                ref="continue"
-                class="px-2"
-                @click="response(false)"
-                >continue (Enter)</v-btn
-              >
+          <v-col
+            v-show="!showResponseBtns"
+            cols="5"
+            sm="auto"
+            class="ma-1 pa-1 py-0 shrink"
+          >
+            <v-btn ref="continue" class="px-2" @click="response(false)"
+              >continue (Enter)</v-btn
+            >
           </v-col>
-          
         </v-row>
       </v-card-actions>
     </v-card>
@@ -467,9 +484,9 @@
           this.edit();
         } else if (this.showBack) {
           this.determineResponse(e, key);
-        } else if (e.shiftKey && key == "enter" && this.show.enable_actions) {
+        } else if (e.shiftKey && key == "enter" && this.show.enable_response) {
           this.showAnswer();
-        } else if (key == "enter" && this.show.enable_actions) {
+        } else if (key == "enter" && this.show.enable_response) {
           console.log(mainStore.onboarding);
           this.showAnswer();
         } else if (
@@ -589,9 +606,9 @@
 
     public requireAnswerError() {
       mainStore.addNotification({
-          content: "In Test Mode, you must type your answer or press don't know!",
-          color: "error",
-        });
+        content: "In Test Mode, you must type your answer or press don't know!",
+        color: "error",
+      });
     }
 
     public async response(response) {
