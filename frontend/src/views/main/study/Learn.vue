@@ -236,7 +236,10 @@
           </template>
         </v-text-field>
       </v-card-text>
-      <v-card-actions v-show="show.enable_show_back && !showBack" class="px-4 pt-3 pb-2">
+      <v-card-actions
+        v-show="show.enable_show_back && !showBack"
+        class="px-4 pt-3 pb-2"
+      >
         <v-btn @click="showAnswer">Show Answer (Enter)</v-btn>
         <v-btn @click="dontKnow">Don't Know (Shift-Enter)</v-btn>
       </v-card-actions>
@@ -279,10 +282,10 @@
       <v-card-actions class="pt-3 pb-1 px-5">
         <v-row class="shrink" justify="space-around">
           <v-col
+            v-show="showResponseBtns"
             cols="5"
             sm="auto"
             class="ma-1 pa-1 py-0 shrink"
-            v-show="showResponseBtns"
           >
             <v-btn
               ref="wrong"
@@ -468,13 +471,10 @@
 
     public handleKeyDown(e: KeyboardEvent) {
       const key = e.key.toLowerCase();
-      console.log(e.shiftKey);
-      console.log(key);
-      console.log(e.shiftKey && key == "enter" && this.show.enable_show_back);
-      console.log();
       if (!this.editDialog && !this.pressed) {
-        this.pressed = true;
-        console.log("GOING TO CHECK")
+        if (key != "shift") {
+          this.pressed = true;
+        }
         if (e.altKey && (e.key == "s" || key == "ß")) {
           this.suspend();
         } else if (e.altKey && (key == "d" || key == "∂")) {
@@ -490,11 +490,8 @@
         } else if (this.showBack) {
           this.determineResponse(e, key);
         } else if (e.shiftKey && key == "enter" && this.show.enable_show_back) {
-          console.log("SHIFT KEYE SDFSDF")
           this.dontKnow();
         } else if (key == "enter" && this.show.enable_show_back) {
-          console.log("SHIFT KEYE BITEDSFSDF SDFSDF")
-          console.log(mainStore.onboarding);
           this.showAnswer();
         } else if (
           /^[a-z0-9]$/i.test(key) &&
@@ -515,7 +512,7 @@
     }
 
     public determineResponse(e: KeyboardEvent, key: string) {
-      if (key == "enter") {
+      if (key == "enter" && !e.shiftKey) {
         this.response(this.recommendation);
       } else if (key == "[") {
         this.response(false);
