@@ -97,7 +97,7 @@
 
     checkPopup() {
       const popup =
-        mainStore.connectionError && studyStore.inTestMode !== true ||
+        (mainStore.connectionError && studyStore.inTestMode !== true) ||
         mainStore.schedulerError ||
         mainStore.inaccessibleDeckError;
       mainStore.setConnectionPopup(popup);

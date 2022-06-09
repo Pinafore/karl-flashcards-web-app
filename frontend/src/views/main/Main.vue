@@ -40,7 +40,7 @@
       </v-list>
       <v-divider></v-divider>
       <v-list subheader>
-        <v-list-item to="/main/study/learn" v-if="recallPopup">
+        <v-list-item v-if="recallPopup" to="/main/study/learn">
           <v-list-item-action>
             <v-icon>mdi-lightbulb-on</v-icon>
           </v-list-item-action>

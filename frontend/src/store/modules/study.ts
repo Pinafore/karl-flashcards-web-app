@@ -78,7 +78,11 @@ export default class StudyModule extends VuexModule {
 
   @Mutation
   setShow(payload: IComponents["Fact"]) {
-    const popup = !(mainStore.recallPopup || mainStore.onboarding || mainStore.testModePopup);
+    const popup = !(
+      mainStore.recallPopup ||
+      mainStore.onboarding ||
+      mainStore.testModePopup
+    );
     this.show = {
       text: payload.text,
       fact: payload,
@@ -421,7 +425,7 @@ export default class StudyModule extends VuexModule {
           );
           this.setRecommendation(response.data);
         }
-        
+
         this.startTimer();
       } catch (error) {
         await mainStore.checkApiError(error);
