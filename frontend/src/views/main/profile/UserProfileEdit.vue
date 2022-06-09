@@ -32,19 +32,15 @@
                 autocomplete="email"
               ></v-text-field>
             </validation-provider>
-            <validation-provider
-              v-slot="{ errors }"
-              rules="required|between:0,100"
-              name="Target Recall Percentage"
-            >
-              <v-text-field
-                v-model="recallTarget"
-                label="Target Recall Percentage (Only Affects Certain Randomly Assigned Users)"
-                :error-messages="errors[0]"
-                required
-                name="Target Recall Percentage"
-              ></v-text-field>
-            </validation-provider>
+            <v-radio-group v-model="recallTarget" row>
+              <v-radio
+                v-for="num in recallTargetOptions"
+                :key="num"
+                :label="`${num}% Recall`"
+                :value="num"
+              >
+              </v-radio>
+            </v-radio-group>
             <v-checkbox v-model="showTips" label="Show Tips"></v-checkbox>
           </v-card-text>
           <v-card-actions>
@@ -89,6 +85,7 @@
     email = "";
     showTips = false;
     recallTarget = 0;
+    recallTargetOptions: number[] = [50, 85];
 
     created() {
       const userProfile = mainStore.userProfile;
