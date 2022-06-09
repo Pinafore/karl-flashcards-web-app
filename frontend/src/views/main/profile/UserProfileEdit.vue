@@ -45,8 +45,8 @@
                 name="Target Recall Percentage"
               ></v-text-field>
             </validation-provider>
+            <v-checkbox v-model="showTips" label="Show Tips"></v-checkbox>
           </v-card-text>
-          <v-checkbox v-model="showTips" label="Show Tips"></v-checkbox>
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn @click="cancel">Cancel</v-btn>
