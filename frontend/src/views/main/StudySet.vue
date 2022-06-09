@@ -5,18 +5,22 @@
         <h2>Study Set Finished</h2>
       </v-card-title>
       <v-card-text>
-        <p>
+        <p v-if="inTestMode">
+          Thanks for completing test mode! Would you like to create a study set with
+          your originally selected settings or go back to the create study set screen?
+        </p>
+        <p v-else>
           You've finished this study set! Would you like to create another set with the
-          same settings or change options for your next study set?
+          same settings or go back to the the create study screen to change options?
         </p>
       </v-card-text>
       <v-card-actions class="pt-0">
         <v-spacer></v-spacer>
-        <v-btn color="primary" ref="same" text @click="continueStudy">
-          Same Settings
+        <v-btn ref="same" color="primary" text @click="continueStudy">
+          Create: Same Settings
         </v-btn>
         <v-btn color="primary" text @click="goToDeck">
-          Change Options
+          Back: Change Options
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -46,6 +50,10 @@
       );
     }
 
+    get inTestMode() {
+      return studyStore.inTestMode;
+    }
+
     continueStudy() {
       studyStore.getStudyFacts();
       this.popup = false;
@@ -60,7 +68,7 @@
       this.popup = this.isFinished;
       setTimeout(() => {
         (this.$refs.same.$el as HTMLInputElement).focus();
-      })
+      });
     }
   }
 </script>
