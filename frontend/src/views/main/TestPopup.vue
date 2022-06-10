@@ -1,5 +1,11 @@
 <template class="pa-0 ma-0">
-  <v-dialog v-model="testModePopup" max-width="1000px" persistent @click:outside="startTesting" @keydown.enter="startTesting">
+  <v-dialog
+    v-model="testModePopup"
+    max-width="1000px"
+    persistent
+    @click:outside="startTesting"
+    @keydown.enter="startTesting"
+  >
     <v-card>
       <v-card-title>
         <h2>Phase 2: Test Mode</h2>
@@ -12,11 +18,14 @@
           to generally take less than fifteen minutes. You may resume your regular study
           after completing this test mode.
         </p>
+        <p>
+          You must complete test mode within an hour of starting or your progress in the
+          session will be reset.
+        </p>
       </v-card-text>
       <v-card-actions class="pt-0">
         <v-spacer></v-spacer>
-        <v-btn 
-          ref="begin" color="primary" text @click="startTesting">
+        <v-btn ref="begin" color="primary" text @click="startTesting">
           Begin
         </v-btn>
       </v-card-actions>
@@ -44,6 +53,14 @@
       return studyStore.inTestMode;
     }
 
+    get onboard() {
+      return mainStore.onboarding;
+    }
+
+    get recallPopup() {
+      return mainStore.recallPopup;
+    }
+
     get testModePopup() {
       return mainStore.testModePopup;
     }
@@ -53,13 +70,16 @@
       mainStore.setTestModePopup(true);
       setTimeout(() => {
         (this.$refs.begin.$el as HTMLInputElement).focus();
-      })
-
+      });
     }
 
     async startTesting() {
+      this.$router.push({
+        path: "/main/study/learn",
+        query: { test: String(1) },
+      });
       mainStore.setTestModePopup(false);
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
       studyStore.setShowActions();
     }
   }

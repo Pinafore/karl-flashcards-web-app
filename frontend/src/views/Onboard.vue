@@ -1,6 +1,6 @@
 <template class="pa-0 ma-0">
   <v-main class="pa-0 ma-0">
-    <v-dialog width="1000" v-model="onboarding">
+    <v-dialog v-model="onboarding" width="1000">
       <v-card>
         <v-card-title>
           <h2>Tips</h2>
@@ -10,9 +10,9 @@
           click "Add Decks" to continue
         </v-card-text>
         <v-card-text v-if="this.$router.currentRoute.name === 'decks'">
-          In the create study set screen, you can select a specific deck or multiple decks to
-          study facts from. Click the checkboxes next to the deck names in order to
-          select multiple decks.
+          In the create study set screen, you can select a specific deck or multiple
+          decks to study facts from. Click the checkboxes next to the deck names in
+          order to select multiple decks.
         </v-card-text>
         <div v-if="this.$router.currentRoute.name === 'learn'" class="px-2">
           <v-card-subtitle>
@@ -80,7 +80,7 @@
         </v-card-text>
         <v-card-actions class="pt-0">
           <v-spacer></v-spacer>
-          <v-btn color="primary" ref="begin" text @click="hideTip">
+          <v-btn ref="begin" color="primary" text @click="hideTip">
             Got it!
           </v-btn>
         </v-card-actions>
@@ -103,7 +103,6 @@
     async mounted() {
       await mainStore.getUserProfile();
       this.getUpdate();
-      
     }
 
     get onboarding() {
@@ -114,31 +113,37 @@
       mainStore.setOnboarding(value);
     }
 
+    // Not mainStore.recallPopup as that can cause a race, it may not be set to true yet
+    get recallPopup() {
+      return this.currentRecallTarget == -1;
+    }
+
+    get currentRecallTarget() {
+      return mainStore.userProfile?.recall_target ?? -1;
+    }
+
     getUpdate() {
-      if(this.$router.currentRoute.name === 'decks') {
-        console.log("Recall popup")
-        console.log(this.recallPopup)
-        console.log(this.show_help && !(this.recallPopup === true))
+      if (this.$router.currentRoute.name === "decks") {
+        console.log("Recall popup");
+        console.log(this.recallPopup);
+        console.log(this.show_help && !(this.recallPopup === true));
         mainStore.setOnboarding(this.show_help && !(this.recallPopup === true));
       } else {
         mainStore.setOnboarding(this.show_help);
       }
       if (this.onboarding) {
         setTimeout(() => {
-        (this.$refs.begin.$el as HTMLInputElement).focus();
-        })
+          (this.$refs.begin.$el as HTMLInputElement).focus();
+        });
       }
-    }
-    get recallPopup() {
-      return mainStore.recallPopup;
     }
 
     get show_help() {
       return mainStore.userProfile?.show_help ?? false;
     }
 
-    @Watch("recallPopup") 
-    recallPopupChanged(){
+    @Watch("recallPopup")
+    recallPopupChanged() {
       this.getUpdate();
     }
 
@@ -149,7 +154,7 @@
 
     async hideTip() {
       mainStore.setOnboarding(false);
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
       studyStore.setShowActions();
     }
   }
