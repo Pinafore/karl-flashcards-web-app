@@ -102,9 +102,11 @@ export default class StudyModule extends VuexModule {
       mainStore.onboarding
     ) {
       this.show.enable_actions = false;
+      this.show.enable_show_back = false;
     } else {
       if (this.show.fact) {
         this.show.enable_actions = true;
+        this.show.enable_show_back = true;
       }
     }
   }
