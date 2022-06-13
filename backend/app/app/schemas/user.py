@@ -70,6 +70,7 @@ class User(UserInDBBase):
     default_deck: Deck
     decks: List[Deck] = []
     resume_studyset: bool
+    in_test_mode: bool
 
     class Config:
         orm_mode = True

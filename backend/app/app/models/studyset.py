@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING, List
 
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -8,6 +9,7 @@ from sqlalchemy import Column, Integer, ForeignKey, Boolean, TIMESTAMP, func
 from sqlalchemy.orm import relationship
 
 from app import schemas
+from app.core.config import settings
 
 if TYPE_CHECKING:  # noqa: F401
     from .user import User  # noqa: F401
@@ -99,3 +101,8 @@ class StudySet(Base):
     @hybrid_property
     def not_started(self) -> bool:
         return self.num_unstudied == self.num_facts
+
+    @hybrid_property
+    def expired(self) -> bool:
+        return self.create_date < datetime.now(timezone('UTC')) - timedelta(hours=settings.STUDY_SET_EXPIRATION_HOURS)
+        

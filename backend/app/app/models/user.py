@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING, List, Optional
 
 from sqlalchemy import Boolean, Column, Integer, String, ForeignKey, Enum, TIMESTAMP, SmallInteger
@@ -10,6 +11,7 @@ from app.schemas.repetition import Repetition
 
 # from .user_deck import user_deck
 from app.schemas import DeckType
+from app.core.config import settings
 from .deck import Deck  # noqa: F401
 from .studyset import StudySet
 # from app.crud import studyset
@@ -65,3 +67,20 @@ class User(Base):
         study_set = studyset.find_existing_study_set(db, self)
         db.close()
         return study_set is not None
+
+    @hybrid_property
+    def in_test_mode(self) -> bool:
+        db = SessionLocal()
+        from app.crud import studyset
+        study_set = studyset.find_last_test_set(db, self)
+        db.close()
+        if study_set is None:
+            return studyset.completed_sets(db, self) > settings.TEST_MODE_FIRST_TRIGGER_SESSIONS
+        # while this most recent test set could be expired, as long as it's not completed, user is still in test mode
+        if not study_set.completed:
+            return True
+        over_days_trigger = study_set.create_date + timedelta(days=settings.TEST_MODE_TRIGGER_DAYS > datetime.now(timezone('UTC')))
+        over_sessions_trigger = studyset.sets_since_last_test(db, last_test_set=study_set, user=self)
+        return over_days_trigger or over_sessions_trigger
+        # print([session.create_date for session in self.sessions])
+        # return True if study_set.expired else False

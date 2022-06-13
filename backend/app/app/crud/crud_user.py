@@ -179,19 +179,5 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     def make_current_users_beta_testers(self, db: Session):
         db.query(self.model).update({User.beta_user: True}, synchronize_session='evaluate')
 
-    def test_mode_check(self, db: Session, db_obj: User) -> bool:
-        return False
-        if (db_obj.last_test_date is not None and
-            db_obj.last_test_date + timedelta(days=7) > datetime.now(timezone('UTC'))) or \
-                crud.history.get_user_study_count(user=db_obj) / settings.TEST_MODE_TRIGGER >= db_obj.next_test_mode:
-            if crud.history.get_user_test_study_count(user=db_obj) >= \
-                    db_obj.next_test_mode * settings.TEST_MODE_PER_ROUND:
-                self.update(db, db_obj=db_obj,
-                            obj_in=UserUpdate(next_test_mode=db_obj.next_test_mode + 1,
-                                              last_test_date=datetime.now(timezone('UTC')).isoformat()))
-            return True
-        else:
-            return False
-
 
 user = CRUDUser(User)

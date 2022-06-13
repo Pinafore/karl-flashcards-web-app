@@ -100,7 +100,6 @@ def read_user_me(
     """
     Get current user.
     """
-    crud.user.test_mode_check(db, db_obj=current_user)
     return current_user
 
 

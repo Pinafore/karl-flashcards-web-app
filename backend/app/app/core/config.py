@@ -17,10 +17,13 @@ class Settings(BaseSettings):
     # "http://localhost:8080", "http://local.dockertoolbox.tiangolo.com"]'
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
     INTERFACE: str = "http://host.docker.internal:4000/"
-    TEST_MODE_TRIGGER: int = 250
-    TEST_MODE_PER_ROUND: int = 30
+    TEST_MODE_FIRST_TRIGGER_SESSIONS: int = 5
+    TEST_MODE_TRIGGER_DAYS: int = 10
+    TEST_MODE_TRIGGER_SESSIONS: int = 7
+    TEST_MODE_PER_ROUND: int = 20
     DEFAULT_DECK_ID: int = 1
     TEST_DECK_NAME: str = "Test Mode"
+    STUDY_SET_EXPIRATION_HOURS: int = 1
 
     @validator("INTERFACE")
     def get_interface(cls, v: Optional[str], values: Dict[str, Any]) -> str:

@@ -172,6 +172,7 @@ export interface IComponents {
     recall_target: number;
     test_mode: number;
     resume_studyset: boolean;
+    in_test_mode: boolean;
   };
   UserCreate: {
     email: string;

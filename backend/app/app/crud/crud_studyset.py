@@ -13,6 +13,7 @@ import requests
 from pytz import timezone
 from datetime import datetime
 from sentry_sdk import capture_exception
+from sqlalchemy.sql.expression import true
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -73,16 +74,14 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                                                 " of the specified decks")
                 decks.append(deck)
         uncompleted_last_set = self.find_existing_study_set(db, user)
-        logger.info(uncompleted_last_set)
+        # Return the uncompleted last set if it exists and the user has not force-requested a new set
+        in_test_mode = user.in_test_mode
         if uncompleted_last_set:
-            # if force_new and not uncompleted_last_set.is_test:
-            if force_new:
+            if force_new and not in_test_mode:
                 self.mark_retired(db, db_obj=uncompleted_last_set)
             else:
                 return uncompleted_last_set
-        is_test_mode = crud.user.test_mode_check(db, db_obj=user)
-        logger.info("test mode: " + str(is_test_mode))
-        if is_test_mode:
+        if in_test_mode:
             facts = crud.fact.get_test_facts(db, user=user)
             test_deck = crud.deck.get_test_deck(db)
             decks = [test_deck] if test_deck is not None else []
@@ -90,7 +89,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             facts = crud.fact.get_ordered_schedule(db, user=user, deck_ids=deck_ids, return_limit=return_limit,
                                                    send_limit=send_limit)
         logger.info(facts)
-        db_obj = self.create_with_facts(db, obj_in=schemas.StudySetCreate(is_test=is_test_mode, user_id=user.id),
+        db_obj = self.create_with_facts(db, obj_in=schemas.StudySetCreate(is_test=in_test_mode, user_id=user.id),
                                         decks=decks,
                                         facts=facts)
         db.commit()
@@ -99,11 +98,23 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
     def find_existing_study_set(self, db: Session, user: models.User) -> Optional[models.StudySet]:
         studyset: models.StudySet = db.query(models.StudySet).filter(models.StudySet.user_id == user.id).order_by(
             models.StudySet.id.desc()).first()
-        if studyset and not (studyset.completed or studyset.not_started):
+        if studyset and not (studyset.expired or studyset.completed):
             return studyset
         else:
             return None
+    
+    def find_last_test_set(self, db: Session, user: models.User) -> Optional[models.StudySet]:
+        studyset: models.StudySet = db.query(models.StudySet).filter(models.StudySet.user_id == user.id).filter(models.StudySet.is_test == true()).order_by(
+            models.StudySet.id.desc()).first()
+        return studyset
+    
+    def completed_sets(self, db: Session, user: models.User) -> Optional[int]:
+        return db.query(models.StudySet).filter(models.StudySet.user_id == user.id).filter(models.StudySet.completed == true()).count()
 
+    def sets_since_last_test(self, db: Session, last_test_set: models.studyset, user: models.User) -> Optional[int]:
+        return db.query(models.StudySet).filter(models.StudySet.user_id == user.id).filter(models.StudySet.completed == true()).filter(models.StudySet.id > last_test_set.id).count()
+
+    
     def update_session_facts(self, db: Session, schedules: List[schemas.Schedule], user: models.User,
                              studyset_id: int) -> Any:
         studyset = self.get(db=db, id=studyset_id)
