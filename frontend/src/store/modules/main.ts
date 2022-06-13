@@ -106,11 +106,6 @@ export default class MainModule extends VuexModule {
   @Mutation
   setUserProfile(payload: IComponents["User"]) {
     this.userProfile = payload;
-    if (this.userProfile.recall_target != -1) {
-      this.onboarding = this.userProfile.show_help;
-    } else {
-      this.onboarding = false;
-    }
   }
 
   @Mutation

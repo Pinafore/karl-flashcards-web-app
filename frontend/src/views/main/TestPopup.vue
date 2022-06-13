@@ -53,7 +53,7 @@
       return studyStore.inTestMode;
     }
 
-    get onboard() {
+    get onboarding() {
       return mainStore.onboarding;
     }
 
@@ -71,6 +71,11 @@
       setTimeout(() => {
         (this.$refs.begin.$el as HTMLInputElement).focus();
       });
+    }
+
+    @Watch("onboarding")
+    onOnboardingChanged() {
+      mainStore.setTestModePopup(false);
     }
 
     async startTesting() {

@@ -124,10 +124,7 @@
 
     getUpdate() {
       if (this.$router.currentRoute.name === "decks") {
-        console.log("Recall popup");
-        console.log(this.recallPopup);
-        console.log(this.show_help && !(this.recallPopup === true));
-        mainStore.setOnboarding(this.show_help && !(this.recallPopup === true));
+        mainStore.setOnboarding(this.show_help && !(this.recallPopup));
       } else {
         mainStore.setOnboarding(this.show_help);
       }
