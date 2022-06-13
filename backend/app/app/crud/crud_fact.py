@@ -353,7 +353,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         logger.info("overall time facts: " + str(overall_total_time))
         return facts
 
-    def get_test_facts(self, db: Session, *, user: models.User, return_limit: Optional[int] = 20) -> List[models.Fact]:
+    def get_test_facts(self, db: Session, *, user: models.User, return_limit: Optional[int] = settings.TEST_MODE_PER_ROUND) -> List[models.Fact]:
         # Get facts that have not been studied before
         logger.info(crud.deck.get_test_deck_id(db=db))
         test_deck_id = crud.deck.get_test_deck_id(db=db)
