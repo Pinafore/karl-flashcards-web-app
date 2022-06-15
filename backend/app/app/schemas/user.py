@@ -20,8 +20,6 @@ class UserBase(BaseModel):
     pwa_tip: Optional[bool] = None
     beta_user: Optional[bool] = None
     recall_target: Optional[int] = None
-    next_test_mode: Optional[int] = None
-    last_test_date: Optional[datetime] = None
 
 
 # Properties to receive via API on creation
@@ -59,7 +57,6 @@ class UserInDBBase(UserBase):
     pwa_tip: bool
     beta_user: bool
     recall_target: int
-    next_test_mode: int
 
     class Config:
         orm_mode = True
