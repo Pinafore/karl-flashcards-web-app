@@ -1,10 +1,11 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, List, Optional
 
 from sqlalchemy import Boolean, Column, Integer, String, ForeignKey, Enum, TIMESTAMP, SmallInteger
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
+from pytz import timezone
 
 from app.db.base_class import Base
 from app.schemas.repetition import Repetition

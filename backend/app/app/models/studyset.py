@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, List
 
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -7,6 +7,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from app.db.base_class import Base
 from sqlalchemy import Column, Integer, ForeignKey, Boolean, TIMESTAMP, func
 from sqlalchemy.orm import relationship
+from pytz import timezone
 
 from app import schemas
 from app.core.config import settings
