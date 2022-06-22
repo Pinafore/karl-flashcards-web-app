@@ -67,6 +67,15 @@ class User(Base):
         db.close()
         return study_set is not None
 
+        
+    @hybrid_property
+    def studyset_expiry_date(self) -> Optional[datetime]:
+        db = SessionLocal()
+        from app.crud import studyset
+        study_set = studyset.find_existing_study_set(db, self)
+        db.close()
+        return study_set.expiry_date if study_set is not None else None
+
     @hybrid_property
     def in_test_mode(self) -> bool:
         db = SessionLocal()

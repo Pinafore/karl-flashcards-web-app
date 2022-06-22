@@ -66,6 +66,8 @@ class UserInDBBase(UserBase):
 class User(UserInDBBase):
     default_deck: Deck
     decks: List[Deck] = []
+    # Coudl refactor to return a study set object, but obstacle is circular references
+    study_set_expiry_date: Optional[datetime]
     resume_studyset: bool
     in_test_mode: bool
 
