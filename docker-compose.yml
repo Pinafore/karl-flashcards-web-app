@@ -86,8 +86,6 @@ services:
     networks:
       - ${TRAEFIK_PUBLIC_NETWORK}
       - default
-    depends_on:
-      - db
     env_file:
       - .env
     deploy:
@@ -139,8 +137,6 @@ services:
   
   backend:
     image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
-    depends_on:
-      - db
     env_file:
       - .env
     environment:
@@ -163,9 +159,6 @@ services:
   
   celeryworker:
     image: '${DOCKER_IMAGE_CELERYWORKER?Variable not set}:${TAG-latest}'
-    depends_on:
-      - db
-      - queue
     env_file:
       - .env
     environment:
