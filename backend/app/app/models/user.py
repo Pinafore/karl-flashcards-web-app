@@ -86,7 +86,7 @@ class User(Base):
         # while this most recent test set could be expired, as long as it's not completed, user is still in test mode
         if not study_set.completed:
             return True
-        over_days_trigger = study_set.create_date + timedelta(days=settings.TEST_MODE_TRIGGER_DAYS > datetime.now(timezone('UTC')))
+        over_days_trigger = (study_set.create_date + timedelta(days=settings.TEST_MODE_TRIGGER_DAYS) > datetime.now(timezone('UTC')))
         over_sessions_trigger = studyset.sets_since_last_test(db, last_test_set=study_set, user=self)
         db.close()
         return over_days_trigger or over_sessions_trigger
