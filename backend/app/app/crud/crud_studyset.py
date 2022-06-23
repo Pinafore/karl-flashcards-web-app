@@ -137,7 +137,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
 
     def record_study(
             self, db: Session, *, user: models.User, session_fact: models.Session_Fact, schedule: schemas.Schedule
-    ) -> Union[models.History]:
+    ) -> models.History:
         try:
             response = schedule.response
             date_studied = datetime.now(timezone('UTC')).isoformat()
