@@ -49,7 +49,9 @@ def load_quizbowl_facts() -> str:
                 #         )
                 #     crud.fact.create_with_owner(db, obj_in=fact_in, user=user)
                 count = count + 1
+        db.close()
         return f"{count} quizbowl questions loaded"
+    db.close()
     return f"superuser does not exist yet"
 
 
@@ -83,7 +85,9 @@ def load_jeopardy_facts() -> str:
                     )
                     crud.fact.create_with_owner(db, obj_in=fact_in, user=user)
                     fact_count += 1
+        db.close()
         return f"{fact_count + 1} quizbowl questions loaded"
+    db.close()
     return f"superuser does not exist yet"
 
 
@@ -108,7 +112,9 @@ def clean_up_preloaded_facts() -> str:
             )
             crud.fact.update(db, db_obj=fact, obj_in=fact_update)
             count = count + 1
+        db.close()
         return f"{count} facts updated"
+    db.close()
     return f"superuser does not exist yet"
 
 
@@ -152,5 +158,7 @@ def create_test_mode_facts() -> str:
                     )
                     crud.fact.create_with_owner(db, obj_in=fact_in, user=user)
                     count += 1
+        db.close()
         return f"{count} quizbowl questions loaded to deck: {deck.title}"
+    db.close()
     return f"superuser does not exist yet"
