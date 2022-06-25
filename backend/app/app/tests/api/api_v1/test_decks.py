@@ -1,6 +1,7 @@
 from typing import Dict
 
 from app import crud
+from app.schemas.deck_type import DeckType
 from app.core.config import settings
 from app.models import User
 from app.schemas.deck import SuperDeckCreate

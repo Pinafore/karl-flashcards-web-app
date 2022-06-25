@@ -15,7 +15,7 @@ def filter_deck_id(query: query, deck_id: Optional[int]):
 
 
 def filter_ilike(query: query, model_attr: Column, filter_attr: Optional[str]):
-    return query.filter(model_attr).ilike(filter_attr) if filter_attr else query
+    return query.filter(model_attr.ilike(f'%{filter_attr}%')) if filter_attr else query
 
 
 def filter_full_text_search(query: query, query_str: Optional[str]):
