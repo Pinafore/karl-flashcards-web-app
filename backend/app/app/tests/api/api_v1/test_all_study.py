@@ -2,7 +2,7 @@ from typing import Dict
 
 from app.core.config import settings
 from app.models import User
-from app.schemas import Schedule
+from app.schemas import Schedule, StudySet
 from app.tests.utils.deck import create_random_deck
 from app.tests.utils.fact import create_random_fact_with_deck
 from app.tests.utils.utils import random_lower_string
@@ -37,25 +37,29 @@ def test_update_schedule_set(
         client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
 ) -> None:
     deck = create_random_deck(db, user=normal_user_token_headers[1])
-    data = []
-    for idx in range(2):
+    for _ in range(20):
         fact = create_random_fact_with_deck(db, user=normal_user_token_headers[1], deck=deck)
-        data.append(Schedule(fact_id=fact.fact_id,
+    response = client.get(
+        f"{settings.API_V1_STR}/study/?deck_id={deck.id}", headers=normal_user_token_headers[0],
+    )
+    data = []
+    print(response.json())
+    for idx in range(2):
+        data.append(Schedule(fact_id=response.json()["unstudied_facts"][idx]["fact_id"],
                              typed=random_lower_string(),
                              response=False,
                              elapsed_milliseconds_text=10,
                              elapsed_milliseconds_answer=10,
                              debug_id=random_lower_string()).dict())
     for idx in range(2):
-        fact = create_random_fact_with_deck(db, user=normal_user_token_headers[1], deck=deck)
-        data.append(Schedule(fact_id=fact.fact_id,
-                             typed=fact.answer,
+        data.append(Schedule(fact_id=response.json()["unstudied_facts"][idx]["fact_id"],
+                             typed=response.json()["unstudied_facts"][idx]["answer"],
                              response=True,
                              elapsed_milliseconds_text=10,
                              elapsed_milliseconds_answer=10,
                              debug_id=random_lower_string()).dict())
     r = client.put(
-        f"{settings.API_V1_STR}/study/", headers=normal_user_token_headers[0], json=data,
+        f"{settings.API_V1_STR}/study/?studyset_id={response.json()['id']}", headers=normal_user_token_headers[0], json=data,
     )
     assert_success(response=r)
 
