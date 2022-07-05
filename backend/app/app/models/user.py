@@ -69,7 +69,7 @@ class User(Base):
 
         
     @hybrid_property
-    def studyset_expiry_date(self) -> Optional[datetime]:
+    def study_set_expiry_date(self) -> Optional[datetime]:
         db = SessionLocal()
         from app.crud import studyset
         study_set = studyset.find_existing_study_set(db, self)

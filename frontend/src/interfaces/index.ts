@@ -173,6 +173,7 @@ export interface IComponents {
     test_mode: number;
     resume_studyset: boolean;
     in_test_mode: boolean;
+    study_set_expiry_date?: string;
   };
   UserCreate: {
     email: string;
