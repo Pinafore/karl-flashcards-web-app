@@ -185,10 +185,10 @@
       <v-btn class="mx-n3" text x-large @click.stop="goHome">{{ appName }}</v-btn>
       <v-list-item v-show="expiration != null">
         <v-list-item-content v-if="$vuetify.breakpoint.xsOnly" style="padding: 0px">
-          {{ expiration }}
+          Expires: {{ expiration }}
         </v-list-item-content>
         <v-list-item-content v-else>
-          Current Study Set Expires in {{ expiration }}
+          Current Study Set Expires at {{ expiration }}
         </v-list-item-content>
       </v-list-item>
       <!-- <span> Study Set Expires: </span> -->
@@ -254,7 +254,7 @@
     mdiBookInformationVariant,
   } from "@mdi/js";
 
-  import { parseISO, formatDistanceToNow } from "date-fns";
+  import { parseISO, format } from "date-fns";
 
   const routeGuardMain = async (to, _from, next) => {
     if (to.path === "/main") {
@@ -335,13 +335,7 @@
 
     get expiration() {
       if (mainStore.userProfile && mainStore.userProfile.study_set_expiry_date) {
-        return formatDistanceToNow(
-          parseISO(mainStore.userProfile.study_set_expiry_date),
-        )
-          .toLowerCase()
-          .split(" ")
-          .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
-          .join(" ");
+        return format(parseISO(mainStore.userProfile.study_set_expiry_date), "h:mm a");
       } else {
         return null;
       }
