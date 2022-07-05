@@ -11,6 +11,7 @@ from app.schemas import User, Fact, Deck
 class StudySetBase(BaseModel):
     is_test: bool = False
     user_id: int
+    debug_id: Optional[str]
 
 
 class StudySetCreate(StudySetBase):

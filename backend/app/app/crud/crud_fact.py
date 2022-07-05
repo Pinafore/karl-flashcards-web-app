@@ -5,7 +5,7 @@ import time
 from datetime import datetime
 from itertools import islice
 from tempfile import SpooledTemporaryFile
-from typing import List, Union, Dict, Any, Optional
+from typing import List, Tuple, Union, Dict, Any, Optional
 
 import pandas
 import requests
@@ -409,12 +409,10 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         return facts
 
     def create_scheduler_query(self, facts: List[models.Fact], user: models.User):
-        rev_karl_list_start = time.time()
-        scheduler_query = schemas.SchedulerQuery(facts=[schemas.KarlFact.from_orm(fact) for fact in facts],
+        
+        scheduler_query = schemas.SchedulerQuery(facts=[schemas.KarlFactV2.from_orm(fact) for fact in facts],
                                                  env=settings.ENVIRONMENT, repetition_model=user.repetition_model,
                                                  user_id=user.id)
-        eligible_fact_time = time.time() - rev_karl_list_start
-        logger.info("scheduler query time: " + str(eligible_fact_time))
         return scheduler_query
 
     def get_ordered_schedule(
@@ -425,33 +423,22 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             deck_ids: List[int] = None,
             return_limit: Optional[int] = None,
             send_limit: Optional[int] = 1000,
-    ) -> Union[List[models.Fact], requests.exceptions.RequestException, json.decoder.JSONDecodeError]:
+    ) -> Tuple[List[models.Fact], str]:
         filters = schemas.FactSearch(deck_ids=deck_ids, limit=send_limit, randomize=True, studyable=True)
         query = crud.fact.build_facts_query(db=db, user=user, filters=filters)
         eligible_facts = self.get_eligible_facts(query=query, limit=send_limit)
         logger.info("eligible fact length: " + str(len(eligible_facts)))
         if not eligible_facts:
             return []
-        karl_list = []
-        karl_list_start = time.time()
-        for each_card in eligible_facts:
-            karl_list.append(schemas.KarlFact(
-                text=each_card.text,
-                answer=each_card.answer,
-                category=each_card.category,
-                deck_name=each_card.deck.title,
-                deck_id=each_card.deck_id,
-                user_id=user.id,
-                fact_id=each_card.fact_id,
-                repetition_model=user.repetition_model,
-                env=settings.ENVIRONMENT
-            ).dict())
-        eligible_fact_time = time.time() - karl_list_start
-        logger.info("old scheduler query time: " + str(eligible_fact_time))
+        
+        rev_karl_list_start = time.time()
+        schedule_query = self.create_scheduler_query(facts=eligible_facts, user=user)
+        eligible_fact_time = time.time() - rev_karl_list_start
+        logger.info("scheduler query time: " + str(eligible_fact_time))
 
         karl_query_start = time.time()
         try:
-            scheduler_response = requests.post(settings.INTERFACE + "api/karl/schedule", json=karl_list)
+            scheduler_response = requests.post(settings.INTERFACE + "api/karl/schedule_v2", json=schedule_query.dict())
             response_json = scheduler_response.json()
             card_order = response_json["order"]
             rationale = response_json["rationale"]
@@ -484,7 +471,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                 details=details,
             )
             crud.history.create(db=db, obj_in=history_in)
-            return ordered_schedules
+            return ordered_schedules, debug_id
         except requests.exceptions.RequestException as e:
             capture_exception(e)
             raise HTTPException(status_code=555, detail="Connection to scheduler is down")

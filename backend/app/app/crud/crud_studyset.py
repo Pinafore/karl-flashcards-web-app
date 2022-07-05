@@ -86,10 +86,10 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             test_deck = crud.deck.get_test_deck(db)
             decks = [test_deck] if test_deck is not None else []
         else:
-            facts = crud.fact.get_ordered_schedule(db, user=user, deck_ids=deck_ids, return_limit=return_limit,
+            facts, debug_id = crud.fact.get_ordered_schedule(db, user=user, deck_ids=deck_ids, return_limit=return_limit,
                                                    send_limit=send_limit)
         logger.info(facts)
-        db_obj = self.create_with_facts(db, obj_in=schemas.StudySetCreate(is_test=in_test_mode, user_id=user.id),
+        db_obj = self.create_with_facts(db, obj_in=schemas.StudySetCreate(is_test=in_test_mode, user_id=user.id, debug_id=debug_id if debug_id else None),
                                         decks=decks,
                                         facts=facts)
         db.commit()
@@ -155,54 +155,41 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                 details["elapsed_milliseconds_text"] = schedule.elapsed_milliseconds_text
                 details["elapsed_milliseconds_answer"] = schedule.elapsed_milliseconds_answer
             fact = session_fact.fact
-            if fact.deck_id == crud.deck.get_test_deck_id(db):
-                history_in = schemas.HistoryCreate(
+            in_test_mode = fact.deck_id == crud.deck.get_test_deck_id(db) # Could refactor into session fact
+            history_in = schemas.HistoryCreate(
                     time=date_studied,
                     user_id=user.id,
                     fact_id=fact.fact_id,
-                    log_type=schemas.Log.test_study,
+                    log_type=schemas.Log.test_study if in_test_mode else schemas.Log.study,
                     correct=schedule.response,
                     details=details,
                 )
-                history = crud.history.create(db=db, obj_in=history_in)
-            else:
-                history_in = schemas.HistoryCreate(
-                    time=date_studied,
-                    user_id=user.id,
-                    fact_id=fact.fact_id,
-                    log_type=schemas.Log.study,
-                    correct=schedule.response,
-                    details=details
-                )
-                history = crud.history.create(db=db, obj_in=history_in)
-                payload_update = [schemas.KarlFactUpdate(
-                    text=fact.text,
-                    user_id=user.id,
-                    repetition_model=user.repetition_model,
-                    fact_id=fact.fact_id,
-                    history_id=history.id,
-                    category=fact.category,
-                    deck_name=fact.deck.title,
-                    deck_id=fact.deck_id,
-                    answer=fact.answer,
-                    env=settings.ENVIRONMENT,
-                    elapsed_seconds_text=schedule.elapsed_seconds_text,
-                    elapsed_seconds_answer=schedule.elapsed_seconds_answer,
-                    elapsed_milliseconds_text=schedule.elapsed_milliseconds_text,
-                    elapsed_milliseconds_answer=schedule.elapsed_milliseconds_answer,
-                    label=response,
-                    debug_id=schedule.debug_id).dict(exclude_unset=True)]
-                logger.info(payload_update[0])
-                request = requests.post(settings.INTERFACE + "api/karl/update", json=payload_update)
-                logger.info(request.request)
-                if not 200 <= request.status_code < 300:
-                    raise HTTPException(status_code=556, detail="Scheduler malfunction")
+            history = crud.history.create(db=db, obj_in=history_in)
+            payload_update = schemas.UpdateRequestV2(
+                user_id=user.id,
+                fact_id=fact.fact_id,
+                deck_name=fact.deck.title,
+                deck_id=fact.deck_id,
+                label=response,
+                elapsed_milliseconds_text=schedule.elapsed_milliseconds_text,
+                elapsed_milliseconds_answer=schedule.elapsed_milliseconds_answer,
+                studyset_id=session_fact.studyset_id,
+                history_id=history.id,
+                answer=fact.answer,
+                typed=schedule.typed,
+                debug_id=session_fact.studyset.debug_id,
+                test_mode=in_test_mode).dict(exclude_unset=True)
+            request = requests.post(settings.INTERFACE + "api/karl/update_v2", json=payload_update)
+            logger.info(request.request)
+            if not 200 <= request.status_code < 300:
+                raise HTTPException(status_code=556, detail="Scheduler malfunction")
             return history
         except requests.exceptions.RequestException as e:
             capture_exception(e)
             raise HTTPException(status_code=555, detail="Connection to scheduler is down")
         except json.decoder.JSONDecodeError as e:
             capture_exception(e)
+            print(e)
             raise HTTPException(status_code=556, detail="Scheduler malfunction")
 
 

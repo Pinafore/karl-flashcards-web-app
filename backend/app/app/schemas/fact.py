@@ -37,6 +37,9 @@ class KarlFactV2(FactBase):
     deck_name: str
     deck_id: int
 
+    class Config:
+        orm_mode = True
+
 
 class SchedulerQuery(BaseModel):
     facts: List[KarlFactV2]
@@ -44,6 +47,20 @@ class SchedulerQuery(BaseModel):
     env: str
     user_id: int
 
+class UpdateRequestV2(BaseModel):
+    user_id: int
+    fact_id: int
+    deck_name: str
+    deck_id: int
+    label: bool
+    elapsed_milliseconds_text: int
+    elapsed_milliseconds_answer: int
+    history_id: int  # uniquely identifies a study
+    answer: str
+    typed: str
+    studyset_id: str
+    debug_id: Optional[str] # aka schedule_request_id, n/a in test updates
+    test_mode: bool
 
 class KarlFactUpdate(KarlFact):
     elapsed_seconds_text: Optional[int] = None
@@ -53,6 +70,8 @@ class KarlFactUpdate(KarlFact):
     history_id: int
     label: bool
     debug_id: str
+    studyset_id: int
+    test_mode: bool
 
 
 class InternalFactBase(FactBase):
