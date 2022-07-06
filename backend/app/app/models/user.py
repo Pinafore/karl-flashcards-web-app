@@ -58,15 +58,6 @@ class User(Base):
     @hybrid_property
     def decks(self) -> List[Deck]:
         return [deck for deck in self.all_decks if deck.deck_type != DeckType.hidden]  # Test if should be schema
-
-    @hybrid_property
-    def resume_studyset(self) -> bool:
-        db = SessionLocal()
-        from app.crud import studyset
-        study_set = studyset.find_existing_study_set(db, self)
-        db.close()
-        return study_set is not None
-
         
     @hybrid_property
     def study_set_expiry_date(self) -> Optional[datetime]:

@@ -66,10 +66,6 @@ class UserInDBBase(UserBase):
 class User(UserInDBBase):
     default_deck: Deck
     decks: List[Deck] = []
-    # Coudl refactor to return a study set object, but obstacle is circular references
-    study_set_expiry_date: Optional[datetime]
-    resume_studyset: bool
-    in_test_mode: bool
 
     class Config:
         orm_mode = True
@@ -86,6 +82,13 @@ class User(UserInDBBase):
     @classmethod
     def _decompose_class(cls: Type['Model'], obj: Any) -> GetterDict:
         return User.CustomGetterDict(obj)
+
+
+# Additional properties to return via API
+class UserWithStudySet(UserInDBBase):
+    # Could refactor to return a study set object, but obstacle is circular references
+    study_set_expiry_date: Optional[datetime]
+    in_test_mode: bool
 
 
 # Additional properties stored in DB

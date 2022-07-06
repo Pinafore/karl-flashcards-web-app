@@ -92,7 +92,7 @@ def update_user_me(
     return user
 
 
-@router.get("/me", response_model=schemas.User)
+@router.get("/me", response_model=schemas.UserWithStudySet)
 def read_user_me(
         db: Session = Depends(deps.get_db),  # noqa
         current_user: models.User = Depends(deps.get_current_active_user),
