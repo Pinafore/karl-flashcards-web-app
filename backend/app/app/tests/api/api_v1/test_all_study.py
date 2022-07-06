@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Tuple
 
 from app.core.config import settings
 from app.models import User
@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 
 def test_get_study_set_no_deck(
-        client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+        client: TestClient, normal_user_token_headers: Tuple[Dict[str, str], User], db: Session
 ) -> None:
     # fact = create_random_fact(db, normal_user_token_headers[1])
     response = client.get(
@@ -21,7 +21,7 @@ def test_get_study_set_no_deck(
 
 
 def test_get_study_set_with_deck(
-        client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+        client: TestClient, normal_user_token_headers: Tuple[Dict[str, str], User], db: Session
 ) -> None:
     deck = create_random_deck(db, user=normal_user_token_headers[1])
     facts = []
@@ -34,7 +34,7 @@ def test_get_study_set_with_deck(
 
 # Fix update schedule set test!
 def test_update_schedule_set(
-        client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+        client: TestClient, normal_user_token_headers: Tuple[Dict[str, str], User], db: Session
 ) -> None:
     deck = create_random_deck(db, user=normal_user_token_headers[1])
     for _ in range(20):
@@ -58,6 +58,7 @@ def test_update_schedule_set(
                              elapsed_milliseconds_text=10,
                              elapsed_milliseconds_answer=10,
                              debug_id=random_lower_string()).dict())
+    print(response.json()['id'])
     r = client.put(
         f"{settings.API_V1_STR}/study/?studyset_id={response.json()['id']}", headers=normal_user_token_headers[0], json=data,
     )
@@ -65,7 +66,7 @@ def test_update_schedule_set(
 
 
 def test_evaluate_answer(
-        client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+        client: TestClient, normal_user_token_headers: Tuple[Dict[str, str], User], db: Session
 ) -> None:
     deck = create_random_deck(db, user=normal_user_token_headers[1])
     fact = create_random_fact_with_deck(db, user=normal_user_token_headers[1], deck=deck)

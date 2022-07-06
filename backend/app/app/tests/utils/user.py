@@ -1,5 +1,5 @@
 import logging
-from typing import Dict
+from typing import Dict, Tuple
 
 from app import crud
 from app.core.config import settings
@@ -35,7 +35,7 @@ def create_random_user(db: Session) -> User:
 
 def authentication_token_from_email(
         *, client: TestClient, email: str, db: Session
-) -> (Dict[str, str], User):
+) -> Tuple[Dict[str, str], User]:
     """
     Return a valid token for the user with given email.
 

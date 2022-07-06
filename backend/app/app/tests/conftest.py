@@ -1,4 +1,4 @@
-from typing import Dict, Generator
+from typing import Dict, Generator, Tuple
 
 import pytest
 from app.core.config import settings
@@ -28,7 +28,7 @@ def superuser_token_headers(client: TestClient) -> Dict[str, str]:
 
 
 @pytest.fixture(scope="module")
-def normal_user_token_headers(client: TestClient, db: Session) -> (Dict[str, str], User):
+def normal_user_token_headers(client: TestClient, db: Session) -> Tuple[Dict[str, str], User]:
     return authentication_token_from_email(
         client=client, email=settings.EMAIL_TEST_USER, db=db
     )
