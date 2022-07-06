@@ -84,11 +84,7 @@
     }
 
     get resumeAvail() {
-      if (mainStore.userProfile) {
-        return mainStore.userProfile.resume_studyset;
-      } else {
-        return false;
-      }
+      return mainStore.userProfile && mainStore.userProfile.study_set_expiry_date;
     }
 
     public checkAllDecks() {

@@ -45,7 +45,9 @@
             <v-icon>mdi-lightbulb-on</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title v-if="resumeAvail">Resume Study</v-list-item-title>
+            <v-list-item-title v-if="expiration != null"
+              >Resume Study</v-list-item-title
+            >
             <v-list-item-title v-else>Quick Study (All)</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
@@ -191,8 +193,6 @@
           Current Study Set Expires at {{ expiration }}
         </v-list-item-content>
       </v-list-item>
-      <!-- <span> Study Set Expires: </span> -->
-      <!-- <v-spacer></v-spacer> -->
       <v-list-item class="justify-end px-2">
         <v-icon>mdi-weather-sunny</v-icon>
         <v-list-item-action>
@@ -291,13 +291,13 @@
       mainStore.setDashboardShowDrawer(value);
     }
 
-    get resumeAvail() {
-      if (mainStore.userProfile) {
-        return mainStore.userProfile.resume_studyset;
-      } else {
-        return false;
-      }
-    }
+    // get resumeAvail() {
+    //   if (this.expiration() ) {
+    //     return mainStore.userProfile.resume_studyset;
+    //   } else {
+    //     return false;
+    //   }
+    // }
 
     get darkMode() {
       this.$vuetify.theme.dark = mainStore.userProfile?.dark_mode ?? false;

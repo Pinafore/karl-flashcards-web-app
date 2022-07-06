@@ -85,6 +85,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             facts = crud.fact.get_test_facts(db, user=user)
             test_deck = crud.deck.get_test_deck(db)
             decks = [test_deck] if test_deck is not None else []
+            debug_id = None
         else:
             facts, debug_id = crud.fact.get_ordered_schedule(db, user=user, deck_ids=deck_ids, return_limit=return_limit,
                                                    send_limit=send_limit)
@@ -141,11 +142,12 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         try:
             response = schedule.response
             date_studied = datetime.now(timezone('UTC')).isoformat()
+            debug_id = session_fact.studyset.debug_id
             details = {
                 "study_system": user.repetition_model,
                 "typed": schedule.typed,
                 "response": schedule.response,
-                "debug_id": schedule.debug_id,
+                "debug_id": debug_id,
                 "recall_target": user.recall_target,
             }
             if schedule.elapsed_seconds_text:
@@ -177,10 +179,10 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                 history_id=history.id,
                 answer=fact.answer,
                 typed=schedule.typed,
-                debug_id=session_fact.studyset.debug_id,
+                debug_id=debug_id,
                 test_mode=in_test_mode).dict(exclude_unset=True)
             request = requests.post(settings.INTERFACE + "api/karl/update_v2", json=payload_update)
-            logger.info(request.request)
+            logger.info(request.content)
             if not 200 <= request.status_code < 300:
                 raise HTTPException(status_code=556, detail="Scheduler malfunction")
             return history
@@ -189,7 +191,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             raise HTTPException(status_code=555, detail="Connection to scheduler is down")
         except json.decoder.JSONDecodeError as e:
             capture_exception(e)
-            print(e)
+            logger.info(e)
             raise HTTPException(status_code=556, detail="Scheduler malfunction")
 
 

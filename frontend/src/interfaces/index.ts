@@ -59,7 +59,6 @@ export interface IComponents {
     reported?: boolean;
     permission?: Permission;
     reports?: IComponents["FactReported"][];
-    debug_id?: string;
   };
   FactCreate: {
     text: string;
@@ -130,7 +129,6 @@ export interface IComponents {
   Msg: { msg: string };
   Schedule: {
     fact_id: number;
-    debug_id: string;
     typed: string;
     response: boolean;
     elapsed_milliseconds_text: number;
@@ -171,7 +169,7 @@ export interface IComponents {
     pwa_tip: boolean;
     recall_target: number;
     test_mode: number;
-    resume_studyset: boolean;
+    // resume_studyset: boolean;
     in_test_mode: boolean;
     study_set_expiry_date?: string;
   };
