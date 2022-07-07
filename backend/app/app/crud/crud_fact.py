@@ -422,7 +422,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
             user: models.User,
             deck_ids: List[int] = None,
             return_limit: Optional[int] = None,
-            send_limit: Optional[int] = 1000,
+            send_limit: Optional[int] = None,
     ) -> Tuple[List[models.Fact], str]:
         filters = schemas.FactSearch(deck_ids=deck_ids, limit=send_limit, randomize=True, studyable=True)
         query = crud.fact.build_facts_query(db=db, user=user, filters=filters)
