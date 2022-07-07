@@ -142,7 +142,7 @@ class Fact(FactInDBBase):
     suspended: Optional[bool] = None
     permission: Optional[Permission] = None
     reports: Optional[List[FactReported]] = None
-    debug_id: Optional[str] = None
+    # debug_id: Optional[str] = None
 
     class Config:
         orm_mode = True

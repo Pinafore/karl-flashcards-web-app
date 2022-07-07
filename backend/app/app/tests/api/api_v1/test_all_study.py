@@ -49,15 +49,13 @@ def test_update_schedule_set(
                              typed=random_lower_string(),
                              response=False,
                              elapsed_milliseconds_text=10,
-                             elapsed_milliseconds_answer=10,
-                             debug_id=random_lower_string()).dict())
+                             elapsed_milliseconds_answer=10).dict())
     for idx in range(2):
         data.append(Schedule(fact_id=response.json()["unstudied_facts"][idx]["fact_id"],
                              typed=response.json()["unstudied_facts"][idx]["answer"],
                              response=True,
                              elapsed_milliseconds_text=10,
-                             elapsed_milliseconds_answer=10,
-                             debug_id=random_lower_string()).dict())
+                             elapsed_milliseconds_answer=10).dict())
     print(response.json()['id'])
     r = client.put(
         f"{settings.API_V1_STR}/study/?studyset_id={response.json()['id']}", headers=normal_user_token_headers[0], json=data,

@@ -8,7 +8,6 @@ from app.schemas import History
 
 class Schedule(BaseModel):
     fact_id: int
-    debug_id: str # probably obsolete
     typed: str
     response: bool
     elapsed_seconds_text: Optional[int] = None
