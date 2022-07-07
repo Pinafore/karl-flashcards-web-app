@@ -85,10 +85,10 @@ class User(UserInDBBase):
 
 
 # Additional properties to return via API
-class UserWithStudySet(UserInDBBase):
+class UserWithStudySet(User):
     # Could refactor to return a study set object, but obstacle is circular references
     study_set_expiry_date: Optional[datetime]
-    in_test_mode: bool
+    # in_test_mode: bool
 
 
 # Additional properties stored in DB

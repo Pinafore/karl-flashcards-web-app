@@ -61,25 +61,9 @@ class User(Base):
         
     @hybrid_property
     def study_set_expiry_date(self) -> Optional[datetime]:
-        db = SessionLocal()
-        from app.crud import studyset
-        study_set = studyset.find_existing_study_set(db, self)
-        db.close()
-        return study_set.expiry_date if study_set is not None else None
+        # db = SessionLocal()
 
-    @hybrid_property
-    def in_test_mode(self) -> bool:
-        db = SessionLocal()
+        from app.api.deps import get_db
         from app.crud import studyset
-        study_set = studyset.find_last_test_set(db, self)
-        if study_set is None:
-            return studyset.completed_sets(db, self) > settings.TEST_MODE_FIRST_TRIGGER_SESSIONS
-        # while this most recent test set could be expired, as long as it's not completed, user is still in test mode
-        if not study_set.completed:
-            return True
-        over_days_trigger = (study_set.create_date + timedelta(days=settings.TEST_MODE_TRIGGER_DAYS) > datetime.now(timezone('UTC')))
-        over_sessions_trigger = studyset.sets_since_last_test(db, last_test_set=study_set, user=self)
-        db.close()
-        return over_days_trigger or over_sessions_trigger
-        # print([session.create_date for session in self.sessions])
-        # return True if study_set.expired else False
+        study_set = studyset.find_existing_study_set(next(get_db()), self)
+        return study_set.expiry_date if study_set is not None else None

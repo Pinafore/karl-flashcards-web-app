@@ -14,6 +14,7 @@ from pytz import timezone
 from datetime import datetime
 from sentry_sdk import capture_exception
 from sqlalchemy.sql.expression import true
+from datetime import datetime, timedelta
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -75,7 +76,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                 decks.append(deck)
         uncompleted_last_set = self.find_existing_study_set(db, user)
         # Return the uncompleted last set if it exists and the user has not force-requested a new set
-        in_test_mode = user.in_test_mode
+        in_test_mode = self.in_test_mode(db, user=user)
         if uncompleted_last_set:
             if force_new and not in_test_mode:
                 self.mark_retired(db, db_obj=uncompleted_last_set)
@@ -157,7 +158,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                 details["elapsed_milliseconds_text"] = schedule.elapsed_milliseconds_text
                 details["elapsed_milliseconds_answer"] = schedule.elapsed_milliseconds_answer
             fact = session_fact.fact
-            in_test_mode = fact.deck_id == crud.deck.get_test_deck_id(db) # Could refactor into session fact
+            in_test_mode = fact.deck_id == crud.deck.get_test_deck_id(db) # Could refactor into session fact field
             history_in = schemas.HistoryCreate(
                     time=date_studied,
                     user_id=user.id,
@@ -181,6 +182,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                 typed=schedule.typed,
                 debug_id=debug_id,
                 test_mode=in_test_mode).dict(exclude_unset=True)
+            logger.info(payload_update)
             request = requests.post(settings.INTERFACE + "api/karl/update_v2", json=payload_update)
             logger.info(request.content)
             if not 200 <= request.status_code < 300:
@@ -194,5 +196,20 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             logger.info(e)
             raise HTTPException(status_code=556, detail="Scheduler malfunction")
 
+    def in_test_mode(
+            self, db: Session, *, user: models.User
+    ) -> models.History:
+        study_set = studyset.find_last_test_set(db, user)
+        if study_set is None:
+            return studyset.completed_sets(db, user) > settings.TEST_MODE_FIRST_TRIGGER_SESSIONS
+        # while this most recent test set could be expired, as long as it's not completed, user is still in test mode
+        if not study_set.completed:
+            return True
+        over_days_trigger = (study_set.create_date + timedelta(days=settings.TEST_MODE_TRIGGER_DAYS) > datetime.now(timezone('UTC')))
+        over_sessions_trigger = studyset.sets_since_last_test(db, last_test_set=study_set, user=user)
+        logger.info("In Test Mode: ")
+        logger.info(over_days_trigger)
+        logger.info(over_sessions_trigger)
+        return over_days_trigger or over_sessions_trigger
 
 studyset = CRUDStudySet(models.StudySet)
