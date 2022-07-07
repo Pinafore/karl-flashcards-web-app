@@ -288,6 +288,7 @@ export default class StudyModule extends VuexModule {
       }
       mainStore.setConnectionError(false);
       mainStore.setSchedulerError(false);
+      await mainStore.getUserProfile();
     } catch (error) {
       console.log(error);
       await mainStore.checkApiError(error);
