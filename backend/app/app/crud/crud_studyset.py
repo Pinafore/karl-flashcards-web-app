@@ -206,7 +206,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         if not study_set.completed:
             return True
         over_days_trigger = (study_set.create_date + timedelta(days=settings.TEST_MODE_TRIGGER_DAYS) > datetime.now(timezone('UTC')))
-        over_sessions_trigger = studyset.sets_since_last_test(db, last_test_set=study_set, user=user)
+        over_sessions_trigger = studyset.sets_since_last_test(db, last_test_set=study_set, user=user) > settings.TEST_MODE_TRIGGER_SESSIONS
         logger.info("In Test Mode: ")
         logger.info(over_days_trigger)
         logger.info(over_sessions_trigger)
