@@ -16,3 +16,4 @@ from .file_props import FileProps
 from .rank_type import RankType
 from .leaderboard import LeaderboardUser, Leaderboard, DataTypeHeader
 from .studyset import StudySet, StudySetCreate, StudySetUpdate
+from .set_parameters_schema import SetParametersSchema
