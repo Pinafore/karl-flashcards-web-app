@@ -5,6 +5,7 @@ class Log(str, Enum):
     browser = "browser"
     get_facts = "get_facts"
     update_fact = "update_fact"
+    update_user = "update_user"
     study = "study"
     suspend = "suspend"
     delete = "delete"

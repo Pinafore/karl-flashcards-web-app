@@ -7,7 +7,7 @@ import json
 from pytz import timezone
 from sentry_sdk import capture_exception
 
-from app import crud
+from app import crud, schemas
 from app.core.config import settings
 from app.core.security import get_password_hash, verify_password
 from app.crud.base import CRUDBase
@@ -104,6 +104,15 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             update_data["hashed_password"] = hashed_password
         if obj_in.recall_target and update_data["recall_target"]:
             set_user_settings(user=db_obj, new_settings=obj_in)
+        
+        history_in = schemas.HistoryCreate(
+            time=datetime.now(timezone('UTC')),
+            user_id=db_obj.id,
+            log_type=schemas.Log.update_user,
+            details={"update": update_data, "study_system": db_obj.repetition_model, "recall_target": db_obj.recall_target}
+        )
+        crud.history.create(db=db, obj_in=history_in)
+        
         return super().update(db, db_obj=db_obj, obj_in=update_data)
 
     def authenticate(self, db: Session, *, email: str, username: str, password: str) -> Optional[User]:
