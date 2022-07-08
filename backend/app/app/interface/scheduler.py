@@ -20,7 +20,7 @@ def set_user_settings(user: models.user, new_settings: schemas.UserUpdate) -> Un
     params = schemas.SetParametersSchema(env=settings.ENVIRONMENT, recall_target=new_settings.recall_target / 100, repetition_model=new_settings.repetition_model)
     parameters = {'user_id': user.id, 'params': params.dict()}
     try:
-        request = requests.put(f"{settings.INTERFACE}api/karl/set_params/", json=parameters)
+        request = requests.put(f"{settings.INTERFACE}api/karl/set_params?user_id={user.id}", json=params.dict())
         logger.info(request.url)
         return request.status_code
     except requests.exceptions.RequestException as e:
