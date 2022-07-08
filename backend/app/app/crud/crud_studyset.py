@@ -145,6 +145,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             date_studied = datetime.now(timezone('UTC')).isoformat()
             debug_id = session_fact.studyset.debug_id
             details = {
+                "studyset_id": session_fact.studyset_id,
                 "study_system": user.repetition_model,
                 "typed": schedule.typed,
                 "response": schedule.response,
