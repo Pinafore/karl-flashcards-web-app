@@ -106,7 +106,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             set_user_settings(user=db_obj, new_settings=obj_in)
 
             # Need to retire current study set when settings change
-            uncompleted_last_set = crud.studyset.find_existing_study_set(db, user)
+            uncompleted_last_set = crud.studyset.find_existing_study_set(db, db_obj)
             if uncompleted_last_set:
                 crud.studyset.mark_retired(db, db_obj=uncompleted_last_set)
         
