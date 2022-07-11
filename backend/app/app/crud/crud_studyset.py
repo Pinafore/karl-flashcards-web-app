@@ -1,5 +1,8 @@
 import logging
-from typing import List, Optional, Union, Any
+from typing import List, Optional, Union, Any, Tuple
+import time
+import math
+from itertools import islice
 
 import requests
 import json
@@ -14,7 +17,10 @@ from pytz import timezone
 from datetime import datetime
 from sentry_sdk import capture_exception
 from sqlalchemy.sql.expression import true
+from sqlalchemy import and_, func
 from datetime import datetime, timedelta
+from fastapi import HTTPException
+from sentry_sdk import capture_exception
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -78,23 +84,22 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         # Return the uncompleted last set if it exists and the user has not force-requested a new set
         in_test_mode = self.in_test_mode(db, user=user)
         if uncompleted_last_set:
-            if force_new and not in_test_mode:
+            if force_new and not uncompleted_last_set.is_test:
+                # Marks the study set as completed even though it hasn't been finished, due to override
                 self.mark_retired(db, db_obj=uncompleted_last_set)
             else:
                 return uncompleted_last_set
         if in_test_mode:
-            facts = crud.fact.get_test_facts(db, user=user)
-            test_deck = crud.deck.get_test_deck(db)
-            decks = [test_deck] if test_deck is not None else []
-            debug_id = None
+            db_obj = self.create_new_test_study_set(db, user=user)
         else:
-            facts, debug_id = crud.fact.get_ordered_schedule(db, user=user, deck_ids=deck_ids, return_limit=return_limit,
+            db_obj = self.create_new_study_set(db, user=user, decks=decks, deck_ids=deck_ids, return_limit=return_limit,
                                                    send_limit=send_limit)
-        logger.info(facts)
-        db_obj = self.create_with_facts(db, obj_in=schemas.StudySetCreate(is_test=in_test_mode, user_id=user.id, debug_id=debug_id if debug_id else None),
-                                        decks=decks,
-                                        facts=facts)
-        db.commit()
+        # db_obj = self.create_with_facts(db, obj_in=study_set_create,
+        #                                 decks=decks,
+        #                                 facts=facts)
+        # db_obj = self.create_with_facts(db, obj_in=schemas.StudySetCreate(is_test=in_test_mode, user_id=user.id, debug_id=debug_id if debug_id else None),
+        #                                 decks=decks,
+        #                                 facts=facts)
         return db_obj
 
     def find_existing_study_set(self, db: Session, user: models.User) -> Optional[models.StudySet]:
@@ -104,6 +109,119 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             return studyset
         else:
             return None
+    
+    def create_new_test_study_set(self, db: Session, *, user: models.User, return_limit: int = settings.TEST_MODE_PER_ROUND) -> models.StudySet:
+        # Get facts that have not been studied before
+        logger.info(crud.deck.get_test_deck_id(db=db))
+        test_deck_id = crud.deck.get_test_deck_id(db=db)
+        if test_deck_id is None:
+            raise HTTPException(560, detail="Test Deck ID Not Found")
+
+        init_new_facts_query = db.query(models.Fact).filter(models.Fact.deck_id == test_deck_id)
+        new_facts = crud.sqlalchemy_helper.filter_only_new_facts(query=init_new_facts_query, user_id=user.id, log_type=schemas.Log.test_study).order_by(func.random()).limit(return_limit).all()
+        logger.info("New facts:" + str(new_facts))
+
+        # Get facts that have been previously studied before, but were answered incorrectly
+        init_old_facts_query = db.query(models.Fact).filter(models.Fact.deck_id == test_deck_id)
+        old_facts =  crud.sqlalchemy_helper.filter_only_incorrectly_reviewed_facts(query=init_new_facts_query, user_id=user.id, log_type=schemas.Log.test_study).order_by(func.random()).limit(return_limit).all()
+        logger.info("Old facts:" + str(old_facts))
+
+        facts = crud.sqlalchemy_helper.combine_two_fact_sets(new_facts=new_facts, old_facts=old_facts, return_limit=return_limit)
+
+        history_in = schemas.HistoryCreate(
+            time=datetime.now(timezone('UTC')).isoformat(),
+            user_id=user.id,
+            log_type=schemas.Log.get_test_facts,
+            details={
+                "recall_target": user.recall_target,
+            }
+        )
+        crud.history.create(db=db, obj_in=history_in)
+        test_deck = crud.deck.get_test_deck(db)
+        decks = [test_deck] if test_deck is not None else []
+        study_set = self.create_with_facts(db, obj_in=schemas.StudySetCreate(is_test=True, user_id=user.id),
+                                        decks=decks,
+                                        facts=facts)
+        db.commit()
+        return study_set
+
+    def create_scheduler_query(self, facts: List[models.Fact], user: models.User):
+        
+        scheduler_query = schemas.SchedulerQuery(facts=[schemas.KarlFactV2.from_orm(fact) for fact in facts],
+                                                 env=settings.ENVIRONMENT, repetition_model=user.repetition_model,
+                                                 user_id=user.id)
+        return scheduler_query
+
+    def create_new_study_set(
+            self,
+            db: Session,
+            *,
+            user: models.User,
+            decks: List[models.Deck],
+            deck_ids: List[int] = None,
+            return_limit: Optional[int] = None,
+            send_limit: Optional[int] = None,
+    ) -> Tuple[List[models.Fact], str]:
+        filters = schemas.FactSearch(deck_ids=deck_ids, limit=send_limit, randomize=True, studyable=True)
+        query = crud.fact.build_facts_query(db=db, user=user, filters=filters)
+        eligible_facts = crud.fact.get_eligible_facts(query=query, limit=send_limit)
+        logger.info("eligible fact length: " + str(len(eligible_facts)))
+        if not eligible_facts:
+            return []
+        
+        rev_karl_list_start = time.time()
+        schedule_query = self.create_scheduler_query(facts=eligible_facts, user=user)
+        eligible_fact_time = time.time() - rev_karl_list_start
+        logger.info("scheduler query time: " + str(eligible_fact_time))
+
+        karl_query_start = time.time()
+        try:
+            scheduler_response = requests.post(settings.INTERFACE + "api/karl/schedule_v2", json=schedule_query.dict())
+            response_json = scheduler_response.json()
+            card_order = response_json["order"]
+            rationale = response_json["rationale"]
+            debug_id = response_json["debug_id"]
+
+            query_time = time.time() - karl_query_start
+            logger.info(scheduler_response.request)
+            logger.info("query time: " + str(query_time))
+
+            if rationale == "<p>no fact received</p>":
+                raise HTTPException(status_code=558, detail="No Facts Received From Scheduler")
+            # Generator idea adapted from https://stackoverflow.com/a/42393595
+            order_generator = (eligible_facts[x] for x in card_order)  # eligible facts instead?
+            ordered_schedules = list(islice(order_generator, return_limit))
+            logger.info("ordered schedules" + str(ordered_schedules))
+            logger.info("debug id: " + debug_id)
+            # Modify to save all facts in session
+            details = {
+                "study_system": user.repetition_model,
+                "first_fact": schemas.Fact.from_orm(ordered_schedules[0]) if len(ordered_schedules) != 0 else "empty",
+                "eligible_fact_time": query_time,
+                "scheduler_query_time": eligible_fact_time,
+                "debug_id": debug_id,
+                "recall_target": user.recall_target,
+            }
+            history_in = schemas.HistoryCreate(
+                time=datetime.now(timezone('UTC')).isoformat(),
+                user_id=user.id,
+                log_type=schemas.Log.get_facts,
+                details=details,
+            )
+            crud.history.create(db=db, obj_in=history_in)
+
+
+            study_set = self.create_with_facts(db, obj_in=schemas.StudySetCreate(is_test=False, user_id=user.id, debug_id=debug_id),
+                                        decks=decks,
+                                        facts=ordered_schedules)
+            db.commit()
+            return study_set
+        except requests.exceptions.RequestException as e:
+            capture_exception(e)
+            raise HTTPException(status_code=555, detail="Connection to scheduler is down")
+        except json.decoder.JSONDecodeError as e:
+            capture_exception(e)
+            raise HTTPException(status_code=556, detail="Scheduler malfunction")
     
     def find_last_test_set(self, db: Session, user: models.User) -> Optional[models.StudySet]:
         studyset: models.StudySet = db.query(models.StudySet).filter(models.StudySet.user_id == user.id).filter(models.StudySet.is_test == true()).order_by(
@@ -200,6 +318,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
     def in_test_mode(
             self, db: Session, *, user: models.User
     ) -> models.History:
+        return True
         study_set = studyset.find_last_test_set(db, user)
         if study_set is None:
             return studyset.completed_sets(db, user) > settings.TEST_MODE_FIRST_TRIGGER_SESSIONS

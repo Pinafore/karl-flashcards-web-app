@@ -1,24 +1,18 @@
 import json
 import logging
-import math
 import time
 from datetime import datetime
-from itertools import islice
 from tempfile import SpooledTemporaryFile
-from typing import List, Tuple, Union, Dict, Any, Optional
+from typing import List, Union, Dict, Any, Optional
 
 import pandas
-import requests
-from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from pytz import timezone
-from sentry_sdk import capture_exception
-from sqlalchemy import and_, not_, func
+from sqlalchemy import and_, func
 from sqlalchemy.orm import Session, Query
+from app.crud import sqlalchemy_helper
 
 from app import crud, models, schemas
-from app.crud import sqlalchemy_helper
-from app.core.config import settings
 from app.crud.base import CRUDBase
 from app.schemas import Log, DeckType
 
@@ -353,131 +347,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         logger.info("overall time facts: " + str(overall_total_time))
         return facts
 
-    def get_test_facts(self, db: Session, *, user: models.User, return_limit: Optional[int] = settings.TEST_MODE_PER_ROUND) -> List[models.Fact]:
-        # Get facts that have not been studied before
-        logger.info(crud.deck.get_test_deck_id(db=db))
-        test_deck_id = crud.deck.get_test_deck_id(db=db)
-        if test_deck_id is None:
-            raise HTTPException(560, detail="Test Deck ID Not Found")
-
-        logger.info(db.query(self.model).filter(models.Fact.deck_id == test_deck_id).all())
-        new_facts = db.query(self.model) \
-            .filter(models.Fact.deck_id == test_deck_id).outerjoin(
-            models.History, and_(
-                models.Fact.fact_id == models.History.fact_id,
-                models.History.user_id == user.id,
-                models.History.log_type == Log.test_study
-            )).filter(
-            models.History.id == None).order_by(func.random()).limit(return_limit).all()
-        logger.info("New facts:" + str(new_facts))
-
-        # Get facts that have been previously studied before, but were answered incorrectly
-        old_facts = db.query(self.model) \
-            .filter(models.Fact.deck_id == test_deck_id).join(
-            models.History, and_(
-                models.Fact.fact_id == models.History.fact_id,
-                models.History.user_id == user.id,
-                models.History.log_type == Log.test_study,
-                models.History.correct == False)).order_by(func.random()).limit(return_limit).all()
-        logger.info("Old facts:" + str(old_facts))
-
-        len_new_facts = len(new_facts)
-        len_old_facts = len(old_facts)
-        if return_limit:
-            lower_lim, upper_lim = math.floor(return_limit / 2), math.ceil(return_limit / 2)
-            if len_new_facts >= upper_lim and len_old_facts >= upper_lim:
-                facts = new_facts[:lower_lim] + old_facts[:upper_lim]
-            elif len_new_facts < upper_lim:
-                facts = new_facts + old_facts[:return_limit - len_new_facts]
-            elif len_old_facts < upper_lim:
-                facts = old_facts + new_facts[:return_limit - len_old_facts]
-            else:
-                raise HTTPException(559, detail="Test Set Creation Error")
-        else:
-            logger.info("Test Set Should Always Be Above 20: ", len_old_facts + len_new_facts)
-            facts = old_facts + new_facts
-
-        history_in = schemas.HistoryCreate(
-            time=datetime.now(timezone('UTC')).isoformat(),
-            user_id=user.id,
-            log_type=schemas.Log.get_test_facts,
-            details={
-                "recall_target": user.recall_target,
-            }
-        )
-        crud.history.create(db=db, obj_in=history_in)
-        return facts
-
-    def create_scheduler_query(self, facts: List[models.Fact], user: models.User):
-        
-        scheduler_query = schemas.SchedulerQuery(facts=[schemas.KarlFactV2.from_orm(fact) for fact in facts],
-                                                 env=settings.ENVIRONMENT, repetition_model=user.repetition_model,
-                                                 user_id=user.id)
-        return scheduler_query
-
-    def get_ordered_schedule(
-            self,
-            db: Session,
-            *,
-            user: models.User,
-            deck_ids: List[int] = None,
-            return_limit: Optional[int] = None,
-            send_limit: Optional[int] = None,
-    ) -> Tuple[List[models.Fact], str]:
-        filters = schemas.FactSearch(deck_ids=deck_ids, limit=send_limit, randomize=True, studyable=True)
-        query = crud.fact.build_facts_query(db=db, user=user, filters=filters)
-        eligible_facts = self.get_eligible_facts(query=query, limit=send_limit)
-        logger.info("eligible fact length: " + str(len(eligible_facts)))
-        if not eligible_facts:
-            return []
-        
-        rev_karl_list_start = time.time()
-        schedule_query = self.create_scheduler_query(facts=eligible_facts, user=user)
-        eligible_fact_time = time.time() - rev_karl_list_start
-        logger.info("scheduler query time: " + str(eligible_fact_time))
-
-        karl_query_start = time.time()
-        try:
-            scheduler_response = requests.post(settings.INTERFACE + "api/karl/schedule_v2", json=schedule_query.dict())
-            response_json = scheduler_response.json()
-            card_order = response_json["order"]
-            rationale = response_json["rationale"]
-            debug_id = response_json["debug_id"]
-
-            query_time = time.time() - karl_query_start
-            logger.info(scheduler_response.request)
-            logger.info("query time: " + str(query_time))
-
-            if rationale == "<p>no fact received</p>":
-                raise HTTPException(status_code=558, detail="No Facts Received From Scheduler")
-            # Generator idea adapted from https://stackoverflow.com/a/42393595
-            order_generator = (eligible_facts[x] for x in card_order)  # eligible facts instead?
-            ordered_schedules = list(islice(order_generator, return_limit))
-            logger.info("ordered schedules" + str(ordered_schedules))
-            logger.info("debug id: " + debug_id)
-            # Modify to save all facts in session
-            details = {
-                "study_system": user.repetition_model,
-                "first_fact": schemas.Fact.from_orm(ordered_schedules[0]) if len(ordered_schedules) != 0 else "empty",
-                "eligible_fact_time": query_time,
-                "scheduler_query_time": eligible_fact_time,
-                "debug_id": debug_id,
-                "recall_target": user.recall_target,
-            }
-            history_in = schemas.HistoryCreate(
-                time=datetime.now(timezone('UTC')).isoformat(),
-                user_id=user.id,
-                log_type=schemas.Log.get_facts,
-                details=details,
-            )
-            crud.history.create(db=db, obj_in=history_in)
-            return ordered_schedules, debug_id
-        except requests.exceptions.RequestException as e:
-            capture_exception(e)
-            raise HTTPException(status_code=555, detail="Connection to scheduler is down")
-        except json.decoder.JSONDecodeError as e:
-            capture_exception(e)
-            raise HTTPException(status_code=556, detail="Scheduler malfunction")
+    
 
     def load_json_facts(self, db: Session, file: SpooledTemporaryFile, user: models.User) -> None:
         count = 0

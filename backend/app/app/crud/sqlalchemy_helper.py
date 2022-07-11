@@ -1,10 +1,15 @@
+import math
 from typing import List, Optional
+from fastapi import HTTPException
 
-from sqlalchemy import Column, func, not_
+from sqlalchemy import Column, and_, func, not_
 from sqlalchemy.orm import query
 from app import crud, models, schemas
 from app.core.config import settings
 
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def filter_deck_ids(query: query, deck_ids: Optional[List[int]]):
     return query.filter(models.Fact.deck_id.in_(deck_ids)) if deck_ids else query
@@ -31,5 +36,33 @@ def filter_marked(query: query, marked: Optional[bool], user_id: int):
             return query.filter(not_(models.Fact.markers.any(id=user_id)))
     return query
 
+def filter_only_new_facts(query: query, user_id: int, log_type: schemas.Log):
+    return query.outerjoin(
+            models.History, and_(
+                models.Fact.fact_id == models.History.fact_id,
+                models.History.user_id == user_id,
+                models.History.log_type == log_type
+            )).filter(
+            models.History.id == None)
+
+def filter_only_incorrectly_reviewed_facts(query: query, user_id: int, log_type: schemas.Log):
+    return query.join(
+            models.History, and_(
+                models.Fact.fact_id == models.History.fact_id,
+                models.History.user_id == user_id,
+                models.History.log_type == schemas.Log.test_study,
+                models.History.correct == False))
 # def is_test_deck(deck_id: int):
 #     return deck_id == settings.TEST_DECK_ID
+
+def combine_two_fact_sets(new_facts: List[models.Fact], old_facts: List[models.Fact], return_limit: int):
+    len_new_facts = len(new_facts)
+    len_old_facts = len(old_facts)
+    lower_lim, upper_lim = math.floor(return_limit / 2), math.ceil(return_limit / 2)
+    if len_new_facts >= upper_lim and len_old_facts >= upper_lim:
+        facts = new_facts[:lower_lim] + old_facts[:upper_lim]
+    elif len_new_facts < upper_lim:
+        facts = new_facts + old_facts[:return_limit - len_new_facts]
+    elif len_old_facts < upper_lim:
+        facts = old_facts + new_facts[:return_limit - len_old_facts]
+    return facts
