@@ -14,7 +14,7 @@
       <v-card-actions class="px-0 px-sm-auto">
         <v-btn v-show="!checkAllDecks()" @click="deleteDecks">Delete</v-btn>
         <v-btn to="/main/add/deck">Add Deck</v-btn>
-        <v-btn v-if="checkAllDecks()" to="/main/study/learn">Study All</v-btn>
+        <v-btn v-if="checkAllDecks()" @click="openAll()">Study All</v-btn>
         <v-btn v-else color="primary" @click="openDecks()"
           >Study<span class="hidden-xs-only"> Selected</span></v-btn
         >
@@ -106,6 +106,13 @@
       this.$router.push({
         path: "/main/study/learn",
         query: { deck: String(deck.id), num: String(this.selectedNum) },
+      });
+    }
+
+    public openAll() {
+      studyStore.setForceNew(true);
+      this.$router.push({
+        path: "/main/study/learn",
       });
     }
 
