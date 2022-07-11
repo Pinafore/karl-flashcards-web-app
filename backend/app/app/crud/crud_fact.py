@@ -10,7 +10,6 @@ from fastapi.encoders import jsonable_encoder
 from pytz import timezone
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Session, Query
-from app.crud import sqlalchemy_helper
 
 from app import crud, models, schemas
 from app.crud.base import CRUDBase
@@ -307,20 +306,19 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                                                    models.Reported.user_id == user.id)
                                               )
                                    .filter(models.Reported.user_id == None))
-        facts_query = crud.sqlalchemy_helper.filter_full_text_search(query=facts_query, query_str=filters.all)
-        facts_query = crud.sqlalchemy_helper.filter_ilike(query=facts_query, model_attr=models.Fact.text,
+        facts_query = crud.helper.filter_full_text_search(query=facts_query, query_str=filters.all)
+        facts_query = crud.helper.filter_ilike(query=facts_query, model_attr=models.Fact.text,
                                                           filter_attr=filters.text)
-        facts_query = crud.sqlalchemy_helper.filter_ilike(query=facts_query, model_attr=models.Fact.answer,
+        facts_query = crud.helper.filter_ilike(query=facts_query, model_attr=models.Fact.answer,
                                                           filter_attr=filters.answer)
-        facts_query = crud.sqlalchemy_helper.filter_ilike(query=facts_query, model_attr=models.Fact.category,
+        facts_query = crud.helper.filter_ilike(query=facts_query, model_attr=models.Fact.category,
                                                           filter_attr=filters.category)
-        facts_query = crud.sqlalchemy_helper.filter_ilike(query=facts_query, model_attr=models.Fact.identifier,
+        facts_query = crud.helper.filter_ilike(query=facts_query, model_attr=models.Fact.identifier,
                                                           filter_attr=filters.identifier)
-        facts_query = crud.sqlalchemy_helper.filter_deck_ids(query=facts_query, deck_ids=filters.deck_ids)
-        facts_query = crud.sqlalchemy_helper.filter_deck_id(query=facts_query, deck_id=filters.deck_id)
-        facts_query = crud.sqlalchemy_helper.filter_marked(query=facts_query, marked=filters.marked, user_id=user.id)
-        if filters.randomize:
-            facts_query = facts_query.order_by(func.random())
+        facts_query = crud.helper.filter_deck_ids(query=facts_query, deck_ids=filters.deck_ids)
+        facts_query = crud.helper.filter_deck_id(query=facts_query, deck_id=filters.deck_id)
+        facts_query = crud.helper.filter_marked(query=facts_query, marked=filters.marked, user_id=user.id)
+        
         return facts_query
 
     def count_eligible_facts(

@@ -118,15 +118,19 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             raise HTTPException(560, detail="Test Deck ID Not Found")
 
         init_new_facts_query = db.query(models.Fact).filter(models.Fact.deck_id == test_deck_id)
-        new_facts = crud.sqlalchemy_helper.filter_only_new_facts(query=init_new_facts_query, user_id=user.id, log_type=schemas.Log.test_study).order_by(func.random()).limit(return_limit).all()
+        # TODO: func.random()
+        new_facts_query = crud.helper.filter_only_new_facts(init_new_facts_query, user_id=user.id, log_type=schemas.Log.test_study)
+        new_facts = crud.fact.get_eligible_facts(query=new_facts_query, limit=return_limit, randomize=True)
         logger.info("New facts:" + str(new_facts))
 
         # Get facts that have been previously studied before, but were answered incorrectly
         init_old_facts_query = db.query(models.Fact).filter(models.Fact.deck_id == test_deck_id)
-        old_facts =  crud.sqlalchemy_helper.filter_only_incorrectly_reviewed_facts(query=init_old_facts_query, user_id=user.id, log_type=schemas.Log.test_study).order_by(func.random()).limit(return_limit).all()
+        # TODO: func.random()
+        old_facts_query = crud.helper.filter_only_incorrectly_reviewed_facts(query=init_old_facts_query, user_id=user.id, log_type=schemas.Log.test_study)
+        old_facts = crud.fact.get_eligible_facts(query=old_facts_query, limit=return_limit, randomize=True)
         logger.info("Old facts:" + str(old_facts))
 
-        facts = crud.sqlalchemy_helper.combine_two_fact_sets(new_facts=new_facts, old_facts=old_facts, return_limit=return_limit)
+        facts = crud.helper.combine_two_fact_sets(new_facts=new_facts, old_facts=old_facts, return_limit=return_limit)
 
         history_in = schemas.HistoryCreate(
             time=datetime.now(timezone('UTC')).isoformat(),
@@ -318,7 +322,6 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
     def in_test_mode(
             self, db: Session, *, user: models.User
     ) -> models.History:
-        return True
         study_set = studyset.find_last_test_set(db, user)
         if study_set is None:
             return studyset.completed_sets(db, user) > settings.TEST_MODE_FIRST_TRIGGER_SESSIONS
