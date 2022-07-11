@@ -315,6 +315,8 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                                                           filter_attr=filters.category)
         facts_query = crud.helper.filter_ilike(query=facts_query, model_attr=models.Fact.identifier,
                                                           filter_attr=filters.identifier)
+        if filters.randomize:
+            facts_query = facts_query.order_by(func.random())
         facts_query = crud.helper.filter_deck_ids(query=facts_query, deck_ids=filters.deck_ids)
         facts_query = crud.helper.filter_deck_id(query=facts_query, deck_id=filters.deck_id)
         facts_query = crud.helper.filter_marked(query=facts_query, marked=filters.marked, user_id=user.id)
