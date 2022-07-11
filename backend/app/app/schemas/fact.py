@@ -46,6 +46,7 @@ class SchedulerQuery(BaseModel):
     repetition_model: Repetition
     env: str
     user_id: int
+    target_window: int
 
 class UpdateRequestV2(BaseModel):
     user_id: int

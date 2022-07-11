@@ -153,7 +153,8 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         
         scheduler_query = schemas.SchedulerQuery(facts=[schemas.KarlFactV2.from_orm(fact) for fact in facts],
                                                  env=settings.ENVIRONMENT, repetition_model=user.repetition_model,
-                                                 user_id=user.id)
+                                                 user_id=user.id,
+                                                 target_window=settings.RECALL_WINDOW)
         return scheduler_query
 
     def create_new_study_set(
