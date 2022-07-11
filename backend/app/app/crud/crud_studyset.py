@@ -166,41 +166,60 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             return_limit: Optional[int] = None,
             send_limit: Optional[int] = None,
     ) -> Tuple[List[models.Fact], str]:
-        filters = schemas.FactSearch(deck_ids=deck_ids, limit=send_limit, randomize=True, studyable=True)
-        query = crud.fact.build_facts_query(db=db, user=user, filters=filters)
-        eligible_facts = crud.fact.get_eligible_facts(query=query, limit=send_limit)
-        logger.info("eligible fact length: " + str(len(eligible_facts)))
-        if not eligible_facts:
-            return []
+        filters = schemas.FactSearch(deck_ids=deck_ids, limit=send_limit, studyable=True)
+        base_facts_query = crud.fact.build_facts_query(db=db, user=user, filters=filters)
+        eligible_old_facts_query = crud.helper.filter_only_reviewed_facts(query=base_facts_query, user_id=user.id, log_type=schemas.Log.study)
+        eligible_old_facts = crud.fact.get_eligible_facts(query=eligible_old_facts_query, limit=send_limit, randomize=True)
+        # logger.info("eligible fact length: " + str(len(eligible_facts)))
+        # if not eligible_facts:
+        #     return []
         
         rev_karl_list_start = time.time()
-        schedule_query = self.create_scheduler_query(facts=eligible_facts, user=user)
+        schedule_query = self.create_scheduler_query(facts=eligible_old_facts, user=user)
         eligible_fact_time = time.time() - rev_karl_list_start
         logger.info("scheduler query time: " + str(eligible_fact_time))
 
         karl_query_start = time.time()
         try:
-            scheduler_response = requests.post(settings.INTERFACE + "api/karl/schedule_v2", json=schedule_query.dict())
-            response_json = scheduler_response.json()
-            card_order = response_json["order"]
-            rationale = response_json["rationale"]
-            debug_id = response_json["debug_id"]
+            # if statement is temporary only while the scheduler is crashing on empty arrays
+            if eligible_old_facts:
+                scheduler_response = requests.post(settings.INTERFACE + "api/karl/schedule_v2", json=schedule_query.dict())
+                response_json = scheduler_response.json()
+                card_order = response_json["order"]
+                rationale = response_json["rationale"]
+                debug_id = response_json["debug_id"]
 
-            query_time = time.time() - karl_query_start
-            logger.info(scheduler_response.request)
-            logger.info("query time: " + str(query_time))
+                query_time = time.time() - karl_query_start
+                logger.info(scheduler_response.request)
+                logger.info("query time: " + str(query_time))
 
-            if rationale == "<p>no fact received</p>":
-                raise HTTPException(status_code=558, detail="No Facts Received From Scheduler")
-            # Generator idea adapted from https://stackoverflow.com/a/42393595
-            order_generator = (eligible_facts[x] for x in card_order)  # eligible facts instead?
-            ordered_schedules = list(islice(order_generator, return_limit))
-            logger.info("ordered schedules" + str(ordered_schedules))
-            logger.info("debug id: " + debug_id)
-            # Modify to save all facts in session
+                if rationale == "<p>no fact received</p>":
+                    logger.info("No Facts Received")
+                    # raise HTTPException(status_code=558, detail="No Facts Received From Scheduler")
+                # Generator idea adapted from https://stackoverflow.com/a/42393595
+                order_generator = (eligible_old_facts[x] for x in card_order)  # eligible facts instead?
+                old_facts = list(islice(order_generator, return_limit))
+                logger.info("ordered schedules: " + str(old_facts))
+                logger.info("debug id: " + debug_id)
+            else:
+                old_facts = []
+                debug_id = "testing"
+                query_time = 0
+            
+            new_facts = crud.fact.get_eligible_facts(query=base_facts_query, limit=return_limit, randomize=True)
+            logger.info("new facts: " + str(new_facts))
+
+            facts = crud.helper.combine_two_fact_sets(new_facts=new_facts, old_facts=old_facts, return_limit=return_limit)
+            study_set = self.create_with_facts(db, obj_in=schemas.StudySetCreate(is_test=False, user_id=user.id, debug_id=debug_id),
+                                        decks=decks,
+                                        facts=facts)
+                                        
             details = {
                 "study_system": user.repetition_model,
-                "first_fact": schemas.Fact.from_orm(ordered_schedules[0]) if len(ordered_schedules) != 0 else "empty",
+                "first_fact": schemas.Fact.from_orm(facts[0]) if len(facts) != 0 else "empty",
+                "facts": [schemas.Fact.from_orm(fact) for fact in facts],
+                "first_review_fact": schemas.Fact.from_orm(old_facts[0]) if len(old_facts) != 0 else "empty",
+                "reviewfacts": [schemas.Fact.from_orm(fact) for fact in old_facts],
                 "eligible_fact_time": query_time,
                 "scheduler_query_time": eligible_fact_time,
                 "debug_id": debug_id,
@@ -213,12 +232,8 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                 details=details,
             )
             crud.history.create(db=db, obj_in=history_in)
-
-
-            study_set = self.create_with_facts(db, obj_in=schemas.StudySetCreate(is_test=False, user_id=user.id, debug_id=debug_id),
-                                        decks=decks,
-                                        facts=ordered_schedules)
             db.commit()
+            
             return study_set
         except requests.exceptions.RequestException as e:
             capture_exception(e)

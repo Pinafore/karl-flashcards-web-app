@@ -54,6 +54,12 @@ class SQLAlchemyHelpers():
                     models.History.log_type == schemas.Log.test_study,
                     models.History.correct == False))
 
+    def filter_only_reviewed_facts(self, query: query, user_id: int, log_type: schemas.Log):
+        return query.join(
+                models.History, and_(
+                    models.Fact.fact_id == models.History.fact_id,
+                    models.History.user_id == user_id,
+                    models.History.log_type == schemas.Log.test_study))
     # def is_test_deck(deck_id: int):
     #     return deck_id == settings.TEST_DECK_ID
 

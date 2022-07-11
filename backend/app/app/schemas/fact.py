@@ -115,7 +115,6 @@ class FactSearch(InternalFactBase):
     reported: Optional[bool] = None
     skip: Optional[int] = None
     limit: Optional[int] = None
-    randomize: bool = False
 
 
 # Properties shared by models stored in DB
