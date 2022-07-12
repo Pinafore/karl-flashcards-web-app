@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     DEFAULT_DECK_ID: int = 1
     TEST_DECK_NAME: str = "Test Mode"
     STUDY_SET_EXPIRATION_HOURS: int = 1
-    RECALL_WINDOW: int = 5
+    RECALL_WINDOW: float = 0.1
 
     @validator("INTERFACE")
     def get_interface(cls, v: Optional[str], values: Dict[str, Any]) -> str:
