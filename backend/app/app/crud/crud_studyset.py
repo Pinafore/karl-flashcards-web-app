@@ -154,7 +154,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         scheduler_query = schemas.SchedulerQuery(facts=[schemas.KarlFactV2.from_orm(fact) for fact in facts],
                                                  env=settings.ENVIRONMENT, repetition_model=user.repetition_model,
                                                  user_id=user.id,
-                                                 target_window=settings.RECALL_WINDOW)
+                                                 recall_target=settings.RECALL_WINDOW)
         return scheduler_query
 
     def create_new_study_set(
@@ -183,29 +183,24 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         karl_query_start = time.time()
         try:
             # if statement is temporary only while the scheduler is crashing on empty arrays
-            if eligible_old_facts:
-                scheduler_response = requests.post(settings.INTERFACE + "api/karl/schedule_v2", json=schedule_query.dict())
-                response_json = scheduler_response.json()
-                card_order = response_json["order"]
-                rationale = response_json["rationale"]
-                debug_id = response_json["debug_id"]
+            scheduler_response = requests.post(settings.INTERFACE + "api/karl/schedule_v2", json=schedule_query.dict())
+            response_json = scheduler_response.json()
+            card_order = response_json["order"]
+            rationale = response_json["rationale"]
+            debug_id = response_json["debug_id"]
 
-                query_time = time.time() - karl_query_start
-                logger.info(scheduler_response.request)
-                logger.info("query time: " + str(query_time))
+            query_time = time.time() - karl_query_start
+            logger.info(scheduler_response.request)
+            logger.info("query time: " + str(query_time))
 
-                if rationale == "<p>no fact received</p>":
-                    logger.info("No Facts Received")
-                    # raise HTTPException(status_code=558, detail="No Facts Received From Scheduler")
-                # Generator idea adapted from https://stackoverflow.com/a/42393595
-                order_generator = (eligible_old_facts[x] for x in card_order)  # eligible facts instead?
-                old_facts = list(islice(order_generator, return_limit))
-                logger.info("ordered schedules: " + str(old_facts))
-                logger.info("debug id: " + debug_id)
-            else:
-                old_facts = []
-                debug_id = "testing"
-                query_time = 0
+            if rationale == "<p>no fact received</p>":
+                logger.info("No Facts Received")
+                # raise HTTPException(status_code=558, detail="No Facts Received From Scheduler")
+            # Generator idea adapted from https://stackoverflow.com/a/42393595
+            order_generator = (eligible_old_facts[x] for x in card_order)  # eligible facts instead?
+            old_facts = list(islice(order_generator, return_limit))
+            logger.info("ordered schedules: " + str(old_facts))
+            logger.info("debug id: " + debug_id)
             
             new_facts = crud.fact.get_eligible_facts(query=base_facts_query, limit=return_limit, randomize=True)
             logger.info("new facts: " + str(new_facts))

@@ -8,6 +8,7 @@ from app.schemas.repetition import Repetition
 from app.schemas.deck import Deck
 # Shared properties
 from app.schemas.permission import Permission
+from app.schemas.target_window import TargetWindow
 
 
 class FactBase(BaseModel):
@@ -46,7 +47,7 @@ class SchedulerQuery(BaseModel):
     repetition_model: Repetition
     env: str
     user_id: int
-    target_window: float
+    recall_target: TargetWindow
 
 class UpdateRequestV2(BaseModel):
     user_id: int

@@ -1,5 +1,6 @@
 import secrets
 from typing import Any, Dict, List, Optional, Union
+from app.schemas.target_window import TargetWindow
 
 from pydantic import AnyHttpUrl, BaseSettings, EmailStr, HttpUrl, PostgresDsn, validator
 
@@ -24,7 +25,9 @@ class Settings(BaseSettings):
     DEFAULT_DECK_ID: int = 1
     TEST_DECK_NAME: str = "Test Mode"
     STUDY_SET_EXPIRATION_HOURS: int = 1
-    RECALL_WINDOW: float = 0.1
+    RECALL_WINDOW: TargetWindow = TargetWindow(target_window_lowest=0.80
+    ,target_window_highest=0.85
+    ,target=0.9)
 
     @validator("INTERFACE")
     def get_interface(cls, v: Optional[str], values: Dict[str, Any]) -> str:
