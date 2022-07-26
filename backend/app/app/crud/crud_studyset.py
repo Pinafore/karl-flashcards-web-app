@@ -118,14 +118,14 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             raise HTTPException(560, detail="Test Deck ID Not Found")
 
         init_new_facts_query = db.query(models.Fact).filter(models.Fact.deck_id == test_deck_id)
-        # TODO: func.random()
+        # TODO: Test func.random()
         new_facts_query = crud.helper.filter_only_new_facts(init_new_facts_query, user_id=user.id, log_type=schemas.Log.test_study)
         new_facts = crud.fact.get_eligible_facts(query=new_facts_query, limit=return_limit, randomize=True)
         logger.info("New facts:" + str(new_facts))
 
         # Get facts that have been previously studied before, but were answered incorrectly
         init_old_facts_query = db.query(models.Fact).filter(models.Fact.deck_id == test_deck_id)
-        # TODO: func.random()
+        # TODO: Test func.random()
         old_facts_query = crud.helper.filter_only_incorrectly_reviewed_facts(query=init_old_facts_query, user_id=user.id, log_type=schemas.Log.test_study)
         old_facts = crud.fact.get_eligible_facts(query=old_facts_query, limit=return_limit, randomize=True)
         logger.info("Old facts:" + str(old_facts))
@@ -304,18 +304,19 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             history = crud.history.create(db=db, obj_in=history_in)
             payload_update = schemas.UpdateRequestV2(
                 user_id=user.id,
-                fact_id=fact.fact_id,
-                deck_name=fact.deck.title,
-                deck_id=fact.deck_id,
+                # fact_id=fact.fact_id,
+                # deck_name=fact.deck.title,
+                # deck_id=fact.deck_id,
                 label=response,
                 elapsed_milliseconds_text=schedule.elapsed_milliseconds_text,
                 elapsed_milliseconds_answer=schedule.elapsed_milliseconds_answer,
                 studyset_id=session_fact.studyset_id,
                 history_id=history.id,
-                answer=fact.answer,
+                # answer=fact.answer,
                 typed=schedule.typed,
                 debug_id=debug_id,
-                test_mode=in_test_mode).dict(exclude_unset=True)
+                test_mode=in_test_mode,
+                fact_info=schemas.KarlFactV2.from_orm(fact)).dict(exclude_unset=True)
             logger.info(payload_update)
             request = requests.post(settings.INTERFACE + "api/karl/update_v2", json=payload_update)
             logger.info(request.content)
@@ -332,7 +333,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
 
     def in_test_mode(
             self, db: Session, *, user: models.User
-    ) -> models.History:
+    ) -> bool:
         study_set = studyset.find_last_test_set(db, user)
         if study_set is None:
             return studyset.completed_sets(db, user) > settings.TEST_MODE_FIRST_TRIGGER_SESSIONS

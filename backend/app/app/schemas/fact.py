@@ -51,9 +51,9 @@ class SchedulerQuery(BaseModel):
 
 class UpdateRequestV2(BaseModel):
     user_id: int
-    fact_id: int
-    deck_name: str
-    deck_id: int
+    # fact_id: int
+    # deck_name: str
+    # deck_id: int
     label: bool
     elapsed_milliseconds_text: int
     elapsed_milliseconds_answer: int
@@ -63,6 +63,7 @@ class UpdateRequestV2(BaseModel):
     studyset_id: str
     debug_id: Optional[str] # aka schedule_request_id, n/a in test updates
     test_mode: bool
+    fact_info: KarlFactV2
 
 class KarlFactUpdate(KarlFact):
     elapsed_seconds_text: Optional[int] = None
