@@ -317,9 +317,9 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                 debug_id=debug_id,
                 test_mode=in_test_mode,
                 fact=schemas.KarlFactV2.from_orm(fact)).dict(exclude_unset=True)
-            logger.info(payload_update)
+            logger.info("payload update: " + str(payload_update))
             request = requests.post(settings.INTERFACE + "api/karl/update_v2", json=payload_update)
-            logger.info(request.content)
+            logger.info("request content: " + str(request.content))
             if not 200 <= request.status_code < 300:
                 raise HTTPException(status_code=556, detail="Scheduler malfunction")
             return history
