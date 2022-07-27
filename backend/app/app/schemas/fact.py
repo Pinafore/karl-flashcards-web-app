@@ -51,9 +51,9 @@ class SchedulerQuery(BaseModel):
 
 class UpdateRequestV2(BaseModel):
     user_id: int
-    # fact_id: int
-    # deck_name: str
-    # deck_id: int
+    fact_id: int
+    deck_name: str
+    deck_id: int
     label: bool
     elapsed_milliseconds_text: int
     elapsed_milliseconds_answer: int
