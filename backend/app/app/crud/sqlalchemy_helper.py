@@ -63,16 +63,16 @@ class SQLAlchemyHelpers():
     # def is_test_deck(deck_id: int):
     #     return deck_id == settings.TEST_DECK_ID
 
-    def combine_two_fact_sets(self, new_facts: List[models.Fact], old_facts: List[models.Fact], return_limit: int):
-        len_new_facts = len(new_facts)
+    def combine_two_fact_sets(self, random_facts: List[models.Fact], old_facts: List[models.Fact], return_limit: int):
+        len_random_facts = len(random_facts)
         len_old_facts = len(old_facts)
         lower_lim, upper_lim = math.floor(return_limit / 2), math.ceil(return_limit / 2)
-        if len_new_facts >= upper_lim and len_old_facts >= upper_lim:
-            facts = new_facts[:lower_lim] + old_facts[:upper_lim]
-        elif len_new_facts < upper_lim:
-            facts = new_facts + old_facts[:return_limit - len_new_facts]
+        if len_random_facts >= upper_lim and len_old_facts >= upper_lim:
+            facts = random_facts[:lower_lim] + old_facts[:upper_lim]
+        elif len_random_facts < upper_lim:
+            facts = random_facts + old_facts[:return_limit - len_random_facts]
         elif len_old_facts < upper_lim:
-            facts = old_facts + new_facts[:return_limit - len_old_facts]
+            facts = old_facts + random_facts[:return_limit - len_old_facts]
         return facts
 
 helper = SQLAlchemyHelpers()

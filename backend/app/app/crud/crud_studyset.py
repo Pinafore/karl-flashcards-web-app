@@ -130,7 +130,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         old_facts = crud.fact.get_eligible_facts(query=old_facts_query, limit=return_limit, randomize=True)
         logger.info("Old facts:" + str(old_facts))
 
-        facts = crud.helper.combine_two_fact_sets(new_facts=new_facts, old_facts=old_facts, return_limit=return_limit)
+        facts = crud.helper.combine_two_fact_sets(random_facts=new_facts, old_facts=old_facts, return_limit=return_limit)
 
         history_in = schemas.HistoryCreate(
             time=datetime.now(timezone('UTC')).isoformat(),
@@ -193,19 +193,20 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             logger.info(scheduler_response.request)
             logger.info("query time: " + str(query_time))
 
+            logger.info("eligible old facts: " + str(eligible_old_facts))
             if rationale == "<p>no fact received</p>":
                 logger.info("No Facts Received")
                 # raise HTTPException(status_code=558, detail="No Facts Received From Scheduler")
             # Generator idea adapted from https://stackoverflow.com/a/42393595
             order_generator = (eligible_old_facts[x] for x in card_order)  # eligible facts instead?
             old_facts = list(islice(order_generator, return_limit))
-            logger.info("ordered schedules: " + str(old_facts))
+            logger.info("old facts: " + str(old_facts))
             logger.info("debug id: " + debug_id)
             
-            new_facts = crud.fact.get_eligible_facts(query=base_facts_query, limit=return_limit, randomize=True)
-            logger.info("new facts: " + str(new_facts))
+            random_facts = crud.fact.get_eligible_facts(query=base_facts_query, limit=return_limit, randomize=True)
+            logger.info("new facts: " + str(random_facts))
 
-            facts = crud.helper.combine_two_fact_sets(new_facts=new_facts, old_facts=old_facts, return_limit=return_limit)
+            facts = crud.helper.combine_two_fact_sets(random_facts=random_facts, old_facts=old_facts, return_limit=return_limit)
             study_set = self.create_with_facts(db, obj_in=schemas.StudySetCreate(is_test=False, user_id=user.id, debug_id=debug_id),
                                         decks=decks,
                                         facts=facts)
