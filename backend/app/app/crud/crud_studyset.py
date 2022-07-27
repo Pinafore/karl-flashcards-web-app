@@ -180,6 +180,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         eligible_fact_time = time.time() - rev_karl_list_start
         logger.info("scheduler query time: " + str(eligible_fact_time))
 
+        logger.info("eligible old facts: " + str(eligible_old_facts))
         karl_query_start = time.time()
         try:
             # if statement is temporary only while the scheduler is crashing on empty arrays
@@ -193,7 +194,6 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             logger.info(scheduler_response.request)
             logger.info("query time: " + str(query_time))
 
-            logger.info("eligible old facts: " + str(eligible_old_facts))
             if rationale == "<p>no fact received</p>":
                 logger.info("No Facts Received")
                 # raise HTTPException(status_code=558, detail="No Facts Received From Scheduler")
@@ -285,6 +285,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                 "response": schedule.response,
                 "debug_id": debug_id,
                 "recall_target": user.recall_target,
+                "recommendation": schedule.recommendation
             }
             if schedule.elapsed_seconds_text:
                 details["elapsed_seconds_text"] = schedule.elapsed_seconds_text
@@ -317,6 +318,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                 typed=schedule.typed,
                 debug_id=debug_id,
                 test_mode=in_test_mode,
+                recommendation=schedule.recommendation
                 fact=schemas.KarlFactV2.from_orm(fact)).dict(exclude_unset=True)
             logger.info("payload update: " + str(payload_update))
             request = requests.post(settings.INTERFACE + "api/karl/update_v2", json=payload_update)

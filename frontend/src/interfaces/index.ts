@@ -133,6 +133,7 @@ export interface IComponents {
     response: boolean;
     elapsed_milliseconds_text: number;
     elapsed_milliseconds_answer: number;
+    recommendation: boolean;
     test_mode: number;
   };
   SuperUserCreate: {

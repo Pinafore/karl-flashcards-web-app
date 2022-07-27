@@ -638,6 +638,7 @@
           elapsed_milliseconds_text: this.frontTime,
           elapsed_milliseconds_answer: this.backTime,
           test_mode: this.inTestMode,
+          recommendation: this.recommendation,
         });
         this.resetCard();
         await studyStore.updateSchedule();
