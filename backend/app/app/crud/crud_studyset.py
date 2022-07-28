@@ -318,7 +318,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                 typed=schedule.typed,
                 debug_id=debug_id,
                 test_mode=in_test_mode,
-                recommendation=schedule.recommendation
+                recommendation=schedule.recommendation,
                 fact=schemas.KarlFactV2.from_orm(fact)).dict(exclude_unset=True)
             logger.info("payload update: " + str(payload_update))
             request = requests.post(settings.INTERFACE + "api/karl/update_v2", json=payload_update)
