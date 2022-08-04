@@ -15,6 +15,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+# Values set here are no longer relevant, as they are passed in for each schedule request.
 def set_user_settings(user: models.user, new_settings: schemas.UserUpdate) -> Union[
     int, requests.exceptions.RequestException, json.decoder.JSONDecodeError]:
     params = schemas.SetParametersSchema(env=settings.ENVIRONMENT, recall_target=new_settings.recall_target / 100, repetition_model=new_settings.repetition_model)

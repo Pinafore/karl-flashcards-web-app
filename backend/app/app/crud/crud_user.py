@@ -103,7 +103,8 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             del update_data["password"]
             update_data["hashed_password"] = hashed_password
         if obj_in.recall_target and update_data["recall_target"]:
-            set_user_settings(user=db_obj, new_settings=obj_in)
+            # 
+            # set_user_settings(user=db_obj, new_settings=obj_in)
 
             # Need to retire current study set when settings change
             uncompleted_last_set = crud.studyset.find_existing_study_set(db, db_obj)

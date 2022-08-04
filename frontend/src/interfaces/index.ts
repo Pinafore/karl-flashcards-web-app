@@ -140,7 +140,7 @@ export interface IComponents {
     email: string;
     username: string;
     is_active?: boolean;
-    repetition_model?: "leitner" | "sm-2" | "karl" | "karl50" | "karl85";
+    repetition_model?: "leitner" | "sm-2" | "karl" | "karl50" | "karl85" | "settles";
     password: string;
     is_superuser?: boolean;
   };
@@ -148,7 +148,7 @@ export interface IComponents {
     email?: string;
     username?: string;
     is_active?: boolean;
-    repetition_model?: "leitner" | "sm-2" | "karl" | "karl50" | "karl85";
+    repetition_model?: "leitner" | "sm-2" | "karl" | "karl50" | "karl85" | "settles";
     password?: string;
     default_deck_id?: number;
     is_superuser?: boolean;
