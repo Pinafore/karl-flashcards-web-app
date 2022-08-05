@@ -130,10 +130,10 @@ def create_user_open(
     user_in = schemas.UserCreate(password=user_in.password, email=user_in.email, username=user_in.username)
     user = crud.user.create(db, obj_in=user_in)
 
-    if settings.EMAILS_ENABLED and user_in.email:
-        send_new_account_email(
-            email_to=user_in.email, username=user_in.username
-        )
+    # if settings.EMAILS_ENABLED and user_in.email:
+    #     send_new_account_email(
+    #         email_to=user_in.email, username=user_in.username
+    #     )
     return user
 
 
