@@ -257,6 +257,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         return studyset
     
     def completed_sets(self, db: Session, user: models.User) -> Optional[int]:
+        logger.info("completed sets: " + str(db.query(models.StudySet).filter(models.StudySet.user_id == user.id).count()))
         return db.query(models.StudySet).filter(models.StudySet.user_id == user.id).filter(models.StudySet.completed == true()).count()
 
     def sets_since_last_test(self, db: Session, last_test_set: models.studyset, user: models.User) -> Optional[int]:
@@ -359,10 +360,11 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         if not study_set.completed:
             return True
         over_days_trigger = (study_set.create_date + timedelta(days=settings.TEST_MODE_TRIGGER_DAYS) > datetime.now(timezone('UTC')))
-        over_sessions_trigger = studyset.sets_since_last_test(db, last_test_set=study_set, user=user) > settings.TEST_MODE_TRIGGER_SESSIONS
-        logger.info("In Test Mode: ")
-        logger.info(over_days_trigger)
-        logger.info(over_sessions_trigger)
+        sets_since_last_test = studyset.sets_since_last_test(db, last_test_set=study_set, user=user)
+        logger.info("sets since last test: " + str(sets_since_last_test))
+        over_sessions_trigger = sets_since_last_test > settings.TEST_MODE_TRIGGER_SESSIONS
+        logger.info("Over days trigger: " + str(over_days_trigger))
+        logger.info("Over sessions trigger: " + str(over_sessions_trigger))
         return over_days_trigger or over_sessions_trigger
 
 studyset = CRUDStudySet(models.StudySet)

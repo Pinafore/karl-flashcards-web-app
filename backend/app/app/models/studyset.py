@@ -18,7 +18,9 @@ from .deck import Deck
 from .session_fact import Session_Fact  # noqa: F401
 from .session_deck import Session_Deck  # noqa: F401
 
-
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 class StudySet(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False, index=True)
@@ -48,11 +50,15 @@ class StudySet(Base):
     # https://docs.sqlalchemy.org/en/14/orm/extensions/hybrid.html
     @hybrid_property
     def completed(self) -> bool:
+        logger.info(self.num_unstudied)
         return self.num_unstudied == 0 or self.retired is True  # Retired checks if deck was deleted!
 
     # Modify to include facts to study again?
     @hybrid_property
     def unstudied_facts(self) -> List[Session_Fact]:
+        logger.info([session_fact for session_fact in self.session_facts if  # type: ignore
+                not (
+                        session_fact.completed or session_fact.suspended or session_fact.reported or session_fact.deleted)])
         return [session_fact for session_fact in self.session_facts if  # type: ignore
                 not (
                         session_fact.completed or session_fact.suspended or session_fact.reported or session_fact.deleted)]
