@@ -157,16 +157,16 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
     def create_scheduler_query(self, facts: List[models.Fact], user: models.User):
         recall_percentage = user.recall_target / 100
 
-        # scheduler_query = schemas.SchedulerQuery(facts=[schemas.KarlFactV2.from_orm(fact) for fact in facts],
-        #                                          env=settings.ENVIRONMENT, repetition_model=user.repetition_model,
-        #                                          user_id=user.id,
-        #                                          recall_target=TargetWindow(target_window_lowest=recall_percentage - 0.05, 
-        #                                          target_window_highest=recall_percentage + 0.05, target=recall_percentage))
         scheduler_query = schemas.SchedulerQuery(facts=[schemas.KarlFactV2.from_orm(fact) for fact in facts],
                                                  env=settings.ENVIRONMENT, repetition_model=user.repetition_model,
                                                  user_id=user.id,
-                                                 recall_target=TargetWindow(target_window_lowest=0, 
-                                                 target_window_highest=1, target=0.5))
+                                                 recall_target=TargetWindow(target_window_lowest=recall_percentage - 0.05, 
+                                                 target_window_highest=recall_percentage + 0.05, target=recall_percentage))
+        # scheduler_query = schemas.SchedulerQuery(facts=[schemas.KarlFactV2.from_orm(fact) for fact in facts],
+        #                                          env=settings.ENVIRONMENT, repetition_model=user.repetition_model,
+        #                                          user_id=user.id,
+        #                                          recall_target=TargetWindow(target_window_lowest=0, 
+        #                                          target_window_highest=1, target=0.5))
         return scheduler_query
 
     def create_new_study_set(
