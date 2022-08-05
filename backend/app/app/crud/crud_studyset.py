@@ -3,6 +3,7 @@ from typing import List, Optional, Union, Any, Tuple
 import time
 import math
 from itertools import islice
+from app.schemas.target_window import TargetWindow
 
 import requests
 import json
@@ -66,8 +67,10 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                       force_new: bool,
                       ) -> Union[
         models.StudySet, requests.exceptions.RequestException, json.decoder.JSONDecodeError, HTTPException]:
+        logger.info("getting study set")
         decks = []
         test_deck_id = crud.deck.get_test_deck_id(db=db)
+        logger.info(test_deck_id)
         if deck_ids is not None:
             if test_deck_id in deck_ids:
                 return HTTPException(status_code=557, detail="This deck is currently unavailable")
@@ -81,8 +84,10 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                                                 " of the specified decks")
                 decks.append(deck)
         uncompleted_last_set = self.find_existing_study_set(db, user)
+        logger.info(uncompleted_last_set)
         # Return the uncompleted last set if it exists and the user has not force-requested a new set
         in_test_mode = self.in_test_mode(db, user=user)
+        logger.info(in_test_mode)
         if uncompleted_last_set:
             if force_new and not uncompleted_last_set.is_test:
                 # Marks the study set as completed even though it hasn't been finished, due to override
@@ -150,11 +155,18 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         return study_set
 
     def create_scheduler_query(self, facts: List[models.Fact], user: models.User):
-        
+        recall_percentage = user.recall_target / 100
+
+        # scheduler_query = schemas.SchedulerQuery(facts=[schemas.KarlFactV2.from_orm(fact) for fact in facts],
+        #                                          env=settings.ENVIRONMENT, repetition_model=user.repetition_model,
+        #                                          user_id=user.id,
+        #                                          recall_target=TargetWindow(target_window_lowest=recall_percentage - 0.05, 
+        #                                          target_window_highest=recall_percentage + 0.05, target=recall_percentage))
         scheduler_query = schemas.SchedulerQuery(facts=[schemas.KarlFactV2.from_orm(fact) for fact in facts],
                                                  env=settings.ENVIRONMENT, repetition_model=user.repetition_model,
                                                  user_id=user.id,
-                                                 recall_target=settings.RECALL_WINDOW)
+                                                 recall_target=TargetWindow(target_window_lowest=0, 
+                                                 target_window_highest=1, target=0.5))
         return scheduler_query
 
     def create_new_study_set(
@@ -337,8 +349,11 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
     def in_test_mode(
             self, db: Session, *, user: models.User
     ) -> bool:
+        logger.info("Checking in Test Mode: ")
         study_set = studyset.find_last_test_set(db, user)
+        logger.info("Last Study set: " + str(study_set))
         if study_set is None:
+            logger.info("completed sets: " + str(studyset.completed_sets(db, user)))
             return studyset.completed_sets(db, user) > settings.TEST_MODE_FIRST_TRIGGER_SESSIONS
         # while this most recent test set could be expired, as long as it's not completed, user is still in test mode
         if not study_set.completed:
