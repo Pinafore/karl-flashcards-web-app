@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime, timedelta
-from typing import Any, Dict, Optional, Union, List
+from typing import Any, Dict, Optional, Tuple, Union, List
 
 import requests
 import json
@@ -64,7 +64,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         change_assignment(user=db_obj, repetition_model=model)
         return db_obj
 
-    def assign_scheduler_to_new_user(self, db: Session, obj_in: UserCreate) -> (Repetition, str):
+    def assign_scheduler_to_new_user(self, db: Session, obj_in: UserCreate) -> Tuple[Repetition, str]:
         if obj_in.repetition_model:
             return obj_in.repetition_model, "assigned"
         if self.get_count(db, False) > 250:
@@ -183,7 +183,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             )
             crud.history.create(db=db, obj_in=history_in)
 
-    def get_scheduler_counts(self, db: Session, is_beta: Optional[bool] = None) -> {Repetition: int}:
+    def get_scheduler_counts(self, db: Session, is_beta: Optional[bool] = None) -> Dict[Repetition, int]:
         all_users = self.get_all_with_status(db, is_beta)
 
         scheduler_counts = {system: 0 for system in Repetition}
