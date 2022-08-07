@@ -7,7 +7,7 @@ import json
 from pytz import timezone
 from sentry_sdk import capture_exception
 
-from app import crud, schemas
+from app import crud, schemas, models
 from app.core.config import settings
 from app.core.security import get_password_hash, verify_password
 from app.crud.base import CRUDBase
@@ -193,6 +193,13 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
     def make_current_users_beta_testers(self, db: Session):
         db.query(self.model).update({User.beta_user: True}, synchronize_session='evaluate')
+    
+    def studied_facts(self, db: Session, user: models.User) -> Optional[int]:
+        # logger.info("completed sets: " + str(db.query(models.StudySet).filter(models.StudySet.user_id == user.id).count()))
+        return db.query(models.History).filter(models.History.user_id == user.id).filter(models.History.log_type == Log.study).count()
+
+    def facts_since_last_study(self, db: Session, last_test_set: models.studyset, user: models.User) -> Optional[int]:
+        return db.query(models.History).filter(models.History.user_id == user.id).filter(models.History.log_type == Log.study).filter(models.History.time > last_test_set.create_date).count()
 
 
 user = CRUDUser(User)

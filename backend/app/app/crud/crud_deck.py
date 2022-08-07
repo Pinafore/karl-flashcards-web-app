@@ -111,7 +111,7 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
         if user in db_obj.users:
             db_obj.users.remove(user)
             existing_studyset = crud.studyset.find_existing_study_set(db, user)
-            if isinstance(existing_studyset, models.StudySet):
+            if isinstance(existing_studyset, models.StudySet) and not existing_studyset.is_test:
                 crud.studyset.mark_retired(db, db_obj=existing_studyset)
             db.commit()
             db.refresh(db_obj)

@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     TEST_MODE_TRIGGER_DAYS: int = 10
     TEST_MODE_TRIGGER_SESSIONS: int = 7
     TEST_MODE_PER_ROUND: int = 20
+    TEST_MODE_TRIGGER_FACTS: int = 100
     DEFAULT_DECK_ID: int = 1
     TEST_DECK_NAME: str = "Test Mode"
     STUDY_SET_EXPIRATION_HOURS: int = 1

@@ -355,16 +355,18 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         logger.info("Last Study set: " + str(study_set))
         if study_set is None:
             logger.info("completed sets: " + str(studyset.completed_sets(db, user)))
-            return studyset.completed_sets(db, user) > settings.TEST_MODE_FIRST_TRIGGER_SESSIONS
+            return crud.crud_user.studied_facts(db, user) > settings.TEST_MODE_TRIGGER_FACTS
         # while this most recent test set could be expired, as long as it's not completed, user is still in test mode
         if not study_set.completed:
             return True
-        over_days_trigger = (study_set.create_date + timedelta(days=settings.TEST_MODE_TRIGGER_DAYS) > datetime.now(timezone('UTC')))
-        sets_since_last_test = studyset.sets_since_last_test(db, last_test_set=study_set, user=user)
-        logger.info("sets since last test: " + str(sets_since_last_test))
-        over_sessions_trigger = sets_since_last_test > settings.TEST_MODE_TRIGGER_SESSIONS
-        logger.info("Over days trigger: " + str(over_days_trigger))
-        logger.info("Over sessions trigger: " + str(over_sessions_trigger))
-        return over_days_trigger or over_sessions_trigger
+        facts_since_last_study = facts_since_last_study(db, last_test_set=study_set, user=user)
+        return facts_since_last_study > settings.TEST_MODE_TRIGGER_FACTS
+        # over_days_trigger = (study_set.create_date + timedelta(days=settings.TEST_MODE_TRIGGER_DAYS) > datetime.now(timezone('UTC')))
+        # sets_since_last_test = studyset.sets_since_last_test(db, last_test_set=study_set, user=user)
+        # logger.info("sets since last test: " + str(sets_since_last_test))
+        # over_sessions_trigger = sets_since_last_test > settings.TEST_MODE_TRIGGER_FACTS
+        # logger.info("Over days trigger: " + str(over_days_trigger))
+        # logger.info("Over sessions trigger: " + str(over_sessions_trigger))
+        # return over_days_trigger or over_sessions_trigger
 
 studyset = CRUDStudySet(models.StudySet)
