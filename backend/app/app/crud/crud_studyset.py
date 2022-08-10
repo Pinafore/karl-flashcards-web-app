@@ -353,10 +353,10 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         logger.info("Checking in Test Mode: ")
         study_set = studyset.find_last_test_set(db, user)
         logger.info("Last Study set: " + str(study_set))
-        logger.info("Studied facts: " + str(crud.crud_user.studied_facts(db, user)))
+        logger.info("Studied facts: " + str(crud.user.studied_facts(db, user)))
         if study_set is None:
             logger.info("completed sets: " + str(studyset.completed_sets(db, user)))
-            return crud.crud_user.studied_facts(db, user) > settings.TEST_MODE_TRIGGER_FACTS
+            return crud.user.studied_facts(db, user) > settings.TEST_MODE_TRIGGER_FACTS
         # while this most recent test set could be expired, as long as it's not completed, user is still in test mode
         if not study_set.completed:
             return True
