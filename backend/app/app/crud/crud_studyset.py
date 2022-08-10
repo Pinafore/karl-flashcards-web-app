@@ -353,6 +353,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         logger.info("Checking in Test Mode: ")
         study_set = studyset.find_last_test_set(db, user)
         logger.info("Last Study set: " + str(study_set))
+        logger.info("Studied facts: " + str(crud.crud_user.studied_facts(db, user)))
         if study_set is None:
             logger.info("completed sets: " + str(studyset.completed_sets(db, user)))
             return crud.crud_user.studied_facts(db, user) > settings.TEST_MODE_TRIGGER_FACTS
@@ -360,6 +361,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         if not study_set.completed:
             return True
         facts_since_last_study = facts_since_last_study(db, last_test_set=study_set, user=user)
+        logger.info("Facts since last study: " + str(facts_since_last_study))
         return facts_since_last_study > settings.TEST_MODE_TRIGGER_FACTS
         # over_days_trigger = (study_set.create_date + timedelta(days=settings.TEST_MODE_TRIGGER_DAYS) > datetime.now(timezone('UTC')))
         # sets_since_last_test = studyset.sets_since_last_test(db, last_test_set=study_set, user=user)
