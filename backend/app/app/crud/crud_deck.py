@@ -1,6 +1,5 @@
 import logging
 from typing import List, Optional, Union, Dict, Any
-from app.api.api_v1.endpoints.users import assign_test_deck
 
 from app.core.config import settings
 from app.crud.base import CRUDBase
@@ -49,7 +48,7 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
     def get_multi_by_owner(
             self, db: Session, *, user: User, skip: Optional[int] = None, limit: Optional[int] = None
     ) -> List[Deck]:
-        decks = [deck for deck in user.decks if deck.id != self.get_test_deck_id(db=db)]
+        decks = [deck for deck in user.decks] # Doesn't include test deck because that is hidden into all_decks
         if skip and limit:
             decks = decks[skip:skip + limit]
         elif skip:
@@ -81,15 +80,15 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
             deck = self.create_with_owner(db=db,
                                    obj_in=SuperDeckCreate(title=settings.TEST_DECK_NAME, deck_type=DeckType.hidden),
                                    user=super_user)
-        if deck not in user.decks:
+        if deck not in user.all_decks:
             self.assign_viewer(db=db, db_obj=deck, user=user)
             
         return deck
 
     def assign_test_deck_to_all(self, db: Session):
-        all_users = db.query(self.model).all()
+        all_users = db.query(models.User).all()
         for found_user in all_users:
-            assign_test_deck(db=db,user=found_user)
+            self.assign_test_deck(db=db,user=found_user)
 
     def find_or_create(
             self, db: Session, *, proposed_deck: str, user: User, deck_type: DeckType = DeckType.default
