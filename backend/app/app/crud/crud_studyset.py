@@ -360,7 +360,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         # while this most recent test set could be expired, as long as it's not completed, user is still in test mode
         if not study_set.completed:
             return True
-        facts_since_last_study = facts_since_last_study(db, last_test_set=study_set, user=user)
+        facts_since_last_study = crud.user.facts_since_last_study(db, last_test_set=study_set, user=user)
         logger.info("Facts since last study: " + str(facts_since_last_study))
         return facts_since_last_study > settings.TEST_MODE_TRIGGER_FACTS
         # over_days_trigger = (study_set.create_date + timedelta(days=settings.TEST_MODE_TRIGGER_DAYS) > datetime.now(timezone('UTC')))

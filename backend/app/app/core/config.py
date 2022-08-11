@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     TEST_MODE_TRIGGER_FACTS: int = 100
     DEFAULT_DECK_ID: int = 1
     TEST_DECK_NAME: str = "Test Mode"
-    STUDY_SET_EXPIRATION_HOURS: int = 1
+    STUDY_SET_EXPIRATION_HOURS: int = 2
     TEST_RECALL_WINDOW: TargetWindow = TargetWindow(target_window_lowest=0.0
     ,target_window_highest=1.0
     ,target=0.5)
