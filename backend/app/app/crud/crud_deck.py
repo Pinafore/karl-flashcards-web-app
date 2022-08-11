@@ -1,5 +1,6 @@
 import logging
 from typing import List, Optional, Union, Dict, Any
+from app.api.api_v1.endpoints.users import assign_test_deck
 
 from app.core.config import settings
 from app.crud.base import CRUDBase
@@ -75,14 +76,20 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
 
     def assign_test_deck(self, db: Session, user: User) -> Deck:
         deck = self.get_test_deck(db)
-        if deck:
-            if deck not in user.decks:
-                self.assign_viewer(db=db, db_obj=deck, user=user)
-        else:
+        if deck is None:
+            super_user = crud.user.get_by_email(db, email=settings.FIRST_SUPERUSER)
             deck = self.create_with_owner(db=db,
                                    obj_in=SuperDeckCreate(title=settings.TEST_DECK_NAME, deck_type=DeckType.hidden),
-                                   user=user)
+                                   user=super_user)
+        if deck not in user.decks:
+            self.assign_viewer(db=db, db_obj=deck, user=user)
+            
         return deck
+
+    def assign_test_deck_to_all(self, db: Session):
+        all_users = db.query(self.model).all()
+        for found_user in all_users:
+            assign_test_deck(db=db,user=found_user)
 
     def find_or_create(
             self, db: Session, *, proposed_deck: str, user: User, deck_type: DeckType = DeckType.default

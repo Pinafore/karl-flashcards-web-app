@@ -239,3 +239,18 @@ def reassign_schedulers(
     background_tasks.add_task(crud.user.reassign_schedulers, db=db)
 
     return True
+
+@router.post("/bulk/test", response_model=bool)
+def assign_test_deck(
+        *,
+        db: Session = Depends(deps.get_db),
+        background_tasks: BackgroundTasks,
+        current_user: models.User = Depends(deps.get_current_active_superuser),
+) -> Any:
+    """
+    Reassign the assigned scheduler for all users
+    """
+
+    background_tasks.add_task(crud.user.assign_test_deck_to_all, db=db)
+
+    return True
