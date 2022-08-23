@@ -43,6 +43,7 @@
       <v-card-actions>
         <v-btn v-if="type === 'inaccessibleDeckError'" @click="goBack">Return</v-btn>
         <v-btn v-else @click="goBack">Return to Home Screen</v-btn>
+        <v-btn @click="refresh">Refresh</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -118,6 +119,10 @@
       } else {
         this.$router.push("/main/dashboard");
       }
+    }
+
+    refresh() {
+      this.$router.go(0);
     }
   }
 </script>
