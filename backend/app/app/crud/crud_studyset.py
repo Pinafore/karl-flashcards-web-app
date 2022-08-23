@@ -83,17 +83,19 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                                          detail="This user does not have the necessary permission to access one or more"
                                                 " of the specified decks")
                 decks.append(deck)
+        # Does not return study sets that are expired or completed
         uncompleted_last_set = self.find_existing_study_set(db, user)
         logger.info(uncompleted_last_set)
-        # Return the uncompleted last set if it exists and the user has not force-requested a new set
-        in_test_mode = self.in_test_mode(db, user=user)
-        logger.info(in_test_mode)
         if uncompleted_last_set:
             if force_new and not uncompleted_last_set.is_test:
                 # Marks the study set as completed even though it hasn't been finished, due to override
                 self.mark_retired(db, db_obj=uncompleted_last_set)
             else:
                 return uncompleted_last_set
+        # Return the uncompleted last set if it exists and the user has not force-requested a new set
+        in_test_mode = self.in_test_mode(db, user=user)
+        logger.info(in_test_mode)
+        
         if in_test_mode:
             db_obj = self.create_new_test_study_set(db, user=user)
         else:
@@ -350,16 +352,16 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
     def in_test_mode(
             self, db: Session, *, user: models.User
     ) -> bool:
-        logger.info("Checking in Test Mode: ")
+        logger.info("Checking in Test Mode")
         study_set = studyset.find_last_test_set(db, user)
         logger.info("Last Study set: " + str(study_set))
         logger.info("Studied facts: " + str(crud.user.studied_facts(db, user)))
         if study_set is None:
             logger.info("completed sets: " + str(studyset.completed_sets(db, user)))
             return crud.user.studied_facts(db, user) > settings.TEST_MODE_TRIGGER_FACTS
-        # while this most recent test set could be expired, as long as it's not completed, user is still in test mode
-        if not study_set.completed:
-            return True
+        # This code used to exist to force regenerating test sets after expiry, we no longer do so.
+        # if not study_set.completed:
+        #     return True
         facts_since_last_study = crud.user.facts_since_last_study(db, last_test_set=study_set, user=user)
         logger.info("Facts since last study: " + str(facts_since_last_study))
         return facts_since_last_study > settings.TEST_MODE_TRIGGER_FACTS
