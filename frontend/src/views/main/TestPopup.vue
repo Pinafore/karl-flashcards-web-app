@@ -19,8 +19,8 @@
           after completing this test mode.
         </p>
         <p>
-          You must complete test mode within an hour of starting or your progress in the
-          session will be reset.
+          You must complete test mode within two hours of starting or your progress in
+          the session will be reset.
         </p>
       </v-card-text>
       <v-card-actions class="pt-0">
