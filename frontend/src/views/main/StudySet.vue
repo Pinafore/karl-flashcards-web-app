@@ -69,11 +69,13 @@
       ) {
         // this.status = "completed";
         return "completed";
-      } else if (mainStore.userProfile && mainStore.userProfile.study_set_expiry_date) {
+      } else if (
+        mainStore.userProfile &&
+        mainStore.userProfile.study_set_expiry_date &&
+        parseISO(mainStore.userProfile.study_set_expiry_date) < new Date()
+      ) {
         // this.status = "expired";
-        return parseISO(mainStore.userProfile.study_set_expiry_date) < new Date()
-          ? "expired"
-          : "studying";
+        return "expired";
       } else {
         // this.status = "studying";
         return "studying";
@@ -103,6 +105,8 @@
     }
 
     goToDeck() {
+      studyStore.setInTestMode(false);
+      this.popup = false;
       this.$router.push("/main/study/decks");
     }
 

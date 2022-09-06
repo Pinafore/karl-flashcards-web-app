@@ -75,6 +75,7 @@
     selectedNum = 20;
 
     async mounted() {
+      studyStore.setInTestMode(false);
       await mainStore.getUserProfile();
     }
 

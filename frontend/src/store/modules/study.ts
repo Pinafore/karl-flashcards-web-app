@@ -199,7 +199,7 @@ export default class StudyModule extends VuexModule {
   }
 
   @Mutation
-  setIsTestMode(payload: boolean) {
+  setInTestMode(payload: boolean) {
     this.inTestMode = payload;
   }
 
@@ -283,7 +283,7 @@ export default class StudyModule extends VuexModule {
         this.setStudySet(response.data);
         this.setStudy(response.data.unstudied_facts);
         this.setInitUnstudied(response.data.num_unstudied);
-        this.setIsTestMode(response.data.is_test);
+        this.setInTestMode(response.data.is_test);
         await this.getNextShow();
       }
       mainStore.setConnectionError(false);

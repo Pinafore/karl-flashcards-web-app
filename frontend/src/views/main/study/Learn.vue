@@ -416,6 +416,7 @@
     }
 
     public async mounted() {
+      studyStore.setStudySet(null);
       await mainStore.getUserProfile();
       mainStore.setConnectionError(false);
       mainStore.setSchedulerError(false);
