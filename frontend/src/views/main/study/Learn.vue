@@ -252,7 +252,7 @@
         <div class="title primary--text">
           {{ show.fact && show.fact.answer }}
         </div>
-        <span v-show="!inTestMode">
+        <span v-show="showResponseBtns">
           <div class="title">You typed: '{{ typed }}'</div>
           <div
             v-if="recommendation"
@@ -514,7 +514,8 @@
 
     public determineResponse(e: KeyboardEvent, key: string) {
       if (key == "enter" && !e.shiftKey) {
-        this.response(this.recommendation);
+        // this.showResponseBtns ensures that response is never true when user doesn't know
+        this.response(this.recommendation && this.showResponseBtns);
       } else if (key == "[") {
         this.response(false);
       } else if (key == "]" && this.showResponseBtns) {
