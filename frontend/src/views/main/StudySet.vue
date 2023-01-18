@@ -2,7 +2,7 @@
   <v-dialog v-model="popup" max-width="1000px" persistent>
     <v-card>
       <v-card-title>
-        <h2 v-if="status == 'completed'">Study Set Finished</h2>
+        <h2 v-if="status == 'completed'">Study Set Completed!</h2>
         <h2 v-else-if="status == 'expired'">Study Set Expired</h2>
       </v-card-title>
       <v-card-text v-if="status == 'completed'">
@@ -11,9 +11,12 @@
           set screen.
         </p>
         <p v-else>
-          You've finished this study set! Would you like to create another set with the
-          same settings or go back to the the create study set screen to change options?
+          Would you like to create another set with the same settings or go back to the
+          the create study set screen to change options?
         </p>
+        <h3 v-show="userPlace !== null">
+          You have studied the {{ userPlace }}th-most minutes on KAR³L today!
+        </h3>
       </v-card-text>
       <v-card-text v-else-if="status == 'expired'">
         <p v-if="inTestMode">
@@ -47,7 +50,7 @@
 <script lang="ts">
   import { Component, Vue, Watch } from "vue-property-decorator";
   import { mainStore, studyStore } from "@/store";
-  import { parseISO } from "date-fns";
+  import { parseISO, format, startOfDay } from "date-fns";
 
   @Component
   export default class StudySet extends Vue {
@@ -56,9 +59,28 @@
     };
     popup = false;
     status = "studying";
+    rankType = "total_minutes";
+    loading = true;
 
     async mounted() {
       this.popup = this.isFinished != "studying";
+    }
+
+    async getLeaderboard() {
+      this.loading = true;
+      await mainStore.getLeaderboard({
+        rank_type: this.rankType,
+        date_start: format(startOfDay(new Date()), "yyyy-MM-dd"),
+      });
+      this.loading = false;
+    }
+
+    get filteredLeaderboard() {
+      return mainStore.filteredLeaderboard;
+    }
+
+    get userPlace() {
+      return this.filteredLeaderboard?.user_place;
     }
 
     get isFinished() {
@@ -111,9 +133,14 @@
     }
 
     @Watch("isFinished")
-    onIsFinishedChanged() {
+    async onIsFinishedChanged() {
       this.popup = this.isFinished != "studying";
       this.status = this.isFinished;
+
+      if (this.isFinished != "studying") {
+        await this.getLeaderboard();
+      }
+
       setTimeout(() => {
         (this.$refs.same.$el as HTMLInputElement).focus();
       });
