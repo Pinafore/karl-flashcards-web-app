@@ -349,7 +349,7 @@
 </template>
 
 <script lang="ts">
-  import { Component, Vue, Watch } from "vue-property-decorator";
+  import { Component, Vue } from "vue-property-decorator";
   import { studyStore, mainStore } from "@/utils/store-accessor";
   import Onboard from "@/views/Onboard.vue";
   import ConnectionPopup from "@/views/ConnectionPopup.vue";
