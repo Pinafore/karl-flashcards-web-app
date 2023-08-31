@@ -84,7 +84,10 @@ const router = new VueRouter({
         {
           path: "survey",
           name: "survey",
-          beforeEnter() {location.href = 'https://docs.google.com/forms/d/e/1FAIpQLSdzTLf5f9-1LvOFHQbuNLySPp-ZdslQZIhV-UTRCfIV0ko54Q/viewform?usp=sf_link'}
+          beforeEnter() {
+            location.href =
+              "https://docs.google.com/forms/d/e/1FAIpQLSdzTLf5f9-1LvOFHQbuNLySPp-ZdslQZIhV-UTRCfIV0ko54Q/viewform?usp=sf_link";
+          },
         },
         {
           path: "main",

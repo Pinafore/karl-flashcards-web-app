@@ -11,6 +11,7 @@ from fastapi import BackgroundTasks
 from app import crud, models, schemas
 from app.api import deps
 from app.core.celery_app import celery_app
+from app.core.config import settings
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -39,7 +40,7 @@ def read_facts(
     """
     if limit > 1000:
         raise HTTPException(status_code=445, detail="Too many facts requested. Please limit to <1000 facts.")
-    if deck_ids is not None and 2 in deck_ids:
+    if deck_ids is not None and crud.deck.get_test_deck_id(db=db) in deck_ids:
         raise HTTPException(status_code=557, detail="This deck is currently unavailable")
 
     if suspended and reported:
@@ -162,6 +163,20 @@ def update_preloaded_facts(
     return True
 
 
+@router.put("/test-mode", response_model=schemas.Deck)
+def create_test_mode_facts(
+        *,
+        current_user: models.User = Depends(deps.get_current_active_superuser),  # noqa
+        db: Session = Depends(deps.get_db),
+) -> Any:
+    """
+    Update preloaded facts.
+    """
+    celery_app.send_task("app.worker.create_test_mode_facts")
+    deck = crud.deck.assign_test_deck(db, user=current_user)
+    return deck
+
+
 @router.put("/{fact_id}", response_model=schemas.Fact)
 def update_fact(
         *,
@@ -273,9 +288,6 @@ def mark_fact(
     else:
         fact = crud.fact.mark(db=perms.db, db_obj=perms.fact, user=perms.current_user)
     return fact
-
-    chicken = crud.fact.get_eligible_facts(db=db, user=user, filters=FactSearch(text="apple"))
-    assert len(chicken) == 1
 
 
 @router.delete("/report/all/{fact_id}", response_model=schemas.Fact)

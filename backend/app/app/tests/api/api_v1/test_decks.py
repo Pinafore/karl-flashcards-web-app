@@ -1,6 +1,7 @@
-from typing import Dict
+from typing import Dict, Tuple
 
 from app import crud
+from app.schemas.deck_type import DeckType
 from app.core.config import settings
 from app.models import User
 from app.schemas.deck import SuperDeckCreate
@@ -11,9 +12,9 @@ from sqlalchemy.orm import Session
 
 
 def test_create_deck(
-        client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+        client: TestClient, normal_user_token_headers: Tuple[Dict[str, str], User], db: Session
 ) -> None:
-    data = {"title": "Foo", "public": "false"}
+    data = {"title": "Foo", "deck_type": "public"}
     response = client.post(
         f"{settings.API_V1_STR}/decks/", headers=normal_user_token_headers[0], json=data,
     )
@@ -22,7 +23,7 @@ def test_create_deck(
 
 
 def test_read_deck(
-        client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+        client: TestClient, normal_user_token_headers: Tuple[Dict[str, str], User], db: Session
 ) -> None:
     deck = create_random_deck(db, normal_user_token_headers[1])
     response = client.get(
@@ -34,7 +35,7 @@ def test_read_deck(
 
 
 def test_read_decks(
-        client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+        client: TestClient, normal_user_token_headers: Tuple[Dict[str, str], User], db: Session
 ) -> None:
     response = client.get(
         f"{settings.API_V1_STR}/decks/?limit=5", headers=normal_user_token_headers[0],
@@ -43,7 +44,7 @@ def test_read_decks(
 
 
 def test_read_open_decks(
-        client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+        client: TestClient, normal_user_token_headers: Tuple[Dict[str, str], User], db: Session
 ) -> None:
     response = client.get(
         f"{settings.API_V1_STR}/decks/public", headers=normal_user_token_headers[0],
@@ -52,11 +53,11 @@ def test_read_open_decks(
 
 
 def test_assign_deck(
-        client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+        client: TestClient, normal_user_token_headers: Tuple[Dict[str, str], User], db: Session
 ) -> None:
-    data = SuperDeckCreate(title="Public", public=True)
+    data = SuperDeckCreate(title="Public", deck_type=DeckType.public)
     deck = crud.deck.create(db=db, obj_in=data)
-    data2 = SuperDeckCreate(title="Public2", public=True)
+    data2 = SuperDeckCreate(title="Public2", deck_type=DeckType.public)
     deck2 = crud.deck.create(db=db, obj_in=data2)
     response = client.put(
         f"{settings.API_V1_STR}/decks/?deck_ids={deck.id}&deck_ids={deck2.id}",
@@ -68,12 +69,12 @@ def test_assign_deck(
     db.refresh(user)
     assert content[0]["title"] == deck.title
     assert content[1]["title"] == deck2.title
-    assert deck in user.decks
-    assert deck2 in user.decks
+    assert deck in user.all_decks
+    assert deck2 in user.all_decks
 
 
 def test_update_deck(
-        client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+        client: TestClient, normal_user_token_headers: Tuple[Dict[str, str], User], db: Session
 ) -> None:
     deck = create_random_deck(db, normal_user_token_headers[1])
     old_title = deck.title
@@ -90,7 +91,7 @@ def test_update_deck(
 
 
 def test_delete_deck(
-        client: TestClient, normal_user_token_headers: (Dict[str, str], User), db: Session
+        client: TestClient, normal_user_token_headers: Tuple[Dict[str, str], User], db: Session
 ) -> None:
     deck = create_random_deck(db, normal_user_token_headers[1])
     user = normal_user_token_headers[1]

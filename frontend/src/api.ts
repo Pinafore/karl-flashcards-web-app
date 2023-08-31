@@ -104,16 +104,23 @@ export const api = {
       authHeaders(token),
     );
   },
-  async getStudyFacts(token: string, deckIds: number[]) {
+  async getStudyFacts(
+    token: string,
+    deckIds: number[],
+    selectedNum: number,
+    forceNew: boolean,
+  ) {
     let url = `${apiUrl}/api/study/`;
+    url += `?`;
     if (deckIds.length > 0) {
-      url += `?`;
       for (const eachId in deckIds) {
         url += `deck_ids=${deckIds[eachId]}&`;
       }
       url = url.slice(0, -1);
     }
-    return axios.get<IComponents["Fact"][]>(url, authHeaders(token));
+    url += `&limit=${selectedNum}`;
+    url += `&force_new=${forceNew}`;
+    return axios.get<IComponents["StudySet"]>(url, authHeaders(token));
   },
   async createFact(token: string, data: IComponents["FactCreate"]) {
     return axios.post(`${apiUrl}/api/facts/`, data, authHeaders(token));
@@ -171,8 +178,16 @@ export const api = {
       authHeaders(token),
     );
   },
-  async updateSchedule(token: string, data: IComponents["Schedule"][]) {
-    return axios.put(`${apiUrl}/api/study/`, data, authHeaders(token));
+  async updateSchedule(
+    token: string,
+    studyset_id: number,
+    data: IComponents["Schedule"][],
+  ) {
+    return axios.put(
+      `${apiUrl}/api/study/?studyset_id=${studyset_id}`,
+      data,
+      authHeaders(token),
+    );
   },
   async updateFact(token: string, id: number, data: IComponents["FactUpdate"]) {
     return axios.put(`${apiUrl}/api/facts/${id}`, data, authHeaders(token));

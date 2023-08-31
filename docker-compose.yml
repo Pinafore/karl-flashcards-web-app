@@ -1,4 +1,4 @@
-version: "3.3"
+version: "3.6"
 services:
 
   proxy:
@@ -86,8 +86,6 @@ services:
     networks:
       - ${TRAEFIK_PUBLIC_NETWORK}
       - default
-    depends_on:
-      - db
     env_file:
       - .env
     deploy:
@@ -105,14 +103,14 @@ services:
         - traefik.http.services.${STACK_NAME?Variable not set}-pgadmin.loadbalancer.server.port=5050
 
   queue:
-    image: rabbitmq:3
+    image: rabbitmq
     # Using the below image instead is required to enable the "Broker" tab in the flower UI:
     # image: rabbitmq:3-management
     #
     # You also have to change the flower command
   
   flower:
-    image: mher/flower:0.9.5
+    image: mher/flower:0.9.7
     networks:
       - ${TRAEFIK_PUBLIC_NETWORK?Variable not set}
       - default
@@ -139,8 +137,6 @@ services:
   
   backend:
     image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
-    depends_on:
-      - db
     env_file:
       - .env
     environment:
@@ -163,9 +159,6 @@ services:
   
   celeryworker:
     image: '${DOCKER_IMAGE_CELERYWORKER?Variable not set}:${TAG-latest}'
-    depends_on:
-      - db
-      - queue
     env_file:
       - .env
     environment:

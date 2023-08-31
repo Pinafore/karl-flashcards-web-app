@@ -11,6 +11,8 @@ from app.db.session import SessionLocal
 from sentry_sdk.integrations.celery import CeleryIntegration
 from sqlalchemy.orm import Session
 
+from app.schemas import DeckType
+
 if settings.SENTRY_DSN:
     sentry_sdk.init(
         settings.SENTRY_DSN,
@@ -34,7 +36,7 @@ def load_quizbowl_facts() -> str:
         with open(filename, "r") as file:
             json_data = json.load(file)
             for fact in json_data:
-                crud.fact.create_fact(db, fact, user, True)
+                crud.fact.create_fact(db, fact, user, DeckType.public)
                 #     deck = crud.deck.find_or_create(db, proposed_deck=fact["deck"], user=user, public=True)
                 #     fact_in = schemas.FactCreate(
                 #             text=fact["text"],
@@ -47,7 +49,9 @@ def load_quizbowl_facts() -> str:
                 #         )
                 #     crud.fact.create_with_owner(db, obj_in=fact_in, user=user)
                 count = count + 1
+        db.close()
         return f"{count} quizbowl questions loaded"
+    db.close()
     return f"superuser does not exist yet"
 
 
@@ -58,10 +62,11 @@ def load_jeopardy_facts() -> str:
     if user:
         dirname = os.path.dirname(os.path.abspath(__file__))
         filename = os.path.join(dirname, "./data/jeopardy.json")
-        deck = crud.deck.find_or_create(db, proposed_deck="Jeopardy", user=user, public=True)
+        deck = crud.deck.find_or_create(db, proposed_deck="Jeopardy", user=user, deck_type=DeckType.public)
         with open(filename, "r") as file:
             json_data = json.load(file)
-            for count, fact in enumerate(itertools.islice(json_data, 0, 20000)):
+            fact_count = 0
+            for fact in itertools.islice(json_data, 0, 20000):
                 if "<" not in fact["question"]:
                     extra = {
                         "type": "Jeopardy",
@@ -79,7 +84,10 @@ def load_jeopardy_facts() -> str:
                         extra=extra
                     )
                     crud.fact.create_with_owner(db, obj_in=fact_in, user=user)
-        return f"{count + 1} quizbowl questions loaded"
+                    fact_count += 1
+        db.close()
+        return f"{fact_count + 1} quizbowl questions loaded"
+    db.close()
     return f"superuser does not exist yet"
 
 
@@ -104,7 +112,9 @@ def clean_up_preloaded_facts() -> str:
             )
             crud.fact.update(db, db_obj=fact, obj_in=fact_update)
             count = count + 1
+        db.close()
         return f"{count} facts updated"
+    db.close()
     return f"superuser does not exist yet"
 
 
@@ -113,3 +123,42 @@ def clean_up_text(text) -> str:
     text = re.sub(" /$", "\"", text)
     text = text.strip("'")
     return text
+
+
+@celery_app.task()
+def create_test_mode_facts() -> str:
+    db: Session = SessionLocal()
+    user = crud.user.get_by_email(db, email=settings.FIRST_SUPERUSER)
+    if user:
+        dirname = os.path.dirname(os.path.abspath(__file__))
+        filename = os.path.join(dirname, "./data/jeopardy.json")
+        deck = crud.deck.assign_test_deck(db, user)
+        with open(filename, "r") as file:
+            json_data = json.load(file)
+            # there seems to be 216930 jeopardy questions
+            count = 0
+            for fact in itertools.islice(json_data, 20000, None, 100):
+                if count >= 1000:
+                    break
+                if "<" not in fact["question"] and "seen here" not in fact["question"]:
+                    extra = {
+                        "type": "Jeopardy",
+                        "air_date": fact["air_date"],
+                        "value": fact["value"],
+                        "round": fact["round"],
+                        "show_number": fact["show_number"]
+                    }
+                    fact_in = schemas.FactCreate(
+                        text=fact["question"],
+                        answer=fact["answer"],
+                        deck_id=deck.id,
+                        answer_lines=[fact["answer"]],
+                        category=fact["category"],
+                        extra=extra
+                    )
+                    crud.fact.create_with_owner(db, obj_in=fact_in, user=user)
+                    count += 1
+        db.close()
+        return f"{count} quizbowl questions loaded to deck: {deck.title}"
+    db.close()
+    return f"superuser does not exist yet"

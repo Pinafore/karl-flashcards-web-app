@@ -10,64 +10,98 @@
       <v-card-text>
         <div>
           <h2>
-            Project: Streamlining Knowledge Acquisition Through A Novel
+            Project Title: Streamlining Knowledge Acquisition Through A Novel
             Spaced-Repetition Model
           </h2>
           <h3>Purpose of the Study</h3>
           <p style="text-align:left">
             This research is being conducted by Jordan Boyd-Graber at the University of
             Maryland, College Park. We are inviting you to participate in this research
-            project because you are interested in trivia, quizbowl, Jeopardy, and/or
+            project because you are interested in trivia, Quizbowl, Jeopardy, and/or
             general knowledge. The purpose of this research project is to make it easier
             and more efficient to study new facts that may come up in these scenarios.
           </p>
 
           <h3>Procedures</h3>
           <p style="text-align:left">
-            The procedures of this study involve first signing up on either the website
-            or mobile app with an email and password. You will then be asked to select
-            what decks of facts (Jeopardy, history, literature) you would like to learn
-            with. You are then encouraged to consistently study facts for as long as you
-            would like each day until the end of the experiment. While it is encouraged
-            that you study every day, this is not required. We estimate that you will
-            spend between 10 and 500 hours over the course of this study, depending on
-            your interest, which will continue to the end of June 2021. An optional
-            official group chat will allow users to provide quick user feedback and
-            discussion. External trivia performance data and surveys will be collected
-            to help measure the effects of this application. We will have multiple
-            rounds of study in order to iterate and improve our scheduler. Throughout
-            these rounds, we will be gathering user feedback to help improve flashcard
-            suggestions. In phase two of the study, users will be able to test different
-            scheduler variants that will be modified over time rather than being
-            assigned randomly to an unchanged scheduler for the course of the
-            experiment. Future phases may involve a return to randomized trials to
-            provide more valuable quantitative data for analysis of improved scheduler
-            models.
+            To begin the study, you need to sign up with an email and a password either
+            on the website or through the mobile app. Once logged in, you will be asked
+            to select decks of flashcards you would like to study. The app provides some
+            default decks such as Jeopardy and History, but you can also create your own
+            decks and change what to study any time.
+          </p>
+          <p style="text-align:left">
+            During the course of our study, we estimate that you will spend between 10
+            and 500 hours. Participating in this research is a requirement for using our
+            application but there is no minimum required time commitment for using the
+            application. However, we encourage users to study at least 10 minutes a day
+            in our app, which would help us gather data about performance and memory
+            over time.
+          </p>
+          <p style="text-align:left">
+            Our app has two modes: study mode and test mode. The study mode resembles
+            how you would normally study with flashcards: our app shows the front of a
+            flashcard, asks for your answer, and tells you whether the answer is
+            correct. Our algorithm then chooses the next flashcard that is most suitable
+            given your existing knowledge.
+          </p>
+          <p style="text-align:left">
+            In test mode, you will be asked to review 10-30 cards (exact number TBD)
+            until you recall every flashcard. Every time a fact is studied, information
+            including the date studied, time taken, user id, response information, and
+            whether you were learning a new fact is stored in a database. Additionally,
+            information about your interaction with flashcards (creation, marking,
+            editing) will also be recorded. The only identifying information tied to
+            these user ids are the emails and usernames of users in this study.
+          </p>
+          <p style="text-align:left">
+            Our study will take place between Mar. 2022 and Dec. 2022. You are
+            encouraged (but not required) to study consistently for as long as you would
+            like each day. During the course of our study, we estimate that you will
+            spend between 10 and 500 hours. Continual usage is not required, but we
+            encourage spending at least 10 minutes a day for continued practice over
+            time.
+          </p>
+          <p style="text-align:left">
+            At the end of our study, we will give out rewards (detailed below). An
+            optional official group chat will allow you to provide quick user feedback
+            and discussion. All participants will be able to see the responses and
+            usernames of other participants in the group chat.
           </p>
           <h3>Potential Risks and Discomforts</h3>
           <p style="text-align:left">
-            There are no known risks beyond that of using a computer associated to
-            participants of this study.
+            The only known risk to participants of this study is in confidentiality of
+            study participation and data from studying flashcards with the app. This
+            risk will be mitigated through the procedures described in Confidentiality.
           </p>
 
           <h3>Potential Benefits</h3>
           <p style="text-align:left">
-            The benefits to you include the ability to practice trivia online. We hope
-            that, in the future, other people might benefit from this study through
-            improved understanding of how to introduce and schedule flashcards for
-            learning and review.
+            The benefits to you include the ability to practice trivia online, but there
+            are no other direct benefits. However, this study aims to use techniques in
+            machine learning and natural language processing to make learning and
+            retaining information more efficient. Participants in this study may
+            therefore benefit from being able to better study information they are
+            interested in online. Practice with this application could also help
+            participants prepare for academic competitions like quizbowl and Jeopardy
+            through exposure to new facts and a potentially improved system for
+            scheduling flashcards.
           </p>
 
           <h3>Confidentiality</h3>
           <p style="text-align:left">
-            We will not ask you for any personal information beyond your email address
-            and, if applicable, external trivia performance data. Any potential loss of
-            confidentiality will be minimized by storing data securely in a
-            password-protected account. After the end of the experiment, data will be
-            anonymized and released publicly. We may ask you to participate in optional
-            surveys where you may optionally provide your name and link to public
-            statistics pages for trivia competitions, which we will incorporate into
-            evaluations of our scheduler performance.
+            We will not ask you for any personal information beyond your username and
+            email. Data collected in this study will be securely stored in a database
+            hosted on password-protected webservers and cloud-based file storage. Only
+            researchers will have access to users’ emails and no other identifying
+            information will be collected in the app. After the end of the experiment,
+            data will be anonymized and released publicly. Your email will be kept in a
+            separate table and linked to a username and user id. These user ids and
+            usernames are used throughout the experiment to schedule flashcards and for
+            statistical leaderboards, but the collected usernames and emails will be
+            stored in secured file storage and destroyed after the completion of this
+            study. To maintain linkage in study data, a new randomized user id will be
+            generated in replacement of the identification keys in use during the study.
           </p>
           <p style="text-align:left">
             If we write a report or article about this research project, your identity
@@ -76,15 +110,28 @@
             governmental authorities if you or someone else is in danger or if we are
             required to do so by law.
           </p>
+          <p style="text-align:left">
+            During the course of the study, the collected data will only be accessible
+            to PI Jordan Boyd-Graber and Co-PIs Shi Feng & Matthew Shu. Your
+            identifiable information (email address) will be deleted at the end of the
+            study.
+          </p>
           <h3>Compensation</h3>
           <p style="text-align:left">
-            A $20 gift card will be given to the five users who spend the most time
-            studying in the app over the course of the study, which will last until the
-            end of June 2021. 10 other users who answer over 200 questions will be
-            randomly selected to receive $10 gift cards. If you will earn $100 or more
-            as a research participant in this study, you must provide your name, address
-            and SSN to receive compensation. If you do not earn over $100 only your name
-            and address will be collected to receive compensation.
+            We will conduct our study between Mar. 2022 and Dec. 2022.
+          </p>
+          <p style="text-align:left">
+            Top five users who studied the most cards during this time will each receive
+            a $20 gift card. Other users who studied over 200 cards each round will
+            enter a raffle to win one of ten gift cards, $10 each.
+          </p>
+          <p style="text-align:left">
+            If you will earn $100 or more as a research participant in this study, you
+            must provide your name, address and SSN to receive compensation.
+          </p>
+          <p style="text-align:left">
+            If you do not earn over $100 only your name and address will be collected to
+            receive compensation. Gift cards will be distributed through email.
           </p>
           <h3>Right to Withdraw and Questions</h3>
           <p style="text-align:left">
@@ -103,9 +150,10 @@
 
           <p style="text-align:left">
             Jordan Boyd-Graber<br />
-            Iribe 4146 University of Maryland <br />
-            jbg@umiacs.umd.edu<br />
-            (301)-405-6766<br />
+            4146 Iribe University of Maryland <br />
+            College Park, Maryland, 20742 <br />
+            E-mail: jbg@umiacs.umd.edu<br />
+            Telephone: (301)-405-6766<br />
           </p>
 
           <h3>Participant Rights</h3>

@@ -40,20 +40,23 @@
       </v-list>
       <v-divider></v-divider>
       <v-list subheader>
+        <v-list-item v-if="recallPopup" to="/main/study/learn">
+          <v-list-item-action>
+            <v-icon>mdi-lightbulb-on</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title v-if="expiration != null"
+              >Resume Study</v-list-item-title
+            >
+            <v-list-item-title v-else>Quick Study (All)</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
         <v-list-item to="/main/study/decks">
           <v-list-item-action>
             <v-icon>{{ mdiBookMultiple }}</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title>Decks</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <v-list-item to="/main/study/learn">
-          <v-list-item-action>
-            <v-icon>mdi-lightbulb-on</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>Study All</v-list-item-title>
+            <v-list-item-title>New Study Set</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
         <v-list-item to="/main/browse">
@@ -144,6 +147,14 @@
             <v-list-item-title>Contact</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+        <v-list-item to="/privacy-irb">
+          <v-list-item-action>
+            <v-icon>mdi-information-outline</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>IRB</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
         <v-list-item @click="logout">
           <v-list-item-action>
             <v-icon>mdi-close</v-icon>
@@ -182,7 +193,14 @@
     >
       <v-app-bar-nav-icon @click.stop="switchShowDrawer"></v-app-bar-nav-icon>
       <v-btn class="mx-n3" text x-large @click.stop="goHome">{{ appName }}</v-btn>
-      <v-spacer></v-spacer>
+      <v-list-item v-show="expiration != null">
+        <v-list-item-content v-if="$vuetify.breakpoint.xsOnly" style="padding: 0px">
+          Expires: {{ expiration }}
+        </v-list-item-content>
+        <v-list-item-content v-else>
+          Current Study Set Expires at {{ expiration }}
+        </v-list-item-content>
+      </v-list-item>
       <v-list-item class="justify-end px-2">
         <v-icon>mdi-weather-sunny</v-icon>
         <v-list-item-action>
@@ -197,13 +215,13 @@
           </v-btn>
         </template>
         <v-list>
-          <v-list-item to="/main/profile">
-            <v-list-item-content>
-              <v-list-item-title>Profile</v-list-item-title>
-            </v-list-item-content>
+          <v-list-item to="/ma in/profile">
             <v-list-item-action>
               <v-icon>mdi-account</v-icon>
             </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>Profile</v-list-item-title>
+            </v-list-item-content>
           </v-list-item>
           <v-list-item to="/main/contact">
             <v-list-item-action>
@@ -211,6 +229,14 @@
             </v-list-item-action>
             <v-list-item-content>
               <v-list-item-title>Contact</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+          <v-list-item to="/privacy-irb">
+            <v-list-item-action>
+              <v-icon>mdi-information-outline</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>IRB</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
           <v-list-item @click="logout">
@@ -243,6 +269,8 @@
     mdiFormatListNumbered,
     mdiBookInformationVariant,
   } from "@mdi/js";
+
+  import { parseISO, format } from "date-fns";
 
   const routeGuardMain = async (to, _from, next) => {
     if (to.path === "/main") {
@@ -279,6 +307,14 @@
       mainStore.setDashboardShowDrawer(value);
     }
 
+    // get resumeAvail() {
+    //   if (this.expiration() ) {
+    //     return mainStore.userProfile.resume_studyset;
+    //   } else {
+    //     return false;
+    //   }
+    // }
+
     get darkMode() {
       this.$vuetify.theme.dark = mainStore.userProfile?.dark_mode ?? false;
       return mainStore.userProfile?.dark_mode;
@@ -303,6 +339,22 @@
 
     public async logout() {
       await mainStore.userLogOut();
+    }
+
+    get recallPopup() {
+      if (mainStore.userProfile) {
+        return (mainStore.userProfile.recall_target ?? -1) != -1;
+      } else {
+        return false;
+      }
+    }
+
+    get expiration() {
+      if (mainStore.userProfile && mainStore.userProfile.study_set_expiry_date) {
+        return format(parseISO(mainStore.userProfile.study_set_expiry_date), "h:mm a");
+      } else {
+        return null;
+      }
     }
   }
 </script>

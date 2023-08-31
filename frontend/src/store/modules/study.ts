@@ -1,25 +1,31 @@
 import { api } from "@/api";
 import { Action, Module, Mutation, VuexModule } from "vuex-module-decorators";
 import { IComponents, IStudyShow, Permission } from "@/interfaces";
-import { mainStore } from "@/utils/store-accessor";
+import { mainStore, studyStore } from "@/utils/store-accessor";
 import router from "@/router";
 
 @Module({ name: "study" })
 export default class StudyModule extends VuexModule {
   study: IComponents["Fact"][] = [];
+  init_unstudied = 0;
+  studyset: IComponents["StudySet"] | null = null;
   deckIds: number[] | null = null;
   schedule: IComponents["Schedule"][] = [];
   recommendation = false;
   show: IStudyShow = {
-    text: "loading",
+    text: "Loading...",
     enable_report: false,
     enable_actions: false,
+    enable_show_back: false,
     marked: false,
   };
   frontTime = 0;
   time = 0;
   timer: NodeJS.Timeout | undefined = undefined;
   backTime = 0;
+  inTestMode = false;
+  forceNew = false;
+  selectedNum = 20;
 
   @Mutation
   setDeckIds(payload) {
@@ -32,8 +38,37 @@ export default class StudyModule extends VuexModule {
   }
 
   @Mutation
+  updateSelectedNum(payload) {
+    this.selectedNum = payload;
+  }
+
+  @Mutation
+  setRestudy() {
+    if (this.studyset) {
+      this.studyset.needs_restudy = true;
+    }
+  }
+
+  @Mutation
+  setForceNew(payload) {
+    this.forceNew = payload;
+  }
+
+  @Mutation
   emptySchedule() {
     this.schedule = [];
+  }
+
+  @Mutation
+  updateUnstudied() {
+    if (this.studyset) {
+      this.studyset.num_unstudied -= 1;
+    }
+  }
+
+  @Mutation
+  setInitUnstudied(payload) {
+    this.init_unstudied = payload;
   }
 
   @Mutation
@@ -43,13 +78,37 @@ export default class StudyModule extends VuexModule {
 
   @Mutation
   setShow(payload: IComponents["Fact"]) {
+    const popup = !(
+      mainStore.recallPopup ||
+      mainStore.onboarding ||
+      mainStore.testModePopup
+    );
     this.show = {
       text: payload.text,
       fact: payload,
-      enable_report: payload.permission === Permission.viewer,
-      enable_actions: true,
+      enable_report: payload.permission === Permission.viewer && popup,
+      enable_actions: popup && !this.inTestMode,
+      enable_show_back: popup,
       marked: payload.marked ?? false,
     };
+  }
+
+  @Mutation
+  setShowActions() {
+    if (
+      mainStore.connectionPopup ||
+      mainStore.testModePopup ||
+      mainStore.recallPopup ||
+      mainStore.onboarding
+    ) {
+      this.show.enable_actions = false;
+      this.show.enable_show_back = false;
+    } else {
+      if (this.show.fact) {
+        this.show.enable_actions = true;
+        this.show.enable_show_back = true;
+      }
+    }
   }
 
   @Mutation
@@ -58,6 +117,7 @@ export default class StudyModule extends VuexModule {
       text: "Loading...",
       enable_report: false,
       enable_actions: false,
+      enable_show_back: false,
       marked: false,
     };
   }
@@ -68,6 +128,7 @@ export default class StudyModule extends VuexModule {
       text: "You have finished studying these decks for now, check back in later!",
       enable_report: false,
       enable_actions: false,
+      enable_show_back: false,
       marked: false,
     };
   }
@@ -78,6 +139,7 @@ export default class StudyModule extends VuexModule {
       text: "A problem occurred, please check back in later!",
       enable_report: false,
       enable_actions: false,
+      enable_show_back: false,
       marked: false,
     };
   }
@@ -85,6 +147,11 @@ export default class StudyModule extends VuexModule {
   @Mutation
   setStudy(payload: IComponents["Fact"][]) {
     this.study = payload;
+  }
+
+  @Mutation
+  setStudySet(payload: IComponents["StudySet"] | null) {
+    this.studyset = payload;
   }
 
   @Mutation
@@ -105,15 +172,18 @@ export default class StudyModule extends VuexModule {
 
   @Mutation
   removeFirstFact() {
-    this.study.shift();
+    if (this.studyset) {
+      this.studyset.unstudied_facts.shift();
+    }
   }
 
   @Mutation
   loading() {
     this.show = {
-      text: "loading",
+      text: "Loading...",
       enable_report: false,
       enable_actions: false,
+      enable_show_back: false,
       marked: false,
     };
   }
@@ -126,6 +196,11 @@ export default class StudyModule extends VuexModule {
   @Mutation
   clearTime() {
     this.time = 0;
+  }
+
+  @Mutation
+  setInTestMode(payload: boolean) {
+    this.inTestMode = payload;
   }
 
   @Action
@@ -172,32 +247,50 @@ export default class StudyModule extends VuexModule {
 
   @Action
   async getNextShow() {
+    // console.log(this.studyset);
+    // if (this.studyset) {
+    //   console.log(this.studyset.unstudied_facts.length);
+    // }
     this.clearTimer();
-    if (this.study.length > 0) {
-      this.setShow(this.study[0]);
-      this.startTimer();
-      this.removeFirstFact();
-    } else {
-      await this.getStudyFacts();
+    if (this.studyset) {
+      if (this.studyset.unstudied_facts.length > 0) {
+        this.setShow(this.studyset.unstudied_facts[0]);
+        this.startTimer();
+        this.removeFirstFact();
+      } else if (this.studyset.needs_restudy == true) {
+        await this.getStudyFacts();
+      }
     }
   }
 
   @Action
   async getStudyFacts() {
+    this.setStudySet(null);
     this.clearTimer();
     try {
       this.setShowLoading();
-      const response = await api.getStudyFacts(mainStore.token, this.deckIds ?? []);
-      if (response.data.length == 0) {
+      const response = await api.getStudyFacts(
+        mainStore.token,
+        this.deckIds ?? [],
+        this.selectedNum,
+        this.forceNew,
+      );
+      this.setForceNew(false);
+      if (response.data.unstudied_facts.length == 0) {
         this.setShowEmpty();
         this.setStudy([]);
       } else {
-        this.setStudy(response.data);
+        this.setStudySet(response.data);
+        this.setStudy(response.data.unstudied_facts);
+        this.setInitUnstudied(response.data.num_unstudied);
+        this.setInTestMode(response.data.is_test);
         await this.getNextShow();
       }
       mainStore.setConnectionError(false);
       mainStore.setSchedulerError(false);
+      await mainStore.getUserProfile();
     } catch (error) {
+      console.log(error);
       await mainStore.checkApiError(error);
       this.setShowError();
     }
@@ -321,16 +414,21 @@ export default class StudyModule extends VuexModule {
 
   @Action
   async evaluateAnswer(typed: string) {
-    if (this.show.fact && this.show.enable_actions) {
+    if (this.show.fact && this.show.enable_show_back) {
       try {
         this.markFrontTime();
         this.clearTimer();
-        const response = await api.evalAnswer(
-          mainStore.token,
-          this.show.fact.fact_id,
-          typed,
-        );
-        this.setRecommendation(response.data);
+        if (typed.trimStart() == "") {
+          this.setRecommendation(false);
+        } else {
+          const response = await api.evalAnswer(
+            mainStore.token,
+            this.show.fact.fact_id,
+            typed,
+          );
+          this.setRecommendation(response.data);
+        }
+
         this.startTimer();
       } catch (error) {
         await mainStore.checkApiError(error);
@@ -340,11 +438,12 @@ export default class StudyModule extends VuexModule {
 
   @Action
   async updateSchedule() {
-    if (this.show.fact && this.show.enable_actions) {
+    if (this.show.fact && this.show.enable_show_back && this.studyset) {
       try {
         this.setShowLoading();
-        await api.updateSchedule(mainStore.token, this.schedule);
+        await api.updateSchedule(mainStore.token, this.studyset.id, this.schedule);
         this.emptySchedule();
+        this.updateUnstudied();
         await this.getNextShow();
         mainStore.setConnectionError(false);
         mainStore.setSchedulerError(false);

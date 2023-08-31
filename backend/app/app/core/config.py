@@ -1,5 +1,6 @@
 import secrets
 from typing import Any, Dict, List, Optional, Union
+from app.schemas.target_window import TargetWindow
 
 from pydantic import AnyHttpUrl, BaseSettings, EmailStr, HttpUrl, PostgresDsn, validator
 
@@ -17,6 +18,17 @@ class Settings(BaseSettings):
     # "http://localhost:8080", "http://local.dockertoolbox.tiangolo.com"]'
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
     INTERFACE: str = "http://host.docker.internal:4000/"
+    TEST_MODE_FIRST_TRIGGER_SESSIONS: int = 5
+    TEST_MODE_TRIGGER_DAYS: int = 10
+    TEST_MODE_TRIGGER_SESSIONS: int = 7
+    TEST_MODE_PER_ROUND: int = 20
+    TEST_MODE_TRIGGER_FACTS: int = 100
+    DEFAULT_DECK_ID: int = 1
+    TEST_DECK_NAME: str = "Test Mode"
+    STUDY_SET_EXPIRATION_HOURS: int = 2
+    TEST_RECALL_WINDOW: TargetWindow = TargetWindow(target_window_lowest=0.0
+    ,target_window_highest=1.0
+    ,target=0.5)
 
     @validator("INTERFACE")
     def get_interface(cls, v: Optional[str], values: Dict[str, Any]) -> str:

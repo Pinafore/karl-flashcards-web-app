@@ -7,12 +7,20 @@ from app.schemas.log import Log
 from pydantic import BaseModel
 
 
-class HistoryBase(BaseModel):
+class BothHistoryBase(BaseModel):
     time: datetime
     user_id: int
     fact_id: Optional[int] = None
-    log_type: Log
     details: dict
+
+
+class HistoryBase(BothHistoryBase):
+    log_type: Log
+    correct: Optional[bool] = None
+
+
+class TestHistoryBase(BothHistoryBase):
+    response: bool
 
 
 # Properties to receive on deck creation
@@ -20,8 +28,17 @@ class HistoryCreate(HistoryBase):
     pass
 
 
+class TestHistoryCreate(TestHistoryBase):
+    pass
+
+
 # Properties to receive on deck update
 class HistoryUpdate(HistoryBase):
+    pass
+
+
+# Properties to receive on deck update
+class TestHistoryUpdate(TestHistoryBase):
     pass
 
 

@@ -6,6 +6,8 @@ from app.api import deps
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pytz import timezone
 from sqlalchemy.orm import Session
+from app.core.config import settings
+from app.schemas import DeckType
 
 router = APIRouter()
 
@@ -23,7 +25,7 @@ def read_decks(
         decks = crud.deck.get_multi(db, skip=paginate.skip, limit=paginate.limit)
     else:
         decks = crud.deck.get_multi_by_owner(
-            user=current_user, skip=paginate.skip, limit=paginate.limit
+            db, user=current_user, skip=paginate.skip, limit=paginate.limit
         )
     return decks
 
@@ -73,7 +75,7 @@ def assign_decks(
         if not deck:
             raise HTTPException(status_code=404, detail="Deck not found")
 
-        if deck.public:
+        if deck.deck_type == DeckType.public:
             if deck not in current_user.decks:
                 deck = crud.deck.assign_viewer(db=db, db_obj=deck, user=current_user)
                 decks.append(deck)
@@ -91,6 +93,20 @@ def assign_decks(
     return decks
 
 
+@router.put("/test", response_model=schemas.Deck)
+def assign_all_test_deck(
+        *,
+        db: Session = Depends(deps.get_db),
+        current_user: models.User = Depends(deps.get_current_active_superuser),
+) -> Any:
+    """
+    Assign test deck to all users
+    """
+    for user in crud.user.get_all_with_status(db=db, is_beta=False):
+        deck = crud.deck.assign_test_deck(db, user)
+    return deck
+
+
 @router.put("/{deck_id}", response_model=schemas.Deck)
 def update_deck(
         *,
@@ -105,7 +121,7 @@ def update_deck(
     deck = crud.deck.get(db=db, id=deck_id)
     if not deck:
         raise HTTPException(status_code=404, detail="Deck not found")
-    if not crud.user.is_superuser(current_user) and deck.public:
+    if not crud.user.is_superuser(current_user) and deck.deck_type != DeckType.default:
         raise HTTPException(status_code=401, detail="Not enough permissions")
     deck = crud.deck.update(db=db, db_obj=deck, obj_in=deck_in)
     return deck
@@ -124,7 +140,7 @@ def read_deck(
     deck = crud.deck.get(db=db, id=deck_id)
     if not deck:
         raise HTTPException(status_code=404, detail="Deck not found")
-    if crud.user.is_superuser(current_user) or deck in current_user.decks or deck.public:
+    if crud.user.is_superuser(current_user) or deck in current_user.decks or deck.deck_type != DeckType.default:
         return deck
     else:
         raise HTTPException(status_code=401, detail="Not enough permissions")

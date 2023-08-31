@@ -24,10 +24,12 @@ sqlalchemy = "^1.3.16"
 pytest = "^5.4.1"
 python-jose = {extras = ["cryptography"], version = "^3.1.0"}
 sentry_sdk = "^0.14.3"
+cython = "^0.29.30"
 scikit-learn = "^0.22.2"
 pytest-timeout = "^1.3.4"
 tqdm = "^4.46.0"
 pandas = "^1.0.5"
+MarkupSafe = "2.0.1"
 
 [tool.poetry.dev-dependencies]
 mypy = "^0.770"

@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Optional, List
 
-from sqlalchemy import Column, ForeignKey, Integer, String, TIMESTAMP, ARRAY, cast, Index, func
+from sqlalchemy import Column, ForeignKey, Integer, String, TIMESTAMP, ARRAY, cast, Index, func, Boolean
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -15,6 +15,9 @@ if TYPE_CHECKING:
     from .suspended import Suspended  # noqa: F401
     from .deck import Deck  # noqa: F401
     from .history import History  # noqa: F401
+    from .test_history import Test_History  # noqa: F401
+    from .studyset import StudySet  # noqa: F401
+from .session_fact import Session_Fact  # noqa: F401
 
 
 def create_tsvector(*args):
@@ -44,6 +47,8 @@ class Fact(Base):
     deleters = association_proxy('deletions', 'deleter')
     reporters = association_proxy('reporteds', 'reporter')
     markers = association_proxy('marks', 'marker')
+    test_history = relationship("Test_History", back_populates="fact")
+    studysets = association_proxy('session_facts', 'studyset', creator=lambda studyset: Session_Fact(studyset=studyset))
 
     __ts_vector__ = create_tsvector(
         cast(func.coalesce(text, ''), postgresql.TEXT),
@@ -64,23 +69,22 @@ class Fact(Base):
     def permissions(self, user: User) -> Optional[Permission]:
         if self.user_id == user.id:
             return Permission.owner
-        for user_deck in user.user_decks:
+        for user_deck in user.user_decks:  # type: ignore # association proxy object is actually iterable
             if self.deck == user_deck.deck:
                 return user_deck.permissions
         else:
             return None
 
     @hybrid_method
-    def find_reports(self, user: User) -> Optional[List[FactReported]]:
+    def find_reports(self, user: User) -> List[FactReported]:
         if user.is_superuser:
             return [FactReported.construct(report_id=ind, reporter_id=report.user_id,
                                            reporter_username=report.reporter.username, **report.suggestion)
-                    for ind, report in enumerate(self.reporteds)]
+                    for ind, report in enumerate(self.reporteds)]  # type: ignore # reporteds is user end
         else:
             return [FactReported.construct(report_id=ind, reporter_id=report.user_id,
                                            reporter_username=report.reporter.username, **report.suggestion)
-                    for ind, report in enumerate(self.reporteds) if
-                    report.user_id == user.id]
+                    for ind, report in enumerate(self.reporteds) if report.user_id == user.id]  # type: ignore
 
     @hybrid_method
     def is_marked(self, user: User) -> bool:
@@ -89,3 +93,15 @@ class Fact(Base):
     @hybrid_method
     def is_suspended(self, user: User) -> bool:
         return True if user in self.suspenders else False
+
+    @hybrid_method
+    def is_deleted(self, user: User) -> bool:
+        return True if user in self.deleters else False
+
+    @hybrid_method
+    def is_reported(self, user: User) -> bool:
+        return True if user in self.reporters else False
+
+    @hybrid_property
+    def deck_name(self) -> str:
+        return self.deck.title

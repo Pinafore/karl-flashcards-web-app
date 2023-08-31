@@ -1,161 +1,187 @@
 <template>
-  <v-container fluid style="max-width:1200px">
+  <v-container fluid style="max-width:1250px">
     <onboard></onboard>
     <connection-popup></connection-popup>
+    <test-popup></test-popup>
+    <RecallPopup></RecallPopup>
+    <study-set></study-set>
     <v-card class="mx-3 my-1 py-1 px-0 px-sm-3">
       <v-card-title primary-title class="mx-3 my-0 pa-0">
-        <div class="headline primary--text">Learn</div>
+        <div v-if="inTestMode" class="headline primary--text">Test Mode</div>
+        <div
+          v-else-if="$vuetify.breakpoint.xsOnly || studyset === null"
+          class="headline primary--text"
+        >
+          Learn
+        </div>
+        <div v-else class="headline primary--text">
+          {{ studyset.short_description }}
+        </div>
+        <div
+          v-show="show.text !== `Loading...`"
+          class="headline primary--text"
+          style="margin-left: .5em"
+        >
+          ({{ current_study_num }} of {{ num_facts }})
+        </div>
         <v-spacer></v-spacer>
-
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn
-              v-if="$vuetify.breakpoint.mdAndDown"
-              :disabled="!show.enable_actions"
-              text
-              icon
-              v-bind="attrs"
-              @click="dialog = true"
-              v-on="on"
-            >
-              <v-icon>mdi-information</v-icon>
-            </v-btn>
-            <v-btn
-              v-else
-              :disabled="!show.enable_actions"
-              class="ma-1 pa-2"
-              v-bind="attrs"
-              @click="dialog = true"
-              v-on="on"
-            >
-              <v-icon>mdi-information</v-icon>Debug (Alt-/)
-            </v-btn>
-          </template>
-          <span>Debug (Alt-/)</span>
-        </v-tooltip>
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn
-              v-if="$vuetify.breakpoint.mdAndDown"
-              :disabled="!show.enable_actions"
-              text
-              icon
-              v-bind="attrs"
-              @click="mark()"
-              v-on="on"
-            >
-              <v-icon>mdi-star</v-icon>
-            </v-btn>
-            <v-btn
-              v-else
-              :disabled="!show.enable_actions"
-              class="ma-1 pa-2"
-              v-bind="attrs"
-              @click="mark()"
-              v-on="on"
-            >
-              <v-icon left>mdi-star</v-icon>Favorite (Alt-M)
-            </v-btn>
-          </template>
-          <span>Favorite (Alt-M)</span>
-        </v-tooltip>
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn
-              v-if="$vuetify.breakpoint.mdAndDown"
-              :disabled="!show.enable_actions"
-              text
-              icon
-              v-bind="attrs"
-              @click="suspend()"
-              v-on="on"
-            >
-              <v-icon>mdi-pause</v-icon>
-            </v-btn>
-            <v-btn
-              v-else
-              :disabled="!show.enable_actions"
-              class="ma-1 pa-2"
-              v-bind="attrs"
-              @click="suspend()"
-              v-on="on"
-            >
-              <v-icon left>mdi-pause</v-icon>Suspend (Alt-S)
-            </v-btn>
-          </template>
-          <span>Suspend (Alt-S)</span>
-        </v-tooltip>
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn
-              v-if="$vuetify.breakpoint.mdAndDown"
-              :disabled="!show.enable_actions"
-              text
-              icon
-              v-bind="attrs"
-              @click="remove()"
-              v-on="on"
-            >
-              <v-icon>mdi-delete</v-icon>
-            </v-btn>
-            <v-btn
-              v-else
-              class="ma-1 pa-2"
-              :disabled="!show.enable_actions"
-              v-bind="attrs"
-              @click="remove()"
-              v-on="on"
-            >
-              <v-icon left>mdi-delete</v-icon>Delete (Alt-D)
-            </v-btn>
-          </template>
-          <span>Delete (Alt-D)</span>
-        </v-tooltip>
-        <span v-if="show.enable_report">
+        <span v-show="!inTestMode">
           <v-tooltip bottom>
             <template v-slot:activator="{ on, attrs }">
               <v-btn
                 v-if="$vuetify.breakpoint.mdAndDown"
+                :disabled="!show.enable_actions"
                 text
                 icon
                 v-bind="attrs"
-                @click="report()"
+                @click="dialog = true"
                 v-on="on"
               >
-                <v-icon>mdi-alert-octagon</v-icon>
+                <v-icon>mdi-information</v-icon>
+              </v-btn>
+              <v-btn
+                v-else
+                :disabled="!show.enable_actions"
+                class="ma-1 pa-2"
+                v-bind="attrs"
+                @click="dialog = true"
+                v-on="on"
+              >
+                <v-icon>mdi-information</v-icon>Info: Alt-/
+              </v-btn>
+            </template>
+            <span>Info (Alt-/)</span>
+          </v-tooltip>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                v-if="$vuetify.breakpoint.mdAndDown"
+                :disabled="!show.enable_actions"
+                text
+                icon
+                v-bind="attrs"
+                @click="mark()"
+                v-on="on"
+              >
+                <v-icon>mdi-star</v-icon>
+              </v-btn>
+              <v-btn
+                v-else
+                :disabled="!show.enable_actions"
+                class="ma-1 pa-2"
+                v-bind="attrs"
+                @click="mark()"
+                v-on="on"
+              >
+                <v-icon left>mdi-star</v-icon>Mark: Alt-M
+              </v-btn>
+            </template>
+            <span>Favorite (Alt-M)</span>
+          </v-tooltip>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                v-if="$vuetify.breakpoint.mdAndDown"
+                :disabled="!show.enable_actions"
+                text
+                icon
+                v-bind="attrs"
+                @click="suspend()"
+                v-on="on"
+              >
+                <v-icon>mdi-pause</v-icon>
+              </v-btn>
+              <v-btn
+                v-else
+                :disabled="!show.enable_actions"
+                class="ma-1 pa-2"
+                v-bind="attrs"
+                @click="suspend()"
+                v-on="on"
+              >
+                <v-icon left>mdi-pause</v-icon>Suspend: Alt-S
+              </v-btn>
+            </template>
+            <span>Suspend (Alt-S)</span>
+          </v-tooltip>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                v-if="$vuetify.breakpoint.mdAndDown"
+                :disabled="!show.enable_actions"
+                text
+                icon
+                v-bind="attrs"
+                @click="remove()"
+                v-on="on"
+              >
+                <v-icon>mdi-delete</v-icon>
               </v-btn>
               <v-btn
                 v-else
                 class="ma-1 pa-2"
+                :disabled="!show.enable_actions"
                 v-bind="attrs"
-                @click="report()"
+                @click="remove()"
                 v-on="on"
               >
-                <v-icon left>mdi-alert-octagon</v-icon>Report (Alt-R)
+                <v-icon left>mdi-delete</v-icon>Delete: Alt-D
               </v-btn>
             </template>
-            <span>Report (Alt-R)</span>
+            <span>Delete (Alt-D)</span>
           </v-tooltip>
-        </span>
-        <span v-else-if="show.enable_actions">
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn
-                v-if="$vuetify.breakpoint.mdAndDown"
-                text
-                icon
-                v-bind="attrs"
-                @click="edit()"
-                v-on="on"
-              >
-                <v-icon>mdi-pencil</v-icon>
-              </v-btn>
-              <v-btn v-else class="ma-1 pa-2" v-bind="attrs" @click="edit()" v-on="on">
-                <v-icon left>mdi-pencil</v-icon>Edit (Alt-E)
-              </v-btn>
-            </template>
-            <span>Edit (Alt-E)</span>
-          </v-tooltip>
+          <span v-if="show.enable_report">
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  v-if="$vuetify.breakpoint.mdAndDown"
+                  text
+                  icon
+                  v-bind="attrs"
+                  @click="report()"
+                  v-on="on"
+                >
+                  <v-icon>mdi-alert-octagon</v-icon>
+                </v-btn>
+                <v-btn
+                  v-else
+                  class="ma-1 pa-2"
+                  v-bind="attrs"
+                  @click="report()"
+                  v-on="on"
+                >
+                  <v-icon left>mdi-alert-octagon</v-icon>Report: Alt-R
+                </v-btn>
+              </template>
+              <span>Report (Alt-R)</span>
+            </v-tooltip>
+          </span>
+          <span v-else-if="show.enable_actions">
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  v-if="$vuetify.breakpoint.mdAndDown"
+                  text
+                  icon
+                  v-bind="attrs"
+                  @click="edit()"
+                  v-on="on"
+                >
+                  <v-icon>mdi-pencil</v-icon>
+                </v-btn>
+                <v-btn
+                  v-else
+                  class="ma-1 pa-2"
+                  v-bind="attrs"
+                  @click="edit()"
+                  v-on="on"
+                >
+                  <v-icon left>mdi-pencil</v-icon>Edit: Alt-E
+                </v-btn>
+              </template>
+              <span>Edit (Alt-E)</span>
+            </v-tooltip>
+          </span>
         </span>
       </v-card-title>
     </v-card>
@@ -165,7 +191,7 @@
           <v-col cols="12" sm="auto">
             <div
               v-if="
-                show.enable_actions &&
+                show.enable_show_back &&
                   show.fact &&
                   show.fact.category &&
                   show.fact.category.toString() !== 'None' &&
@@ -179,7 +205,7 @@
           </v-col>
           <v-col cols="12" sm="auto">
             <div
-              v-if="show.enable_actions && show.fact && show.fact.identifier"
+              v-if="show.enable_show_back && show.fact && show.fact.identifier"
               class="title"
             >
               <span class="hidden-xs-only">—</span>Identify {{ show.fact.identifier }}
@@ -194,23 +220,31 @@
           {{ show.text }}
         </div>
       </v-card-text>
-      <v-card-text v-show="show.enable_actions" class="py-2">
+      <v-card-text v-show="show.enable_show_back" class="py-2">
         <v-text-field
           id="answer"
           ref="answerfield"
           v-model="typed"
           solo
-          label="Recommended - Type Answer (Press any letter to focus)"
           autofocus
           hide-details="auto"
           @keydown="keyHandler"
-        ></v-text-field>
+          ><template v-slot:label>
+            <span v-if="inTestMode">Required (Test Mode) - </span>
+            <span v-else>Recommended - </span>
+            Type Answer (Press any letter to focus)
+          </template>
+        </v-text-field>
       </v-card-text>
-      <v-card-actions v-show="show.enable_actions && !showBack" class="px-4 pt-3 pb-2">
+      <v-card-actions
+        v-show="show.enable_show_back && !showBack"
+        class="px-4 pt-3 pb-2"
+      >
         <v-btn @click="showAnswer">Show Answer (Enter)</v-btn>
+        <v-btn @click="dontKnow">Don't Know (Shift-Enter)</v-btn>
       </v-card-actions>
     </v-card>
-    <v-card v-show="showBack && show.enable_actions" class="my-2 mx-3 px-3 py-4">
+    <v-card v-show="showBack && show.enable_show_back" class="my-2 mx-3 px-3 py-4">
       <v-card-title class="py-0">
         <div class="title">Answer</div>
       </v-card-title>
@@ -218,21 +252,23 @@
         <div class="title primary--text">
           {{ show.fact && show.fact.answer }}
         </div>
-        <div class="title">You typed: '{{ typed }}'</div>
-        <div
-          v-if="recommendation"
-          class="title primary--text py-2"
-          :style="{ color: 'green !important' }"
-        >
-          KAR³L Believes Your Response Was Correct
-          <span class="hidden-xs-only">(Enter to Accept, Or Override Below)</span>
-        </div>
-        <div v-else class="title primary--text" :style="{ color: 'red !important' }">
-          KAR³L Believes Your Response Was Wrong
-          <span class="hidden-xs-only">(Enter to Accept, Or Override Below)</span>
-        </div>
+        <span v-show="showResponseBtns">
+          <div class="title">You typed: '{{ typed }}'</div>
+          <div
+            v-if="recommendation"
+            class="title primary--text py-2"
+            :style="{ color: 'green !important' }"
+          >
+            KAR³L Believes Your Response Was Correct
+            <span class="hidden-xs-only">(Enter to Accept, Or Override Below)</span>
+          </div>
+          <div v-else class="title primary--text" :style="{ color: 'red !important' }">
+            KAR³L Believes Your Response Was Wrong
+            <span class="hidden-xs-only">(Enter to Accept, Or Override Below)</span>
+          </div>
+        </span>
       </v-card-text>
-      <v-card-text v-show="show.enable_actions" class="py-2">
+      <v-card-text v-show="show.enable_show_back" class="py-2">
         <v-text-field
           id="retype_answer"
           ref="retype"
@@ -245,7 +281,12 @@
       </v-card-text>
       <v-card-actions class="pt-3 pb-1 px-5">
         <v-row class="shrink" justify="space-around">
-          <v-col cols="5" sm="auto" class="ma-1 pa-1 py-0 shrink">
+          <v-col
+            v-show="showResponseBtns"
+            cols="5"
+            sm="auto"
+            class="ma-1 pa-1 py-0 shrink"
+          >
             <v-btn
               ref="wrong"
               :color="!recommendation ? 'red' : ''"
@@ -254,7 +295,13 @@
               >wrong ([)</v-btn
             >
           </v-col>
-          <v-col id="response" cols="5" sm="auto" class="ma-1 pa-1 py-0 shrink">
+          <v-col
+            v-show="showResponseBtns"
+            id="response"
+            cols="5"
+            sm="auto"
+            class="ma-1 pa-1 py-0 shrink"
+          >
             <v-btn
               ref="right"
               :color="recommendation ? 'green' : ''"
@@ -263,13 +310,23 @@
               >right (])</v-btn
             >
           </v-col>
+          <v-col
+            v-show="!showResponseBtns"
+            cols="5"
+            sm="auto"
+            class="ma-1 pa-1 py-0 shrink"
+          >
+            <v-btn ref="continue" class="px-2" @click="response(false)"
+              >continue (Enter)</v-btn
+            >
+          </v-col>
         </v-row>
       </v-card-actions>
     </v-card>
     <v-dialog v-model="dialog" scrollable>
       <v-card>
         <v-card-title>
-          <h2>Debug</h2>
+          <h2>Information and Debugging</h2>
         </v-card-title>
         <v-card-text>
           <!-- eslint-disable-next-line vue/no-v-html -->
@@ -295,10 +352,13 @@
   import { Component, Vue } from "vue-property-decorator";
   import { studyStore, mainStore } from "@/utils/store-accessor";
   import Onboard from "@/views/Onboard.vue";
-  import ConnectionPopup from "@/views/ErrorPopup.vue";
+  import ConnectionPopup from "@/views/ConnectionPopup.vue";
+  import RecallPopup from "@/views/main/RecallPopup.vue";
+  import TestPopup from "@/views/main/TestPopup.vue";
+  import StudySet from "@/views/main/StudySet.vue";
 
   @Component({
-    components: { ConnectionPopup, Onboard },
+    components: { TestPopup, ConnectionPopup, Onboard, RecallPopup, StudySet },
   })
   export default class Learn extends Vue {
     $refs!: {
@@ -312,6 +372,12 @@
     retyped = "";
     dialog = false;
     editDialog = false;
+    pressed = false;
+    showResponseBtns = true;
+
+    get studyset() {
+      return studyStore.studyset;
+    }
 
     get facts() {
       return studyStore.study;
@@ -333,11 +399,32 @@
       return studyStore.recommendation;
     }
 
+    get inTestMode() {
+      return studyStore.inTestMode;
+    }
+
+    get num_unstudied() {
+      return studyStore.studyset?.unstudied_facts.length ?? 0;
+    }
+
+    get num_facts() {
+      return studyStore.init_unstudied;
+    }
+
+    get current_study_num() {
+      return this.num_facts - this.num_unstudied;
+    }
+
     public async mounted() {
+      studyStore.setStudySet(null);
+      await mainStore.getUserProfile();
       mainStore.setConnectionError(false);
       mainStore.setSchedulerError(false);
+      this.updateSelectedNum(this.$router.currentRoute.query.num);
       await this.determine_decks(this.$router.currentRoute.query.deck);
       window.addEventListener("keydown", this.handleKeyDown);
+      window.addEventListener("keyup", this.resetKeyListener);
+      await studyStore.getStudyFacts();
     }
 
     public beforeRouteEnter(to, from, next) {
@@ -367,7 +454,12 @@
       } else {
         studyStore.setDeckIds([]);
       }
-      await studyStore.getNextShow();
+    }
+
+    public updateSelectedNum(payload: string | (string | null)[]) {
+      if (payload && payload !== undefined) {
+        studyStore.updateSelectedNum(payload);
+      }
     }
 
     public async destroyed() {
@@ -375,11 +467,15 @@
       studyStore.setShowLoading();
       studyStore.emptySchedule();
       window.removeEventListener("keydown", this.handleKeyDown);
+      window.removeEventListener("keyup", this.resetKeyListener);
     }
 
     public handleKeyDown(e: KeyboardEvent) {
       const key = e.key.toLowerCase();
-      if (!this.editDialog) {
+      if (!this.editDialog && !this.pressed) {
+        if (key != "shift") {
+          this.pressed = true;
+        }
         if (e.altKey && (e.key == "s" || key == "ß")) {
           this.suspend();
         } else if (e.altKey && (key == "d" || key == "∂")) {
@@ -394,7 +490,9 @@
           this.edit();
         } else if (this.showBack) {
           this.determineResponse(e, key);
-        } else if (key == "enter" && this.show.enable_actions) {
+        } else if (e.shiftKey && key == "enter" && this.show.enable_show_back) {
+          this.dontKnow();
+        } else if (key == "enter" && this.show.enable_show_back) {
           this.showAnswer();
         } else if (
           /^[a-z0-9]$/i.test(key) &&
@@ -410,12 +508,17 @@
       }
     }
 
+    public resetKeyListener(_: KeyboardEvent) {
+      this.pressed = false;
+    }
+
     public determineResponse(e: KeyboardEvent, key: string) {
-      if (key == "enter") {
-        this.response(this.recommendation);
+      if (key == "enter" && !e.shiftKey) {
+        // this.showResponseBtns ensures that response is never true when user doesn't know
+        this.response(this.recommendation && this.showResponseBtns);
       } else if (key == "[") {
         this.response(false);
-      } else if (key == "]") {
+      } else if (key == "]" && this.showResponseBtns) {
         this.response(true);
       } else if (
         /^[a-z0-9]$/i.test(key) &&
@@ -449,40 +552,69 @@
         e.preventDefault();
       }
     }
-    public async showAnswer() {
-      await studyStore.evaluateAnswer(this.typed);
+
+    public async dontKnow() {
+      this.showResponseBtns = false;
       this.showBack = true;
       this.scrollToResponseButtons();
     }
 
+    public async showAnswer() {
+      if (this.inTestMode && this.typed.trimStart() == "") {
+        this.requireAnswerError();
+      } else {
+        await studyStore.evaluateAnswer(this.typed);
+        this.showBack = true;
+        this.scrollToResponseButtons();
+      }
+    }
+
     public resetCard() {
       this.showBack = false;
+      this.showResponseBtns = true;
       this.typed = "";
       this.retyped = "";
       this.scrollToFront();
     }
 
     public async suspend() {
-      await studyStore.suspendFact();
-      this.resetCard();
+      if (!this.inTestMode) {
+        await studyStore.suspendFact();
+        this.resetCard();
+      }
     }
 
     public async edit() {
-      await studyStore.editFactDialog();
+      if (!this.inTestMode) {
+        await studyStore.editFactDialog();
+      }
     }
 
     public async report() {
-      await studyStore.reportFactDialog();
-      this.resetCard();
+      if (!this.inTestMode) {
+        await studyStore.reportFactDialog();
+        this.resetCard();
+      }
     }
 
     public async remove() {
-      await studyStore.deleteFact();
-      this.resetCard();
+      if (!this.inTestMode) {
+        await studyStore.deleteFact();
+        this.resetCard();
+      }
     }
 
     public async mark() {
-      await studyStore.markFact();
+      if (!this.inTestMode) {
+        await studyStore.markFact();
+      }
+    }
+
+    public requireAnswerError() {
+      mainStore.addNotification({
+        content: "In Test Mode, you must type your answer or press don't know!",
+        color: "error",
+      });
     }
 
     public async response(response) {
@@ -492,6 +624,7 @@
           color: "success",
         });
       } else {
+        studyStore.setRestudy();
         mainStore.addNotification({
           content: "Your evaluation: Wrong",
           color: "error",
@@ -502,11 +635,12 @@
         studyStore.markBackTime();
         studyStore.addToSchedule({
           fact_id: this.show.fact.fact_id,
-          debug_id: this.show.fact.debug_id ?? "unknown id",
           typed: this.typed,
           response: response,
           elapsed_milliseconds_text: this.frontTime,
           elapsed_milliseconds_answer: this.backTime,
+          test_mode: this.inTestMode,
+          recommendation: this.recommendation,
         });
         this.resetCard();
         await studyStore.updateSchedule();

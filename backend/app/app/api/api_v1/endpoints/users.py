@@ -1,6 +1,7 @@
 import json
 from typing import Any, List, Optional
 
+import logging
 import requests
 from fastapi import BackgroundTasks
 
@@ -12,6 +13,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 router = APIRouter()
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 @router.get("/", response_model=List[schemas.User])
@@ -57,10 +60,6 @@ def create_user(
             detail="A user with this username already exists in the system.",
         )
     user = crud.user.super_user_create(db, obj_in=user_in)
-    # if settings.EMAILS_ENABLED and user_in.email:
-    #     send_new_account_email(
-    #         email_to=user_in.email, username=user_in.username
-    #     )
     return user
 
 
@@ -94,7 +93,7 @@ def update_user_me(
     return user
 
 
-@router.get("/me", response_model=schemas.User)
+@router.get("/me", response_model=schemas.UserWithStudySet)
 def read_user_me(
         db: Session = Depends(deps.get_db),  # noqa
         current_user: models.User = Depends(deps.get_current_active_user),
@@ -248,5 +247,20 @@ def reassign_schedulers(
     """
 
     background_tasks.add_task(crud.user.reassign_schedulers, db=db)
+
+    return True
+
+@router.post("/bulk/test", response_model=bool)
+def assign_all_test_deck(
+        *,
+        db: Session = Depends(deps.get_db),
+        background_tasks: BackgroundTasks,
+        current_user: models.User = Depends(deps.get_current_active_superuser),
+) -> Any:
+    """
+    Reassign the assigned scheduler for all users
+    """
+
+    background_tasks.add_task(crud.deck.assign_test_deck_to_all, db=db)
 
     return True

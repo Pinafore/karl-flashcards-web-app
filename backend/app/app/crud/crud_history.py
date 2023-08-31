@@ -13,5 +13,11 @@ class CRUDHistory(CRUDBase[models.History, schemas.HistoryCreate, schemas.Histor
         debug = db.query(self.model).filter(self.model.details["debug_id"].astext == debug_id)
         return debug
 
+    def get_user_study_count(self, user: models.User):
+        return len([history_item for history_item in user.history if history_item.log_type == "study"])
+
+    def get_user_test_study_count(self, user: models.User):
+        return len([history_item for history_item in user.history if history_item.log_type == "test_study"])
+
 
 history = CRUDHistory(models.History)

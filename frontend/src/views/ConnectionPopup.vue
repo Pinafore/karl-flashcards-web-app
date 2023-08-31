@@ -1,5 +1,5 @@
 <template class="pa-0 ma-0">
-  <v-dialog v-model="popup" max-width="1000px" @click:outside="goBack">
+  <v-dialog v-model="connectionPopup" max-width="1000px" @click:outside="goBack">
     <v-card>
       <span v-if="type === 'connection'">
         <v-card-title>
@@ -43,6 +43,7 @@
       <v-card-actions>
         <v-btn v-if="type === 'inaccessibleDeckError'" @click="goBack">Return</v-btn>
         <v-btn v-else @click="goBack">Return to Home Screen</v-btn>
+        <v-btn @click="refresh">Refresh</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -50,11 +51,10 @@
 
 <script lang="ts">
   import { Component, Vue, Watch } from "vue-property-decorator";
-  import { mainStore } from "@/store";
+  import { mainStore, studyStore } from "@/store";
 
   @Component
   export default class ConnectionPopup extends Vue {
-    popup = false;
     type = "";
 
     mounted() {
@@ -63,6 +63,10 @@
 
     destroyed() {
       mainStore.setInaccessibleDeckError(false);
+    }
+
+    get connectionPopup() {
+      return mainStore.connectionPopup;
     }
 
     get connectionError() {
@@ -93,10 +97,11 @@
     }
 
     checkPopup() {
-      this.popup =
-        mainStore.connectionError ||
+      const popup =
+        (mainStore.connectionError && studyStore.inTestMode !== true) ||
         mainStore.schedulerError ||
         mainStore.inaccessibleDeckError;
+      mainStore.setConnectionPopup(popup);
       if (mainStore.connectionError) {
         this.type = "connection";
       } else if (mainStore.schedulerError) {
@@ -107,13 +112,17 @@
     }
 
     goBack() {
-      this.popup = false;
+      mainStore.setConnectionPopup(false);
       if (this.type === "inaccessibleDeckError") {
         mainStore.setInaccessibleDeckError(false);
         this.$router.back();
       } else {
         this.$router.push("/main/dashboard");
       }
+    }
+
+    refresh() {
+      this.$router.go(0);
     }
   }
 </script>

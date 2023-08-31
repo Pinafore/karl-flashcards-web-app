@@ -190,7 +190,7 @@
             </validation-provider>
           </span>
           <span v-else>
-            loading...
+            Loading...
           </span>
         </v-card-text>
         <v-card-actions>

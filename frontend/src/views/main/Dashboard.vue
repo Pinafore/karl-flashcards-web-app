@@ -1,6 +1,7 @@
 <template>
   <v-container fluid>
     <p-w-a v-if="showPWA"></p-w-a>
+    <RecallPopup></RecallPopup>
     <v-row>
       <v-col>
         <v-card class="ma-3 pa-3">
@@ -8,8 +9,8 @@
             <div class="headline primary--text">Hi {{ greetedUser }}</div>
           </v-card-title>
           <v-card-actions class="pa-4">
-            <v-btn to="/main/study/learn">Study All</v-btn>
-            <v-btn to="/main/study/decks">Decks</v-btn>
+            <v-btn to="/main/study/learn">Quick Study</v-btn>
+            <v-btn to="/main/study/decks">New Study Set</v-btn>
           </v-card-actions>
         </v-card>
       </v-col>
@@ -174,9 +175,11 @@
   import { mainStore } from "@/store";
   import { format, startOfDay } from "date-fns";
   import PWA from "@/views/PWA.vue";
+  import RecallPopup from "@/views/main/RecallPopup.vue";
   import { IAppNotification, IComponents } from "@/interfaces";
+
   @Component({
-    components: { PWA },
+    components: { PWA, RecallPopup },
   })
   export default class Dashboard extends Vue {
     loading = true;

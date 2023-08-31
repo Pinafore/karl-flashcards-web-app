@@ -1,6 +1,6 @@
 <template class="pa-0 ma-0">
   <v-main class="pa-0 ma-0">
-    <v-dialog v-model="onboard" width="1000">
+    <v-dialog v-model="onboarding" width="1000">
       <v-card>
         <v-card-title>
           <h2>Tips</h2>
@@ -10,9 +10,9 @@
           click "Add Decks" to continue
         </v-card-text>
         <v-card-text v-if="this.$router.currentRoute.name === 'decks'">
-          In your decks screen, you can select a specific deck or multiple decks to
-          study facts from. Click the checkboxes next to the deck names in order to
-          select multiple decks.
+          In the create study set screen, you can select a specific deck or multiple
+          decks to study facts from. Click the checkboxes next to the deck names in
+          order to select multiple decks.
         </v-card-text>
         <div v-if="this.$router.currentRoute.name === 'learn'" class="px-2">
           <v-card-subtitle>
@@ -80,7 +80,7 @@
         </v-card-text>
         <v-card-actions class="pt-0">
           <v-spacer></v-spacer>
-          <v-btn color="primary" text @click="onboard = false">
+          <v-btn ref="begin" color="primary" text @click="hideTip">
             Got it!
           </v-btn>
         </v-card-actions>
@@ -90,21 +90,69 @@
 </template>
 
 <script lang="ts">
-  import { Component, Vue } from "vue-property-decorator";
-  import { mainStore } from "@/store";
+  import { Component, Vue, Watch } from "vue-property-decorator";
+  import { mainStore, studyStore } from "@/store";
 
   @Component
   export default class Onboard extends Vue {
+    $refs!: {
+      begin: Vue;
+    };
     onboard = false;
 
     async mounted() {
       await mainStore.getUserProfile();
-      this.onboard = mainStore.userProfile?.show_help ?? false;
+      this.getUpdate();
     }
 
-    noMoreHelp() {
+    get onboarding() {
+      return mainStore.onboarding;
+    }
+
+    set onboarding(value) {
+      mainStore.setOnboarding(value);
+    }
+
+    // Not mainStore.recallPopup as that can cause a race, it may not be set to true yet
+    get recallPopup() {
+      return this.currentRecallTarget == -1;
+    }
+
+    get currentRecallTarget() {
+      return mainStore.userProfile?.recall_target ?? -1;
+    }
+
+    getUpdate() {
+      if (this.$router.currentRoute.name === "decks") {
+        mainStore.setOnboarding(this.show_help && !(this.recallPopup));
+      } else {
+        mainStore.setOnboarding(this.show_help);
+      }
+      if (this.onboarding) {
+        setTimeout(() => {
+          (this.$refs.begin.$el as HTMLInputElement).focus();
+        });
+      }
+    }
+
+    get show_help() {
+      return mainStore.userProfile?.show_help ?? false;
+    }
+
+    @Watch("recallPopup")
+    recallPopupChanged() {
+      this.getUpdate();
+    }
+
+    async noMoreHelp() {
       mainStore.updateUserHelp(false);
-      this.onboard = false;
+      await this.hideTip();
+    }
+
+    async hideTip() {
+      mainStore.setOnboarding(false);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      studyStore.setShowActions();
     }
   }
 </script>

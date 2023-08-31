@@ -1,16 +1,18 @@
 import logging
-from datetime import datetime
-from typing import Any, Dict, Optional, Union, List
+from datetime import datetime, timedelta
+from typing import Any, Dict, Optional, Tuple, Union, List
 
 import requests
 import json
 from pytz import timezone
 from sentry_sdk import capture_exception
 
-from app import crud
+from app import crud, schemas, models
+from app.core.config import settings
 from app.core.security import get_password_hash, verify_password
 from app.crud.base import CRUDBase
 from app.interface.reassignment import change_assignment
+from app.interface.scheduler import set_user_settings
 from app.models.user import User
 from app.schemas import Repetition, Log
 from app.schemas.user import UserCreate, UserUpdate, SuperUserCreate, SuperUserUpdate
@@ -22,8 +24,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 import sys
 
-sys.setrecursionlimit(1500)
-
 
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     def get_by_email(self, db: Session, *, email: str) -> Optional[User]:
@@ -32,8 +32,8 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     def get_by_username(self, db: Session, *, username: str) -> Optional[User]:
         return db.query(User).filter(User.username == username).first()
 
-    def get_all_with_status(self, db: Session, is_beta: Optional[bool]) -> List[User]:
-        if is_beta is None:
+    def get_all_with_status(self, db: Session, is_beta: Optional[bool] = False) -> List[User]:
+        if is_beta:
             return db.query(User).all()
         else:
             return db.query(User).filter(User.beta_user == is_beta).all()
@@ -51,17 +51,20 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             username=obj_in.username,
             is_active=obj_in.is_active,
             repetition_model=model,
+            recall_target=obj_in.recall_target,
         )
         db.add(db_obj)
         db.commit()
-        deck = crud.deck.get(db=db, id=1)
+        deck = crud.deck.get(db=db, id=settings.DEFAULT_DECK_ID)
         crud.deck.assign_viewer(db=db, db_obj=deck, user=db_obj)
         db.refresh(db_obj)
-
+        # Assign test
+        crud.deck.assign_test_deck(db=db, user=db_obj)
+        db.refresh(db_obj)
         change_assignment(user=db_obj, repetition_model=model)
         return db_obj
 
-    def assign_scheduler_to_new_user(self, db: Session, obj_in: UserCreate) -> (Repetition, str):
+    def assign_scheduler_to_new_user(self, db: Session, obj_in: UserCreate) -> Tuple[Repetition, str]:
         if obj_in.repetition_model:
             return obj_in.repetition_model, "assigned"
         if self.get_count(db, False) > 250:
@@ -80,7 +83,8 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             is_superuser=obj_in.is_superuser,
             is_active=obj_in.is_active,
             repetition_model=obj_in.repetition_model,
-            beta_user=obj_in.beta_user
+            beta_user=obj_in.beta_user,
+            recall_target=obj_in.recall_target,
         )
         db.add(db_obj)
         db.commit()
@@ -94,11 +98,27 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             update_data = obj_in
         else:
             update_data = obj_in.dict(exclude_unset=True)
-        if obj_in.password:
-            if update_data["password"]:
-                hashed_password = get_password_hash(update_data["password"])
-                del update_data["password"]
-                update_data["hashed_password"] = hashed_password
+        if obj_in.password and update_data["password"]:
+            hashed_password = get_password_hash(update_data["password"])
+            del update_data["password"]
+            update_data["hashed_password"] = hashed_password
+        if obj_in.recall_target and update_data["recall_target"]:
+            # 
+            # set_user_settings(user=db_obj, new_settings=obj_in)
+
+            # Need to retire current study set when settings change
+            uncompleted_last_set = crud.studyset.find_existing_study_set(db, db_obj)
+            if uncompleted_last_set:
+                crud.studyset.mark_retired(db, db_obj=uncompleted_last_set)
+        
+        history_in = schemas.HistoryCreate(
+            time=datetime.now(timezone('UTC')),
+            user_id=db_obj.id,
+            log_type=schemas.Log.update_user,
+            details={"update": update_data, "study_system": db_obj.repetition_model, "recall_target": db_obj.recall_target}
+        )
+        crud.history.create(db=db, obj_in=history_in)
+        
         return super().update(db, db_obj=db_obj, obj_in=update_data)
 
     def authenticate(self, db: Session, *, email: str, username: str, password: str) -> Optional[User]:
@@ -163,16 +183,23 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             )
             crud.history.create(db=db, obj_in=history_in)
 
-    def get_scheduler_counts(self, db: Session, is_beta: Optional[bool] = None) -> {Repetition: int}:
+    def get_scheduler_counts(self, db: Session, is_beta: Optional[bool] = None) -> Dict[Repetition, int]:
         all_users = self.get_all_with_status(db, is_beta)
 
         scheduler_counts = {system: 0 for system in Repetition}
         for found_user in all_users:
-            scheduler_counts[found_user.repetition_model] += 1
+            scheduler_counts[found_user.repetition_model] += 1  # type: ignore
         return scheduler_counts
 
     def make_current_users_beta_testers(self, db: Session):
         db.query(self.model).update({User.beta_user: True}, synchronize_session='evaluate')
+    
+    def studied_facts(self, db: Session, user: models.User) -> Optional[int]:
+        # logger.info("completed sets: " + str(db.query(models.StudySet).filter(models.StudySet.user_id == user.id).count()))
+        return db.query(models.History).filter(models.History.user_id == user.id).filter(models.History.log_type == Log.study).count()
+
+    def facts_since_last_study(self, db: Session, last_test_set: models.studyset, user: models.User) -> Optional[int]:
+        return db.query(models.History).filter(models.History.user_id == user.id).filter(models.History.log_type == Log.study).filter(models.History.time > last_test_set.create_date).count()
 
 
 user = CRUDUser(User)

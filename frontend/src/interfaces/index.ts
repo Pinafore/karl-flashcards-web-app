@@ -11,6 +11,7 @@ export interface IStudyShow {
   fact?: IComponents["Fact"];
   enable_report: boolean;
   enable_actions: boolean;
+  enable_show_back: boolean;
   marked: boolean;
 }
 
@@ -58,7 +59,6 @@ export interface IComponents {
     reported?: boolean;
     permission?: Permission;
     reports?: IComponents["FactReported"][];
-    debug_id?: string;
   };
   FactCreate: {
     text: string;
@@ -129,17 +129,18 @@ export interface IComponents {
   Msg: { msg: string };
   Schedule: {
     fact_id: number;
-    debug_id: string;
     typed: string;
     response: boolean;
     elapsed_milliseconds_text: number;
     elapsed_milliseconds_answer: number;
+    recommendation: boolean;
+    test_mode: number;
   };
   SuperUserCreate: {
     email: string;
     username: string;
     is_active?: boolean;
-    repetition_model?: "leitner" | "sm-2" | "karl" | "karl50" | "karl85";
+    repetition_model?: "leitner" | "sm-2" | "karl" | "karl50" | "karl85" | "settles";
     password: string;
     is_superuser?: boolean;
   };
@@ -147,7 +148,7 @@ export interface IComponents {
     email?: string;
     username?: string;
     is_active?: boolean;
-    repetition_model?: "leitner" | "sm-2" | "karl" | "karl50" | "karl85";
+    repetition_model?: "leitner" | "sm-2" | "karl" | "karl50" | "karl85" | "settles";
     password?: string;
     default_deck_id?: number;
     is_superuser?: boolean;
@@ -157,7 +158,7 @@ export interface IComponents {
     email: string;
     username: string;
     is_active: boolean;
-    repetition_model?: "leitner" | "sm-2" | "karl" | "karl50" | "karl85";
+    repetition_model?: "leitner" | "sm-2" | "karl" | "karl50" | "karl85" | "settles";
     id: number;
     is_superuser: boolean;
     show_help: boolean;
@@ -167,24 +168,31 @@ export interface IComponents {
     facts?: IComponents["Fact"][];
     dark_mode: boolean;
     pwa_tip: boolean;
+    recall_target: number;
+    test_mode: number;
+    // resume_studyset: boolean;
+    in_test_mode: boolean;
+    study_set_expiry_date?: string;
   };
   UserCreate: {
     email: string;
     username: string;
     is_active?: boolean;
-    repetition_model?: "leitner" | "sm-2" | "karl" | "karl50" | "karl85";
+    repetition_model?: "leitner" | "sm-2" | "karl" | "karl50" | "karl85" | "settles";
     password: string;
   };
   UserUpdate: {
     email?: string;
     username?: string;
     is_active?: boolean;
-    repetition_model?: "leitner" | "sm-2" | "karl" | "karl50" | "karl85";
+    repetition_model?: "leitner" | "sm-2" | "karl" | "karl50" | "karl85" | "settles";
     password?: string;
     default_deck_id?: number;
     show_help?: boolean;
     dark_mode?: boolean;
     pwa_tip?: boolean;
+    recall_target?: number;
+    test_mode?: number;
   };
   ValidationError: { loc: string[]; msg: string; type: string };
   StatSearch: {
@@ -228,5 +236,20 @@ export interface IComponents {
     user?: IComponents["User"];
     user_place?: number;
     limit?: number;
+  };
+  StudySet: {
+    id: number;
+    completed: boolean;
+    unstudied_facts: IComponents["Fact"][];
+    all_decks: IComponents["Deck"][];
+    all_facts: IComponents["Fact"][];
+    is_test: boolean;
+    num_facts: number;
+    num_unstudied: number;
+    user: IComponents["User"];
+    short_description: string;
+    expanded_description: string;
+    is_first_pass: string;
+    needs_restudy?: boolean;
   };
 }

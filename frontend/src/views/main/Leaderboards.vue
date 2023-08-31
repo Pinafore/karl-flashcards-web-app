@@ -1,6 +1,7 @@
 <template>
   <v-container fluid>
     <connection-popup></connection-popup>
+    <RecallPopup></RecallPopup>
     <v-card class="ma-3 mb-0 pa-3">
       <v-card-title primary-title>
         <div class="headline primary--text">Filter Leaderboards</div>
@@ -167,11 +168,12 @@
   import { Component, Vue, Watch } from "vue-property-decorator";
   import { mainStore } from "@/store";
   import { IComponents } from "@/interfaces";
-  import ConnectionPopup from "@/views/ErrorPopup.vue";
+  import ConnectionPopup from "@/views/ConnectionPopup.vue";
+  import RecallPopup from "@/views/main/RecallPopup.vue";
   import { DataOptions } from "vuetify";
 
   @Component({
-    components: { ConnectionPopup },
+    components: { ConnectionPopup, RecallPopup },
   })
   export default class Leaderboard extends Vue {
     loading = true;

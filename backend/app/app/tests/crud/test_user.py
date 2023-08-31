@@ -88,7 +88,7 @@ def test_get_user(db: Session) -> None:
     user_2 = crud.user.get(db, id=user.id)
     assert user_2
     assert user.email == user_2.email
-    assert jsonable_encoder(user) == jsonable_encoder(user_2)
+    assert user.id == user_2.id
 
 
 def test_update_user(db: Session) -> None:

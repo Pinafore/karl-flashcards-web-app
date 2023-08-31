@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional, List, Any, Type
 
 from pydantic import BaseModel, EmailStr
@@ -18,6 +19,7 @@ class UserBase(BaseModel):
     dark_mode: Optional[bool] = None
     pwa_tip: Optional[bool] = None
     beta_user: Optional[bool] = None
+    recall_target: Optional[int] = None
 
 
 # Properties to receive via API on creation
@@ -54,6 +56,7 @@ class UserInDBBase(UserBase):
     dark_mode: bool
     pwa_tip: bool
     beta_user: bool
+    recall_target: int
 
     class Config:
         orm_mode = True
@@ -79,6 +82,13 @@ class User(UserInDBBase):
     @classmethod
     def _decompose_class(cls: Type['Model'], obj: Any) -> GetterDict:
         return User.CustomGetterDict(obj)
+
+
+# Additional properties to return via API
+class UserWithStudySet(User):
+    # Could refactor to return a study set object, but obstacle is circular references
+    study_set_expiry_date: Optional[datetime]
+    # in_test_mode: bool
 
 
 # Additional properties stored in DB

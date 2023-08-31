@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Tuple
 
 from app import crud
 from app.core.config import settings
@@ -22,7 +22,7 @@ def test_get_users_superuser_me(
 
 
 def test_get_users_normal_user_me(
-        client: TestClient, normal_user_token_headers: (Dict[str, str], User)
+        client: TestClient, normal_user_token_headers: Tuple[Dict[str, str], User]
 ) -> None:
     r = client.get(f"{settings.API_V1_STR}/users/me", headers=normal_user_token_headers[0])
     current_user = r.json()
@@ -88,7 +88,7 @@ def test_create_user_existing_email(
 
 
 def test_create_user_by_normal_user(
-        client: TestClient, normal_user_token_headers: (Dict[str, str], User)
+        client: TestClient, normal_user_token_headers: Tuple[Dict[str, str], User]
 ) -> None:
     username = random_lower_string()
     email = random_email()

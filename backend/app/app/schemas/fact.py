@@ -1,12 +1,14 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
+from sqlalchemy.orm import Query
 
 from app.schemas.repetition import Repetition
 from app.schemas.deck import Deck
 # Shared properties
 from app.schemas.permission import Permission
+from app.schemas.target_window import TargetWindow
 
 
 class FactBase(BaseModel):
@@ -16,7 +18,6 @@ class FactBase(BaseModel):
 
 
 class KarlFact(FactBase):
-    user_id: int
     fact_id: int
     text: str
     answer: str
@@ -24,7 +25,46 @@ class KarlFact(FactBase):
     deck_id: int
     repetition_model: Repetition
     env: str
+    user_id: int
 
+    class Config:
+        orm_mode = True
+
+
+class KarlFactV2(FactBase):
+    fact_id: int
+    text: str
+    answer: str
+    deck_name: str
+    deck_id: int
+
+    class Config:
+        orm_mode = True
+
+
+class SchedulerQuery(BaseModel):
+    facts: List[KarlFactV2]
+    repetition_model: Repetition
+    env: str
+    user_id: int
+    recall_target: TargetWindow
+
+class UpdateRequestV2(BaseModel):
+    user_id: int
+    fact_id: int
+    deck_name: str
+    deck_id: int
+    label: bool
+    elapsed_milliseconds_text: int
+    elapsed_milliseconds_answer: int
+    history_id: int  # uniquely identifies a study
+    answer: str
+    typed: str
+    studyset_id: str
+    debug_id: Optional[str] # aka schedule_request_id, n/a in test updates
+    test_mode: bool
+    recommendation: bool
+    fact: KarlFactV2
 
 class KarlFactUpdate(KarlFact):
     elapsed_seconds_text: Optional[int] = None
@@ -34,12 +74,14 @@ class KarlFactUpdate(KarlFact):
     history_id: int
     label: bool
     debug_id: str
+    studyset_id: int
+    test_mode: bool
 
 
 class InternalFactBase(FactBase):
     deck_id: Optional[int] = None
     identifier: Optional[str] = None
-    answer_lines: List[str] = None
+    answer_lines: Optional[List[str]] = None
     extra: Optional[dict] = None
 
 
@@ -77,7 +119,6 @@ class FactSearch(InternalFactBase):
     reported: Optional[bool] = None
     skip: Optional[int] = None
     limit: Optional[int] = None
-    randomize: bool = False
 
 
 # Properties shared by models stored in DB
@@ -104,7 +145,10 @@ class Fact(FactInDBBase):
     suspended: Optional[bool] = None
     permission: Optional[Permission] = None
     reports: Optional[List[FactReported]] = None
-    debug_id: Optional[str] = None
+    # debug_id: Optional[str] = None
+
+    class Config:
+        orm_mode = True
 
 
 # Properties to return to client
