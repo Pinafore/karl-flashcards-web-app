@@ -2,6 +2,7 @@ import axios, { CancelTokenStatic } from "axios";
 import { apiUrl } from "@/env";
 import { IComponents } from "./interfaces";
 import { endOfDay, format, parse, startOfDay } from "date-fns";
+import { Dictionary } from "vue-gtag";
 
 const CancelToken = axios.CancelToken;
 let cancel;
@@ -16,6 +17,7 @@ function authHeaders(token: string) {
     }),
   };
 }
+
 
 export const api = {
   async logInGetToken(username: string, password: string) {
@@ -109,6 +111,7 @@ export const api = {
     deckIds: number[],
     selectedNum: number,
     forceNew: boolean,
+    targetRecall?: number,
   ) {
     let url = `${apiUrl}/api/study/`;
     url += `?`;
@@ -120,6 +123,10 @@ export const api = {
     }
     url += `&limit=${selectedNum}`;
     url += `&force_new=${forceNew}`;
+
+    if (targetRecall !== null) {
+      url += `&target_recall=${targetRecall}`;
+    }
     return axios.get<IComponents["StudySet"]>(url, authHeaders(token));
   },
   async createFact(token: string, data: IComponents["FactCreate"]) {

@@ -1,9 +1,0 @@
-.env*
-.DS_Store
-docker-stack.yml
-db-backups/
-cookiecutter-config-file.yml
-.git.bfg-report/
-.idea/
-backend/3.8/
-*.code-workspace

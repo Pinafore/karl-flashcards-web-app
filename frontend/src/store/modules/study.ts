@@ -26,6 +26,7 @@ export default class StudyModule extends VuexModule {
   inTestMode = false;
   forceNew = false;
   selectedNum = 20;
+  targetRecall = null;
 
   @Mutation
   setDeckIds(payload) {
@@ -52,6 +53,11 @@ export default class StudyModule extends VuexModule {
   @Mutation
   setForceNew(payload) {
     this.forceNew = payload;
+  }
+
+  @Mutation
+  setTargetRecall(payload) {
+    this.targetRecall = payload;
   }
 
   @Mutation
@@ -274,6 +280,7 @@ export default class StudyModule extends VuexModule {
         this.deckIds ?? [],
         this.selectedNum,
         this.forceNew,
+        this.targetRecall,
       );
       this.setForceNew(false);
       if (response.data.unstudied_facts.length == 0) {

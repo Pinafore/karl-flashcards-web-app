@@ -37,6 +37,14 @@
             <v-list-item-title>Leaderboards</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+        <v-list-item to="/main/predictions">
+          <v-list-item-action>
+            <v-icon>{{ mdiHeadCog }}</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>KAR³L Predictions</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
       </v-list>
       <v-divider></v-divider>
       <v-list subheader>
@@ -268,6 +276,7 @@
     mdiUploadMultiple,
     mdiFormatListNumbered,
     mdiBookInformationVariant,
+    mdiHeadCog,
   } from "@mdi/js";
 
   import { parseISO, format } from "date-fns";
@@ -290,6 +299,7 @@
     mdiUploadMultiple = mdiUploadMultiple;
     mdiBookInformationVariant = mdiBookInformationVariant;
     mdiFormatListNumbered = mdiFormatListNumbered;
+    mdiHeadCog = mdiHeadCog;
 
     public beforeRouteEnter(to, from, next) {
       routeGuardMain(to, from, next);
