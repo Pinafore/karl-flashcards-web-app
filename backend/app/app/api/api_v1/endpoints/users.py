@@ -241,7 +241,7 @@ def reassign_schedulers(
     return True
 
 @router.post("/bulk/test", response_model=bool)
-def assign_all_test_deck(
+def assign_bulk_test_deck(
         *,
         db: Session = Depends(deps.get_db),
         background_tasks: BackgroundTasks,
