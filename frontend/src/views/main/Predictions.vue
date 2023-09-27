@@ -15,39 +15,11 @@
           <v-slider v-model="searchOptions.student_recall" thumb-label step="10" min="0" max="100" show-ticks="always"
             tick-size="4"></v-slider>
         </v-col>
-        <v-col class="text-right" cols="12"><v-btn size="large" @click="retrievePredictedCards">See Predictions!</v-btn></v-col>
+        <v-col class="text-right" cols="12"><v-btn @click="retrievePredictedCards">See Predictions!</v-btn></v-col>
       </v-row>
-      <v-row v-if="filteredLeaderboard">
-        <v-col>
-          <v-card class="pa-3">
-            <v-card-title primary-title class="pb-2 justify-center">
-              <div class="headline primary--text justify-center">
-                {{ filteredLeaderboard.name }}
-              </div>
-            </v-card-title>
-            <div class="px-2 text-center">{{ filteredLeaderboard.details }}</div>
-
-            <v-data-table disable-filtering disable-sort class="mb-3 pa-1" :headers="filteredLeaderboard.headers"
-              item-key="id" :loading="loading" :items="filteredLeaderboard.leaderboard" :options.sync="options"
-              :server-items-length="filteredLeaderboard.total" :footer-props="{
-                itemsPerPageOptions: [10, 25, 50, 100],
-                showFirstLastPage: true,
-              }">
-            </v-data-table>
-          </v-card>
-        </v-col>
-      </v-row>
-      <v-row v-else>
-        <v-col>
-          <v-card class="pa-3">
-            <v-card-title primary-title class="pb-2 justify-center">
-              <div class="headline primary--text justify-center">
-                Loading
-              </div>
-            </v-card-title>
-          </v-card>
-        </v-col>
-      </v-row>
+      <br />
+      <br />
+      <Facts />
     </v-card>
   </v-container>
 </template>
@@ -59,9 +31,10 @@ import { IComponents } from "@/interfaces";
 import ConnectionPopup from "@/views/ConnectionPopup.vue";
 import RecallPopup from "@/views/main/RecallPopup.vue";
 import { DataOptions } from "vuetify";
+import Facts from "@/views/main/PredictionBrowser.vue"
 
 @Component({
-  components: { ConnectionPopup, RecallPopup },
+  components: { ConnectionPopup, RecallPopup, Facts },
 })
 export default class Predictions extends Vue {
   loading = true;
@@ -86,14 +59,12 @@ export default class Predictions extends Vue {
   // }
 
   public async mounted() {
-    studyStore.setStudySet(null);
-    await mainStore.getUserProfile();
-    mainStore.setConnectionError(false);
-    mainStore.setSchedulerError(false);
-    this.updateSelectedNum(this.$router.currentRoute.query.num);
-    await this.determine_decks(this.$router.currentRoute.query.deck);
-    // window.addEventListener("keydown", this.handleKeyDown);
-    // window.addEventListener("keyup", this.resetKeyListener);
+      studyStore.setStudySet(null);
+      await mainStore.getUserProfile();
+      mainStore.setConnectionError(false);
+      mainStore.setSchedulerError(false);
+    
+    await this.retrievePredictedCards()
   }
 
   public beforeRouteEnter(to, from, next) {
@@ -103,23 +74,23 @@ export default class Predictions extends Vue {
   }
 
 
-  public async determine_decks(deckIds: string | (string | null)[]) {
-    if (deckIds) {
-      if (typeof deckIds === "string") {
-        studyStore.setDeckIds([Number(deckIds)]);
-      } else {
-        studyStore.setDeckIds(deckIds.map(Number));
-      }
-    } else {
-      studyStore.setDeckIds([]);
-    }
-  }
+  // public async determine_decks(deckIds: string | (string | null)[]) {
+  //   if (deckIds) {
+  //     if (typeof deckIds === "string") {
+  //       studyStore.setDeckIds([Number(deckIds)]);
+  //     } else {
+  //       studyStore.setDeckIds(deckIds.map(Number));
+  //     }
+  //   } else {
+  //     studyStore.setDeckIds([]);
+  //   }
+  // }
 
-  public updateSelectedNum(payload: string | (string | null)[]) {
-    if (payload && payload !== undefined) {
-      studyStore.updateSelectedNum(payload);
-    }
-  }
+  // public updateSelectedNum(payload: string | (string | null)[]) {
+  //   if (payload && payload !== undefined) {
+  //     studyStore.updateSelectedNum(payload);
+  //   }
+  // }
 
   public async destroyed() {
     studyStore.clearTimer();
@@ -165,23 +136,16 @@ export default class Predictions extends Vue {
     return place !== null;
   }
 
-  showGoToUser() {
-    const place = this.filteredLeaderboard?.user_place ?? null;
-    if (place) {
-      return (
-        (this.options.page - 1) * this.options.itemsPerPage >= place ||
-        place >
-        (this.options.page - 1) * this.options.itemsPerPage +
-        this.options.itemsPerPage
-      );
-    } else {
-      return false;
-    }
-  }
-
   async retrievePredictedCards() {
     studyStore.setTargetRecall(this.searchOptions.student_recall)
     await studyStore.getStudyFacts();
+    const facts = studyStore.studyset?.all_facts
+    console.log(facts)
+    if (facts != null) {
+      mainStore.setFacts(facts)
+      mainStore.setTotalFacts(facts.length)
+    }
+    
     studyStore.setTargetRecall(null)
   }
 }
