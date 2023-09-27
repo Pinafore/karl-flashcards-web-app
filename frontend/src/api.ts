@@ -111,7 +111,7 @@ export const api = {
     deckIds: number[],
     selectedNum: number,
     forceNew: boolean,
-    targetRecall?: number,
+    targetRecall?: number|null,
   ) {
     let url = `${apiUrl}/api/study/`;
     url += `?`;

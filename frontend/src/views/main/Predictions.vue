@@ -26,16 +26,6 @@
               </div>
             </v-card-title>
             <div class="px-2 text-center">{{ filteredLeaderboard.details }}</div>
-            <v-row justify="center">
-              <v-btn v-if="showGoToUser()" class="px-2 mt-2 justify-center" @click="goToUser()">Your Rank: {{ userRank()
-              }} - See Page</v-btn>
-              <div v-else-if="showRank()" class="px-2 text-center">
-                Your Rank: {{ userRank() }}
-              </div>
-              <div v-else class="px-2 text-center">
-                Your Rank: N/A
-              </div>
-            </v-row>
 
             <v-data-table disable-filtering disable-sort class="mb-3 pa-1" :headers="filteredLeaderboard.headers"
               item-key="id" :loading="loading" :items="filteredLeaderboard.leaderboard" :options.sync="options"
@@ -112,16 +102,6 @@ export default class Predictions extends Vue {
     });
   }
 
-  public async beforeRouteUpdate(to, from, next) {
-    if (!to.name.startsWith("learn-") && !from.name.startsWith("learn-")) {
-      await this.determine_decks(to.query.deck);
-    }
-    this.editDialog = to.name == "learn-edit" || to.name == "learn-report";
-    if (to.name == "learn") {
-      studyStore.startTimer();
-    }
-    next();
-  }
 
   public async determine_decks(deckIds: string | (string | null)[]) {
     if (deckIds) {
@@ -180,13 +160,6 @@ export default class Predictions extends Vue {
   //   this.searchOptions.limit = value.itemsPerPage;
   //   this.searchLeaderboards();
   // }
-
-  async searchLeaderboards() {
-    this.loading = true;
-    await mainStore.getLeaderboard(this.searchOptions);
-    this.loading = false;
-  }
-
   showRank() {
     const place = this.filteredLeaderboard?.user_place ?? null;
     return place !== null;
@@ -203,16 +176,6 @@ export default class Predictions extends Vue {
       );
     } else {
       return false;
-    }
-  }
-  goToUser() {
-    const place = this.filteredLeaderboard?.user_place ?? null;
-    if (place) {
-      this.options.page = Math.ceil(place / this.options.itemsPerPage);
-      this.searchOptions.skip =
-        Math.floor(place / this.options.itemsPerPage) * this.options.itemsPerPage;
-      this.searchOptions.limit = this.options.itemsPerPage;
-      this.searchLeaderboards();
     }
   }
 
