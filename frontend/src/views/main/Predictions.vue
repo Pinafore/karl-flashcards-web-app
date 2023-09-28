@@ -19,7 +19,22 @@
       </v-row>
       <br />
       <br />
-      <Facts />
+      <v-row v-if="loading" cols="12">
+        <v-col>
+          <v-card class="pa-3">
+            <v-card-title primary-title class="pb-2 justify-center">
+              <div class="headline primary--text justify-center">
+                Loading...
+              </div>
+            </v-card-title>
+          </v-card>
+        </v-col>
+      </v-row>
+      <v-row v-else cols="12">
+        <v-col>
+          <Facts />
+        </v-col>
+      </v-row>
     </v-card>
   </v-container>
 </template>
@@ -41,16 +56,8 @@ export default class Predictions extends Vue {
   searchOptions: IComponents["ModelPredictionSearch"] = { student_recall: 0.0 };
   startMenu = false;
   endMenu = false;
-  options: DataOptions = {
-    groupBy: [],
-    groupDesc: [],
-    itemsPerPage: 25,
-    multiSort: false,
-    mustSort: false,
-    page: 1,
-    sortBy: [],
-    sortDesc: [],
-  };
+  originalRecall = 0.0;
+  originalFacts = [];
 
   // async mounted() {
   //   mainStore.setConnectionError(false);
@@ -63,60 +70,25 @@ export default class Predictions extends Vue {
       await mainStore.getUserProfile();
       mainStore.setConnectionError(false);
       mainStore.setSchedulerError(false);
+
+      const recall = mainStore.userProfile?.recall_target
+      if (recall !== undefined) {
+        this.originalRecall = recall
+      }
     
-    await this.retrievePredictedCards()
+      await this.retrievePredictedCards()
   }
-
-  public beforeRouteEnter(to, from, next) {
-    next((vm) => {
-      vm.editDialog = to.name == "learn-edit" || to.name == "learn-report";
-    });
-  }
-
-
-  // public async determine_decks(deckIds: string | (string | null)[]) {
-  //   if (deckIds) {
-  //     if (typeof deckIds === "string") {
-  //       studyStore.setDeckIds([Number(deckIds)]);
-  //     } else {
-  //       studyStore.setDeckIds(deckIds.map(Number));
-  //     }
-  //   } else {
-  //     studyStore.setDeckIds([]);
-  //   }
-  // }
-
-  // public updateSelectedNum(payload: string | (string | null)[]) {
-  //   if (payload && payload !== undefined) {
-  //     studyStore.updateSelectedNum(payload);
-  //   }
-  // }
 
   public async destroyed() {
+    studyStore.setTargetRecall(this.originalRecall)
     studyStore.clearTimer();
     studyStore.setShowLoading();
     studyStore.emptySchedule();
-    // window.removeEventListener("keydown", this.handleKeyDown);
-    // window.removeEventListener("keyup", this.resetKeyListener);
   }
 
-  get decks() {
-    const userProfile = mainStore.userProfile;
-    return userProfile && userProfile.decks
-      ? [{ title: "All", public: false, id: 0 }].concat(userProfile.decks)
-      : [];
-  }
 
   get today() {
     return mainStore.today;
-  }
-
-  get filteredLeaderboard() {
-    return mainStore.filteredLeaderboard;
-  }
-
-  get rankTypes() {
-    return mainStore.rankTypes;
   }
 
   @Watch("searchOptions", { deep: true })
@@ -125,28 +97,20 @@ export default class Predictions extends Vue {
     // this.searchLeaderboards();
   }
 
-  // @Watch("options", { deep: true })
-  // onOptionsChanged(value: DataOptions) {
-  //   this.searchOptions.skip = value.page * value.itemsPerPage - value.itemsPerPage;
-  //   this.searchOptions.limit = value.itemsPerPage;
-  //   this.searchLeaderboards();
-  // }
-  showRank() {
-    const place = this.filteredLeaderboard?.user_place ?? null;
-    return place !== null;
-  }
-
   async retrievePredictedCards() {
-    studyStore.setTargetRecall(this.searchOptions.student_recall)
+    this.loading = true;
+    studyStore.setTargetRecall(this.searchOptions.student_recall > 0 ? this.searchOptions.student_recall : 1)
     await studyStore.getStudyFacts();
     const facts = studyStore.studyset?.all_facts
     console.log(facts)
     if (facts != null) {
       mainStore.setFacts(facts)
       mainStore.setTotalFacts(facts.length)
+    } else {
+      mainStore.setFacts([])
+      mainStore.setTotalFacts(0)
     }
-    
-    studyStore.setTargetRecall(null)
+    this.loading = false;
   }
 }
 </script>

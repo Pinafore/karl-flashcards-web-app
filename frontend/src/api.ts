@@ -127,6 +127,7 @@ export const api = {
     if (targetRecall !== null) {
       url += `&target_recall=${targetRecall}`;
     }
+    console.log(url)
     return axios.get<IComponents["StudySet"]>(url, authHeaders(token));
   },
   async createFact(token: string, data: IComponents["FactCreate"]) {

@@ -65,6 +65,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                       return_limit: Optional[int] = None,
                       send_limit: Optional[int] = 1000,
                       force_new: bool,
+                      called_from_slider: bool,
                       ) -> Union[
         models.StudySet, requests.exceptions.RequestException, json.decoder.JSONDecodeError, HTTPException]:
         logger.info("getting study set")
@@ -86,7 +87,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         # Does not return study sets that are expired or completed
         uncompleted_last_set = self.find_existing_study_set(db, user)
         logger.info(uncompleted_last_set)
-        if uncompleted_last_set:
+        if uncompleted_last_set and not called_from_slider:
             if force_new and not uncompleted_last_set.is_test:
                 # Marks the study set as completed even though it hasn't been finished, due to override
                 self.mark_retired(db, db_obj=uncompleted_last_set)
@@ -95,12 +96,11 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         # Return the uncompleted last set if it exists and the user has not force-requested a new set
         in_test_mode = self.in_test_mode(db, user=user)
         logger.info(in_test_mode)
-        
-        if in_test_mode:
+        if in_test_mode and not called_from_slider:
             db_obj = self.create_new_test_study_set(db, user=user)
         else:
             db_obj = self.create_new_study_set(db, user=user, decks=decks, deck_ids=deck_ids, return_limit=return_limit,
-                                                   send_limit=send_limit)
+                                                   send_limit=send_limit, called_from_slider=called_from_slider)
         # db_obj = self.create_with_facts(db, obj_in=study_set_create,
         #                                 decks=decks,
         #                                 facts=facts)
@@ -180,11 +180,21 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             deck_ids: List[int] = None,
             return_limit: Optional[int] = None,
             send_limit: Optional[int] = None,
+            called_from_slider: Optional[bool] = False,
     ) -> Tuple[List[models.Fact], str]:
         filters = schemas.FactSearch(deck_ids=deck_ids, limit=send_limit, studyable=True)
         base_facts_query = crud.fact.build_facts_query(db=db, user=user, filters=filters)
+
+        # get eligible facts
         eligible_old_facts_query = crud.helper.filter_only_reviewed_facts(query=base_facts_query, user_id=user.id, log_type=schemas.Log.study)
         eligible_old_facts = crud.fact.get_eligible_facts(query=eligible_old_facts_query, limit=send_limit, randomize=True)
+
+        # add more data for model slider prediction
+        if called_from_slider:
+            eligible_old_facts_query = base_facts_query.order_by(models.Fact.fact_id)
+            eligible_old_facts = eligible_old_facts + crud.fact.get_eligible_facts(query=eligible_old_facts_query, limit=1000-len(eligible_old_facts), randomize=False)
+
+            
         # logger.info("eligible fact length: " + str(len(eligible_facts)))
         # if not eligible_facts:
         #     return []
@@ -196,6 +206,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
 
         logger.info("eligible old facts: " + str(eligible_old_facts))
         karl_query_start = time.time()
+
         try:
             # if statement is temporary only while the scheduler is crashing on empty arrays
             scheduler_response = requests.post(settings.INTERFACE + "api/karl/schedule_v2", json=schedule_query.dict())
@@ -216,6 +227,12 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             old_facts = list(islice(order_generator, return_limit))
             logger.info("old facts: " + str(old_facts))
             logger.info("debug id: " + debug_id)
+
+            if called_from_slider:
+                study_set = self.create_with_facts(db, obj_in=schemas.StudySetCreate(is_test=False, user_id=user.id, debug_id=debug_id),
+                                        decks=decks,
+                                        facts=old_facts)
+                return study_set
             
             random_facts = crud.fact.get_eligible_facts(query=base_facts_query, limit=return_limit, randomize=True)
             logger.info("new facts: " + str(random_facts))
