@@ -108,6 +108,8 @@ docker compose exec backend bash
 bash /start-reload.sh
 ```
 
+**Note for windows:** If running `bash /start-reload.sh` results in the error `'\r': command not found`, ensure that the EOL character in `start_reload.sh` has been appropriately changed from CRLF to LF. In VS-Code, this can be changed by searching for "Change End of Line Sequence"
+
 * Now you can open your browser and interact with these URLs:
 
 Frontend, built with Docker, with routes handled based on the path: http://localhost. If you make frontend changes, this will not be reflected unless you rebuild your stack with `docker compose up -d --build`
