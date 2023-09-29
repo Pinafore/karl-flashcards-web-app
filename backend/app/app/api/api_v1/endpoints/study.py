@@ -43,9 +43,8 @@ def get_next_set(
     called_from_slider = False
     if target_recall:
         called_from_slider = True
-        user.recall_target = target_recall
-
-    study_set = crud.studyset.get_study_set(db, user=user, deck_ids=deck_ids, return_limit=limit, force_new=force_new, called_from_slider=called_from_slider)
+    
+    study_set = crud.studyset.get_study_set(db, user=user, deck_ids=deck_ids, return_limit=limit, force_new=force_new, called_from_slider=called_from_slider, target_recall=target_recall)
     # if in_test_mode:
     #     facts = crud.fact.get_test_facts(db=db, user=user)
     # elif deck_ids is None:
@@ -61,7 +60,6 @@ def get_next_set(
     if isinstance(study_set, json.decoder.JSONDecodeError):
         raise HTTPException(status_code=556, detail="Scheduler malfunction")
     
-    user.recall_target = old_recall
     return study_set
 
 

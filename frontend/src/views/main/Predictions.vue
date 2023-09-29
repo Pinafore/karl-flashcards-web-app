@@ -80,7 +80,6 @@ export default class Predictions extends Vue {
   }
 
   public async destroyed() {
-    studyStore.setTargetRecall(this.originalRecall)
     studyStore.clearTimer();
     studyStore.setShowLoading();
     studyStore.emptySchedule();
@@ -99,6 +98,13 @@ export default class Predictions extends Vue {
 
   async retrievePredictedCards() {
     this.loading = true;
+    const currProfile = mainStore.userProfile
+    if (!currProfile) {
+      return
+    }
+    const oldRecall = currProfile?.recall_target
+    console.log(oldRecall)
+
     studyStore.setTargetRecall(this.searchOptions.student_recall > 0 ? this.searchOptions.student_recall : 1)
     await studyStore.getStudyFacts();
     const facts = studyStore.studyset?.all_facts
@@ -110,6 +116,9 @@ export default class Predictions extends Vue {
       mainStore.setFacts([])
       mainStore.setTotalFacts(0)
     }
+    studyStore.setTargetRecall(oldRecall)
+    currProfile.recall_target = oldRecall
+    mainStore.setUserProfile(currProfile)
     this.loading = false;
   }
 }

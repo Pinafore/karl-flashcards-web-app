@@ -65,7 +65,8 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                       return_limit: Optional[int] = None,
                       send_limit: Optional[int] = 1000,
                       force_new: bool,
-                      called_from_slider: bool,
+                      called_from_slider: Optional[bool],
+                      target_recall: Optional[float],
                       ) -> Union[
         models.StudySet, requests.exceptions.RequestException, json.decoder.JSONDecodeError, HTTPException]:
         logger.info("getting study set")
@@ -100,7 +101,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             db_obj = self.create_new_test_study_set(db, user=user)
         else:
             db_obj = self.create_new_study_set(db, user=user, decks=decks, deck_ids=deck_ids, return_limit=return_limit,
-                                                   send_limit=send_limit, called_from_slider=called_from_slider)
+                                                   send_limit=send_limit, called_from_slider=called_from_slider, target_recall=target_recall)
         # db_obj = self.create_with_facts(db, obj_in=study_set_create,
         #                                 decks=decks,
         #                                 facts=facts)
@@ -156,8 +157,8 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         db.commit()
         return study_set
 
-    def create_scheduler_query(self, facts: List[models.Fact], user: models.User):
-        recall_percentage = user.recall_target / 100
+    def create_scheduler_query(self, facts: List[models.Fact], user: models.User, target_recall: float):
+        recall_percentage = target_recall / 100
 
         scheduler_query = schemas.SchedulerQuery(facts=[schemas.KarlFactV2.from_orm(fact) for fact in facts],
                                                  env=settings.ENVIRONMENT, repetition_model=user.repetition_model,
@@ -181,6 +182,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             return_limit: Optional[int] = None,
             send_limit: Optional[int] = None,
             called_from_slider: Optional[bool] = False,
+            target_recall: Optional[float] = None,
     ) -> Tuple[List[models.Fact], str]:
         filters = schemas.FactSearch(deck_ids=deck_ids, limit=send_limit, studyable=True)
         base_facts_query = crud.fact.build_facts_query(db=db, user=user, filters=filters)
@@ -200,7 +202,10 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         #     return []
         
         rev_karl_list_start = time.time()
-        schedule_query = self.create_scheduler_query(facts=eligible_old_facts, user=user)
+        if target_recall:
+            schedule_query = self.create_scheduler_query(facts=eligible_old_facts, user=user, target_recall=target_recall)
+        else:
+            schedule_query = self.create_scheduler_query(facts=eligible_old_facts, user=user, target_recall=user.recall_target)
         eligible_fact_time = time.time() - rev_karl_list_start
         logger.info("scheduler query time: " + str(eligible_fact_time))
 
