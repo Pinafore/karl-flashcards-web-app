@@ -39,6 +39,10 @@ def get_next_set(
         user = current_user
 
     study_set = crud.studyset.get_study_set(db, user=user, deck_ids=deck_ids, return_limit=limit, force_new=force_new)
+    for i in range(len(study_set.facts)):
+        study_set.all_facts[i].extra = study_set.facts[i].extra
+
+
     # if in_test_mode:
     #     facts = crud.fact.get_test_facts(db=db, user=user)
     # elif deck_ids is None:
