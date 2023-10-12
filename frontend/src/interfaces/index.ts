@@ -135,6 +135,7 @@ export interface IComponents {
     elapsed_milliseconds_answer: number;
     recommendation: boolean;
     test_mode: number;
+    used_mnemonic?: boolean;
   };
   SuperUserCreate: {
     email: string;

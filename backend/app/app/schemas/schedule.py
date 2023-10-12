@@ -10,11 +10,12 @@ class Schedule(BaseModel):
     fact_id: int
     typed: str
     response: bool
-    recommendation: bool;
+    recommendation: bool
     elapsed_seconds_text: Optional[int] = None
     elapsed_seconds_answer: Optional[int] = None
     elapsed_milliseconds_text: Optional[int] = None
     elapsed_milliseconds_answer: Optional[int] = None
+    viewed_mnemonic: Optional[bool] = False
 
 
 class ScheduleResponse(BaseModel):

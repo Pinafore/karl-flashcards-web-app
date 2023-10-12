@@ -43,10 +43,24 @@
       item-key="id"
       :items="decks"
       :items-per-page="15"
-      show-select
       :style="{ cursor: 'pointer' }"
+      show-select
       @click:row="openDeck"
     >
+    <template v-slot:header.data-table-select="{ selectAll }">
+      <v-simple-checkbox
+        :value="areAllSelectedExceptVocab()"
+        @input="toggleAllExceptVocab"
+      ></v-simple-checkbox>
+    </template>
+    <template v-slot:item.data-table-select="{item}">
+      <v-simple-checkbox
+        v-ripple
+        :value="isSelected(item.title)"
+        @input="updateSelection(item.title)"
+      ></v-simple-checkbox>
+    </template>
+
     </v-data-table>
   </div>
 </template>
@@ -57,6 +71,7 @@
   import { IComponents } from "@/interfaces";
   import Onboard from "@/views/Onboard.vue";
   import RecallPopup from "@/views/main/RecallPopup.vue";
+import UserProfile from "../profile/UserProfile.vue";
 
   @Component({
     components: { RecallPopup, Onboard },
@@ -73,6 +88,8 @@
     selected: IComponents["Deck"][] = [];
     studyNumOptions: number[] = [5, 10, 20, 30, 50];
     selectedNum = 20;
+    selectedItems: string[] = [];
+    vocabIdentifier = "Vocab2";
 
     async mounted() {
       studyStore.setInTestMode(false);
@@ -80,8 +97,7 @@
     }
 
     get decks() {
-      const userProfile = mainStore.userProfile;
-      return userProfile && userProfile.decks ? userProfile.decks : [];
+      return mainStore.userProfile && mainStore.userProfile.decks ? mainStore.userProfile.decks : [];
     }
 
     get resumeAvail() {
@@ -90,6 +106,44 @@
 
     public checkAllDecks() {
       return this.selected.length == 0 || this.selected.length == this.decks.length;
+    }
+
+    public areAllSelectedExceptVocab() {
+    return this.decks.filter(i => i.title !== this.vocabIdentifier).every(i => this.selectedItems.includes(i.title));
+    }
+
+    public toggleAllExceptVocab() {
+      if (this.areAllSelectedExceptVocab()) {
+        this.selectedItems = [];
+      } else {
+        this.selectedItems = this.decks.filter(i => i.title !== this.vocabIdentifier).map(i => i.title);
+      }
+    }
+
+    public isSelected(id) {
+      return this.selectedItems.includes(id);
+    };
+    
+    public updateSelection(id) {
+      if (id === this.vocabIdentifier) {
+        if (this.isSelected(this.vocabIdentifier)) {
+          this.selectedItems = [];
+        } else {
+          this.selectedItems = [this.vocabIdentifier];
+        }
+      } else {
+        const specialIndex = this.selectedItems.indexOf(this.vocabIdentifier);
+        if (specialIndex !== -1) {
+          this.selectedItems.splice(specialIndex, 1);
+        }
+
+        const index = this.selectedItems.indexOf(id);
+    if (index === -1) {
+      this.selectedItems.push(id);
+    } else {
+      this.selectedItems.splice(index, 1);
+    }
+      }
     }
 
     public openDecks() {

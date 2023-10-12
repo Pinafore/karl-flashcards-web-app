@@ -118,7 +118,8 @@
 
               <span v-if="show.fact &&
                 show.fact.deck &&
-                show.fact.deck.title !== vocabIdentifier" class="hidden-xs-only">Identify {{ show.fact.identifier
+                show.fact.deck.title !== mnemonicData.vocabIdentifier" class="hidden-xs-only">Identify {{
+    show.fact.identifier
   }}</span>
               <span v-else class="hidden-xs-only">What's the definition?</span>
             </div>
@@ -137,7 +138,7 @@
           @keydown="keyHandler" v-if="show.enable_show_back &&
             show.fact &&
             show.fact.deck &&
-            show.fact.deck.title !== vocabIdentifier"><template v-slot:label>
+            show.fact.deck.title !== mnemonicData.vocabIdentifier"><template v-slot:label>
             <span v-if="inTestMode">Required (Test Mode) - </span>
             <span v-else>Recommended - </span>
             Type Answer (Press any letter to focus)
@@ -150,23 +151,33 @@
       </v-card-actions>
     </v-card>
 
-    <div v-show="showBack && show.enable_show_back && show.fact && show.fact.deck && show.fact.deck.title === vocabIdentifier" class="my-2 mx-3 px-3 py-4">
+    <div
+      v-show="showBack && show.enable_show_back && show.fact && show.fact.deck && show.fact.deck.title === mnemonicData.vocabIdentifier"
+      class="my-2 mx-3 px-3 py-4">
       <v-expansion-panels>
         <v-expansion-panels>
-          <v-expansion-panel>
-            
-            <v-expansion-panel-header color='#e0f0ff'><b>KAR³L-generated Mnemonic Device</b><div ref="mnemonicPaneTop"></div></v-expansion-panel-header>
+          <v-expansion-panel @click="updateMnemonicClick()">
+
+            <v-expansion-panel-header color='#e0f0ff'><b>KAR³L-generated Mnemonic Device</b>
+              <div ref="mnemonicPaneTop"></div>
+            </v-expansion-panel-header>
             <v-expansion-panel-content color='#e0f0ff'>
               <div>
-                {{ show.fact && show.fact.extra && show.fact.extra[mnemonicGroup] }}
+                {{ show.fact && show.fact.extra && show.fact.extra[mnemonicData.mnemonicGroup] }}
               </div><v-row>
-                <v-col cols="12"><v-radio-group style="color:black" label="Submit Feedback (Optional)" v-model="feedbackRadioGroup">
+                <v-col cols="12" v-if="!alreadySubmittedFeedback()"><v-radio-group style="color:black"
+                    label="Submit Feedback (Optional)" v-model="feedbackRadioGroup">
                     <v-radio label="Good Mnemonic" value="good_mnemonic"></v-radio>
                     <v-radio label="Incorrect Definition" value="incorrect_definition"></v-radio>
                     <v-radio label="Difficult to Understand" value="difficult_to_understand"></v-radio>
                     <v-radio label="Bad Keyword Link" value="bad_keyword_link"></v-radio>
                     <v-radio label="Offensive" value="offensive"></v-radio>
-                  </v-radio-group><v-btn size="small" @click="submitFeedback()">Submit</v-btn></v-col>
+                  </v-radio-group>
+                  <v-btn size="small" @click="submitFeedback()">Submit</v-btn>
+                </v-col>
+                <v-col cols="12" v-else><br />
+                  <p><i>Thank you for your feedback!</i></p>
+                </v-col>
               </v-row>
             </v-expansion-panel-content>
           </v-expansion-panel>
@@ -182,12 +193,13 @@
         <div v-if="show.enable_show_back &&
           show.fact &&
           show.fact.deck &&
-          show.fact.deck.title !== vocabIdentifier" class="title primary--text">{{ show.fact && show.fact.answer }}</div>
+          show.fact.deck.title !== mnemonicData.vocabIdentifier" class="title primary--text">{{ show.fact &&
+    show.fact.answer }}</div>
         <div v-else class="title primary--text" style="white-space: pre-wrap;">{{ show.fact && show.fact.answer }}</div>
         <span v-show="showResponseBtns" v-if="show.enable_show_back &&
           show.fact &&
           show.fact.deck &&
-          show.fact.deck.title !== vocabIdentifier">
+          show.fact.deck.title !== mnemonicData.vocabIdentifier">
           <div class="title">You typed: '{{ typed }}'</div>
           <div v-if="recommendation" class="title primary--text py-2" :style="{ color: 'green !important' }">
             KAR³L Believes Your Response Was Correct
@@ -204,7 +216,7 @@
           label="Optional - Retype Answer (Press any letter to focus)" autofocus hide-details="auto" v-if="show.enable_show_back &&
             show.fact &&
             show.fact.deck &&
-            show.fact.deck.title !== vocabIdentifier"></v-text-field>
+            show.fact.deck.title !== mnemonicData.vocabIdentifier"></v-text-field>
       </v-card-text>
       <v-card-actions class="pt-3 pb-1 px-5">
         <v-row class="shrink" justify="space-around">
@@ -214,7 +226,7 @@
           </v-col>
           <v-col v-show="showResponseBtns" id="response" cols="5" sm="auto" class="ma-1 pa-1 py-0 shrink">
             <v-btn ref="right"
-              :color="recommendation || (show.fact && show.fact.deck && show.fact.deck.title === vocabIdentifier) ? 'green' : ''"
+              :color="recommendation || (show.fact && show.fact.deck && show.fact.deck.title === mnemonicData.vocabIdentifier) ? 'green' : ''"
               class="px-2" @click="response(true)">right
               (])</v-btn>
           </v-col>
@@ -225,9 +237,9 @@
       </v-card-actions>
     </v-card>
     <!-- <v-card
-      v-show="showBack && show.enable_show_back && show.fact && show.fact.deck && show.fact.deck.title === vocabIdentifier"
+      v-show="showBack && show.enable_show_back && show.fact && show.fact.deck && show.fact.deck.title === mnemonicData.vocabIdentifier"
       class="my-2 mx-3 px-3 py-4" color='#e0f0ff'>
-      <v-card-text v-show="showBack && show && show.fact && show.fact.extra && show.fact.extra['vocabIdentifier']"
+      <v-card-text v-show="showBack && show && show.fact && show.fact.extra && show.fact.extra['mnemonicData.vocabIdentifier']"
         class="pb-0 pt-1">
         <
       </v-card-text>
@@ -293,8 +305,12 @@ export default class Learn extends Vue {
   editDialog = false;
   pressed = false;
   showResponseBtns = true;
-  vocabIdentifier = 'Vocab Fixed';
-  mnemonicGroup = 'mnemonic_1';
+  mnemonicData = {
+    vocabIdentifier: 'Vocab2',
+    mnemonicGroup: '',
+    mnemonicClick: false,
+    mnemonicHasBeenClicked: false,
+  };
 
   get studyset() {
     return studyStore.studyset;
@@ -346,11 +362,7 @@ export default class Learn extends Vue {
     window.addEventListener("keydown", this.handleKeyDown);
     window.addEventListener("keyup", this.resetKeyListener);
     await studyStore.getStudyFacts();
-    
-    const user_id = mainStore.userProfile?.id
-    if (user_id) {
-      this.mnemonicGroup = "mnemonic_" + (user_id % 2 + 2).toString()
-    }
+    await this.setupMnemonicData();
   }
 
   public beforeRouteEnter(to, from, next) {
@@ -445,7 +457,7 @@ export default class Learn extends Vue {
       this.response(false);
     } else if (key == "]" && this.showResponseBtns) {
       this.response(true);
-    } else if (key == ' ' && this.show && this.show.fact && this.show.fact.deck.title === this.vocabIdentifier) {
+    } else if (key == ' ' && this.show && this.show.fact && this.show.fact.deck.title === this.mnemonicData.vocabIdentifier) {
       this.toggleMnemonic();
     }
     else if (
@@ -481,8 +493,29 @@ export default class Learn extends Vue {
     }
   }
 
+
+  public async setupMnemonicData() {
+    const user_id = mainStore.userProfile?.id
+    if (user_id) {
+      this.mnemonicData.mnemonicGroup = "mnemonic_" + (user_id % 2 + 1).toString()
+    }
+  }
+
+  public async updateMnemonicClick() {
+    this.mnemonicData.mnemonicClick = !this.mnemonicData.mnemonicClick
+    this.mnemonicData.mnemonicHasBeenClicked = this.mnemonicData.mnemonicHasBeenClicked || this.mnemonicData.mnemonicClick
+    console.log(this.mnemonicData)
+  }
+
   public async toggleMnemonic() {
     this.$refs.mnemonicPaneTop.click();
+  }
+
+  public async resetMnemonicData() {
+    if (this.mnemonicData.mnemonicClick) {
+      await this.toggleMnemonic();
+    }
+    this.mnemonicData.mnemonicHasBeenClicked = false;
   }
 
   public async dontKnow() {
@@ -573,19 +606,37 @@ export default class Learn extends Vue {
         elapsed_milliseconds_answer: this.backTime,
         test_mode: this.inTestMode,
         recommendation: this.recommendation,
+        viewed_mnemonic: this.mnemonicData.mnemonicHasBeenClicked,
       });
       this.resetCard();
       await studyStore.updateSchedule();
       this.resetCard();
     }
+
+    if (this.show && this.show.fact && this.show.fact.deck.title === this.mnemonicData.vocabIdentifier) {
+      await this.resetMnemonicData();
+    }
+  }
+
+  public alreadySubmittedFeedback() {
+    return this.show.fact && this.show.fact.extra && mainStore.userProfile && this.show.fact.extra[this.mnemonicData.mnemonicGroup + "_feedback"] && this.show.fact.extra[this.mnemonicData.mnemonicGroup + "_feedback"][mainStore.userProfile.id];
   }
 
   public async submitFeedback() {
     if (this.feedbackRadioGroup == '') {
-      alert("Please make a selection to submit feedback!")
+      alert("Please make a selection before submitting feedback, thanks!")
       return
     }
-    console.log(this.feedbackRadioGroup)
+    if (!this.show.fact || !mainStore.userProfile || !this.show.fact.extra || this.show.fact.extra[this.mnemonicData.mnemonicGroup + "_feedback"][mainStore.userProfile.id]) {
+      return
+    }
+    const feedbackData = JSON.parse(JSON.stringify(this.show.fact.extra[this.mnemonicData.mnemonicGroup + "_feedback"]));
+    feedbackData[mainStore.userProfile.id] = this.feedbackRadioGroup
+    this.show.fact.extra[this.mnemonicData.mnemonicGroup + "_feedback"] = feedbackData;
+    await mainStore.updateFact({
+      id: this.show.fact.fact_id,
+      data: this.show.fact,
+    });
   }
 
   public scrollToResponseButtons() {

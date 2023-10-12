@@ -73,6 +73,7 @@ def update_schedule_set(
     """
 
     # successes = []
+    print('\n\n', facts_in, '\n\n')
     response = crud.studyset.update_session_facts(db=db, schedules=facts_in, user=current_user, studyset_id=studyset_id)
     return response
     # for fact_in in facts_in:

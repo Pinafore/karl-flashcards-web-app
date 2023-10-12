@@ -64,6 +64,7 @@ class UpdateRequestV2(BaseModel):
     debug_id: Optional[str] # aka schedule_request_id, n/a in test updates
     test_mode: bool
     recommendation: bool
+    viewed_mnemonic: Optional[bool]
     fact: KarlFactV2
 
 class KarlFactUpdate(KarlFact):
