@@ -47,12 +47,14 @@
       show-select
       @click:row="openDeck"
     >
-    <template v-slot:header.data-table-select="{ selectAll }">
+
+    <template v-slot:header.data-table-select>
       <v-simple-checkbox
         :value="areAllSelectedExceptVocab()"
         @input="toggleAllExceptVocab"
       ></v-simple-checkbox>
     </template>
+    
     <template v-slot:item.data-table-select="{item}">
       <v-simple-checkbox
         v-ripple
@@ -60,6 +62,7 @@
         @input="updateSelection(item.title)"
       ></v-simple-checkbox>
     </template>
+
 
     </v-data-table>
   </div>
@@ -89,7 +92,7 @@ import UserProfile from "../profile/UserProfile.vue";
     studyNumOptions: number[] = [5, 10, 20, 30, 50];
     selectedNum = 20;
     selectedItems: string[] = [];
-    vocabIdentifier = "Vocab2";
+    vocabIdentifier = "Vocab2 (Can only be studied on its own!)";
 
     async mounted() {
       studyStore.setInTestMode(false);
@@ -97,7 +100,10 @@ import UserProfile from "../profile/UserProfile.vue";
     }
 
     get decks() {
-      return mainStore.userProfile && mainStore.userProfile.decks ? mainStore.userProfile.decks : [];
+      if (!mainStore.userProfile || !mainStore.userProfile.decks) {
+        return []
+      }
+      return mainStore.userProfile.decks.map(i => (this.vocabIdentifier.includes(i.title) ? {'title': i.title + " (Can only be studied on its own!)", 'id': i.id, 'public': i.public} : i))
     }
 
     get resumeAvail() {
@@ -109,7 +115,7 @@ import UserProfile from "../profile/UserProfile.vue";
     }
 
     public areAllSelectedExceptVocab() {
-    return this.decks.filter(i => i.title !== this.vocabIdentifier).every(i => this.selectedItems.includes(i.title));
+      return this.decks.filter(i => i.title !== this.vocabIdentifier).every(i => this.selectedItems.includes(i.title));
     }
 
     public toggleAllExceptVocab() {
