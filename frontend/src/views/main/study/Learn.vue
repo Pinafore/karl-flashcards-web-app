@@ -116,7 +116,8 @@
             <div v-show="show.enable_show_back && show.fact && show.fact.identifier" class="title">
               <span class="hidden-xs-only">—</span>
 
-              <span v-if="!shouldShowMnemonic" class="hidden-xs-only">Identify {{ show.fact.identifier }}</span>
+              <span v-if="!mnemonicData.shouldShowMnemonic" class="hidden-xs-only">Identify {{ show.fact.identifier
+              }}</span>
               <span v-else class="hidden-xs-only">What's the definition?</span>
             </div>
           </v-col>
@@ -131,7 +132,7 @@
       </v-card-text>
       <v-card-text v-show="show.enable_show_back" class="py-2">
         <v-text-field id="answer" ref="answerfield" v-model="typed" solo autofocus hide-details="auto"
-          @keydown="keyHandler" v-if="!shouldShowMnemonic"><template v-slot:label>
+          @keydown="keyHandler" v-if="!mnemonicData.shouldShowMnemonic"><template v-slot:label>
             <span v-if="inTestMode">Required (Test Mode) - </span>
             <span v-else>Recommended - </span>
             Type Answer (Press any letter to focus)
@@ -144,9 +145,7 @@
       </v-card-actions>
     </v-card>
 
-    <div
-      v-show="showBack && shouldShowMnemonic"
-      class="my-2 mx-3 px-3 py-4">
+    <div v-show="showBack && mnemonicData.shouldShowMnemonic" class="my-2 mx-3 px-3 py-4">
       <v-expansion-panels>
         <v-expansion-panels>
           <v-expansion-panel @click="updateMnemonicClick()">
@@ -155,41 +154,32 @@
               <div ref="mnemonicPaneTop"></div>
             </v-expansion-panel-header>
             <v-expansion-panel-content color='#e0f0ff'>
-              
+
               <p>
                 {{ show.fact && show.fact.extra && show.fact.extra[mnemonicData.mnemonicGroup] }}
               </p>
               <v-container class="pl-0" v-if="show.fact && !hasSubmittedFeedback()">
-              <v-subheader class="pl-0 pt-4">Submit Feedback (Optional)</v-subheader>
-              <v-rating hover :length="5" :size="30" :model-value="5" active-color="black" v-model="mnemonicRating" class="pb-2"/>
-              <v-subheader v-show="mnemonicRating === 1 || mnemonicRating === 2" class="pl-0 pt-0">Why is this mnemonic bad? (Optional)</v-subheader>
-              <v-container v-show="mnemonicRating === 1 || mnemonicRating === 2" fluid>
-                    <v-checkbox style="margin-top: -15px;"
-                      v-model="isIncorrectDefinition"
-                      label="Incorrect Definition"
-                    ></v-checkbox>
-                    <v-checkbox style="margin-top: -15px;"
-                      v-model="isDifficultToUnderstand"
-                      label="Difficult to Understand"
-                    ></v-checkbox>
-                    <v-checkbox style="margin-top: -15px;"
-                      v-model="isBadKeywordLink"
-                      label="Bad Keyword Link"
-                    ></v-checkbox>
-                    <v-checkbox style="margin-top: -15px;"
-                      v-model="isOffensive"
-                      label="Offensive"
-                    ></v-checkbox>
-                    <v-checkbox style="margin-top: -15px;"
-                      v-model="isOther"
-                      label="Other Reason"
-                    ></v-checkbox>
+                <v-subheader class="pl-0 pt-4">Submit Feedback (Optional)</v-subheader>
+                <v-rating hover :length="5" :size="30" :model-value="5" active-color="black"
+                  v-model="mnemonicData.mnemonicRating" class="pb-2" />
+                <v-subheader v-show="mnemonicData.mnemonicRating === 1 || mnemonicData.mnemonicRating === 2"
+                  class="pl-0 pt-0">Why is this mnemonic bad? (Optional)</v-subheader>
+                <v-container v-show="mnemonicData.mnemonicRating === 1 || mnemonicData.mnemonicRating === 2" fluid>
+                  <v-checkbox style="margin-top: -15px;" v-model="mnemonicData.isIncorrectDefinition"
+                    label="Incorrect Definition"></v-checkbox>
+                  <v-checkbox style="margin-top: -15px;" v-model="mnemonicData.isDifficultToUnderstand"
+                    label="Difficult to Understand"></v-checkbox>
+                  <v-checkbox style="margin-top: -15px;" v-model="mnemonicData.isBadKeywordLink"
+                    label="Bad Keyword Link"></v-checkbox>
+                  <v-checkbox style="margin-top: -15px;" v-model="mnemonicData.isOffensive"
+                    label="Offensive"></v-checkbox>
+                  <v-checkbox style="margin-top: -15px;" v-model="mnemonicData.isOther" label="Other Reason"></v-checkbox>
                 </v-container>
                 <v-btn medium class="pt-0 mt-0" @click="submitFeedback()">Submit</v-btn>
               </v-container>
-            <v-container class="pl-0 pt-8" v-else>
-              <p class="primary--text"><i>Thank you for submitting feedback!</i></p>
-            </v-container>
+              <v-container class="pl-0 pt-8" v-else>
+                <p class="primary--text"><i>Thank you for submitting feedback!</i></p>
+              </v-container>
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
@@ -201,10 +191,10 @@
         <div class="title">Answer</div>
       </v-card-title>
       <v-card-text class="pb-0 pt-1">
-        <div v-if="!shouldShowMnemonic" class="title primary--text">{{ show.fact &&
-    show.fact.answer }}</div>
+        <div v-if="!mnemonicData.shouldShowMnemonic" class="title primary--text">{{ show.fact &&
+          show.fact.answer }}</div>
         <div v-else class="title primary--text" style="white-space: pre-wrap;">{{ show.fact && show.fact.answer }}</div>
-        <span v-show="showResponseBtns" v-if="!shouldShowMnemonic">
+        <span v-show="showResponseBtns" v-if="!mnemonicData.shouldShowMnemonic">
           <div class="title">You typed: '{{ typed }}'</div>
           <div v-if="recommendation" class="title primary--text py-2" :style="{ color: 'green !important' }">
             KAR³L Believes Your Response Was Correct
@@ -218,7 +208,8 @@
       </v-card-text>
       <v-card-text v-show="show.enable_show_back" class="py-2">
         <v-text-field id="retype_answer" ref="retype" v-model="retyped" solo
-          label="Optional - Retype Answer (Press any letter to focus)" autofocus hide-details="auto" v-if="!shouldShowMnemonic"></v-text-field>
+          label="Optional - Retype Answer (Press any letter to focus)" autofocus hide-details="auto"
+          v-if="!mnemonicData.shouldShowMnemonic"></v-text-field>
       </v-card-text>
       <v-card-actions class="pt-3 pb-1 px-5">
         <v-row class="shrink" justify="space-around">
@@ -227,9 +218,8 @@
               ([)</v-btn>
           </v-col>
           <v-col v-show="showResponseBtns" id="response" cols="5" sm="auto" class="ma-1 pa-1 py-0 shrink">
-            <v-btn ref="right"
-              :color="recommendation || (shouldShowMnemonic) ? 'green' : ''"
-              class="px-2" @click="response(true)">right
+            <v-btn ref="right" :color="recommendation || (mnemonicData.shouldShowMnemonic) ? 'green' : ''" class="px-2"
+              @click="response(true)">right
               (])</v-btn>
           </v-col>
           <v-col v-show="!showResponseBtns" cols="5" sm="auto" class="ma-1 pa-1 py-0 shrink">
@@ -278,13 +268,6 @@ export default class Learn extends Vue {
     wrong: HTMLButtonElement;
     mnemonicPaneTop: HTMLInputElement;
   };
-  feedbackFactIds = new Set();
-  isIncorrectDefinition = false;
-  isDifficultToUnderstand = false;
-  isBadKeywordLink = false;
-  isOffensive = false;
-  mnemonicRating = 0;
-  isOther = false;
   showBack = false;
   typed = "";
   retyped = "";
@@ -292,12 +275,19 @@ export default class Learn extends Vue {
   editDialog = false;
   pressed = false;
   showResponseBtns = true;
-  shouldShowMnemonic = false;
   mnemonicData = {
-    vocabIdentifier: 'Vocab2',
+    vocabIdentifier: process.env.VUE_APP_VOCAB_DECK,
     mnemonicGroup: '',
     mnemonicClick: false,
     mnemonicHasBeenClicked: false,
+    shouldShowMnemonic: false,
+    isIncorrectDefinition: false,
+    isDifficultToUnderstand: false,
+    isBadKeywordLink: false,
+    isOffensive: false,
+    isOther: false,
+    mnemonicRating: 0,
+    feedbackFactIds: new Set(),
   };
 
   get studyset() {
@@ -351,8 +341,8 @@ export default class Learn extends Vue {
     window.addEventListener("keyup", this.resetKeyListener);
     await studyStore.getStudyFacts();
 
-    this.shouldShowMnemonic = (this.show.fact !== undefined && this.show.fact.deck.title === this.mnemonicData.vocabIdentifier)
-    if (this.shouldShowMnemonic) {
+    this.mnemonicData.shouldShowMnemonic = (this.show.fact !== undefined && this.show.fact.deck.title === this.mnemonicData.vocabIdentifier)
+    if (this.mnemonicData.shouldShowMnemonic) {
       await this.setupMnemonicData();
     }
   }
@@ -449,7 +439,7 @@ export default class Learn extends Vue {
       this.response(false);
     } else if (key == "]" && this.showResponseBtns) {
       this.response(true);
-    } else if (key == ' ' && this.shouldShowMnemonic) {
+    } else if (key == ' ' && this.mnemonicData.shouldShowMnemonic) {
       this.toggleMnemonic();
     }
     else if (
@@ -490,9 +480,9 @@ export default class Learn extends Vue {
     if (user_id) {
       this.mnemonicData.mnemonicGroup = "mnemonic_" + (user_id % 2 + 1).toString()
       if (this.studyset?.all_facts) {
-        const res = await mainStore.getMnemonic({'data': {'user_id': user_id, 'fact_ids': this.studyset.all_facts.map(fact => {return fact.fact_id})}})
-        this.feedbackFactIds = new Set(res.fact_ids);
-        console.log(this.feedbackFactIds)
+        const res = await mainStore.getMnemonic({ 'data': { 'user_id': user_id, 'fact_ids': this.studyset.all_facts.map(fact => { return fact.fact_id }) } })
+        this.mnemonicData.feedbackFactIds = new Set(res.fact_ids);
+        console.log(this.mnemonicData.feedbackFactIds)
       }
     }
   }
@@ -507,13 +497,13 @@ export default class Learn extends Vue {
   }
 
   public hasSubmittedFeedback() {
-    return this.show.fact && this.feedbackFactIds.has(this.show.fact.fact_id);
+    return this.show.fact && this.mnemonicData.feedbackFactIds.has(this.show.fact.fact_id);
   }
 
   public async submitFeedback() {
     if (this.show.fact) {
-      this.feedbackFactIds.add(this.show.fact.fact_id)
-      this.feedbackFactIds = new Set([...this.feedbackFactIds]);
+      this.mnemonicData.feedbackFactIds.add(this.show.fact.fact_id)
+      this.mnemonicData.feedbackFactIds = new Set([...this.mnemonicData.feedbackFactIds]);
     }
   }
 
@@ -522,12 +512,12 @@ export default class Learn extends Vue {
       await this.toggleMnemonic();
     }
     this.mnemonicData.mnemonicHasBeenClicked = false;
-    this.mnemonicRating = 0;
-    this.isBadKeywordLink = false;
-    this.isDifficultToUnderstand = false;
-    this.isOffensive = false;
-    this.isOther = false;
-    this.isIncorrectDefinition = false;
+    this.mnemonicData.mnemonicRating = 0;
+    this.mnemonicData.isBadKeywordLink = false;
+    this.mnemonicData.isDifficultToUnderstand = false;
+    this.mnemonicData.isOffensive = false;
+    this.mnemonicData.isOther = false;
+    this.mnemonicData.isIncorrectDefinition = false;
   }
 
   public async dontKnow() {
@@ -608,18 +598,18 @@ export default class Learn extends Vue {
       });
     }
 
-    if (this.show && this.show.fact && this.studyset && this.shouldShowMnemonic) {
+    if (this.show && this.show.fact && this.studyset && this.mnemonicData.shouldShowMnemonic) {
       await mainStore.createMnemonic({
         data: {
           study_id: this.studyset.id,
           fact_id: this.show.fact.fact_id,
           user_id: this.studyset.user.id,
           viewed_mnemonic: this.mnemonicData.mnemonicHasBeenClicked,
-          user_rating: this.mnemonicRating,
-          is_offensive: this.isOffensive,
-          is_incorrect_definition: this.isIncorrectDefinition,
-          is_difficult_to_understand: this.isDifficultToUnderstand,
-          is_bad_keyword_link: this.isBadKeywordLink,
+          user_rating: this.mnemonicData.mnemonicRating,
+          is_offensive: this.mnemonicData.isOffensive,
+          is_incorrect_definition: this.mnemonicData.isIncorrectDefinition,
+          is_difficult_to_understand: this.mnemonicData.isDifficultToUnderstand,
+          is_bad_keyword_link: this.mnemonicData.isBadKeywordLink,
           correct: response,
         },
       });
@@ -642,7 +632,7 @@ export default class Learn extends Vue {
       this.resetCard();
     }
 
-    if (this.shouldShowMnemonic) {
+    if (this.mnemonicData.shouldShowMnemonic) {
       await this.resetMnemonicData();
     }
   }
