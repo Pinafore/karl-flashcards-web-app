@@ -116,7 +116,7 @@
             <div v-show="show.enable_show_back && show.fact && show.fact.identifier" class="title">
               <span class="hidden-xs-only">—</span>
 
-              <span v-if="!mnemonicData.shouldShowMnemonic" class="hidden-xs-only">Identify {{ show.fact.identifier
+              <span v-if="!mnemonicData.shouldShowMnemonic" class="hidden-xs-only">Identify {{ show.fact && show.fact.identifier
               }}</span>
               <span v-else class="hidden-xs-only">What's the definition?</span>
             </div>
@@ -372,7 +372,8 @@ export default class Learn extends Vue {
         studyStore.setDeckIds(deckIds.map(Number));
       }
     } else {
-      studyStore.setDeckIds([]);
+      const decks = mainStore.publicDecks.filter(deck => deck.title === this.mnemonicData.vocabIdentifier).map(deck => deck.id);
+      studyStore.setDeckIds(decks);
     }
   }
 
@@ -482,7 +483,7 @@ export default class Learn extends Vue {
       if (this.studyset?.all_facts) {
         const res = await mainStore.getMnemonic({ 'data': { 'user_id': user_id, 'fact_ids': this.studyset.all_facts.map(fact => { return fact.fact_id }) } })
         this.mnemonicData.feedbackFactIds = new Set(res.fact_ids);
-        console.log(this.mnemonicData.feedbackFactIds)
+        //console.log(this.mnemonicData.feedbackFactIds)
       }
     }
   }

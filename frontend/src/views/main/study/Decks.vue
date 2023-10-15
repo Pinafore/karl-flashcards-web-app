@@ -92,7 +92,7 @@ import UserProfile from "../profile/UserProfile.vue";
     studyNumOptions: number[] = [5, 10, 20, 30, 50];
     selectedNum = 20;
     selectedItems: string[] = [];
-    vocabIdentifier = "Vocab2 (Can only be studied on its own!)";
+    vocabIdentifier = process.env.VUE_APP_VOCAB_DECK + " (Can only be studied on its own!)";
 
     async mounted() {
       studyStore.setInTestMode(false);
