@@ -86,7 +86,6 @@ class OwnerFactPerms:
         self.current_user = current_user
         self.fact_id = fact_id
 
-
 class CheckFactPerms:
     def __init__(self, fact_id: int, db: Session = Depends(get_db),
                  current_user: models.User = Depends(get_current_active_user)):

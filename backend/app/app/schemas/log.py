@@ -22,3 +22,4 @@ class Log(str, Enum):
     reassign_model = "reassign_model"
     test_study = "test_study"
     get_test_facts = "get_test_facts"
+    update_mnemonic = "update_mnemonic"

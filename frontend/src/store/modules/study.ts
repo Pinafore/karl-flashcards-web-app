@@ -247,10 +247,6 @@ export default class StudyModule extends VuexModule {
 
   @Action
   async getNextShow() {
-    // console.log(this.studyset);
-    // if (this.studyset) {
-    //   console.log(this.studyset.unstudied_facts.length);
-    // }
     this.clearTimer();
     if (this.studyset) {
       if (this.studyset.unstudied_facts.length > 0) {
@@ -441,7 +437,6 @@ export default class StudyModule extends VuexModule {
     if (this.show.fact && this.show.enable_show_back && this.studyset) {
       try {
         this.setShowLoading();
-        console.log(this.schedule)
         await api.updateSchedule(mainStore.token, this.studyset.id, this.schedule);
         this.emptySchedule();
         this.updateUnstudied();

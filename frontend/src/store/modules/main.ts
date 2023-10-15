@@ -644,6 +644,35 @@ export default class MainModule extends VuexModule {
   }
 
   @Action
+  async createMnemonic(payload: { data: IComponents["MnemonicCreate"] }) {
+    try {
+      const _response = (
+        await Promise.all([
+          api.createMnemonic(this.token, payload.data),
+          await new Promise((resolve, _reject) => setTimeout(() => resolve(), 500)),
+        ])
+      )[0];
+    } catch (error) {
+      await mainStore.checkApiError(error);
+    }
+  }
+
+  @Action
+  async getMnemonic(payload: { data: IComponents["MnemonicSearch"]  }) {
+    try {
+      const _response = (
+        await Promise.all([
+          api.getMnemonics(this.token, payload.data),
+          await new Promise((resolve, _reject) => setTimeout(() => resolve(), 500)),
+        ])
+      )[0];
+      return _response.data
+    } catch (error) {
+      await mainStore.checkApiError(error);
+    }
+  }
+
+  @Action
   async markFact(payload: { id: number; todo: boolean }) {
     try {
       await api.markFact(mainStore.token, payload.id);

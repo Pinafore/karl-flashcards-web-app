@@ -111,7 +111,7 @@ import UserProfile from "../profile/UserProfile.vue";
     }
 
     public checkAllDecks() {
-      return this.selected.length == 0 || this.selected.length == this.decks.length;
+      return this.selectedItems.length == 0 || this.selectedItems.length == this.decks.length;
     }
 
     public areAllSelectedExceptVocab() {

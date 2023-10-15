@@ -2,6 +2,7 @@ from .crud_deck import deck
 from .crud_fact import fact
 from .crud_history import history
 from .crud_user import user
+from .crud_mnemonic import mnemonic
 from .crud_test_history import test_history
 from .crud_studyset import studyset
 from .sqlalchemy_helper import helper

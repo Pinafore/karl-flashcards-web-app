@@ -126,6 +126,22 @@ export interface IComponents {
   HTTPValidationError: {
     detail?: IComponents["ValidationError"][];
   };
+  MnemonicCreate: {
+    study_id: number;
+    fact_id: number;
+    user_id: number;
+    viewed_mnemonic?: boolean;
+    user_rating?: number;
+    is_offensive?: boolean;
+    is_incorrect_definition?: boolean;
+    is_difficult_to_understand?: boolean;
+    is_bad_keyword_link?: boolean;
+    correct: boolean;
+  }
+  MnemonicSearch: {
+    user_id: number;
+    fact_ids: number[];
+  }
   Msg: { msg: string };
   Schedule: {
     fact_id: number;

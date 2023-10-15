@@ -104,6 +104,9 @@ export const api = {
       authHeaders(token),
     );
   },
+  async getMnemonics(token: string, data: IComponents["MnemonicSearch"]) {
+    return axios.post(`${apiUrl}/api/mnemonics/feedback_ids`, data, authHeaders(token));
+  },
   async getStudyFacts(
     token: string,
     deckIds: number[],
@@ -189,9 +192,15 @@ export const api = {
       authHeaders(token),
     );
   },
+
   async updateFact(token: string, id: number, data: IComponents["FactUpdate"]) {
     return axios.put(`${apiUrl}/api/facts/${id}`, data, authHeaders(token));
   },
+
+  async createMnemonic(token: string, data: IComponents["MnemonicCreate"]) {
+    return axios.post(`${apiUrl}/api/mnemonics/`, data, authHeaders(token));
+  },
+
   async uploadFacts(token: string, data: IComponents["FactUpload"]) {
     let url = `${apiUrl}/api/facts/upload/txt`;
     if (data.headers.length > 0) {
