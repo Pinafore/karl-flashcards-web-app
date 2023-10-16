@@ -58,8 +58,8 @@
     <template v-slot:item.data-table-select="{item}">
       <v-simple-checkbox
         v-ripple
-        :value="isSelected(item.title)"
-        @input="updateSelection(item.title)"
+        :value="isSelected(item)"
+        @input="updateSelection(item)"
       ></v-simple-checkbox>
     </template>
 
@@ -91,7 +91,6 @@ import UserProfile from "../profile/UserProfile.vue";
     selected: IComponents["Deck"][] = [];
     studyNumOptions: number[] = [5, 10, 20, 30, 50];
     selectedNum = 20;
-    selectedItems: string[] = [];
     vocabIdentifier = process.env.VUE_APP_VOCAB_DECK + " (Can only be studied on its own!)";
 
     async mounted() {
@@ -111,43 +110,42 @@ import UserProfile from "../profile/UserProfile.vue";
     }
 
     public checkAllDecks() {
-      return this.selectedItems.length == 0 || this.selectedItems.length == this.decks.length;
+      return this.selected.length == 0 || this.selected.length == this.decks.length;
     }
 
     public areAllSelectedExceptVocab() {
-      return this.decks.filter(i => i.title !== this.vocabIdentifier).every(i => this.selectedItems.includes(i.title));
+      return this.decks.filter(i => i.title !== this.vocabIdentifier).every(i => this.selected.map(j => j.title).includes(i.title));
     }
 
     public toggleAllExceptVocab() {
       if (this.areAllSelectedExceptVocab()) {
-        this.selectedItems = [];
+        this.selected = [];
       } else {
-        this.selectedItems = this.decks.filter(i => i.title !== this.vocabIdentifier).map(i => i.title);
+        this.selected = this.decks.filter(i => i.title !== this.vocabIdentifier);
       }
     }
 
     public isSelected(id) {
-      return this.selectedItems.includes(id);
+      return this.selected.includes(id);
     };
     
     public updateSelection(id) {
-      if (id === this.vocabIdentifier) {
-        if (this.isSelected(this.vocabIdentifier)) {
-          this.selectedItems = [];
+      if (id.title === this.vocabIdentifier) {
+        if (this.isSelected(id)) {
+          this.selected = [];
         } else {
-          this.selectedItems = [this.vocabIdentifier];
+          this.selected = [id];
         }
       } else {
-        const specialIndex = this.selectedItems.indexOf(this.vocabIdentifier);
+        const specialIndex = this.selected.map(i => i.title).indexOf(this.vocabIdentifier);
         if (specialIndex !== -1) {
-          this.selectedItems.splice(specialIndex, 1);
+          this.selected.splice(specialIndex, 1)
         }
-
-        const index = this.selectedItems.indexOf(id);
+        const index = this.selected.indexOf(id);
     if (index === -1) {
-      this.selectedItems.push(id);
+      this.selected.push(id);
     } else {
-      this.selectedItems.splice(index, 1);
+      this.selected.splice(index, 1);
     }
       }
     }
