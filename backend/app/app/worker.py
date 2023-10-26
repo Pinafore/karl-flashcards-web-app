@@ -158,7 +158,8 @@ def create_test_mode_facts() -> str:
                     )
                     crud.fact.create_with_owner(db, obj_in=fact_in, user=user)
                     count += 1
+        message = f"{count} quizbowl questions loaded to deck: {deck.title}"
         db.close()
-        return f"{count} quizbowl questions loaded to deck: {deck.title}"
+        return message
     db.close()
     return f"superuser does not exist yet"

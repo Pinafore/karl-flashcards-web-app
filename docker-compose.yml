@@ -103,7 +103,7 @@ services:
         - traefik.http.services.${STACK_NAME?Variable not set}-pgadmin.loadbalancer.server.port=5050
 
   queue:
-    image: rabbitmq
+    image: rabbitmq:3.8
     # Using the below image instead is required to enable the "Broker" tab in the flower UI:
     # image: rabbitmq:3-management
     #

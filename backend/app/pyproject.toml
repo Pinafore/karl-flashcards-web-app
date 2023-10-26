@@ -5,13 +5,13 @@ description = ""
 authors = ["Admin <admin@example.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10"
 uvicorn = "^0.22.0"
 fastapi = "^0.100.0"
 python-multipart = "^0.0.6"
 email-validator = "^1.0.5"
 requests = "^2.23.0"
-celery = "^5.2.7"
+celery = "^4.4.2"
 passlib = {extras = ["bcrypt"], version = "^1.7.2"}
 tenacity = "^6.1.0"
 pydantic = "^1.4"
