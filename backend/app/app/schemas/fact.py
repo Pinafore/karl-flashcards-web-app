@@ -62,10 +62,11 @@ class UpdateRequestV2(BaseModel):
     typed: str
     studyset_id: str
     debug_id: Optional[str] # aka schedule_request_id, n/a in test updates
-    test_mode: bool
+    test_mode: bool # TODO: update when scheduler supports it
     recommendation: bool
     fact: KarlFactV2
 
+# Deprecated?
 class KarlFactUpdate(KarlFact):
     elapsed_seconds_text: Optional[int] = None
     elapsed_seconds_answer: Optional[int] = None

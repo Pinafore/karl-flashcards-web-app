@@ -91,8 +91,9 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                 # Marks the study set as completed even though it hasn't been finished, due to override
                 self.mark_retired(db, db_obj=uncompleted_last_set)
             else:
+                # Return the uncompleted last set if it exists and the user has not force-requested a new set
                 return uncompleted_last_set
-        # Return the uncompleted last set if it exists and the user has not force-requested a new set
+        
         in_test_mode = self.in_test_mode(db, user=user)
         logger.info(in_test_mode)
         
@@ -101,12 +102,6 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         else:
             db_obj = self.create_new_study_set(db, user=user, decks=decks, deck_ids=deck_ids, return_limit=return_limit,
                                                    send_limit=send_limit)
-        # db_obj = self.create_with_facts(db, obj_in=study_set_create,
-        #                                 decks=decks,
-        #                                 facts=facts)
-        # db_obj = self.create_with_facts(db, obj_in=schemas.StudySetCreate(is_test=in_test_mode, user_id=user.id, debug_id=debug_id if debug_id else None),
-        #                                 decks=decks,
-        #                                 facts=facts)
         return db_obj
 
     def find_existing_study_set(self, db: Session, user: models.User) -> Optional[models.StudySet]:
@@ -157,18 +152,13 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         return study_set
 
     def create_scheduler_query(self, facts: List[models.Fact], user: models.User):
-        recall_percentage = user.recall_target / 100
 
+        # TODO: Remove recall_target when confirmed possible!
         scheduler_query = schemas.SchedulerQuery(facts=[schemas.KarlFactV2.from_orm(fact) for fact in facts],
                                                  env=settings.ENVIRONMENT, repetition_model=user.repetition_model,
                                                  user_id=user.id,
-                                                 recall_target=TargetWindow(target_window_lowest=recall_percentage - 0.05, 
-                                                 target_window_highest=recall_percentage + 0.05, target=recall_percentage))
-        # scheduler_query = schemas.SchedulerQuery(facts=[schemas.KarlFactV2.from_orm(fact) for fact in facts],
-        #                                          env=settings.ENVIRONMENT, repetition_model=user.repetition_model,
-        #                                          user_id=user.id,
-        #                                          recall_target=TargetWindow(target_window_lowest=0, 
-        #                                          target_window_highest=1, target=0.5))
+                                                 recall_target=TargetWindow(target_window_lowest=.8, 
+                                                 target_window_highest=.9, target=.85))
         return scheduler_query
 
     def create_new_study_set(
@@ -224,7 +214,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             study_set = self.create_with_facts(db, obj_in=schemas.StudySetCreate(is_test=False, user_id=user.id, debug_id=debug_id),
                                         decks=decks,
                                         facts=facts)
-                                        
+             
             details = {
                 "study_system": user.repetition_model,
                 "first_fact": schemas.Fact.from_orm(facts[0]) if len(facts) != 0 else "empty",
