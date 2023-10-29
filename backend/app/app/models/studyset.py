@@ -5,11 +5,11 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from app.db.base_class import Base
-from sqlalchemy import Column, Integer, ForeignKey, Boolean, TIMESTAMP, String, func
+from sqlalchemy import Column, Integer, Enum, ForeignKey, Boolean, TIMESTAMP, String, func
 from sqlalchemy.orm import relationship
 from pytz import timezone
 
-from app import schemas
+from app.schemas import Repetition, SetType
 from app.core.config import settings
 
 if TYPE_CHECKING:  # noqa: F401
@@ -25,7 +25,8 @@ class StudySet(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False, index=True)
     create_date = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
-    is_test = Column(Boolean, nullable=False, default=False, index=True)
+    set_type = Column(Enum(SetType), nullable=False, server_default=SetType.normal, index=True)
+    repetition_model = Column(Enum(Repetition), nullable=False, server_default=Repetition.karl)
     debug_id = Column(String)
     retired = Column(Boolean)
 
@@ -46,8 +47,20 @@ class StudySet(Base):
     @property
     def num_unstudied(self) -> int:
         return len(self.unstudied_facts)
-
+    
     # https://docs.sqlalchemy.org/en/14/orm/extensions/hybrid.html
+    @hybrid_property
+    def is_test(self) -> bool:
+        return self.set_type == SetType.test
+    
+    @hybrid_property
+    def is_normal(self) -> bool:
+        return self.set_type == SetType.normal
+
+    @hybrid_property
+    def is_post_test(self) -> bool:
+        return self.set_type == SetType.post_test
+    
     @hybrid_property
     def completed(self) -> bool:
         logger.info(self.num_unstudied)

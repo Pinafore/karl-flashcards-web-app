@@ -251,6 +251,6 @@ def assign_bulk_test_deck(
     Reassign the assigned scheduler for all users
     """
 
-    background_tasks.add_task(crud.deck.assign_test_deck_to_all, db=db)
+    background_tasks.add_task(crud.deck.assign_test_decks_to_all, db=db)
 
     return True

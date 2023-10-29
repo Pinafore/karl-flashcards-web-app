@@ -6,11 +6,12 @@ from app.crud.base import CRUDBase
 from app import crud, models
 from app.models import User, Deck
 from app.models.user_deck import User_Deck
-from app.schemas import Permission, DeckType
+from app.schemas import Permission, DeckType, Repetition
 from app.schemas.deck import DeckCreate, DeckUpdate, SuperDeckCreate, SuperDeckUpdate
 from sqlalchemy import not_
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import true
+from fastapi import HTTPException
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -39,7 +40,11 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
             self, db: Session, *, db_obj: Deck, user: User
     ) -> Deck:
         # db_obj.user_decks.append(User_Deck(db_obj, user, Permission.viewer))
-        user_deck = User_Deck(db_obj, user, Permission.viewer)
+        if db_obj.deck_type == DeckType.hidden:
+            user_deck = User_Deck(db_obj, user, Permission.viewer, repetition_model_override=Repetition.select_model())
+        else:
+            user_deck = User_Deck(db_obj, user, Permission.viewer)
+        
         db.add(user_deck)
         db.commit()
         db.refresh(db_obj)
@@ -66,29 +71,39 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
             query = query.filter(not_(Deck.users.any(id=user.id)))
         return query.all()
 
-    def get_test_deck_id(self, db: Session) -> Optional[int]:
-        deck = self.get_test_deck(db=db)
+    def get_current_user_test_deck_id(self, db: Session, user: User) -> Optional[int]:
+        deck = self.get_current_user_test_deck(db=db, user=user)
         return deck.id if deck else None
 
-    def get_test_deck(self, db: Session) -> Optional[Deck]:
-        return db.query(self.model).filter(Deck.deck_type == DeckType.hidden).first()
+    def get_current_user_test_deck(self, db: Session) -> Optional[Deck]:
+        return db.query(self.model) \
+            .join(models.User_Deck, models.User_Deck.deck_id == self.model.id) \
+                .filter(self.model.deck_type == DeckType.hidden) \
+                    .filter(models.User_Deck.completed != true()).order_by(
+                        models.StudySet.id.asc()).first()
 
-    def assign_test_deck(self, db: Session, user: User) -> Deck:
-        deck = self.get_test_deck(db)
-        if deck is None:
-            super_user = crud.user.get_by_email(db, email=settings.FIRST_SUPERUSER)
-            deck = self.create_with_owner(db=db,
-                                   obj_in=SuperDeckCreate(title=settings.TEST_DECK_NAME, deck_type=DeckType.hidden),
-                                   user=super_user)
-        if deck not in user.all_decks:
-            self.assign_viewer(db=db, db_obj=deck, user=user)
-            
-        return deck
+    def get_all_test_decks(self, db: Session) -> List[Deck]:
+        return db.query(self.model).filter(self.model.deck_type == DeckType.hidden).order_by(self.model.id.asc()).all()
 
-    def assign_test_deck_to_all(self, db: Session):
+    def get_all_test_deck_ids(self, db: Session) -> List[int]:
+        test_decks = self.get_all_test_decks(db)
+        return {deck.id for deck in test_decks}
+
+    def assign_test_decks(self, db: Session, user: User) -> List[Deck]:
+        test_decks = self.get_all_test_decks(db)
+        if not test_decks:
+            raise HTTPException(561, detail="No Test Deck Found")
+        
+        for deck in test_decks:
+            if deck not in user.all_decks:
+                self.assign_viewer(db=db, db_obj=deck, user=user)
+                
+        return test_decks
+
+    def assign_test_decks_to_all(self, db: Session):
         all_users = db.query(models.User).all()
         for found_user in all_users:
-            self.assign_test_deck(db=db,user=found_user)
+            self.assign_test_decks(db=db,user=found_user)
 
     def find_or_create(
             self, db: Session, *, proposed_deck: str, user: User, deck_type: DeckType = DeckType.default
@@ -117,7 +132,7 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
         if user in db_obj.users:
             db_obj.users.remove(user)
             existing_studyset = crud.studyset.find_existing_study_set(db, user)
-            if isinstance(existing_studyset, models.StudySet) and not existing_studyset.is_test:
+            if isinstance(existing_studyset, models.StudySet) and existing_studyset.set_type == StudySet.set_type:
                 crud.studyset.mark_retired(db, db_obj=existing_studyset)
             db.commit()
             db.refresh(db_obj)

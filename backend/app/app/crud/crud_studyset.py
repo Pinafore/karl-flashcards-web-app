@@ -69,10 +69,9 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         models.StudySet, requests.exceptions.RequestException, json.decoder.JSONDecodeError, HTTPException]:
         logger.info("getting study set")
         decks = []
-        test_deck_id = crud.deck.get_test_deck_id(db=db)
-        logger.info(test_deck_id)
+        test_deck_ids = crud.deck.get_all_test_deck_ids(db=db)
         if deck_ids is not None:
-            if test_deck_id in deck_ids:
+            if set(deck_ids).intersection(test_deck_ids):
                 return HTTPException(status_code=557, detail="This deck is currently unavailable")
             for deck_id in deck_ids:
                 deck = crud.deck.get(db=db, id=deck_id)
@@ -85,9 +84,9 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                 decks.append(deck)
         # Does not return study sets that are expired or completed
         uncompleted_last_set = self.find_existing_study_set(db, user)
-        logger.info(uncompleted_last_set)
+        
         if uncompleted_last_set:
-            if force_new and not uncompleted_last_set.is_test:
+            if force_new and uncompleted_last_set.set_type == schemas.SetType.normal:
                 # Marks the study set as completed even though it hasn't been finished, due to override
                 self.mark_retired(db, db_obj=uncompleted_last_set)
             else:
@@ -95,7 +94,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                 return uncompleted_last_set
         
         in_test_mode = self.in_test_mode(db, user=user)
-        logger.info(in_test_mode)
+        
         
         if in_test_mode:
             db_obj = self.create_new_test_study_set(db, user=user)
@@ -114,8 +113,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
     
     def create_new_test_study_set(self, db: Session, *, user: models.User, return_limit: int = settings.TEST_MODE_PER_ROUND) -> models.StudySet:
         # Get facts that have not been studied before
-        logger.info(crud.deck.get_test_deck_id(db=db))
-        test_deck_id = crud.deck.get_test_deck_id(db=db)
+        test_deck_id = crud.deck.get_current_user_test_deck_id(db=db, user=user)
         if test_deck_id is None:
             raise HTTPException(560, detail="Test Deck ID Not Found")
 
@@ -143,9 +141,10 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             }
         )
         crud.history.create(db=db, obj_in=history_in)
-        test_deck = crud.deck.get_test_deck(db)
+        test_deck = crud.deck.get_current_user_test_deck(db, user)
         decks = [test_deck] if test_deck is not None else []
-        study_set = self.create_with_facts(db, obj_in=schemas.StudySetCreate(is_test=True, user_id=user.id),
+        # TODO: Update studysetcreate
+        study_set = self.create_with_facts(db, obj_in=schemas.StudySetCreate(user_id=user.id),
                                         decks=decks,
                                         facts=facts)
         db.commit()
@@ -211,7 +210,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             logger.info("new facts: " + str(random_facts))
 
             facts = crud.helper.combine_two_fact_sets(random_facts=random_facts, old_facts=old_facts, return_limit=return_limit)
-            study_set = self.create_with_facts(db, obj_in=schemas.StudySetCreate(is_test=False, user_id=user.id, debug_id=debug_id),
+            study_set = self.create_with_facts(db, obj_in=schemas.StudySetCreate(repetition_model=user.repetition_model, user_id=user.id, debug_id=debug_id),
                                         decks=decks,
                                         facts=facts)
              
@@ -255,6 +254,8 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
     def sets_since_last_test(self, db: Session, last_test_set: models.studyset, user: models.User) -> Optional[int]:
         return db.query(models.StudySet).filter(models.StudySet.user_id == user.id).filter(models.StudySet.completed == true()).filter(models.StudySet.id > last_test_set.id).count()
 
+    def get_deck_studyset_count(self, db: Session, user: models.User, deck: models.Deck) -> Optional[int]:
+        return db.query(models.Session_Deck).filter(models.Session_Deck.deck == deck, models.Session_Deck.studyset.user == user).count()
     
     def update_session_facts(self, db: Session, schedules: List[schemas.Schedule], user: models.User,
                              studyset_id: int) -> Any:
@@ -339,28 +340,34 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             logger.info(e)
             raise HTTPException(status_code=556, detail="Scheduler malfunction")
 
-    def in_test_mode(
+    def check_next_set_type(
             self, db: Session, *, user: models.User
     ) -> bool:
         logger.info("Checking in Test Mode")
-        study_set = studyset.find_last_test_set(db, user)
-        logger.info("Last Study set: " + str(study_set))
+        last_test_set = studyset.find_last_test_set(db, user)
+        logger.info("Last Study set: " + str(last_test_set))
         logger.info("Studied facts: " + str(crud.user.studied_facts(db, user)))
-        if study_set is None:
+        if last_test_set is None:
             logger.info("completed sets: " + str(studyset.completed_sets(db, user)))
-            return crud.user.studied_facts(db, user) > settings.TEST_MODE_TRIGGER_FACTS
+            return schemas.SetType.test
         # This code used to exist to force regenerating test sets after expiry, we no longer do so.
         # if not study_set.completed:
         #     return True
-        facts_since_last_study = crud.user.facts_since_last_study(db, last_test_set=study_set, user=user)
-        logger.info("Facts since last study: " + str(facts_since_last_study))
-        return facts_since_last_study > settings.TEST_MODE_TRIGGER_FACTS
-        # over_days_trigger = (study_set.create_date + timedelta(days=settings.TEST_MODE_TRIGGER_DAYS) > datetime.now(timezone('UTC')))
-        # sets_since_last_test = studyset.sets_since_last_test(db, last_test_set=study_set, user=user)
-        # logger.info("sets since last test: " + str(sets_since_last_test))
-        # over_sessions_trigger = sets_since_last_test > settings.TEST_MODE_TRIGGER_FACTS
-        # logger.info("Over days trigger: " + str(over_days_trigger))
-        # logger.info("Over sessions trigger: " + str(over_sessions_trigger))
-        # return over_days_trigger or over_sessions_trigger
+        current_test_deck = last_test_set.decks[0]
+
+        # When the test set for today is not completed, or there is no test set yet today, we should be in test mode
+        if last_test_set.date() == datetime.now.date():
+            if last_test_set.completed:
+                return schemas.SetType.normal
+            else:
+                return schemas.SetType.test
+        else:
+            # TODO: Check if we want this behavior, where we count any day a test study set is created
+            # This does not ensure a perfect number of flashcards studied like 50
+            # Currently, we don't have easy ways to distinguish between learning/review/relearning stages in logs
+            if self.get_deck_studyset_count(db, user=user, deck=current_test_deck) >= settings.POST_TEST_TRIGGER:
+                return schemas.SetType.post_test
+            else:
+                return schemas.SetType.test
 
 studyset = CRUDStudySet(models.StudySet)

@@ -8,10 +8,9 @@ from sqlalchemy.orm import relationship
 from pytz import timezone
 
 from app.db.base_class import Base
-from app.schemas.repetition import Repetition
 
 # from .user_deck import user_deck
-from app.schemas import DeckType
+from app.schemas import DeckType, Repetition
 from app.core.config import settings
 from .deck import Deck  # noqa: F401
 from .studyset import StudySet
@@ -24,7 +23,6 @@ if TYPE_CHECKING:
     from .fact import Fact  # noqa: F401
     from .user_deck import User_Deck  # noqa: F401
     from .test_history import Test_History  # noqa: F401
-from .studyset import StudySet
 
 
 class User(Base):
@@ -34,7 +32,7 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean(), default=True, nullable=False)
     is_superuser = Column(Boolean(), default=False, nullable=False)
-    repetition_model = Column(Enum(Repetition), default=Repetition.leitner, nullable=False)
+    repetition_model = Column(Enum(Repetition), default=Repetition.karl, nullable=False)
     default_deck_id = Column(Integer, ForeignKey("deck.id"), default=1)
     show_help = Column(Boolean(), default=True, nullable=False)
     dark_mode = Column(Boolean(), default=False, nullable=False)

@@ -1,21 +1,23 @@
-from typing import List, Union, Optional, Any
+from typing import List, Optional
 
 from pydantic import BaseModel, validator
 
 # Properties to return to client about statistics
 from sqlalchemy.orm import Query
 
-from app.schemas import User, Fact, Deck
+from app.schemas import User, Fact, Deck, Repetition, SetType
 
 
 class StudySetBase(BaseModel):
-    is_test: bool = False
     user_id: int
     debug_id: Optional[str]
+    repetition_model: Optional[Repetition]
+    set_type: Optional[SetType]
 
 
 class StudySetCreate(StudySetBase):
-    pass
+    repetition_model: Repetition
+    set_type: SetType = SetType.normal
 
 
 class StudySetUpdate(StudySetBase):
@@ -37,6 +39,8 @@ class StudySet(StudySetInDBBase):
     is_first_pass: bool
     short_description: str
     expanded_description: str
+    retired: bool
+    set_type: SetType
 
     class Config:
         orm_mode = True

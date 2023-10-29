@@ -124,15 +124,15 @@ def clean_up_text(text) -> str:
     text = text.strip("'")
     return text
 
-
+# TODO: Fix imports
 @celery_app.task()
 def create_test_mode_facts() -> str:
     db: Session = SessionLocal()
     user = crud.user.get_by_email(db, email=settings.FIRST_SUPERUSER)
     if user:
         dirname = os.path.dirname(os.path.abspath(__file__))
-        filename = os.path.join(dirname, "./data/jeopardy.json")
-        deck = crud.deck.assign_test_deck(db, user)
+        filename = os.path.join(dirname, "./data/test_mode.json")
+        deck = crud.deck.assign_test_decks(db, user)
         with open(filename, "r") as file:
             json_data = json.load(file)
             # there seems to be 216930 jeopardy questions
