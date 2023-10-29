@@ -6,7 +6,7 @@ from app.crud.base import CRUDBase
 from app import crud, models
 from app.models import User, Deck
 from app.models.user_deck import User_Deck
-from app.schemas import Permission, DeckType, Repetition
+from app.schemas import Permission, DeckType, Repetition, SetType
 from app.schemas.deck import DeckCreate, DeckUpdate, SuperDeckCreate, SuperDeckUpdate
 from sqlalchemy import not_
 from sqlalchemy.orm import Session
@@ -132,7 +132,7 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
         if user in db_obj.users:
             db_obj.users.remove(user)
             existing_studyset = crud.studyset.find_existing_study_set(db, user)
-            if isinstance(existing_studyset, models.StudySet) and existing_studyset.set_type == StudySet.set_type:
+            if isinstance(existing_studyset, models.StudySet) and existing_studyset.set_type == SetType.normal:
                 crud.studyset.mark_retired(db, db_obj=existing_studyset)
             db.commit()
             db.refresh(db_obj)
