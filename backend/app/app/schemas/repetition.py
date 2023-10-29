@@ -11,7 +11,7 @@ class Repetition(str, Enum):
     karl85 = "karl85" # deprecated
     settles = "settles" # deprecated
     fsrs = "fsrs"
-    karlAblation = "karlAblation" 
+    karlAblation = "karl-ablation" 
 
     @classmethod
     def select_model(cls):
