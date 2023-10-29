@@ -164,7 +164,7 @@ def update_preloaded_facts(
     return True
 
 
-@router.put("/test-mode", response_model=schemas.Deck)
+@router.put("/test-mode", response_model=bool)
 def create_test_mode_facts(
         *,
         current_user: models.User = Depends(deps.get_current_active_superuser),  # noqa
@@ -173,10 +173,8 @@ def create_test_mode_facts(
     """
     Update preloaded facts.
     """
-    celery_app.send_task("app.worker.create_test_mode_facts")
-    # TODO: Confirm this assignment is necessary and isn't a race condition?
-    deck = crud.deck.assign_test_decks(db, user=current_user)
-    return deck
+    celery_app.send_task("app.worker.create_test_mode_facts", kwargs={"filename": settings.TEST_MODE_FILE})
+    return True
 
 
 @router.put("/{fact_id}", response_model=schemas.Fact)

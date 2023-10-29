@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     TEST_MODE_TRIGGER_FACTS: int = 100
     POST_TEST_TRIGGER: int = 5
     DEFAULT_DECK_ID: int = 1
-    TEST_DECK_NAME: str = "Test Mode"
+    TEST_MODE_FILE: str = "./data/test_mode_grouped.json"
     STUDY_SET_EXPIRATION_HOURS: int = 2
     TEST_RECALL_WINDOW: TargetWindow = TargetWindow(target_window_lowest=0.0
     ,target_window_highest=1.0

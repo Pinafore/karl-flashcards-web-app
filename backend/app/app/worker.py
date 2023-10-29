@@ -124,41 +124,43 @@ def clean_up_text(text) -> str:
     text = text.strip("'")
     return text
 
-# TODO: Fix imports
 @celery_app.task()
-def create_test_mode_facts() -> str:
+def create_test_mode_facts(filename: str) -> str:
     db: Session = SessionLocal()
-    user = crud.user.get_by_email(db, email=settings.FIRST_SUPERUSER)
-    if user:
+    super_user = crud.user.get_by_email(db, email=settings.FIRST_SUPERUSER)
+    if super_user:
         dirname = os.path.dirname(os.path.abspath(__file__))
-        filename = os.path.join(dirname, "./data/test_mode.json")
-        deck = crud.deck.assign_test_decks(db, user)
+        filename = os.path.join(dirname, filename)
+        message = ""
         with open(filename, "r") as file:
             json_data = json.load(file)
-            # there seems to be 216930 jeopardy questions
+        for item in json_data:
             count = 0
-            for fact in itertools.islice(json_data, 20000, None, 100):
-                if count >= 1000:
-                    break
-                if "<" not in fact["question"] and "seen here" not in fact["question"]:
-                    extra = {
-                        "type": "Jeopardy",
-                        "air_date": fact["air_date"],
-                        "value": fact["value"],
-                        "round": fact["round"],
-                        "show_number": fact["show_number"]
-                    }
-                    fact_in = schemas.FactCreate(
-                        text=fact["question"],
-                        answer=fact["answer"],
-                        deck_id=deck.id,
-                        answer_lines=[fact["answer"]],
-                        category=fact["category"],
-                        extra=extra
-                    )
-                    crud.fact.create_with_owner(db, obj_in=fact_in, user=user)
-                    count += 1
-        message = f"{count} quizbowl questions loaded to deck: {deck.title}"
+            mode_num = item["mode_num"]
+            
+            # Create a test deck for each mode_num
+            deck = crud.deck.find_or_create(db,
+                                            proposed_deck=f"Test Mode {mode_num}", 
+                                            user=super_user,
+                                            deck_type=DeckType.hidden)
+            
+            # Create facts for the deck
+            for fact in item["questions"]:
+                extra = fact.get("extra", {})
+                fact_in = schemas.FactCreate(
+                    text=fact["text"],
+                    answer=fact["answer"],
+                    deck_id=deck.id,
+                    answer_lines=[fact["answer"]],
+                    category=fact["category"],
+                    extra=extra
+                )
+                crud.fact.create_with_owner(db, obj_in=fact_in, user=super_user)
+                count += 1
+            message = f"{message}, {count} test mode questions loaded to deck: {deck.title}"
+        db.commit()
+        crud.deck.assign_test_decks_to_all(db)
+        db.commit()
         db.close()
         return message
     db.close()

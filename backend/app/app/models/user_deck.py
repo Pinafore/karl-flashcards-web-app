@@ -1,3 +1,4 @@
+from typing import Optional
 from app.db.base_class import Base
 from app.schemas import Permission, Repetition
 from sqlalchemy import Column, Integer, ForeignKey, Enum, Boolean
@@ -22,8 +23,9 @@ class User_Deck(Base):
     user = relationship("User", back_populates="user_decks")
     deck = relationship("Deck", back_populates="user_decks")
 
-    def __init__(self, deck: Deck, user: User, permissions: Permission):
+    def __init__(self, deck: Deck, user: User, permissions: Permission, repetition_model_override: Optional[Repetition] = None):
         self.deck = deck
         self.user = user
         self.permissions = permissions
+        self.repetition_model_override = repetition_model_override
     

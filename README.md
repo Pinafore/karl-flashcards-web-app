@@ -454,6 +454,10 @@ docker compose up -d
 
 and check all the corresponding available URLs in the section at the end.
 
+## Working with Celeryworker in Dev
+If you make changes to `backend/app/app/worker.py` (which contains celery tasks), you have to restart the celeryworker `docker compose restart celeryworker`.
+
+
 ## Database Back Ups
 The following backup script identifies the docker container and performs a backup, naming it using the current timestamp.
 
