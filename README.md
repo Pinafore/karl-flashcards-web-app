@@ -454,6 +454,19 @@ docker compose up -d
 
 and check all the corresponding available URLs in the section at the end.
 
+## Database Back Ups
+The following backup script identifies the docker container and performs a backup, naming it using the current timestamp.
+
+```bash
+./scripts/backup.sh
+```
+
+The following load backup script takes in a relative file path to the file dump and restores it.
+
+```bash
+./scripts/load-backup.sh [Path to dump] [./.env location]
+```
+
 ## Frontend development
 
 * Enter the `frontend` directory, install the NPM packages and start the live server using the `npm` scripts:
