@@ -154,10 +154,26 @@ def delete_deck(
         current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
-    Delete an deck.
+    Delete a deck for a user.
     """
     deck = crud.deck.get(db=db, id=deck_id)
     if not deck:
         raise HTTPException(status_code=404, detail="Deck not found")
     deck = crud.deck.remove_for_user(db=db, db_obj=deck, user=current_user)
+    return deck
+
+@router.delete("/bulk/{deck_id}", response_model=schemas.Deck)
+def delete_deck_for_all(
+        *,
+        db: Session = Depends(deps.get_db),
+        deck_id: int,
+        current_user: models.User = Depends(deps.get_current_active_superuser),
+) -> Any:
+    """
+    Delete a deck for all users.
+    """
+    deck = crud.deck.get(db=db, id=deck_id)
+    if not deck:
+        raise HTTPException(status_code=404, detail="Deck not found")
+    deck = crud.deck.soft_delete_deck(db=db, db_obj=deck)
     return deck

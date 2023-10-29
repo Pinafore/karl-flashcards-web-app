@@ -126,17 +126,44 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
             update_data = obj_in.dict(exclude_unset=True)
         return super().update(db, db_obj=db_obj, obj_in=update_data)
 
-    def remove_for_user(
-            self, db: Session, *, db_obj: Deck, user: User
-    ) -> Deck:
-        if user in db_obj.users:
-            db_obj.users.remove(user)
+    def remove_for_user(self, db: Session, *, db_obj: Deck, user: User) -> Deck:
+        # Check if the user is associated with the deck using a direct query
+        user_deck_association = db.query(User_Deck).filter_by(deck_id=db_obj.id, owner_id=user.id).first()
+        
+        if user_deck_association:
+            # Remove the association
+            db.delete(user_deck_association)
+            
+            # Check for the existing study set using a direct query
             existing_studyset = crud.studyset.find_existing_study_set(db, user)
             if isinstance(existing_studyset, models.StudySet) and existing_studyset.set_type == SetType.normal:
                 crud.studyset.mark_retired(db, db_obj=existing_studyset)
+            
             db.commit()
             db.refresh(db_obj)
         return db_obj
+
+    def soft_delete_deck(self, db: Session, db_obj: Deck) -> Deck:
+        
+        if not db_obj:
+            raise HTTPException(status_code=404, detail="Deck not found")
+        
+        # Mark the deck as deleted
+        db_obj.deck_type = DeckType.deleted  # Assuming you have an is_active column in the Deck model
+        
+        # Remove all user associations with the deck
+        db.query(User_Deck).filter_by(deck_id=db_obj.id).delete()
+        
+        # Handle study sets associated with the deck
+        associated_studysets = db.query(models.StudySet).join(models.Session_Deck).filter(models.Session_Deck.deck_id == db_obj.id).all()
+        for studyset in associated_studysets:
+            crud.studyset.mark_retired(db, db_obj=studyset)
+        
+        db.commit()
+        db.refresh(db_obj)
+    
+        return db_obj
+
 
 
 deck = CRUDDeck(Deck)
