@@ -134,7 +134,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
     
     def create_post_test_study_set(self, db: Session, *, user: models.User, test_deck: models.Deck) -> models.StudySet:
         # Get facts that have not been studied before
-        study_set = self.create_with_facts(db, obj_in=schemas.StudySetCreate(repetition_model=user.repetition_model, user_id=user.id, setType=schemas.SetType.post_test),
+        study_set = self.create_with_facts(db, obj_in=schemas.StudySetCreate(repetition_model=user.repetition_model, user_id=user.id, set_type=schemas.SetType.post_test),
                                         decks=[test_deck],
                                         facts=test_deck.facts)
 
@@ -208,8 +208,8 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                 random_facts = crud.fact.get_eligible_facts(query=base_facts_query, limit=return_limit, randomize=True)
                 logger.info("new facts: " + str(random_facts))
                 facts = crud.helper.combine_two_fact_sets(random_facts=random_facts, old_facts=facts, return_limit=return_limit)
-
-            study_set = self.create_with_facts(db, obj_in=schemas.StudySetCreate(repetition_model=user.repetition_model, user_id=user.id, debug_id=debug_id, setType=setType),
+            study_set_create = schemas.StudySetCreate(repetition_model=user.repetition_model, user_id=user.id, debug_id=debug_id, set_type=setType)
+            study_set = self.create_with_facts(db, obj_in=study_set_create,
                                         decks=decks,
                                         facts=facts)
             details = {
