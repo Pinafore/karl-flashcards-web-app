@@ -15,12 +15,21 @@ from functools import wraps
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+class TimeContainer:
+    def __init__(self):
+        self.elapsed_times = {}
+
+    def store_time(self, label, time_value):
+        self.elapsed_times[label] = time_value
+
 @contextmanager
-def log_time(description="Elapsed time"):
+def log_time(description="Elapsed time", container=None, label="elapsed"):
     start_time = time.time()
     yield
     elapsed_time = time.time() - start_time
     logger.info(f"{description}: {elapsed_time:.2f} seconds")
+    if container is not None and isinstance(container, TimeContainer):
+        container.store_time(label, elapsed_time)
 
 # Decorator for timing entire functions
 def time_it(func):

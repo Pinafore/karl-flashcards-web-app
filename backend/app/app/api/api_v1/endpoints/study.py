@@ -34,18 +34,7 @@ def get_next_set(
             raise HTTPException(status_code=400, detail="This user does not have the necessary permissions")
     else:
         user = current_user
-
     study_set = crud.studyset.get_study_set(db, user=user, deck_ids=deck_ids, return_limit=limit, force_new=force_new)
-    # if in_test_mode:
-    #     facts = crud.fact.get_test_facts(db=db, user=user)
-    # elif deck_ids is None:
-    #     facts = crud.fact.get_study_set_facts(db=db, user=user, return_limit=limit)
-    # else:
-    #
-    #     facts = crud.fact.get_study_set_facts(db=db, user=user, deck_ids=deck_ids, return_limit=limit)
-
-    if isinstance(study_set, HTTPException):
-        raise study_set
     if isinstance(study_set, requests.exceptions.RequestException):
         raise HTTPException(status_code=555, detail="Connection to scheduler is down")
     if isinstance(study_set, json.decoder.JSONDecodeError):
@@ -68,18 +57,6 @@ def update_schedule_set(
     # successes = []
     response = crud.studyset.update_session_facts(db=db, schedules=facts_in, user=current_user, studyset_id=studyset_id)
     return response
-    # for fact_in in facts_in:
-    #     fact = crud.fact.get(db=db, id=fact_in.fact_id)
-    #     if not fact:
-    #         raise HTTPException(status_code=404, detail="Fact not found")
-    #     success = crud.fact.update_schedule(db=db, user=current_user, db_obj=fact, schedule=fact_in)
-    #
-    #     if isinstance(success, requests.exceptions.RequestException):
-    #         raise HTTPException(status_code=555, detail="Connection to scheduler is down")
-    #     if isinstance(success, json.decoder.JSONDecodeError):
-    #         raise HTTPException(status_code=556, detail="Scheduler malfunction")
-    #     successes.append(success)
-    # return successes
 
 
 @router.get("/evaluate", response_model=Optional[bool], summary="Evaluates accuracy of typed answer to the given fact")

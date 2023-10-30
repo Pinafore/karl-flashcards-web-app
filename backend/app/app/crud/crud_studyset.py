@@ -21,7 +21,7 @@ from sqlalchemy import and_, func
 from datetime import datetime, timedelta
 from fastapi import HTTPException
 from sentry_sdk import capture_exception
-from app.utils.utils import logger, log_time, time_it
+from app.utils.utils import logger, log_time, time_it, TimeContainer
 
 
 class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.StudySetUpdate]):
@@ -49,31 +49,11 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         db_obj.retired = True
         db.commit()
 
-    def get_study_set(self,
+    def retire_or_return_active_set(self,
                       db: Session,
                       *,
                       user: models.User,
-                      deck_ids: List[int] = None,
-                      return_limit: Optional[int] = None,
-                      send_limit: Optional[int] = 1000,
-                      force_new: bool,
-                      ) -> Union[
-        models.StudySet, requests.exceptions.RequestException, json.decoder.JSONDecodeError, HTTPException]:
-        logger.info("getting study set")
-        decks = []
-        test_deck_ids = crud.deck.get_all_test_deck_ids(db=db)
-        if deck_ids is not None:
-            if set(deck_ids).intersection(test_deck_ids):
-                return HTTPException(status_code=557, detail="This deck is currently unavailable")
-            for deck_id in deck_ids:
-                deck = crud.deck.get(db=db, id=deck_id)
-                if not deck:
-                    return HTTPException(status_code=404, detail="One or more of the specified decks does not exist")
-                if user not in deck.users:
-                    return HTTPException(status_code=450,
-                                         detail="This user does not have the necessary permission to access one or more"
-                                                " of the specified decks")
-                decks.append(deck)
+                      force_new: bool) -> Optional[models.StudySet]:
         # Does not return study sets that are expired or completed
         uncompleted_last_set = self.find_active_study_set(db, user)
         
@@ -84,16 +64,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             else:
                 # Return the uncompleted last set if it exists and the user has not force-requested a new set
                 return uncompleted_last_set
-        
-        in_test_mode = self.in_test_mode(db, user=user)
-        
-        
-        if in_test_mode:
-            db_obj = self.create_new_test_study_set(db, user=user)
-        else:
-            db_obj = self.create_new_study_set(db, user=user, decks=decks, deck_ids=deck_ids, return_limit=return_limit,
-                                                   send_limit=send_limit)
-        return db_obj
+        return None
 
     # Does not return study sets that are expired or completed
     def find_active_study_set(self, db: Session, user: models.User) -> Optional[models.StudySet]:
@@ -103,55 +74,84 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             return studyset
         else:
             return None
-    
-    def create_new_test_study_set(self, db: Session, *, user: models.User, return_limit: int = settings.TEST_MODE_PER_ROUND) -> models.StudySet:
-        # Get facts that have not been studied before
-        test_deck_id = crud.deck.get_current_user_test_deck_id(db=db, user=user)
-        if test_deck_id is None:
-            raise HTTPException(560, detail="Test Deck ID Not Found")
 
-        init_new_facts_query = db.query(models.Fact).filter(models.Fact.deck_id == test_deck_id)
-        # TODO: Test func.random()
-        new_facts_query = crud.helper.filter_only_new_facts(init_new_facts_query, user_id=user.id, log_type=schemas.Log.test_study)
-        new_facts = crud.fact.get_eligible_facts(query=new_facts_query, limit=return_limit, randomize=True)
-        logger.info("New facts:" + str(new_facts))
+    def get_study_set(self,
+                      db: Session,
+                      *,
+                      user: models.User,
+                      deck_ids: List[int] = None,
+                      return_limit: Optional[int] = None,
+                      send_limit: Optional[int] = 1000,
+                      force_new: bool,
+                      ) -> Union[
+        models.StudySet, requests.exceptions.RequestException, json.decoder.JSONDecodeError]:
+        crud.deck.check_for_test_deck_ids(db=db, deck_ids=deck_ids)
+        decks = crud.deck.get_user_decks_given_ids(db=db, user=user, deck_ids=deck_ids)
+        
+        active_set = self.retire_or_return_active_set(db, user=user, force_new=force_new)
+        if active_set:
+            return active_set
 
-        # Get facts that have been previously studied before, but were answered incorrectly
-        init_old_facts_query = db.query(models.Fact).filter(models.Fact.deck_id == test_deck_id)
-        # TODO: Test func.random()
-        old_facts_query = crud.helper.filter_only_incorrectly_reviewed_facts(query=init_old_facts_query, user_id=user.id, log_type=schemas.Log.test_study)
-        old_facts = crud.fact.get_eligible_facts(query=old_facts_query, limit=return_limit, randomize=True)
-        logger.info("Old facts:" + str(old_facts))
+        # Determine study state
+        test_deck = crud.deck.get_current_user_test_deck(db=db, user=user)
+        if test_deck is None:
+            raise HTTPException(status_code=576, detail="TEST ID WAS NONE?")
+            next_set_type = schemas.SetType.normal
+        else:
+            next_set_type = self.check_next_set_type(db, user=user, test_deck=test_deck)
+        
+        if next_set_type == schemas.SetType.test:
+            db_obj = self.create_new_test_study_set(db, user=user, test_deck=test_deck)
+        elif next_set_type == schemas.SetType.post_test:
+            db_obj = self.create_post_test_study_set(db, user=user, test_deck=test_deck)
+        elif next_set_type == schemas.SetType.normal:
+            db_obj = self.create_new_study_set(db, user=user, decks=decks, deck_ids=deck_ids, return_limit=return_limit,
+                                                   send_limit=send_limit)
+        else:
+            raise HTTPException(status_code=672, detail=f"Unknown study set type: {next_set_type}")
+        return db_obj
 
-        facts = crud.helper.combine_two_fact_sets(random_facts=new_facts, old_facts=old_facts, return_limit=return_limit)
-
-        history_in = schemas.HistoryCreate(
-            time=datetime.now(timezone('UTC')).isoformat(),
-            user_id=user.id,
-            log_type=schemas.Log.get_test_facts,
-            details={
-                "recall_target": user.recall_target,
-            }
-        )
-        crud.history.create(db=db, obj_in=history_in)
-        test_deck = crud.deck.get_current_user_test_deck(db, user)
-        decks = [test_deck] if test_deck is not None else []
-        # TODO: Update studysetcreate
-        study_set = self.create_with_facts(db, obj_in=schemas.StudySetCreate(user_id=user.id),
-                                        decks=decks,
-                                        facts=facts)
-        db.commit()
-        return study_set
-
-    def create_scheduler_query(self, facts: List[models.Fact], user: models.User):
+    def create_scheduler_query(self, facts: List[models.Fact], user: models.User, 
+            test_mode: Optional[int] = None):
 
         # TODO: Remove recall_target when confirmed possible!
         scheduler_query = schemas.SchedulerQuery(facts=[schemas.KarlFactV2.from_orm(fact) for fact in facts],
                                                  env=settings.ENVIRONMENT, repetition_model=user.repetition_model,
                                                  user_id=user.id,
                                                  recall_target=TargetWindow(target_window_lowest=.8, 
-                                                 target_window_highest=.9, target=.85))
+                                                 target_window_highest=.9, target=.85),
+                                                 test_mode=test_mode)
         return scheduler_query
+    
+    def create_new_test_study_set(self, db: Session, *, user: models.User, return_limit: int = settings.TEST_MODE_PER_ROUND, test_deck: models.Deck) -> models.StudySet:
+    
+        # Get facts that have not been studied before
+        test_deck_id = test_deck.id
+        if test_deck is None:
+            raise HTTPException(560, detail="Test Deck Not Found")
+        logger.info(f"Test deck id: {test_deck.id}")
+        study_set = self.create_new_study_set(db=db, user=user, decks=[test_deck], deck_ids=[test_deck_id], return_limit=return_limit, setType=schemas.SetType.test)
+        return study_set
+    
+    def create_post_test_study_set(self, db: Session, *, user: models.User, test_deck: models.Deck) -> models.StudySet:
+        # Get facts that have not been studied before
+        study_set = self.create_with_facts(db, obj_in=schemas.StudySetCreate(repetition_model=user.repetition_model, user_id=user.id, setType=schemas.SetType.post_test),
+                                        decks=[test_deck],
+                                        facts=test_deck.facts)
+
+        details = {
+                "post_test": True,
+            }
+        history_in = schemas.HistoryCreate(
+            time=datetime.now(timezone('UTC')).isoformat(),
+            user_id=user.id,
+            log_type=schemas.Log.get_post_test_facts, # Update to dynamically get schemas.Log.get_test_facts
+            details=details,
+        )
+        crud.history.create(db=db, obj_in=history_in)
+        db.commit()
+        
+        return study_set
 
     def create_new_study_set(
             self,
@@ -162,66 +162,70 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             deck_ids: List[int] = None,
             return_limit: Optional[int] = None,
             send_limit: Optional[int] = None,
+            repetition_model: Optional[schemas.Repetition] = None,
+            setType: schemas.SetType = schemas.SetType.normal,
     ) -> Tuple[List[models.Fact], str]:
-        filters = schemas.FactSearch(deck_ids=deck_ids, limit=send_limit, studyable=True)
+        show_hidden = setType == schemas.SetType.post_test or setType == schemas.SetType.test
+        filters = schemas.FactSearch(deck_ids=deck_ids, limit=send_limit, studyable=True, show_hidden=show_hidden)
         base_facts_query = crud.fact.build_facts_query(db=db, user=user, filters=filters)
-        eligible_old_facts_query = crud.helper.filter_only_reviewed_facts(query=base_facts_query, user_id=user.id, log_type=schemas.Log.study)
-        eligible_old_facts = crud.fact.get_eligible_facts(query=eligible_old_facts_query, limit=send_limit, randomize=True)
-        # logger.info("eligible fact length: " + str(len(eligible_facts)))
-        # if not eligible_facts:
-        #     return []
         
-        rev_karl_list_start = time.time()
-        schedule_query = self.create_scheduler_query(facts=eligible_old_facts, user=user)
-        eligible_fact_time = time.time() - rev_karl_list_start
-        logger.info("scheduler query time: " + str(eligible_fact_time))
-
-        logger.info("eligible old facts: " + str(eligible_old_facts))
-        karl_query_start = time.time()
+        if repetition_model is None:
+            repetition_model = user.repetition_model
+        
+        if repetition_model == schemas.Repetition.karl:
+            eligible_facts = crud.fact.get_eligible_facts(query=base_facts_query, limit=send_limit, randomize=True)
+        else:
+            eligible_old_facts_query = crud.helper.filter_only_reviewed_facts(query=base_facts_query, user_id=user.id, log_type=schemas.Log.study)
+            eligible_facts = crud.fact.get_eligible_facts(query=eligible_old_facts_query, limit=send_limit, randomize=True)
+        logger.info(f"return limit {return_limit}")
+        time_container = TimeContainer()
+        with log_time(description="Scheduler query creation", container=time_container, label="eligible_fact_time"):
+            if setType == schemas.SetType.test:
+                test_deck_id = deck_ids[0]
+                schedule_query = self.create_scheduler_query(facts=eligible_facts, user=user, test_mode=test_deck_id)
+            else:
+                schedule_query = self.create_scheduler_query(facts=eligible_facts, user=user)
         try:
-            # if statement is temporary only while the scheduler is crashing on empty arrays
-            scheduler_response = requests.post(settings.INTERFACE + "api/karl/schedule_v2", json=schedule_query.dict())
-            response_json = scheduler_response.json()
-            card_order = response_json["order"]
-            rationale = response_json["rationale"]
-            debug_id = response_json["debug_id"]
-
-            query_time = time.time() - karl_query_start
-            logger.info(scheduler_response.request)
-            logger.info("query time: " + str(query_time))
+            with log_time(description="Scheduler querying", container=time_container, label="scheduler_query_time"):
+                scheduler_response = requests.post(settings.INTERFACE + "api/karl/schedule_v2", json=schedule_query.dict())
+                response_json = scheduler_response.json()
+                card_order = response_json["order"]
+                rationale = response_json["rationale"]
+                debug_id = response_json["debug_id"]
+            logger.info(f"response request: {scheduler_response.request}")
 
             if rationale == "<p>no fact received</p>":
                 logger.info("No Facts Received")
-                # raise HTTPException(status_code=558, detail="No Facts Received From Scheduler")
+                raise HTTPException(status_code=558, detail="No Facts Received From Scheduler")
             # Generator idea adapted from https://stackoverflow.com/a/42393595
-            order_generator = (eligible_old_facts[x] for x in card_order)  # eligible facts instead?
-            old_facts = list(islice(order_generator, return_limit))
-            logger.info("old facts: " + str(old_facts))
+            order_generator = (eligible_facts[x] for x in card_order)
+            facts = list(islice(order_generator, return_limit))
+            logger.info("facts: " + str(facts))
             logger.info("debug id: " + debug_id)
-            
-            random_facts = crud.fact.get_eligible_facts(query=base_facts_query, limit=return_limit, randomize=True)
-            logger.info("new facts: " + str(random_facts))
 
-            facts = crud.helper.combine_two_fact_sets(random_facts=random_facts, old_facts=old_facts, return_limit=return_limit)
-            study_set = self.create_with_facts(db, obj_in=schemas.StudySetCreate(repetition_model=user.repetition_model, user_id=user.id, debug_id=debug_id),
+            old_facts = facts
+            if user.repetition_model != schemas.Repetition.karl:
+                random_facts = crud.fact.get_eligible_facts(query=base_facts_query, limit=return_limit, randomize=True)
+                logger.info("new facts: " + str(random_facts))
+                facts = crud.helper.combine_two_fact_sets(random_facts=random_facts, old_facts=facts, return_limit=return_limit)
+
+            study_set = self.create_with_facts(db, obj_in=schemas.StudySetCreate(repetition_model=user.repetition_model, user_id=user.id, debug_id=debug_id, setType=setType),
                                         decks=decks,
                                         facts=facts)
-             
             details = {
                 "study_system": user.repetition_model,
                 "first_fact": schemas.Fact.from_orm(facts[0]) if len(facts) != 0 else "empty",
                 "facts": [schemas.Fact.from_orm(fact) for fact in facts],
                 "first_review_fact": schemas.Fact.from_orm(old_facts[0]) if len(old_facts) != 0 else "empty",
                 "reviewfacts": [schemas.Fact.from_orm(fact) for fact in old_facts],
-                "eligible_fact_time": query_time,
-                "scheduler_query_time": eligible_fact_time,
                 "debug_id": debug_id,
                 "recall_target": user.recall_target,
             }
+            details.update(time_container.elapsed_times)
             history_in = schemas.HistoryCreate(
                 time=datetime.now(timezone('UTC')).isoformat(),
                 user_id=user.id,
-                log_type=schemas.Log.get_facts,
+                log_type=schemas.Log.get_facts, # Update to dynamically get schemas.Log.get_test_facts
                 details=details,
             )
             crud.history.create(db=db, obj_in=history_in)
@@ -241,7 +245,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         return studyset
     
     def completed_sets(self, db: Session, user: models.User) -> Optional[int]:
-        logger.info("completed sets: " + str(db.query(models.StudySet).filter(models.StudySet.user_id == user.id).count()))
+        logger.info("completed sets func: " + str(db.query(models.StudySet).filter(models.StudySet.user_id == user.id).count()))
         return db.query(models.StudySet).filter(models.StudySet.user_id == user.id).filter(models.StudySet.completed == true()).count()
 
     def sets_since_last_test(self, db: Session, last_test_set: models.studyset, user: models.User) -> Optional[int]:
@@ -255,7 +259,6 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         studyset = self.get(db=db, id=studyset_id)
         if not studyset:
             raise HTTPException(status_code=404, detail="Studyset not found")
-        # history_schemas = []
         for schedule in schedules:
             # fact = crud.fact.get(db=db, id=schedule.fact_id)
             session_fact = db.query(models.Session_Fact).filter(models.Session_Fact.studyset_id == studyset_id).filter(
@@ -267,8 +270,12 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             # Mark that the session fact has been studied most recently here
             session_fact.history_id = history.id
             db.commit()
-            # history_schemas.append(schemas.History.from_orm(history))
-        return schemas.ScheduleResponse(session_complete=studyset.completed)
+
+        # Mark study set as completed if it is, and mark user deck completed if study set is a post-test
+        studyset_completed = studyset.completed
+        if studyset.set_type == schemas.SetType.post_test and studyset.completed:
+            crud.deck.mark_user_deck_completed(db=db, db_obj=studyset.decks[0], user=user)
+        return schemas.ScheduleResponse(session_complete=studyset_completed)
 
     def record_study(
             self, db: Session, *, user: models.User, session_fact: models.Session_Fact, schedule: schemas.Schedule
@@ -334,31 +341,24 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             raise HTTPException(status_code=556, detail="Scheduler malfunction")
 
     def check_next_set_type(
-            self, db: Session, *, user: models.User
+            self, db: Session, *, user: models.User, test_deck: models.Deck
     ) -> bool:
         logger.info("Checking in Test Mode")
         last_test_set = studyset.find_last_test_set(db, user)
         logger.info("Last Study set: " + str(last_test_set))
         logger.info("Studied facts: " + str(crud.user.studied_facts(db, user)))
         if last_test_set is None:
-            logger.info("completed sets: " + str(studyset.completed_sets(db, user)))
+            logger.info("completed sets checking: " + str(studyset.completed_sets(db, user)))
             return schemas.SetType.test
-        # This code used to exist to force regenerating test sets after expiry, we no longer do so.
-        # if not study_set.completed:
-        #     return True
-        current_test_deck = last_test_set.decks[0]
 
-        # When the test set for today is not completed, or there is no test set yet today, we should be in test mode
         if last_test_set.date() == datetime.now.date():
             if last_test_set.completed:
                 return schemas.SetType.normal
             else:
-                return schemas.SetType.test
+                raise HTTPException(status_code=568, detail="Last test incomplete but not picked")
         else:
-            # TODO: Check if we want this behavior, where we count any day a test study set is created
-            # This does not ensure a perfect number of flashcards studied like 50
-            # Currently, we don't have easy ways to distinguish between learning/review/relearning stages in logs
-            if self.get_deck_studyset_count(db, user=user, deck=current_test_deck) >= settings.POST_TEST_TRIGGER:
+            # Currently, we don't have easy ways to distinguish between learning/review/relearning stages in logs. Instead, we do post test by # sets with current test set
+            if self.get_deck_studyset_count(db, user=user, deck=test_deck) >= settings.POST_TEST_TRIGGER:
                 return schemas.SetType.post_test
             else:
                 return schemas.SetType.test

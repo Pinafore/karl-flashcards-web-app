@@ -69,7 +69,7 @@ class SQLAlchemyHelpers():
         elif len_random_facts < upper_lim:
             facts = random_facts + old_facts[:return_limit - len_random_facts]
         elif len_old_facts < upper_lim:
-            facts = old_facts + random_facts[:return_limit - len_old_facts]
+            facts = random_facts[:return_limit - len_old_facts] + old_facts 
         return facts
 
 helper = SQLAlchemyHelpers()

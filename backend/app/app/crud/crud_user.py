@@ -40,8 +40,8 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
     def create(self, db: Session, *, obj_in: UserCreate) -> User:
         model, assignment_method = self.assign_scheduler_to_new_user(db, obj_in)
-        logger.info(model)
-        logger.info(assignment_method)
+        logger.info(f"model: {model}")
+        logger.info(f"assignment_method: {assignment_method}")
         db_obj = User(
             email=obj_in.email,
             hashed_password=get_password_hash(obj_in.password),

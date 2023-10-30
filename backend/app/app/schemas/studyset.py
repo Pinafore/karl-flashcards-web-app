@@ -39,7 +39,7 @@ class StudySet(StudySetInDBBase):
     is_first_pass: bool
     short_description: str
     expanded_description: str
-    retired: bool
+    # retired: bool
     set_type: SetType
 
     class Config:

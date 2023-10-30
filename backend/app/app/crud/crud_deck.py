@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import true
 from fastapi import HTTPException
 from app.utils.utils import logger, log_time, time_it
+from sqlalchemy.orm import joinedload
 
 
 class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
@@ -72,12 +73,17 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
         deck = self.get_current_user_test_deck(db=db, user=user)
         return deck.id if deck else None
 
-    def get_current_user_test_deck(self, db: Session) -> Optional[Deck]:
-        return db.query(self.model) \
-            .join(models.User_Deck, models.User_Deck.deck_id == self.model.id) \
-                .filter(self.model.deck_type == DeckType.hidden) \
-                    .filter(models.User_Deck.completed != true()).order_by(
-                        models.StudySet.id.asc()).first()
+    def get_current_user_test_deck(self, db: Session, user: User) -> Optional[Deck]:
+        test_user_deck = db.query(models.User_Deck) \
+            .options(joinedload(models.User_Deck.deck)) \
+            .filter(models.User_Deck.user == user) \
+                .filter(models.User_Deck.deck.has(deck_type=DeckType.hidden)) \
+                    .order_by(
+                        models.User_Deck.deck_id.asc()).first()
+        if test_user_deck:
+            return test_user_deck.deck
+        else:
+            return None
 
     def get_all_test_decks(self, db: Session) -> List[Deck]:
         return db.query(self.model).filter(self.model.deck_type == DeckType.hidden).order_by(self.model.id.asc()).all()
@@ -135,7 +141,7 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
             user_deck = self.create_with_owner(db=db, obj_in=SuperDeckCreate(title=proposed_deck, deck_type=deck_type),
                                                user=user)
         return user_deck
-
+    
     def update(
             self, db: Session, *, db_obj: Deck, obj_in: Union[DeckUpdate, SuperDeckUpdate, Dict[str, Any]]
     ) -> Deck:
@@ -144,6 +150,15 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
         else:
             update_data = obj_in.dict(exclude_unset=True)
         return super().update(db, db_obj=db_obj, obj_in=update_data)
+
+    def mark_user_deck_completed(self, db: Session, db_obj: Deck, user: User):
+        user_deck_association = db.query(User_Deck).filter_by(deck_id=db_obj.id, owner_id=user.id).first()
+        
+        if not user_deck_association:
+            raise HTTPException(status_code=576, detail=f"Attempted to mark non-existent user deck completed. User id: {user.id}. Deck id: {db_obj.id}")
+        user_deck_association.completed = True
+        db.commit()
+        return
 
     def remove_for_user(self, db: Session, *, db_obj: Deck, user: User) -> Deck:
         # Check if the user is associated with the deck using a direct query

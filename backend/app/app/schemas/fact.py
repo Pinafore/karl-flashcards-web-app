@@ -118,6 +118,7 @@ class FactSearch(InternalFactBase):
     studyable: Optional[bool] = None
     suspended: Optional[bool] = None
     reported: Optional[bool] = None
+    show_hidden: Optional[bool] = None
     skip: Optional[int] = None
     limit: Optional[int] = None
 

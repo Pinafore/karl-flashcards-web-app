@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     TEST_MODE_FIRST_TRIGGER_SESSIONS: int = 5
     TEST_MODE_TRIGGER_DAYS: int = 10
     TEST_MODE_TRIGGER_SESSIONS: int = 7
-    TEST_MODE_PER_ROUND: int = 20
+    TEST_MODE_PER_ROUND: int = 10
     TEST_MODE_TRIGGER_FACTS: int = 100
     POST_TEST_TRIGGER: int = 5
     DEFAULT_DECK_ID: int = 1

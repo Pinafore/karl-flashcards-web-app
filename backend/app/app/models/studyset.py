@@ -61,18 +61,18 @@ class StudySet(Base):
     
     @hybrid_property
     def completed(self) -> bool:
-        logger.info(self.num_unstudied)
+        logger.info(f"Num completed {self.num_unstudied}")
         return self.num_unstudied == 0 or self.retired is True  # Retired checks if deck was deleted!
 
     # Modify to include facts to study again?
+    # TODO: Optimize
     @hybrid_property
     def unstudied_facts(self) -> List[Session_Fact]:
-        logger.info([session_fact for session_fact in self.session_facts if  # type: ignore
-                not (
-                        session_fact.completed or session_fact.suspended or session_fact.reported or session_fact.deleted)])
-        return [session_fact for session_fact in self.session_facts if  # type: ignore
+        unstudied_facts = [session_fact for session_fact in self.session_facts if  # type: ignore
                 not (
                         session_fact.completed or session_fact.suspended or session_fact.reported or session_fact.deleted)]
+        logger.info(f"Unstudied facts {unstudied_facts}")
+        return unstudied_facts
 
     # maybe change to return session_fact
     # Some reason list comprehension is necessary for pydantic to see models
