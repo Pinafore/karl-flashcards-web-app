@@ -92,20 +92,6 @@ def assign_decks(
     crud.history.create(db=db, obj_in=history_in)
     return decks
 
-# TODO: Check this is unnecessary?
-# @router.put("/test", response_model=schemas.Deck)
-# def assign_all_test_decks(
-#         *,
-#         db: Session = Depends(deps.get_db),
-#         current_user: models.User = Depends(deps.get_current_active_superuser),
-# ) -> Any:
-#     """
-#     Assign test deck to all users
-#     """
-#     for user in crud.user.get_all_with_status(db=db, is_beta=False):
-#         deck = crud.deck.assign_test_deck(db, user)
-#     return deck
-
 
 @router.put("/{deck_id}", response_model=schemas.Deck)
 def update_deck(

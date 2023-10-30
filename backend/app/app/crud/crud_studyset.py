@@ -48,11 +48,6 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         db.refresh(db_obj)
         return db_obj
 
-    def create_session_fact(self, db: Session, *, db_obj: models.StudySet, fact: models.Fact) -> None:
-        session_fact = models.Session_Fact(studyset_id=db_obj.id, fact_id=fact.fact_id)
-        db.add(session_fact)
-        db.commit()
-
     def mark_retired(self, db: Session, db_obj: models.StudySet) -> None:
         db_obj.retired = True
         db.commit()
