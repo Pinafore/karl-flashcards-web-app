@@ -1,4 +1,3 @@
-import logging
 from typing import Dict, Tuple
 
 from app import crud
@@ -9,9 +8,7 @@ from app.tests.utils.utils import random_email, random_lower_string
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
+from app.utils.utils import logger, log_time, time_it
 
 def user_authentication_headers(
         *, client: TestClient, email: str, password: str

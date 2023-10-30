@@ -12,15 +12,10 @@
       </v-card-title>
       <v-card-text>
         <p>
-          In KAR³L phase 2, we ask users to periodically study a test set of general
-          knowledge flashcards. This will allow us to perform a more rigorous evaluation
-          of current and future scheduling systems. We expect each session of test mode
-          to generally take less than fifteen minutes. You may resume your regular study
-          after completing this test mode.
-        </p>
-        <p>
-          You must complete test mode within two hours of starting or your progress in
-          the session will be reset.
+          In KAR³L phase 2, we are running a study to perform a more rigorous evaluation
+          of flashcard scheduling systems. We therefore require you to first complete
+          studying our 10 test mode flashcards during this ~3 week period. You may
+          resume your regular study after completing these cards.
         </p>
       </v-card-text>
       <v-card-actions class="pt-0">

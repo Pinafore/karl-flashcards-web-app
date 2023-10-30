@@ -19,12 +19,6 @@ class History(Base):
     log_type = Column(Enum(Log), nullable=False)
     correct = Column(Boolean(), index=True)
     details = Column(JSONB)
-    # repetition_model = Column(Enum(Repetition), default=Repetition.leitner, nullable=False)
-    # typed = Column(String, nullable=False)
-    # response = Column(String, nullable=False)
-    # front_seconds_elapsed = Column(Integer, nullable=False)
-    # back_seconds_elapsed = Column(Integer, nullable=False)
-    # latest_study = Column(Boolean)
 
     fact = relationship("Fact", back_populates="history")
     user = relationship("User", back_populates="history")

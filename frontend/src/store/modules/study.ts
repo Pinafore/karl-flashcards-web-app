@@ -283,7 +283,7 @@ export default class StudyModule extends VuexModule {
         this.setStudySet(response.data);
         this.setStudy(response.data.unstudied_facts);
         this.setInitUnstudied(response.data.num_unstudied);
-        this.setInTestMode(response.data.is_test);
+        this.setInTestMode(response.data.set_type != "normal");
         await this.getNextShow();
       }
       mainStore.setConnectionError(false);

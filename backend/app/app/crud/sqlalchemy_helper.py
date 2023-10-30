@@ -6,10 +6,7 @@ from sqlalchemy import Column, and_, func, not_
 from sqlalchemy.orm import query
 from app import crud, models, schemas
 from app.core.config import settings
-
-import logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from app.utils.utils import logger, log_time, time_it
 
 class SQLAlchemyHelpers():
     def filter_deck_ids(self, query: query, deck_ids: Optional[List[int]]):
@@ -72,7 +69,7 @@ class SQLAlchemyHelpers():
         elif len_random_facts < upper_lim:
             facts = random_facts + old_facts[:return_limit - len_random_facts]
         elif len_old_facts < upper_lim:
-            facts = old_facts + random_facts[:return_limit - len_old_facts]
+            facts = random_facts[:return_limit - len_old_facts] + old_facts 
         return facts
 
 helper = SQLAlchemyHelpers()

@@ -5,11 +5,11 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from app.db.base_class import Base
-from sqlalchemy import Column, Integer, ForeignKey, Boolean, TIMESTAMP, String, func
+from sqlalchemy import Column, Integer, Enum, ForeignKey, Boolean, TIMESTAMP, String, func
 from sqlalchemy.orm import relationship
 from pytz import timezone
 
-from app import schemas
+from app.schemas import Repetition, SetType
 from app.core.config import settings
 
 if TYPE_CHECKING:  # noqa: F401
@@ -18,14 +18,13 @@ from .deck import Deck
 from .session_fact import Session_Fact  # noqa: F401
 from .session_deck import Session_Deck  # noqa: F401
 
-import logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from app.utils.utils import logger, log_time, time_it
 class StudySet(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False, index=True)
     create_date = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
-    is_test = Column(Boolean, nullable=False, default=False, index=True)
+    set_type = Column(Enum(SetType), nullable=False, server_default=SetType.normal, index=True)
+    repetition_model = Column(Enum(Repetition), nullable=False, server_default=Repetition.karl)
     debug_id = Column(String)
     retired = Column(Boolean)
 
@@ -46,22 +45,34 @@ class StudySet(Base):
     @property
     def num_unstudied(self) -> int:
         return len(self.unstudied_facts)
-
+    
     # https://docs.sqlalchemy.org/en/14/orm/extensions/hybrid.html
     @hybrid_property
+    def is_test(self) -> bool:
+        return self.set_type == SetType.test
+    
+    @hybrid_property
+    def is_normal(self) -> bool:
+        return self.set_type == SetType.normal
+
+    @hybrid_property
+    def is_post_test(self) -> bool:
+        return self.set_type == SetType.post_test
+    
+    @hybrid_property
     def completed(self) -> bool:
-        logger.info(self.num_unstudied)
+        logger.info(f"Num completed {self.num_unstudied}")
         return self.num_unstudied == 0 or self.retired is True  # Retired checks if deck was deleted!
 
     # Modify to include facts to study again?
+    # TODO: Optimize
     @hybrid_property
     def unstudied_facts(self) -> List[Session_Fact]:
-        logger.info([session_fact for session_fact in self.session_facts if  # type: ignore
-                not (
-                        session_fact.completed or session_fact.suspended or session_fact.reported or session_fact.deleted)])
-        return [session_fact for session_fact in self.session_facts if  # type: ignore
+        unstudied_facts = [session_fact for session_fact in self.session_facts if  # type: ignore
                 not (
                         session_fact.completed or session_fact.suspended or session_fact.reported or session_fact.deleted)]
+        logger.info(f"Unstudied facts {unstudied_facts}")
+        return unstudied_facts
 
     # maybe change to return session_fact
     # Some reason list comprehension is necessary for pydantic to see models

@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, Tuple, Union, List
 
@@ -20,9 +19,7 @@ from app.schemas.history import HistoryCreate
 from sqlalchemy.orm import Session
 import numpy as np
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-import sys
+from app.utils.utils import logger, log_time, time_it
 
 
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
@@ -43,8 +40,8 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
     def create(self, db: Session, *, obj_in: UserCreate) -> User:
         model, assignment_method = self.assign_scheduler_to_new_user(db, obj_in)
-        logger.info(model)
-        logger.info(assignment_method)
+        logger.info(f"model: {model}")
+        logger.info(f"assignment_method: {assignment_method}")
         db_obj = User(
             email=obj_in.email,
             hashed_password=get_password_hash(obj_in.password),
@@ -102,14 +99,13 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             hashed_password = get_password_hash(update_data["password"])
             del update_data["password"]
             update_data["hashed_password"] = hashed_password
-        if obj_in.recall_target and update_data["recall_target"]:
-            # 
+        # Previously we had to retire test sets if recall target is updated, but no longer necessary
+        # if obj_in.recall_target and update_data["recall_target"]:
             # set_user_settings(user=db_obj, new_settings=obj_in)
-
             # Need to retire current study set when settings change
-            uncompleted_last_set = crud.studyset.find_existing_study_set(db, db_obj)
-            if uncompleted_last_set:
-                crud.studyset.mark_retired(db, db_obj=uncompleted_last_set)
+            # uncompleted_last_set = crud.studyset.find_active_study_set(db, db_obj)
+            # if uncompleted_last_set:
+            #     crud.studyset.mark_retired(db, db_obj=uncompleted_last_set)
         
         history_in = schemas.HistoryCreate(
             time=datetime.now(timezone('UTC')),

@@ -5,3 +5,4 @@ class DeckType(str, Enum):
     default = "default"
     public = "public"
     hidden = "hidden"
+    deleted = "deleted"
