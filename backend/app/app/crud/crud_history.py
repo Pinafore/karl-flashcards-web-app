@@ -1,11 +1,7 @@
-import logging
-
 from app import models, schemas
 from app.crud.base import CRUDBase
 from sqlalchemy.orm import Session
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from app.utils.utils import logger, log_time, time_it
 
 
 class CRUDHistory(CRUDBase[models.History, schemas.HistoryCreate, schemas.HistoryUpdate]):

@@ -1,7 +1,6 @@
 import json
 from typing import Any, List, Optional
 
-import logging
 import requests
 from fastapi import BackgroundTasks
 
@@ -11,10 +10,9 @@ from app.core.config import settings
 from app.utils.utils import send_new_account_email
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from app.utils.utils import logger, log_time, time_it
 
 router = APIRouter()
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 @router.get("/", response_model=List[schemas.User])

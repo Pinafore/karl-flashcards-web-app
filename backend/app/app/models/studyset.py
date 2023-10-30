@@ -18,9 +18,7 @@ from .deck import Deck
 from .session_fact import Session_Fact  # noqa: F401
 from .session_deck import Session_Deck  # noqa: F401
 
-import logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from app.utils.utils import logger, log_time, time_it
 class StudySet(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False, index=True)

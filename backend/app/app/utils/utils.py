@@ -7,7 +7,31 @@ import emails
 from app.core.config import settings
 from emails.template import JinjaTemplate
 from jose import jwt
+from contextlib import contextmanager
+import time
+from functools import wraps
 
+# Setup the logger
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+@contextmanager
+def log_time(description="Elapsed time"):
+    start_time = time.time()
+    yield
+    elapsed_time = time.time() - start_time
+    logger.info(f"{description}: {elapsed_time:.2f} seconds")
+
+# Decorator for timing entire functions
+def time_it(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        elapsed_time = time.time() - start_time
+        logger.info(f"{func.__name__} executed in: {elapsed_time:.2f} seconds")
+        return result
+    return wrapper
 
 def send_email(
         email_to: str,

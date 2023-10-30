@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, Tuple, Union, List
 
@@ -20,9 +19,7 @@ from app.schemas.history import HistoryCreate
 from sqlalchemy.orm import Session
 import numpy as np
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-import sys
+from app.utils.utils import logger, log_time, time_it
 
 
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):

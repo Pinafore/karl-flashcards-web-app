@@ -1,4 +1,3 @@
-import logging
 from datetime import timedelta
 from typing import Any
 
@@ -15,9 +14,6 @@ from app.utils.utils import (
 from fastapi import APIRouter, Body, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 router = APIRouter()
 
 

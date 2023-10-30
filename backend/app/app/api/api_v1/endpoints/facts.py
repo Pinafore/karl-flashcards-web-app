@@ -1,5 +1,3 @@
-import logging
-import time
 from datetime import datetime
 from typing import Any, List, Optional
 
@@ -12,9 +10,8 @@ from app import crud, models, schemas
 from app.api import deps
 from app.core.celery_app import celery_app
 from app.core.config import settings
+from app.utils.utils import log_time
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -68,13 +65,10 @@ def read_facts(
     if total == limit:
         total = crud.fact.count_eligible_facts(query=query)
 
-    begin_overall_start = time.time()
-    new_facts: List[schemas.Fact] = []
-    for fact in facts:
-        new_facts.append(crud.fact.get_schema_with_perm(db_obj=fact, user=current_user))
-    overall_end_time = time.time()
-    overall_total_time = overall_end_time - begin_overall_start
-    logger.info("permissions: " + str(overall_total_time))
+    with log_time("Add permissions to facts"):
+        new_facts: List[schemas.Fact] = []
+        for fact in facts:
+            new_facts.append(crud.fact.get_schema_with_perm(db_obj=fact, user=current_user))
 
     fact_browser = schemas.FactBrowse(facts=new_facts, total=total)
     details = search.dict()

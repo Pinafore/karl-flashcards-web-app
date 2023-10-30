@@ -1,5 +1,4 @@
 import json
-import logging
 from typing import Any, List, Optional
 
 import requests
@@ -9,9 +8,7 @@ from app.core.config import settings
 from app.utils import evaluate
 from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from sqlalchemy.orm import Session
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from app.utils.utils import logger
 router = APIRouter()
 
 

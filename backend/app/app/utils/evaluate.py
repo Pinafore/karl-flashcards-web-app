@@ -1,11 +1,9 @@
-import logging
 from typing import List
 
 from app import models
 from sklearn.metrics.pairwise import cosine_similarity
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from app.utils.utils import logger, log_time, time_it
 import os
 import pickle
 

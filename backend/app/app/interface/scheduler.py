@@ -1,5 +1,4 @@
 import json
-import logging
 import time
 from datetime import datetime
 from typing import List, Union
@@ -11,8 +10,7 @@ from app import models, schemas, crud
 from app.core.config import settings
 from sqlalchemy.orm import Session
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from app.utils.utils import logger, log_time, time_it
 
 
 # Values set here are no longer relevant, as they are passed in for each schedule request.

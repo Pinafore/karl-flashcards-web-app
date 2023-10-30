@@ -1,6 +1,4 @@
 import json
-import logging
-import time
 from datetime import datetime
 from tempfile import SpooledTemporaryFile
 from typing import List, Union, Dict, Any, Optional
@@ -14,9 +12,7 @@ from sqlalchemy.orm import Session, Query
 from app import crud, models, schemas
 from app.crud.base import CRUDBase
 from app.schemas import Log, DeckType
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from app.utils.utils import logger, log_time, time_it
 
 
 class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
@@ -321,20 +317,16 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         
         return facts_query
 
+    @time_it
     def count_eligible_facts(
             self, query: Query
     ) -> int:
-        begin_overall_start = time.time()
-        facts = query.distinct().count()
-        overall_end_time = time.time()
-        overall_total_time = overall_end_time - begin_overall_start
-        logger.info("overall time count: " + str(overall_total_time))
-        return facts
+        return query.distinct().count()
 
+    @time_it
     def get_eligible_facts(
             self, query: Query, skip: int = None, limit: int = None, randomize: bool = False
     ) -> List[models.Fact]:
-        begin_overall_start = time.time()
         if randomize:
             query = query.order_by(func.random())
         if skip:
@@ -342,9 +334,6 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         if limit:
             query = query.limit(limit)
         facts = query.all()
-        overall_end_time = time.time()
-        overall_total_time = overall_end_time - begin_overall_start
-        logger.info("overall time facts: " + str(overall_total_time))
         return facts
 
     

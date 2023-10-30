@@ -1,4 +1,3 @@
-import logging
 from typing import List, Optional, Union, Any, Tuple
 import time
 import math
@@ -22,9 +21,7 @@ from sqlalchemy import and_, func
 from datetime import datetime, timedelta
 from fastapi import HTTPException
 from sentry_sdk import capture_exception
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from app.utils.utils import logger, log_time, time_it
 
 
 class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.StudySetUpdate]):

@@ -6,10 +6,7 @@ from sqlalchemy import Column, and_, func, not_
 from sqlalchemy.orm import query
 from app import crud, models, schemas
 from app.core.config import settings
-
-import logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from app.utils.utils import logger, log_time, time_it
 
 class SQLAlchemyHelpers():
     def filter_deck_ids(self, query: query, deck_ids: Optional[List[int]]):

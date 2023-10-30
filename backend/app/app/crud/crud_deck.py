@@ -1,4 +1,3 @@
-import logging
 from typing import List, Optional, Set, Union, Dict, Any
 
 from app.core.config import settings
@@ -12,9 +11,7 @@ from sqlalchemy import not_
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import true
 from fastapi import HTTPException
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from app.utils.utils import logger, log_time, time_it
 
 
 class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
