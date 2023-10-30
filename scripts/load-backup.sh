@@ -38,7 +38,7 @@ DIR_NAME=$(dirname $BACKUP_FILE)
 FULL_PATH="$DIR_NAME/$BASE_NAME"
 
 # Unzip the backup file
-gunzip -c $BACKUP_FILE > $BASE_NAME
+gunzip -c $BACKUP_FILE > $FULL_PATH
 if [ $? -ne 0 ]; then
     handle_error "Failed to unzip the backup file. Aborting restore."
 fi
