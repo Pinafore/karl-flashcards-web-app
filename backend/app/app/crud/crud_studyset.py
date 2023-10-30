@@ -96,7 +96,6 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         test_deck = crud.deck.get_current_user_test_deck(db=db, user=user)
         if test_deck is None:
             raise HTTPException(status_code=576, detail="TEST ID WAS NONE?")
-            next_set_type = schemas.SetType.normal
         else:
             next_set_type = self.check_next_set_type(db, user=user, test_deck=test_deck)
         
@@ -186,13 +185,14 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             else:
                 schedule_query = self.create_scheduler_query(facts=eligible_facts, user=user)
         try:
+            logger.info(schedule_query.dict())
             with log_time(description="Scheduler querying", container=time_container, label="scheduler_query_time"):
                 scheduler_response = requests.post(settings.INTERFACE + "api/karl/schedule_v2", json=schedule_query.dict())
                 response_json = scheduler_response.json()
-                card_order = response_json["order"]
-                rationale = response_json["rationale"]
-                debug_id = response_json["debug_id"]
             logger.info(f"response request: {scheduler_response.request}")
+            card_order = response_json["order"]
+            rationale = response_json["rationale"]
+            debug_id = response_json["debug_id"]
 
             if rationale == "<p>no fact received</p>":
                 logger.info("No Facts Received")
@@ -240,7 +240,8 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             raise HTTPException(status_code=556, detail="Scheduler malfunction")
     
     def find_last_test_set(self, db: Session, user: models.User) -> Optional[models.StudySet]:
-        studyset: models.StudySet = db.query(models.StudySet).filter(models.StudySet.user_id == user.id).filter(models.StudySet.is_test == true()).order_by(
+        # Don't show 'retired' test set cards, which come from deleted test mode decks.
+        studyset: models.StudySet = db.query(models.StudySet).filter(models.StudySet.user_id == user.id).filter(models.StudySet.is_test == true()).filter(models.StudySet.retired != true()).order_by(
             models.StudySet.id.desc()).first()
         return studyset
     
@@ -351,7 +352,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             logger.info("completed sets checking: " + str(studyset.completed_sets(db, user)))
             return schemas.SetType.test
 
-        if last_test_set.date() == datetime.now.date():
+        if last_test_set.create_date == datetime.now.date():
             if last_test_set.completed:
                 return schemas.SetType.normal
             else:

@@ -283,7 +283,7 @@ export interface IComponents {
     unstudied_facts: IComponents["Fact"][];
     all_decks: IComponents["Deck"][];
     all_facts: IComponents["Fact"][];
-    is_test: boolean;
+    set_type: "normal" | "test" | "post_test";
     num_facts: number;
     num_unstudied: number;
     user: IComponents["User"];

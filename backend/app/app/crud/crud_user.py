@@ -99,14 +99,13 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             hashed_password = get_password_hash(update_data["password"])
             del update_data["password"]
             update_data["hashed_password"] = hashed_password
-        if obj_in.recall_target and update_data["recall_target"]:
-            # 
+        # Previously we had to retire test sets if recall target is updated, but no longer necessary
+        # if obj_in.recall_target and update_data["recall_target"]:
             # set_user_settings(user=db_obj, new_settings=obj_in)
-
             # Need to retire current study set when settings change
-            uncompleted_last_set = crud.studyset.find_active_study_set(db, db_obj)
-            if uncompleted_last_set:
-                crud.studyset.mark_retired(db, db_obj=uncompleted_last_set)
+            # uncompleted_last_set = crud.studyset.find_active_study_set(db, db_obj)
+            # if uncompleted_last_set:
+            #     crud.studyset.mark_retired(db, db_obj=uncompleted_last_set)
         
         history_in = schemas.HistoryCreate(
             time=datetime.now(timezone('UTC')),
