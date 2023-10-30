@@ -61,7 +61,7 @@ class User(Base):
     def study_set_expiry_date(self) -> Optional[datetime]:
         db = SessionLocal()
         from app.crud import studyset
-        study_set = studyset.find_existing_study_set(db, self)
+        study_set = studyset.find_active_study_set(db, self)
         expiry_date = study_set.expiry_date if study_set is not None else None
         db.close()
         return expiry_date

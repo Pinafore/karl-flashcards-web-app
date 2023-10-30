@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional, Union, Dict, Any
+from typing import List, Optional, Set, Union, Dict, Any
 
 from app.core.config import settings
 from app.crud.base import CRUDBase
@@ -85,7 +85,7 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
     def get_all_test_decks(self, db: Session) -> List[Deck]:
         return db.query(self.model).filter(self.model.deck_type == DeckType.hidden).order_by(self.model.id.asc()).all()
 
-    def get_all_test_deck_ids(self, db: Session) -> List[int]:
+    def get_all_test_deck_ids(self, db: Session) -> Set[int]:
         test_decks = self.get_all_test_decks(db)
         return {deck.id for deck in test_decks}
 
@@ -104,6 +104,28 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
         all_users = db.query(models.User).all()
         for found_user in all_users:
             self.assign_test_decks(db=db,user=found_user)
+    
+    def check_for_test_deck_ids(self, db, deck_ids):
+        if not deck_ids:
+            return []
+        test_deck_ids = self.get_all_test_deck_ids(db=db)
+        if set(deck_ids).intersection(test_deck_ids):
+            raise HTTPException(status_code=557, detail="This deck is currently unavailable")
+        
+    def get_user_decks_given_ids(self, db: Session, user: models.User, deck_ids: List[int] = None) -> List[models.Deck]:
+        decks = []
+        if deck_ids is None:
+            return decks 
+        for deck_id in deck_ids:
+            deck = self.get(db=db, id=deck_id)
+            if not deck:
+                raise HTTPException(status_code=404, detail="One or more of the specified decks does not exist")
+            if user not in deck.users:
+                raise HTTPException(status_code=450,
+                                        detail="This user does not have the necessary permission to access one or more"
+                                            " of the specified decks")
+            decks.append(deck)
+        return decks
 
     def find_or_create(
             self, db: Session, *, proposed_deck: str, user: User, deck_type: DeckType = DeckType.default
@@ -131,11 +153,9 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
         user_deck_association = db.query(User_Deck).filter_by(deck_id=db_obj.id, owner_id=user.id).first()
         
         if user_deck_association:
-            # Remove the association
             db.delete(user_deck_association)
             
-            # Check for the existing study set using a direct query
-            existing_studyset = crud.studyset.find_existing_study_set(db, user)
+            existing_studyset = crud.studyset.find_active_study_set(db, user)
             if isinstance(existing_studyset, models.StudySet) and existing_studyset.set_type == SetType.normal:
                 crud.studyset.mark_retired(db, db_obj=existing_studyset)
             
@@ -148,13 +168,10 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
         if not db_obj:
             raise HTTPException(status_code=404, detail="Deck not found")
         
-        # Mark the deck as deleted
-        db_obj.deck_type = DeckType.deleted  # Assuming you have an is_active column in the Deck model
+        db_obj.deck_type = DeckType.deleted
         
-        # Remove all user associations with the deck
         db.query(User_Deck).filter_by(deck_id=db_obj.id).delete()
         
-        # Handle study sets associated with the deck
         associated_studysets = db.query(models.StudySet).join(models.Session_Deck).filter(models.Session_Deck.deck_id == db_obj.id).all()
         for studyset in associated_studysets:
             crud.studyset.mark_retired(db, db_obj=studyset)

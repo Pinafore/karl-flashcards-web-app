@@ -83,7 +83,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                                                 " of the specified decks")
                 decks.append(deck)
         # Does not return study sets that are expired or completed
-        uncompleted_last_set = self.find_existing_study_set(db, user)
+        uncompleted_last_set = self.find_active_study_set(db, user)
         
         if uncompleted_last_set:
             if force_new and uncompleted_last_set.set_type == schemas.SetType.normal:
@@ -103,7 +103,8 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                                                    send_limit=send_limit)
         return db_obj
 
-    def find_existing_study_set(self, db: Session, user: models.User) -> Optional[models.StudySet]:
+    # Does not return study sets that are expired or completed
+    def find_active_study_set(self, db: Session, user: models.User) -> Optional[models.StudySet]:
         studyset: models.StudySet = db.query(models.StudySet).filter(models.StudySet.user_id == user.id).order_by(
             models.StudySet.id.desc()).first()
         if studyset and not (studyset.expired or studyset.completed):

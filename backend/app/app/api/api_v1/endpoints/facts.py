@@ -40,9 +40,9 @@ def read_facts(
     """
     if limit > 1000:
         raise HTTPException(status_code=445, detail="Too many facts requested. Please limit to <1000 facts.")
-    test_deck_ids = crud.deck.get_all_test_deck_ids(db=db)
-    if deck_ids is not None and set(deck_ids).intersection(test_deck_ids):
-        raise HTTPException(status_code=557, detail="This deck is currently unavailable")
+    crud.deck.check_for_test_deck_ids(db=db, deck_ids=deck_ids)
+    # This ensures the user doesn't search for facts that they don't have access to
+    decks = crud.deck.get_user_decks_given_ids(db=db, user=current_user, deck_ids=deck_ids)
 
     if suspended and reported:
         studyable = True
