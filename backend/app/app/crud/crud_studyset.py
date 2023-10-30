@@ -34,6 +34,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
 
     def create_with_facts(self, db: Session, *, obj_in: schemas.StudySetCreate, facts: Optional[List[models.Fact]],
                           decks: Optional[List[models.Deck]]) -> models.StudySet:
+        logger.info(f"Creating with facts {obj_in}")
         db_obj = self.create(db, obj_in=obj_in)
         db.refresh(db_obj)
         # Not append because facts and decks are lists
@@ -98,7 +99,8 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             raise HTTPException(status_code=576, detail="TEST ID WAS NONE?")
         else:
             next_set_type = self.check_next_set_type(db, user=user, test_deck=test_deck)
-        
+        logger.info(f"Test set: {next_set_type}")
+
         if next_set_type == schemas.SetType.test:
             db_obj = self.create_new_test_study_set(db, user=user, test_deck=test_deck)
         elif next_set_type == schemas.SetType.post_test:
@@ -167,7 +169,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         show_hidden = setType == schemas.SetType.post_test or setType == schemas.SetType.test
         filters = schemas.FactSearch(deck_ids=deck_ids, limit=send_limit, studyable=True, show_hidden=show_hidden)
         base_facts_query = crud.fact.build_facts_query(db=db, user=user, filters=filters)
-        
+        logger.info(base_facts_query)
         if repetition_model is None:
             repetition_model = user.repetition_model
         
@@ -208,7 +210,9 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                 random_facts = crud.fact.get_eligible_facts(query=base_facts_query, limit=return_limit, randomize=True)
                 logger.info("new facts: " + str(random_facts))
                 facts = crud.helper.combine_two_fact_sets(random_facts=random_facts, old_facts=facts, return_limit=return_limit)
+            logger.info(f"Study set created of type {setType}")
             study_set_create = schemas.StudySetCreate(repetition_model=user.repetition_model, user_id=user.id, debug_id=debug_id, set_type=setType)
+            logger.info(f"Study set create: {study_set_create}")
             study_set = self.create_with_facts(db, obj_in=study_set_create,
                                         decks=decks,
                                         facts=facts)
