@@ -14,8 +14,9 @@
         <p>
           In KAR³L phase 2, we are running a study to perform a more rigorous evaluation
           of flashcard scheduling systems. We therefore require you to first complete
-          studying our 10 test mode flashcards during this ~3 week period. You may
-          resume your regular study after completing these cards.
+          studying our 10 test mode flashcards during this ~3 week period. Please
+          complete this test mode studyset before it expires two hours after creation.
+          You may resume your regular study after completing these cards.
         </p>
       </v-card-text>
       <v-card-actions class="pt-0">
