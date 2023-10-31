@@ -119,8 +119,8 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         scheduler_query = schemas.SchedulerQuery(facts=[schemas.KarlFactV2.from_orm(fact) for fact in facts],
                                                  env=settings.ENVIRONMENT, repetition_model=user.repetition_model,
                                                  user_id=user.id,
-                                                 recall_target=TargetWindow(target_window_lowest=.8, 
-                                                 target_window_highest=.9, target=.85),
+                                                 recall_target=TargetWindow(target_window_lowest=0, 
+                                                 target_window_highest=1, target=.85),
                                                  test_mode=test_mode)
         return scheduler_query
     
