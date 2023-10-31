@@ -1,7 +1,7 @@
 import { api } from "@/api";
 import { Action, Module, Mutation, VuexModule } from "vuex-module-decorators";
 import { IComponents, IStudyShow, Permission } from "@/interfaces";
-import { mainStore, studyStore } from "@/utils/store-accessor";
+import { mainStore } from "@/utils/store-accessor";
 import router from "@/router";
 
 @Module({ name: "study" })
