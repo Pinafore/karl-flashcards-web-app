@@ -207,9 +207,10 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
 
             old_facts = facts
             if user.repetition_model != schemas.Repetition.karl:
-                random_facts = crud.fact.get_eligible_facts(query=base_facts_query, limit=return_limit, randomize=True)
-                logger.info("new facts: " + str(random_facts))
-                facts = crud.helper.combine_two_fact_sets(random_facts=random_facts, old_facts=facts, return_limit=return_limit)
+                eligible_new_facts_query = crud.helper.filter_only_new_facts(query=base_facts_query, user_id=user.id, log_type=schemas.Log.study)
+                new_facts = crud.fact.get_eligible_facts(query=eligible_new_facts_query, limit=return_limit, randomize=True)
+                logger.info("new facts: " + str(new_facts))
+                facts = crud.helper.combine_two_fact_sets(new_facts=new_facts, old_facts=facts, return_limit=return_limit)
             logger.info(f"Study set created of type {setType}")
             study_set_create = schemas.StudySetCreate(repetition_model=user.repetition_model, user_id=user.id, debug_id=debug_id, set_type=setType)
             logger.info(f"Study set create: {study_set_create}")
@@ -289,6 +290,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             response = schedule.response
             date_studied = datetime.now(timezone('UTC')).isoformat()
             debug_id = session_fact.studyset.debug_id
+            set_type = session_fact.studyset.set_type
             details = {
                 "studyset_id": session_fact.studyset_id,
                 "study_system": user.repetition_model,
@@ -296,7 +298,8 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                 "response": schedule.response,
                 "debug_id": debug_id,
                 "recall_target": user.recall_target,
-                "recommendation": schedule.recommendation
+                "recommendation": schedule.recommendation,
+                "set_type": set_type
             }
             if schedule.elapsed_seconds_text:
                 details["elapsed_seconds_text"] = schedule.elapsed_seconds_text
@@ -305,12 +308,12 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                 details["elapsed_milliseconds_text"] = schedule.elapsed_milliseconds_text
                 details["elapsed_milliseconds_answer"] = schedule.elapsed_milliseconds_answer
             fact = session_fact.fact
-            in_test_mode = fact.deck_id == crud.deck.get_test_deck_id(db) # Could refactor into session fact field
+             # Could refactor into session fact field
             history_in = schemas.HistoryCreate(
                     time=date_studied,
                     user_id=user.id,
                     fact_id=fact.fact_id,
-                    log_type=schemas.Log.test_study if in_test_mode else schemas.Log.study,
+                    log_type=schemas.Log.study,
                     correct=schedule.response,
                     details=details,
                 )
@@ -328,7 +331,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                 answer=fact.answer,
                 typed=schedule.typed,
                 debug_id=debug_id,
-                test_mode=in_test_mode,
+                test_mode=set_type == schemas.SetType.test,
                 recommendation=schedule.recommendation,
                 fact=schemas.KarlFactV2.from_orm(fact)).dict(exclude_unset=True)
             logger.info("payload update: " + str(payload_update))
