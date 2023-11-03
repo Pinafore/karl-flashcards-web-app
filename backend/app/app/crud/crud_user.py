@@ -56,7 +56,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         crud.deck.assign_viewer(db=db, db_obj=deck, user=db_obj)
         db.refresh(db_obj)
         # Assign test
-        crud.deck.assign_test_deck(db=db, user=db_obj)
+        crud.deck.assign_test_decks(db=db, user=db_obj)
         db.refresh(db_obj)
         change_assignment(user=db_obj, repetition_model=model)
         return db_obj
@@ -65,7 +65,9 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         if obj_in.repetition_model:
             return obj_in.repetition_model, "assigned"
         if self.get_count(db, False) > 250:
-            return Repetition.select_model(), "random"
+            model = Repetition.select_model()
+            logger.info("Randomly assigning new user")
+            return model, "random"
         scheduler_counts = self.get_scheduler_counts(db, is_beta=False)
         keys_list = list(scheduler_counts.keys())
         params = [max(55 - scheduler_counts[i], 1) for i in keys_list]
