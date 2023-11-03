@@ -14,10 +14,12 @@ from fastapi import HTTPException
 from app.core.config import settings
 import requests
 from pytz import timezone
+import pytz
 from datetime import datetime
 from sentry_sdk import capture_exception
 from sqlalchemy.sql.expression import true
-from sqlalchemy import and_, func
+from sqlalchemy import and_, false, func, not_, or_
+from sqlalchemy.orm import joinedload
 from datetime import datetime, timedelta
 from fastapi import HTTPException
 from sentry_sdk import capture_exception
@@ -125,7 +127,6 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         return scheduler_query
     
     def create_new_test_study_set(self, db: Session, *, user: models.User, return_limit: int = settings.TEST_MODE_PER_ROUND, test_deck: models.Deck) -> models.StudySet:
-    
         # Get facts that have not been studied before
         test_deck_id = test_deck.id
         if test_deck is None:
@@ -181,6 +182,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         logger.info(f"return limit {return_limit}")
         time_container = TimeContainer()
         with log_time(description="Scheduler query creation", container=time_container, label="eligible_fact_time"):
+            # TODO: ADD Post test
             if setType == schemas.SetType.test:
                 test_deck_id = deck_ids[0]
                 schedule_query = self.create_scheduler_query(facts=eligible_facts, user=user, test_mode=test_deck_id)
@@ -189,7 +191,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         try:
             logger.info(schedule_query.dict())
             with log_time(description="Scheduler querying", container=time_container, label="scheduler_query_time"):
-                scheduler_response = requests.post(settings.INTERFACE + "api/karl/schedule_v2", json=schedule_query.dict())
+                scheduler_response = requests.post(settings.INTERFACE + "api/karl/schedule_v3", json=schedule_query.dict())
                 response_json = scheduler_response.json()
             logger.info(f"response request: {scheduler_response.request}")
             card_order = response_json["order"]
@@ -246,7 +248,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
     
     def find_last_test_set(self, db: Session, user: models.User) -> Optional[models.StudySet]:
         # Don't show 'retired' test set cards, which come from deleted test mode decks.
-        studyset: models.StudySet = db.query(models.StudySet).filter(models.StudySet.user_id == user.id).filter(models.StudySet.is_test == true()).filter(models.StudySet.retired != true()).order_by(
+        studyset: models.StudySet = db.query(models.StudySet).filter(models.StudySet.user_id == user.id).filter(models.StudySet.is_test == true()).filter(or_(models.StudySet.retired == None, models.StudySet.retired == false())).order_by(
             models.StudySet.id.desc()).first()
         return studyset
     
@@ -258,7 +260,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         return db.query(models.StudySet).filter(models.StudySet.user_id == user.id).filter(models.StudySet.completed == true()).filter(models.StudySet.id > last_test_set.id).count()
 
     def get_deck_studyset_count(self, db: Session, user: models.User, deck: models.Deck) -> Optional[int]:
-        return db.query(models.Session_Deck).filter(models.Session_Deck.deck == deck, models.Session_Deck.studyset.user == user).count()
+        return db.query(models.Session_Deck).options(joinedload(models.Session_Deck.studyset)).filter(models.Session_Deck.deck == deck, models.Session_Deck.studyset.has(user=user)).count()
     
     def update_session_facts(self, db: Session, schedules: List[schemas.Schedule], user: models.User,
                              studyset_id: int) -> Any:
@@ -353,13 +355,21 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
     ) -> bool:
         logger.info("Checking in Test Mode")
         last_test_set = studyset.find_last_test_set(db, user)
-        logger.info("Last Study set: " + str(last_test_set))
+        if last_test_set:
+            logger.info("Last test Study set: " + str(last_test_set.id))
+        else:
+            logger.info("No test set found")
         logger.info("Studied facts: " + str(crud.user.studied_facts(db, user)))
         if last_test_set is None:
             logger.info("completed sets checking: " + str(studyset.completed_sets(db, user)))
             return schemas.SetType.test
 
-        if last_test_set.create_date == datetime.now.date():
+        # Make current_time offset-aware using the same timezone
+        current_time = datetime.now(timezone('UTC'))
+        time_difference = current_time - last_test_set.create_date
+        logger.info(f"Time difference between tests: {time_difference}")
+        
+        if time_difference <= timedelta(hours=24):
             if last_test_set.completed:
                 return schemas.SetType.normal
             else:
@@ -367,8 +377,10 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         else:
             # Currently, we don't have easy ways to distinguish between learning/review/relearning stages in logs. Instead, we do post test by # sets with current test set
             if self.get_deck_studyset_count(db, user=user, deck=test_deck) >= settings.POST_TEST_TRIGGER:
+                logger.info("GETTING TO POST TEST")
                 return schemas.SetType.post_test
             else:
+                logger.info("GETTING TO TEST")
                 return schemas.SetType.test
 
 studyset = CRUDStudySet(models.StudySet)
