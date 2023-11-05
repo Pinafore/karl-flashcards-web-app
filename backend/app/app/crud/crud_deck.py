@@ -1,4 +1,4 @@
-from typing import List, Optional, Set, Union, Dict, Any
+from typing import List, Optional, Set, Union, Dict, Any, Tuple
 
 from app.core.config import settings
 from app.crud.base import CRUDBase
@@ -70,20 +70,27 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
         return query.all()
 
     def get_current_user_test_deck_id(self, db: Session, user: User) -> Optional[int]:
-        deck = self.get_current_user_test_deck(db=db, user=user)
+        deck, _ = self.get_current_user_test_deck(db=db, user=user)
         return deck.id if deck else None
 
-    def get_current_user_test_deck(self, db: Session, user: User) -> Optional[Deck]:
-        test_user_deck = db.query(models.User_Deck) \
+    def get_current_user_test_deck(self, db: Session, user: User) -> Optional[Tuple[Deck, int]]:
+        test_user_decks = db.query(models.User_Deck) \
             .options(joinedload(models.User_Deck.deck)) \
             .filter(models.User_Deck.user == user) \
                 .filter(models.User_Deck.deck.has(deck_type=DeckType.hidden)) \
                     .order_by(
-                        models.User_Deck.deck_id.asc()).first()
-        if test_user_deck:
-            return test_user_deck.deck
-        else:
+                        models.User_Deck.deck_id.asc()).all()
+        
+        if not test_user_decks:
             return None
+
+        for test_deck in test_user_decks:
+            num_test_sets_completed = crud.studyset.get_deck_studyset_count(db, user=user, deck=test_deck.deck)
+            # if the user has not studied the deck at least 6 times (5 test mode sessions + 1 post-test), this is the active deck
+            if num_test_sets_completed < settings.POST_TEST_TRIGGER + 1:
+                break
+            print("\n\nSKIPPING TEST DECK:", test_deck.deck.id, " WITH", num_test_sets_completed, "STUDIES\n\n")
+        return test_deck.deck, num_test_sets_completed
 
     def get_all_test_decks(self, db: Session) -> List[Deck]:
         return db.query(self.model).filter(self.model.deck_type == DeckType.hidden).order_by(self.model.id.asc()).all()

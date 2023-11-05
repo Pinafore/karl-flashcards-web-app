@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     TEST_MODE_TRIGGER_SESSIONS: int = 7
     TEST_MODE_PER_ROUND: int = 10
     TEST_MODE_TRIGGER_FACTS: int = 100
+    TEST_MODE_NUM_HOURS: int = 16
     POST_TEST_TRIGGER: int = 5
     DEFAULT_DECK_ID: int = 1
     TEST_MODE_FILE: str = "./data/test_mode_grouped.json"
