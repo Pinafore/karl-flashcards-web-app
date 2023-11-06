@@ -1,3 +1,4 @@
+from random import shuffle
 from typing import List, Optional, Union, Any, Tuple
 import time
 import math
@@ -142,9 +143,10 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
     def create_post_test_study_set(self, db: Session, *, user: models.User, test_deck: models.Deck) -> models.StudySet:
         study_set = self.create_with_facts(db, obj_in=schemas.StudySetCreate(repetition_model=user.repetition_model, user_id=user.id, set_type=schemas.SetType.post_test),
                                         decks=[test_deck],
-                                        facts=test_deck.facts)
+                                        facts=shuffle(test_deck.facts))
         details = {
                 "post_test": True,
+                "set_type": schemas.SetType.post_test
             }
         history_in = schemas.HistoryCreate(
             time=datetime.now(timezone('UTC')).isoformat(),
@@ -231,12 +233,13 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                 "reviewfacts": [schemas.Fact.from_orm(fact) for fact in old_facts],
                 "debug_id": debug_id,
                 "recall_target": user.recall_target,
+                "set_type": schemas.SetType.post_test
             }
             details.update(time_container.elapsed_times)
             history_in = schemas.HistoryCreate(
                 time=datetime.now(timezone('UTC')).isoformat(),
                 user_id=user.id,
-                log_type=schemas.Log.get_facts, # Update to dynamically get schemas.Log.get_test_facts
+                log_type=schemas.Log.get_test_facts if setType == schemas.SetType.test else schemas.Log.get_facts, # Update to dynamically get schemas.Log.get_test_facts
                 details=details,
             )
             crud.history.create(db=db, obj_in=history_in)
@@ -252,10 +255,14 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             capture_exception(e)
             raise HTTPException(status_code=556, detail="Scheduler malfunction")
     
-    def find_last_test_set(self, db: Session, user: models.User) -> Optional[models.StudySet]:
+    def find_last_test_or_post_test_set(self, db: Session, user: models.User) -> Optional[models.StudySet]:
         # Don't show 'retired' test set cards, which come from deleted test mode decks.
-        studyset: models.StudySet = db.query(models.StudySet).filter(models.StudySet.user_id == user.id).filter(models.StudySet.is_test == true()).filter(or_(models.StudySet.retired == None, models.StudySet.retired == false())).order_by(
-            models.StudySet.id.desc()).first()
+        studyset: models.StudySet = (db.query(models.StudySet)
+                                     .filter(models.StudySet.user_id == user.id)
+                                     .filter(or_(models.StudySet.is_test == true(), models.StudySet.is_post_test == true()))
+                                     .filter(or_(models.StudySet.retired == None,
+                                                  models.StudySet.retired == false()))
+                                                  .order_by(models.StudySet.id.desc()).first())
         return studyset
     
     def completed_sets(self, db: Session, user: models.User) -> Optional[int]:
@@ -286,6 +293,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             db.commit()
 
         # Mark study set as completed if it is, and mark user deck completed if study set is a post-test
+        # TODO: CHECK if this actually deprecated now?
         studyset_completed = studyset.completed
         if studyset.set_type == schemas.SetType.post_test and studyset.completed:
             crud.deck.mark_user_deck_completed(db=db, db_obj=studyset.decks[0], user=user)
@@ -360,7 +368,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             self, db: Session, *, user: models.User, test_deck: models.Deck, num_test_deck_studies: int
     ) -> bool:
         logger.info("Checking in Test Mode")
-        last_test_set = studyset.find_last_test_set(db, user)
+        last_test_set = studyset.find_last_test_or_post_test_set(db, user)
         if last_test_set:
             logger.info("Last test Study set: " + str(last_test_set.id))
         else:
@@ -382,9 +390,8 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                 raise HTTPException(status_code=568, detail="Last test incomplete but not picked")
         else:
             # Currently, we don't have easy ways to distinguish between learning/review/relearning stages in logs. Instead, we do post test by # sets with current test set
-            test_set_count = num_test_deck_studies
-            print('\n\nTEST SET COUNT:', test_set_count, '\n\n')
-            if test_set_count >= settings.POST_TEST_TRIGGER:
+            print('\n\nTEST SET COUNT:', num_test_deck_studies, '\n\n')
+            if num_test_deck_studies >= settings.POST_TEST_TRIGGER:
                 logger.info("GETTING TO POST TEST")
                 return schemas.SetType.post_test
             else:

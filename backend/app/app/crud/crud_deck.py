@@ -7,7 +7,7 @@ from app.models import User, Deck
 from app.models.user_deck import User_Deck
 from app.schemas import Permission, DeckType, Repetition, SetType
 from app.schemas.deck import DeckCreate, DeckUpdate, SuperDeckCreate, SuperDeckUpdate
-from sqlalchemy import not_
+from sqlalchemy import func, not_, or_
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import true
 from fastapi import HTTPException
@@ -74,23 +74,36 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
         return deck.id if deck else None
 
     def get_current_user_test_deck(self, db: Session, user: User) -> Optional[Tuple[Deck, int]]:
-        test_user_decks = db.query(models.User_Deck) \
-            .options(joinedload(models.User_Deck.deck)) \
-            .filter(models.User_Deck.user == user) \
-                .filter(models.User_Deck.deck.has(deck_type=DeckType.hidden)) \
-                    .order_by(
-                        models.User_Deck.deck_id.asc()).all()
-        
-        if not test_user_decks:
-            return None
+        # Subquery to count the number of Session_Deck entries per User_Deck
+        subquery = (
+            db.query(
+                models.Session_Deck.deck_id,
+                func.count().label('num_test_sets_completed')
+            )
+            .join(models.Session_Deck.studyset)
+            .filter(models.StudySet.user_id == user.id)
+            .group_by(models.Session_Deck.deck_id)
+            .subquery()
+        )
 
-        for test_deck in test_user_decks:
-            num_test_sets_completed = crud.studyset.get_deck_studyset_count(db, user=user, deck=test_deck.deck)
-            # if the user has not studied the deck at least 6 times (5 test mode sessions + 1 post-test), this is the active deck
-            if num_test_sets_completed < settings.POST_TEST_TRIGGER + 1:
-                break
-            print("\n\nSKIPPING TEST DECK:", test_deck.deck.id, " WITH", num_test_sets_completed, "STUDIES\n\n")
-        return test_deck.deck, num_test_sets_completed
+        # Main query to get the Deck along with the coalesced count of completed test sets
+        test_deck = (
+            db.query(
+                models.Deck,
+                func.coalesce(subquery.c.num_test_sets_completed, 0).label('num_test_sets_completed')
+            )
+            .join(models.User_Deck)  # Join User_Deck to filter by user and deck relationship
+            .outerjoin(subquery, models.User_Deck.deck_id == subquery.c.deck_id)
+            .filter(models.User_Deck.owner_id == user.id,
+                    models.Deck.deck_type == DeckType.hidden,
+                    or_(subquery.c.num_test_sets_completed == None,
+                        subquery.c.num_test_sets_completed < settings.POST_TEST_TRIGGER + 1))
+            .order_by(models.User_Deck.deck_id.asc())
+            .first()
+        )
+
+        # Directly return the result of the query
+        return test_deck
 
     def get_all_test_decks(self, db: Session) -> List[Deck]:
         return db.query(self.model).filter(self.model.deck_type == DeckType.hidden).order_by(self.model.id.asc()).all()
