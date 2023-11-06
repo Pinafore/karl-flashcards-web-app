@@ -75,6 +75,7 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
 
     def get_current_user_test_deck(self, db: Session, user: User) -> Optional[Tuple[Deck, int]]:
         # Subquery to count the number of Session_Deck entries per User_Deck
+        # Possibly, we can just check for the presence of a post test deck?
         subquery = (
             db.query(
                 models.Session_Deck.deck_id,
