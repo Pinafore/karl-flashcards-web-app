@@ -96,6 +96,8 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         if active_set:
             return active_set
 
+        #settings.POST_TEST_TRIGGER = 1
+
         # Determine study state
         test_deck, num_test_deck_studies = crud.deck.get_current_user_test_deck(db=db, user=user)
         if test_deck is None:
@@ -117,6 +119,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                                                    send_limit=send_limit)
         else:
             raise HTTPException(status_code=672, detail=f"Unknown study set type: {next_set_type}")
+    
         return db_obj
 
     def create_scheduler_query(self, facts: List[models.Fact], user: models.User, 
@@ -141,9 +144,11 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         return study_set
     
     def create_post_test_study_set(self, db: Session, *, user: models.User, test_deck: models.Deck) -> models.StudySet:
+        facts = test_deck.facts
+        shuffle(facts) # I still don't think we should shuffle
         study_set = self.create_with_facts(db, obj_in=schemas.StudySetCreate(repetition_model=user.repetition_model, user_id=user.id, set_type=schemas.SetType.post_test),
                                         decks=[test_deck],
-                                        facts=shuffle(test_deck.facts))
+                                        facts=facts)
         details = {
                 "post_test": True,
                 "set_type": schemas.SetType.post_test
@@ -383,6 +388,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         time_difference = current_time - last_test_set.create_date
         logger.info(f"Time difference between tests: {time_difference}")
         
+        #if time_difference <= timedelta(seconds=1):
         if time_difference <= timedelta(hours=settings.TEST_MODE_NUM_HOURS):
             if last_test_set.completed:
                 return schemas.SetType.normal

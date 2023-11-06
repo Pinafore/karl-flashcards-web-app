@@ -126,4 +126,4 @@ class StudySet(Base):
     
     @hybrid_property
     def expiry_date(self) -> datetime:
-        return None if self.is_post_test and self.create_date + timedelta(hours=settings.STUDY_SET_EXPIRATION_HOURS)
+        return None if self.is_post_test else self.create_date + timedelta(hours=settings.STUDY_SET_EXPIRATION_HOURS)
