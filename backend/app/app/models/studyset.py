@@ -122,8 +122,8 @@ class StudySet(Base):
 
     @hybrid_property
     def expired(self) -> bool:
-        return datetime.now(timezone('UTC')) > self.expiry_date
+        return not self.is_post_test and datetime.now(timezone('UTC')) > self.expiry_date
     
     @hybrid_property
     def expiry_date(self) -> datetime:
-        return self.create_date + timedelta(hours=settings.STUDY_SET_EXPIRATION_HOURS)
+        return None if self.is_post_test else self.create_date + timedelta(hours=settings.STUDY_SET_EXPIRATION_HOURS)
