@@ -143,7 +143,6 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
     
     def create_post_test_study_set(self, db: Session, *, user: models.User, test_deck: models.Deck) -> models.StudySet:
         facts = test_deck.facts
-        shuffle(facts) # I still don't think we should shuffle
         study_set = self.create_with_facts(db, obj_in=schemas.StudySetCreate(repetition_model=user.repetition_model, user_id=user.id, set_type=schemas.SetType.post_test),
                                         decks=[test_deck],
                                         facts=facts)
