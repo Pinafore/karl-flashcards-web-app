@@ -103,6 +103,9 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
             .first()
         )
 
+        if test_deck == None:
+            return None, settings.POST_TEST_TRIGGER + 1
+
         # Directly return the result of the query
         return test_deck
 

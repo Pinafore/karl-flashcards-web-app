@@ -96,16 +96,14 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         if active_set:
             return active_set
 
-        #settings.POST_TEST_TRIGGER = 1
-
         # Determine study state
         test_deck, num_test_deck_studies = crud.deck.get_current_user_test_deck(db=db, user=user)
-        if test_deck is None:
-            raise HTTPException(status_code=576, detail="TEST ID WAS NONE?")
-        elif num_test_deck_studies > settings.POST_TEST_TRIGGER + 1:
+        if num_test_deck_studies > settings.POST_TEST_TRIGGER + 1:
             raise HTTPException(status_code=576, detail="USER STUDIED MORE TEST DECKS THAN THEY SHOULD HAVE")
         elif num_test_deck_studies == settings.POST_TEST_TRIGGER + 1: # all done with test mode, resume normal study
             next_set_type = schemas.SetType.normal
+        elif test_deck is None:
+            raise HTTPException(status_code=576, detail="TEST ID WAS NONE?")
         else:
             next_set_type = self.check_next_set_type(db, user=user, test_deck=test_deck, num_test_deck_studies=num_test_deck_studies)
         logger.info(f"Test set: {next_set_type}")
