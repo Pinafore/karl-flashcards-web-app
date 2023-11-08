@@ -1,7 +1,7 @@
 <template>
   <div>
     <Onboard></Onboard>
-    <test-popup></test-popup>
+    <test-popup :shouldShow="true"></test-popup>
     <RecallPopup></RecallPopup>
     <v-toolbar style="position: sticky; top: 0; z-index: 10;">
       <v-toolbar-title>
@@ -102,7 +102,7 @@
       const selectedIds = this.selected.map((a) => String(a.id));
       studyStore.setForceNew(true);
       this.$router.push({
-        path: "/main/study/learn",
+        path: "/main/study/learn?quick=false",
         query: { deck: selectedIds, num: String(this.selectedNum) },
       });
     }
@@ -110,7 +110,7 @@
     public openDeck(deck) {
       studyStore.setForceNew(true);
       this.$router.push({
-        path: "/main/study/learn",
+        path: "/main/study/learn?quick=false",
         query: { deck: String(deck.id), num: String(this.selectedNum) },
       });
     }
@@ -118,7 +118,7 @@
     public openAll() {
       studyStore.setForceNew(true);
       this.$router.push({
-        path: "/main/study/learn",
+        path: "/main/study/learn?quick=false",
       });
     }
 

@@ -126,9 +126,7 @@ export const api = {
     token: string,
   ) {
     const url = `${apiUrl}/api/study/test_mode`;
-    const res = axios.get<boolean>(url, authHeaders(token));
-    console.log(res);
-    return res; 
+    return axios.get<boolean>(url, authHeaders(token)); 
   },
   async createFact(token: string, data: IComponents["FactCreate"]) {
     return axios.post(`${apiUrl}/api/facts/`, data, authHeaders(token));
