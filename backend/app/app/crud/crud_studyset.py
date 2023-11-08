@@ -78,6 +78,29 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             return studyset
         else:
             return None
+        
+    def check_if_in_test_mode(self,
+                      db: Session,
+                      *,
+                      user: models.User,
+                      ) -> Union[
+        bool, requests.exceptions.RequestException, json.decoder.JSONDecodeError]:
+
+        # Determine study state
+        test_deck, num_test_deck_studies = crud.deck.get_current_user_test_deck(db=db, user=user)
+        if num_test_deck_studies > settings.POST_TEST_TRIGGER + 1:
+            raise HTTPException(status_code=576, detail="USER STUDIED MORE TEST DECKS THAN THEY SHOULD HAVE")
+        elif num_test_deck_studies == settings.POST_TEST_TRIGGER + 1: # all done with test mode, resume normal study
+            next_set_type = schemas.SetType.normal
+        elif test_deck is None:
+            raise HTTPException(status_code=576, detail="TEST ID WAS NONE?")
+        else:
+            next_set_type = self.check_next_set_type(db, user=user, test_deck=test_deck, num_test_deck_studies=num_test_deck_studies)
+        logger.info(f"Test set: {next_set_type}")
+
+        print(f"\n\nTest set: {next_set_type}\n\n")
+
+        return next_set_type in {schemas.SetType.test, schemas.SetType.post_test}
 
     def get_study_set(self,
                       db: Session,
@@ -91,10 +114,6 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         models.StudySet, requests.exceptions.RequestException, json.decoder.JSONDecodeError]:
         crud.deck.check_for_test_deck_ids(db=db, deck_ids=deck_ids)
         decks = crud.deck.get_user_decks_given_ids(db=db, user=user, deck_ids=deck_ids)
-        
-        active_set = self.retire_or_return_active_set(db, user=user, force_new=force_new)
-        if active_set:
-            return active_set
 
         # Determine study state
         test_deck, num_test_deck_studies = crud.deck.get_current_user_test_deck(db=db, user=user)
@@ -113,6 +132,9 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         elif next_set_type == schemas.SetType.post_test:
             db_obj = self.create_post_test_study_set(db, user=user, test_deck=test_deck)
         elif next_set_type == schemas.SetType.normal:
+            active_set = self.retire_or_return_active_set(db, user=user, force_new=force_new)
+            if active_set:
+                return active_set
             db_obj = self.create_new_study_set(db, user=user, decks=decks, deck_ids=deck_ids, return_limit=return_limit,
                                                    send_limit=send_limit)
         else:
@@ -385,8 +407,8 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         time_difference = current_time - last_test_set.create_date
         logger.info(f"Time difference between tests: {time_difference}")
         
-        #if time_difference <= timedelta(seconds=1):
-        if time_difference <= timedelta(hours=settings.TEST_MODE_NUM_HOURS):
+        if time_difference <= timedelta(seconds=30):
+        #if time_difference <= timedelta(hours=settings.TEST_MODE_NUM_HOURS):
             if last_test_set.completed:
                 return schemas.SetType.normal
             else:

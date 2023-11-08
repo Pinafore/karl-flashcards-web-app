@@ -1,6 +1,7 @@
 <template>
   <div>
     <Onboard></Onboard>
+    <test-popup></test-popup>
     <RecallPopup></RecallPopup>
     <v-toolbar style="position: sticky; top: 0; z-index: 10;">
       <v-toolbar-title>
@@ -56,10 +57,11 @@
   import { mainStore, studyStore } from "@/utils/store-accessor";
   import { IComponents } from "@/interfaces";
   import Onboard from "@/views/Onboard.vue";
+  import TestPopup from "@/views/main/TestPopup.vue";
   import RecallPopup from "@/views/main/RecallPopup.vue";
 
   @Component({
-    components: { RecallPopup, Onboard },
+    components: {TestPopup, RecallPopup, Onboard },
   })
   export default class Decks extends Vue {
     public headers = [
@@ -75,8 +77,11 @@
     selectedNum = 20;
 
     async mounted() {
-      studyStore.setInTestMode(false);
+      studyStore.setStudySet(null);
       await mainStore.getUserProfile();
+      mainStore.setConnectionError(false);
+      mainStore.setSchedulerError(false);
+      await studyStore.checkIfInTestMode();
     }
 
     get decks() {

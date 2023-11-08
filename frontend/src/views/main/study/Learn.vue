@@ -2,7 +2,6 @@
   <v-container fluid style="max-width:1250px">
     <onboard></onboard>
     <connection-popup></connection-popup>
-    <test-popup></test-popup>
     <RecallPopup></RecallPopup>
     <study-set></study-set>
     <v-card class="mx-3 my-1 py-1 px-0 px-sm-3">

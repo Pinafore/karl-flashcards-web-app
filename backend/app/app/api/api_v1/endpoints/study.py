@@ -11,6 +11,29 @@ from sqlalchemy.orm import Session
 from app.utils.utils import logger
 router = APIRouter()
 
+@router.get("/test_mode", response_model=bool)
+def check_if_in_test_mode(
+        db: Session = Depends(deps.get_db),
+        user_id: Optional[int] = None,
+        current_user: models.User = Depends(deps.get_current_active_user),
+) -> Any:
+    """
+    Get next set of facts for review using user's schedule.
+    Allows superusers to view anyone's future schedule.
+    A user's deck ids can be provided for filtering.
+    """
+    
+    if user_id:
+        user = crud.user.get(db=db, id=user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        if not (crud.user.is_superuser(current_user) or user_id == current_user.id):
+            raise HTTPException(status_code=400, detail="This user does not have the necessary permissions")
+    else:
+        user = current_user
+    in_test_mode = crud.studyset.check_if_in_test_mode(db, user=user)
+    print("\n\nChecking In Test Mode!", in_test_mode,"\n\n")
+    return in_test_mode
 
 @router.get("/", response_model=schemas.StudySet)
 def get_next_set(
