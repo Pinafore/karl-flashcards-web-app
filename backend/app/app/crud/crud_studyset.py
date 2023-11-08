@@ -115,6 +115,8 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         crud.deck.check_for_test_deck_ids(db=db, deck_ids=deck_ids)
         decks = crud.deck.get_user_decks_given_ids(db=db, user=user, deck_ids=deck_ids)
 
+        active_set = self.retire_or_return_active_set(db, user=user, force_new=force_new)
+
         # Determine study state
         test_deck, num_test_deck_studies = crud.deck.get_current_user_test_deck(db=db, user=user)
         if num_test_deck_studies > settings.POST_TEST_TRIGGER + 1:
@@ -128,15 +130,19 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         logger.info(f"Test set: {next_set_type}")
 
         if next_set_type == schemas.SetType.test:
+            if active_set and active_set.set_type == schemas.SetType.test:
+                return active_set
             db_obj = self.create_new_test_study_set(db, user=user, test_deck=test_deck)
         elif next_set_type == schemas.SetType.post_test:
+            if active_set and active_set.set_type == schemas.SetType.post_test:
+                return active_set
             db_obj = self.create_post_test_study_set(db, user=user, test_deck=test_deck)
         elif next_set_type == schemas.SetType.normal:
-            active_set = self.retire_or_return_active_set(db, user=user, force_new=force_new)
             if active_set:
                 return active_set
             db_obj = self.create_new_study_set(db, user=user, decks=decks, deck_ids=deck_ids, return_limit=return_limit,
                                                    send_limit=send_limit)
+            
         else:
             raise HTTPException(status_code=672, detail=f"Unknown study set type: {next_set_type}")
     
@@ -412,7 +418,8 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             if last_test_set.completed:
                 return schemas.SetType.normal
             else:
-                raise HTTPException(status_code=568, detail="Last test incomplete but not picked")
+                return last_test_set.set_type
+                #raise HTTPException(status_code=568, detail="Last test incomplete but not picked")
         else:
             # Currently, we don't have easy ways to distinguish between learning/review/relearning stages in logs. Instead, we do post test by # sets with current test set
             print('\n\nTEST SET COUNT:', num_test_deck_studies, '\n\n')
