@@ -158,18 +158,27 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
     
         return db_obj
 
-    def create_scheduler_query(self, facts: List[models.Fact], user: models.User, 
-            test_mode: Optional[int] = None):
 
+    def create_scheduler_query(self, db: Session, facts: List[models.Fact], user: models.User,
+            test_mode: Optional[int] = None):
         # TODO: Remove recall_target when confirmed possible!
         scheduler_query = schemas.SchedulerQuery(facts=[schemas.KarlFactV2.from_orm(fact) for fact in facts],
-                                                 env=settings.ENVIRONMENT, repetition_model=user.repetition_model,
+                                                 env=settings.ENVIRONMENT,
+                                                 repetition_model=user.repetition_model if test_mode == None else self.get_overriden_scheduler(db, user, test_mode),
                                                  user_id=user.id,
                                                  recall_target=TargetWindow(target_window_lowest=0, 
                                                  target_window_highest=1, target=.85),
                                                  test_mode=test_mode)
         return scheduler_query
     
+    def get_overriden_scheduler(self, db: Session, user: models.User, test_deck_id: int):
+        # return the overriden scheduler for the user, if in test mode
+        query = (db.query(models.User_Deck)
+                                        .filter(models.User_Deck.owner_id == user.id)
+                                        .filter(models.User_Deck.deck_id == test_deck_id))
+        user_deck: models.User_Deck = query.first()
+        return user_deck.repetition_model_override
+
     def create_new_test_study_set(self, db: Session, *, user: models.User, return_limit: int = settings.TEST_MODE_PER_ROUND, test_deck: models.Deck) -> models.StudySet:
         # Get facts that have not been studied before
         test_deck_id = test_deck.id
@@ -231,9 +240,9 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             # TODO: ADD Post test
             if setType == schemas.SetType.test:
                 test_deck_id = deck_ids[0]
-                schedule_query = self.create_scheduler_query(facts=eligible_facts, user=user, test_mode=test_deck_id)
+                schedule_query = self.create_scheduler_query(db=db, facts=eligible_facts, user=user, test_mode=test_deck_id)
             else:
-                schedule_query = self.create_scheduler_query(facts=eligible_facts, user=user)
+                schedule_query = self.create_scheduler_query(db=db, facts=eligible_facts, user=user)
         try:
             logger.info(schedule_query.dict())
             with log_time(description="Scheduler querying", container=time_container, label="scheduler_query_time"):
