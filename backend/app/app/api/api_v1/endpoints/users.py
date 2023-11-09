@@ -159,7 +159,7 @@ def reassign_scheduler_me(
         *,
         db: Session = Depends(deps.get_db),
         repetition_model: Optional[schemas.Repetition],
-        current_user: models.User = Depends(deps.get_current_active_user),
+        current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """
     Reassign current user to assigned scheduler or create random new assignment
