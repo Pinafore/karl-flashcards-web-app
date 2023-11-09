@@ -1,3 +1,4 @@
+from random import choice
 from typing import List, Optional, Set, Union, Dict, Any, Tuple
 
 from app.core.config import settings
@@ -39,7 +40,7 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
     ) -> Deck:
         # db_obj.user_decks.append(User_Deck(db_obj, user, Permission.viewer))
         if db_obj.deck_type == DeckType.hidden:
-            user_deck = User_Deck(db_obj, user, Permission.viewer, repetition_model_override=Repetition.select_model())
+            user_deck = User_Deck(db_obj, user, Permission.viewer, repetition_model_override=self.select_repetition_given_counts(db, user=user))
         else:
             user_deck = User_Deck(db_obj, user, Permission.viewer)
         
@@ -47,6 +48,34 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
         db.commit()
         db.refresh(db_obj)
         return db_obj
+    
+    def select_repetition_given_counts(self, db: Session, *, user: User) -> Repetition:
+        # Query the count of each repetition model for the user
+        counts = (
+            db.query(
+                User_Deck.repetition_model_override,
+                func.count(User_Deck.repetition_model_override).label('model_count')
+            )
+            .join(Deck, Deck.id == User_Deck.deck_id)
+            .filter(Deck.deck_type == DeckType.hidden, User_Deck.owner_id == user.id)
+            .group_by(User_Deck.repetition_model_override)
+            .all()
+        )
+
+        # Convert counts to a dictionary
+        model_counts = {model: count for model, count in counts}
+        logger.info(str(model_counts))
+        # If a model has not been used yet, set its count to 0
+        for model in [Repetition.fsrs, Repetition.karl, Repetition.karlAblation]:
+            model_counts.setdefault(model, 0)
+
+        # Find the model(s) with the minimum count
+        min_count_models = [model for model, count in model_counts.items() if count == min(model_counts.values())]
+
+        # Randomly select one of the least selected models
+        selected_model = choice(min_count_models)
+
+        return selected_model
 
     def get_multi_by_owner(
             self, db: Session, *, user: User, skip: Optional[int] = None, limit: Optional[int] = None
