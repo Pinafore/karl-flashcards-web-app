@@ -7,7 +7,7 @@
         </v-card-title>
         <v-card-text v-if="this.$router.currentRoute.name === 'public-decks'">
           KAR³L has decks of pre-made facts. Choose the decks you're interested in and
-          click "Add Decks" to continue
+          click "Add Decks" to continue!
         </v-card-text>
         <v-card-text v-if="this.$router.currentRoute.name === 'decks'">
           In the create study set screen, you can select a specific deck or multiple
@@ -73,13 +73,16 @@
           </v-card-text>
         </div>
 
-        <v-card-text class="pb-0">
+        <!-- <v-card-text class="pb-0">
           <a @click="noMoreHelp"
             >Familiar with KAR³L? Click here to stop showing tips.</a
           >
-        </v-card-text>
+        </v-card-text> -->
         <v-card-actions class="pt-0">
           <v-spacer></v-spacer>
+          <v-btn ref="begin" color="primary" text @click="noMoreHelp">
+            Stop Showing Tips
+          </v-btn>
           <v-btn ref="begin" color="primary" text @click="hideTip">
             Got it!
           </v-btn>
@@ -124,7 +127,7 @@
 
     getUpdate() {
       if (this.$router.currentRoute.name === "decks") {
-        mainStore.setOnboarding(this.show_help && !(this.recallPopup));
+        mainStore.setOnboarding(this.show_help && !this.recallPopup);
       } else {
         mainStore.setOnboarding(this.show_help);
       }
