@@ -32,7 +32,6 @@ def check_if_in_test_mode(
     else:
         user = current_user
     in_test_mode = crud.studyset.check_if_in_test_mode(db, user=user)
-    print("\n\nChecking In Test Mode!", in_test_mode,"\n\n")
     return in_test_mode
 
 @router.get("/", response_model=schemas.StudySet)

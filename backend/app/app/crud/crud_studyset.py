@@ -88,6 +88,12 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
 
         # Determine study state
         test_deck, num_test_deck_studies = crud.deck.get_current_user_test_deck(db=db, user=user)
+
+        active_set = self.retire_or_return_active_set(db, user=user, force_new=False)
+        # Adjust count when current set has not been completed
+        if active_set and active_set.set_type in {schemas.SetType.test, schemas.SetType.post_test}:
+            num_test_deck_studies -= 1
+
         if num_test_deck_studies > settings.POST_TEST_TRIGGER + 1:
             raise HTTPException(status_code=576, detail="USER STUDIED MORE TEST DECKS THAN THEY SHOULD HAVE")
         elif num_test_deck_studies == settings.POST_TEST_TRIGGER + 1: # all done with test mode, resume normal study
@@ -115,10 +121,14 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         crud.deck.check_for_test_deck_ids(db=db, deck_ids=deck_ids)
         decks = crud.deck.get_user_decks_given_ids(db=db, user=user, deck_ids=deck_ids)
 
-        active_set = self.retire_or_return_active_set(db, user=user, force_new=force_new)
-
         # Determine study state
         test_deck, num_test_deck_studies = crud.deck.get_current_user_test_deck(db=db, user=user)
+
+        active_set = self.retire_or_return_active_set(db, user=user, force_new=force_new)
+        # Adjust count when current set has not been completed
+        if active_set and active_set.set_type in {schemas.SetType.test, schemas.SetType.post_test}:
+            num_test_deck_studies -= 1
+
         if num_test_deck_studies > settings.POST_TEST_TRIGGER + 1:
             raise HTTPException(status_code=576, detail="USER STUDIED MORE TEST DECKS THAN THEY SHOULD HAVE")
         elif num_test_deck_studies == settings.POST_TEST_TRIGGER + 1: # all done with test mode, resume normal study
