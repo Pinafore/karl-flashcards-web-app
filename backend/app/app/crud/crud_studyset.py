@@ -432,8 +432,8 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         time_difference = current_time - last_test_set.create_date
         logger.info(f"Time difference between tests: {time_difference}")
         
-        if time_difference <= timedelta(seconds=30):
-        #if time_difference <= timedelta(hours=settings.TEST_MODE_NUM_HOURS):
+        # if time_difference <= timedelta(seconds=30):
+        if time_difference <= timedelta(hours=settings.TEST_MODE_NUM_HOURS):
             if last_test_set.completed:
                 return schemas.SetType.normal
             else:
