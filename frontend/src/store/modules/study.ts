@@ -264,6 +264,26 @@ export default class StudyModule extends VuexModule {
   }
 
   @Action
+  async checkIfInTestMode() {
+    this.setStudySet(null);
+    this.clearTimer();
+    try {
+      const response = await api.checkIfInTestMode(
+        mainStore.token,
+      );
+      this.setInTestMode(response.data);
+      this.setForceNew(false);
+      mainStore.setConnectionError(false);
+      mainStore.setSchedulerError(false);
+      await mainStore.getUserProfile();
+    } catch (error) {
+      console.log(error);
+      await mainStore.checkApiError(error);
+      this.setShowError();
+    }
+  }
+
+  @Action
   async getStudyFacts() {
     this.setStudySet(null);
     this.clearTimer();

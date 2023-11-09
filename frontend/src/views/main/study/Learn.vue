@@ -2,7 +2,7 @@
   <v-container fluid style="max-width:1250px">
     <onboard></onboard>
     <connection-popup></connection-popup>
-    <test-popup></test-popup>
+    <test-popup :shouldShow="checkQuickStudy()"></test-popup>
     <RecallPopup></RecallPopup>
     <study-set></study-set>
     <v-card class="mx-3 my-1 py-1 px-0 px-sm-3">
@@ -374,9 +374,14 @@
     editDialog = false;
     pressed = false;
     showResponseBtns = true;
+    fromQuickStudy = true;
 
     get studyset() {
       return studyStore.studyset;
+    }
+
+    get deckIds() {
+      return studyStore.deckIds;
     }
 
     get facts() {
@@ -442,6 +447,16 @@
         studyStore.startTimer();
       }
       next();
+    }
+
+    public checkQuickStudy() {
+      if (window) {
+        const currentUrl = window.location.href;
+        const url = new URL(currentUrl);
+        const urlParams = new URLSearchParams(url.search);
+        return urlParams.get("quick") === "true";
+      }
+      return false;
     }
 
     public async determine_decks(deckIds: string | (string | null)[]) {

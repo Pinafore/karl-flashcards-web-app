@@ -30,11 +30,14 @@
 </template>
 
 <script lang="ts">
-  import { Component, Vue, Watch } from "vue-property-decorator";
+  import { Component, Vue, Watch, Prop } from "vue-property-decorator";
   import { mainStore, studyStore } from "@/store";
 
   @Component
   export default class TestPopup extends Vue {
+
+    @Prop() readonly shouldShow!: boolean;
+
     $refs!: {
       begin: Vue;
     };
@@ -42,7 +45,7 @@
     // May be good to have a popup when test mode is done
 
     async mounted() {
-      mainStore.setTestModePopup(this.inTestMode);
+      mainStore.setTestModePopup(this.inTestMode && this.shouldShow);
     }
 
     get inTestMode() {
@@ -63,10 +66,12 @@
 
     @Watch("inTestMode")
     onIsTestModeChanged() {
+      if (this.shouldShow) {
       mainStore.setTestModePopup(this.inTestMode);
-      setTimeout(() => {
+        setTimeout(() => {
         (this.$refs.begin.$el as HTMLInputElement).focus();
       });
+      }
     }
 
     @Watch("onboarding")
@@ -76,7 +81,7 @@
 
     async startTesting() {
       this.$router.push({
-        path: "/main/study/learn",
+        path: "/main/study/learn?quick=false",
         query: { test: String(1) },
       });
       mainStore.setTestModePopup(false);
