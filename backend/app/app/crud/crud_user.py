@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, Tuple, Union, List
 
@@ -167,11 +168,13 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
     def reassign_schedulers(self, db: Session):
         all_users = db.query(self.model).all()
+        repetition_model_counts = defaultdict(int)
         for found_user in all_users:
             old_repetition = found_user.repetition_model
             new_repetition = Repetition.select_model()
             found_user = crud.user.update(db, db_obj=found_user,
                                           obj_in=UserUpdate(repetition_model=new_repetition))
+            repetition_model_counts[new_repetition] += 1
             change_assignment(user=found_user, repetition_model=new_repetition)
             history_in = HistoryCreate(
                 time=datetime.now(timezone('UTC')),
@@ -180,6 +183,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
                 details={"old_repetition_model": old_repetition, "new_repetition_model": found_user.repetition_model}
             )
             crud.history.create(db=db, obj_in=history_in)
+        logger.info(f"Repetition model assignment counts: {str(repetition_model_counts)}")
 
     def get_scheduler_counts(self, db: Session, is_beta: Optional[bool] = None) -> Dict[Repetition, int]:
         all_users = self.get_all_with_status(db, is_beta)

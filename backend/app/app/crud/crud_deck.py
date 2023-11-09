@@ -63,7 +63,7 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
         )
 
         # Convert counts to a dictionary
-        model_counts = {model: count for model, count in counts}
+        model_counts = {model: count for model, count in counts if model in [Repetition.fsrs, Repetition.karl]}
         logger.info(str(model_counts))
         # If a model has not been used yet, set its count to 0
         for model in [Repetition.fsrs, Repetition.karl]:
