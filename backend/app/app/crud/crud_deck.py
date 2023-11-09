@@ -66,7 +66,7 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
         model_counts = {model: count for model, count in counts}
         logger.info(str(model_counts))
         # If a model has not been used yet, set its count to 0
-        for model in [Repetition.fsrs, Repetition.karl, Repetition.karlAblation]:
+        for model in [Repetition.fsrs, Repetition.karl]:
             model_counts.setdefault(model, 0)
 
         # Find the model(s) with the minimum count

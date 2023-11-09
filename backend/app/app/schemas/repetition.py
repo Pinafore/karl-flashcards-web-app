@@ -15,4 +15,4 @@ class Repetition(str, Enum):
 
     @classmethod
     def select_model(cls):
-        return choice([Repetition.fsrs, Repetition.karl, Repetition.karlAblation])
+        return choice([Repetition.fsrs, Repetition.karl])
