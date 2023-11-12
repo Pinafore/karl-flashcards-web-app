@@ -2,7 +2,7 @@
   <v-container fluid style="max-width:1250px">
     <onboard></onboard>
     <connection-popup></connection-popup>
-    <test-popup :shouldShow="checkQuickStudy()"></test-popup>
+    <test-popup :shouldShow="shouldShowTestPopup"></test-popup>
     <RecallPopup></RecallPopup>
     <study-set></study-set>
     <v-card class="mx-3 my-1 py-1 px-0 px-sm-3">
@@ -420,6 +420,30 @@
       return this.num_facts - this.num_unstudied;
     }
 
+    get is_resume() {
+      if (window) {
+        const currentUrl = window.location.href;
+        const url = new URL(currentUrl);
+        const urlParams = new URLSearchParams(url.search);
+        return urlParams.get("resume") === "true";
+      }
+      return false;
+    }
+
+    get shouldShowTestPopup() {
+      console.log('checking!', studyStore.isContinuedSet)
+      if (studyStore.isContinuedSet) {
+        return true;
+      }
+      if (window) {
+        const currentUrl = window.location.href;
+        const url = new URL(currentUrl);
+        const urlParams = new URLSearchParams(url.search);
+        return urlParams.get("quick") === "true" || urlParams.get("resume") === "true";
+      }
+      return false;
+    }
+
     public async mounted() {
       studyStore.setStudySet(null);
       await mainStore.getUserProfile();
@@ -429,7 +453,9 @@
       await this.determine_decks(this.$router.currentRoute.query.deck);
       window.addEventListener("keydown", this.handleKeyDown);
       window.addEventListener("keyup", this.resetKeyListener);
+      studyStore.setResume(this.is_resume)
       await studyStore.getStudyFacts();
+      studyStore.setResume(false)
     }
 
     public beforeRouteEnter(to, from, next) {
@@ -447,16 +473,6 @@
         studyStore.startTimer();
       }
       next();
-    }
-
-    public checkQuickStudy() {
-      if (window) {
-        const currentUrl = window.location.href;
-        const url = new URL(currentUrl);
-        const urlParams = new URLSearchParams(url.search);
-        return urlParams.get("quick") === "true";
-      }
-      return false;
     }
 
     public async determine_decks(deckIds: string | (string | null)[]) {
