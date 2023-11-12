@@ -431,7 +431,7 @@
     }
 
     get shouldShowTestPopup() {
-      console.log('checking!', studyStore.isContinuedSet)
+      console.log("checking!", studyStore.isContinuedSet);
       if (studyStore.isContinuedSet) {
         return true;
       }
@@ -453,9 +453,9 @@
       await this.determine_decks(this.$router.currentRoute.query.deck);
       window.addEventListener("keydown", this.handleKeyDown);
       window.addEventListener("keyup", this.resetKeyListener);
-      studyStore.setResume(this.is_resume)
+      studyStore.setResume(this.is_resume);
       await studyStore.getStudyFacts();
-      studyStore.setResume(false)
+      studyStore.setResume(false);
     }
 
     public beforeRouteEnter(to, from, next) {

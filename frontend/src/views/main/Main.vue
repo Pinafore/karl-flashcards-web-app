@@ -40,7 +40,10 @@
       </v-list>
       <v-divider></v-divider>
       <v-list subheader>
-        <v-list-item v-if="recallPopup && expiration != null" to="/main/study/learn?resume=true">
+        <v-list-item
+          v-if="recallPopup && expiration != null"
+          to="/main/study/learn?resume=true"
+        >
           <v-list-item-action>
             <v-icon>mdi-lightbulb-on</v-icon>
           </v-list-item-action>
@@ -48,7 +51,10 @@
             <v-list-item-title>Resume Study</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        <v-list-item v-if="recallPopup && expiration == null" to="/main/study/learn?quick=true">
+        <v-list-item
+          v-if="recallPopup && expiration == null"
+          to="/main/study/learn?quick=true"
+        >
           <v-list-item-action>
             <v-icon>mdi-lightbulb-on</v-icon>
           </v-list-item-action>
