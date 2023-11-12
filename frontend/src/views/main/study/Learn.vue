@@ -439,7 +439,7 @@
         const currentUrl = window.location.href;
         const url = new URL(currentUrl);
         const urlParams = new URLSearchParams(url.search);
-        return urlParams.get("quick") === "true" || urlParams.get("resume") === "true";
+        return urlParams.get("show_test_mode") === "true" || urlParams.get("resume") === "true";
       }
       return false;
     }

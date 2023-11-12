@@ -53,7 +53,7 @@
         </v-list-item>
         <v-list-item
           v-if="recallPopup && expiration == null"
-          to="/main/study/learn?quick=true"
+          to="/main/study/learn?show_test_mode=true"
         >
           <v-list-item-action>
             <v-icon>mdi-lightbulb-on</v-icon>
