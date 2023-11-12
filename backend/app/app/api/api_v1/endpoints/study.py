@@ -42,6 +42,7 @@ def get_next_set(
         force_new: bool = False,
         limit: int = 5,
         current_user: models.User = Depends(deps.get_current_active_user),
+        is_resume: Optional[bool] = None
 ) -> Any:
     """
     Get next set of facts for review using user's schedule.
@@ -56,7 +57,7 @@ def get_next_set(
             raise HTTPException(status_code=400, detail="This user does not have the necessary permissions")
     else:
         user = current_user
-    study_set = crud.studyset.get_study_set(db, user=user, deck_ids=deck_ids, return_limit=limit, force_new=force_new)
+    study_set = crud.studyset.get_study_set(db, user=user, deck_ids=deck_ids, return_limit=limit, force_new=force_new, is_resume=is_resume)
     print("\n\nSTUDY SET:", study_set, study_set.facts, len(study_set.facts), '\n\n')
     if isinstance(study_set, requests.exceptions.RequestException):
         raise HTTPException(status_code=555, detail="Connection to scheduler is down")

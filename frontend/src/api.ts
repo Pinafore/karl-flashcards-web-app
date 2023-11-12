@@ -109,6 +109,7 @@ export const api = {
     deckIds: number[],
     selectedNum: number,
     forceNew: boolean,
+    isResume: boolean,
   ) {
     let url = `${apiUrl}/api/study/`;
     url += `?`;
@@ -120,6 +121,7 @@ export const api = {
     }
     url += `&limit=${selectedNum}`;
     url += `&force_new=${forceNew}`;
+    url += `&is_resume=${isResume}`;
     return axios.get<IComponents["StudySet"]>(url, authHeaders(token));
   },
   async checkIfInTestMode(

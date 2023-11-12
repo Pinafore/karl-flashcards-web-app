@@ -26,6 +26,8 @@ export default class StudyModule extends VuexModule {
   inTestMode = false;
   forceNew = false;
   selectedNum = 20;
+  isResume = false;
+  isContinuedSet = false;
 
   @Mutation
   setDeckIds(payload) {
@@ -152,6 +154,16 @@ export default class StudyModule extends VuexModule {
   @Mutation
   setStudySet(payload: IComponents["StudySet"] | null) {
     this.studyset = payload;
+  }
+
+  @Mutation
+  setResume(payload) {
+    this.isResume = payload;
+  }
+
+  @Mutation
+  setContinuedSet(payload) {
+    this.isContinuedSet = payload;
   }
 
   @Mutation
@@ -294,6 +306,7 @@ export default class StudyModule extends VuexModule {
         this.deckIds ?? [],
         this.selectedNum,
         this.forceNew,
+        this.isResume,
       );
       this.setForceNew(false);
       if (response.data.unstudied_facts.length == 0) {

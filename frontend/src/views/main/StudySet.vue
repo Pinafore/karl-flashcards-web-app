@@ -66,6 +66,11 @@
 
     async mounted() {
       this.popup = this.isFinished != "studying";
+      studyStore.setContinuedSet(false);
+    }
+
+    async destroyed() {
+      studyStore.setContinuedSet(false);
     }
 
     async getLeaderboard() {
@@ -124,12 +129,14 @@
     }
 
     continueStudy() {
+      studyStore.setContinuedSet(true);
       studyStore.getStudyFacts();
       this.popup = false;
     }
 
     goToDeck() {
       studyStore.setInTestMode(false);
+      studyStore.setContinuedSet(false);
       this.popup = false;
       this.$router.push("/main/study/decks");
     }

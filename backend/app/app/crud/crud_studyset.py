@@ -90,6 +90,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         test_deck, num_test_deck_studies = crud.deck.get_current_user_test_deck(db=db, user=user)
 
         active_set = self.retire_or_return_active_set(db, user=user, force_new=False)
+
         # Adjust count when current set has not been completed
         if active_set and active_set.set_type in {schemas.SetType.test, schemas.SetType.post_test}:
             num_test_deck_studies -= 1
@@ -116,6 +117,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                       return_limit: Optional[int] = None,
                       send_limit: Optional[int] = 300,
                       force_new: bool,
+                      is_resume: Optional[bool] = None,
                       ) -> Union[
         models.StudySet, requests.exceptions.RequestException, json.decoder.JSONDecodeError]:
         crud.deck.check_for_test_deck_ids(db=db, deck_ids=deck_ids)
@@ -125,6 +127,9 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         test_deck, num_test_deck_studies = crud.deck.get_current_user_test_deck(db=db, user=user)
 
         active_set = self.retire_or_return_active_set(db, user=user, force_new=force_new)
+        if active_set and is_resume: # finish the set the user is currently studying
+            return active_set
+
         # Adjust count when current set has not been completed
         if active_set and active_set.set_type in {schemas.SetType.test, schemas.SetType.post_test}:
             num_test_deck_studies -= 1
@@ -432,7 +437,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         time_difference = current_time - last_test_set.create_date
         logger.info(f"Time difference between tests: {time_difference}")
         
-        # if time_difference <= timedelta(seconds=30):
+        #if time_difference <= timedelta(seconds=30):
         if time_difference <= timedelta(hours=settings.TEST_MODE_NUM_HOURS):
             if last_test_set.completed:
                 return schemas.SetType.normal
