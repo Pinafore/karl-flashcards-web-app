@@ -81,7 +81,7 @@
 
     async startTesting() {
       this.$router.push({
-        path: "/main/study/learn?quick=false",
+        path: "/main/study/learn?show_test_mode=false",
         query: { test: String(1) },
       });
       mainStore.setTestModePopup(false);

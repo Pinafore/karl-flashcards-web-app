@@ -102,7 +102,7 @@
       const selectedIds = this.selected.map((a) => String(a.id));
       studyStore.setForceNew(true);
       this.$router.push({
-        path: "/main/study/learn?quick=false",
+        path: "/main/study/learn?show_test_mode=true",
         query: { deck: selectedIds, num: String(this.selectedNum) },
       });
     }
@@ -110,7 +110,7 @@
     public openDeck(deck) {
       studyStore.setForceNew(true);
       this.$router.push({
-        path: "/main/study/learn?quick=false",
+        path: "/main/study/learn?show_test_mode=true",
         query: { deck: String(deck.id), num: String(this.selectedNum) },
       });
     }
@@ -118,7 +118,7 @@
     public openAll() {
       studyStore.setForceNew(true);
       this.$router.push({
-        path: "/main/study/learn?quick=false",
+        path: "/main/study/learn?show_test_mode=true",
       });
     }
 
