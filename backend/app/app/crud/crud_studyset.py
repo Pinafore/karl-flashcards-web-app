@@ -162,12 +162,12 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         return db_obj
 
 
-    def create_scheduler_query(self, db: Session, facts: List[models.Fact], user: models.User,
+    def create_scheduler_query(self, db: Session, facts: List[models.Fact], user: models.User, repetition_model: schemas.SetType,
             test_mode: Optional[int] = None):
         # TODO: Remove recall_target when confirmed possible!
         scheduler_query = schemas.SchedulerQuery(facts=[schemas.KarlFactV2.from_orm(fact) for fact in facts],
                                                  env=settings.ENVIRONMENT,
-                                                 repetition_model=user.repetition_model if test_mode == None else self.get_overriden_scheduler(db, user, test_mode),
+                                                 repetition_model=repetition_model,
                                                  user_id=user.id,
                                                  recall_target=TargetWindow(target_window_lowest=0, 
                                                  target_window_highest=1, target=.85),
@@ -224,17 +224,27 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             setType: schemas.SetType = schemas.SetType.normal,
     ) -> Tuple[List[models.Fact], str]:
 
+        print('\n\nCreating new study set:', repetition_model, user.repetition_model)
+        print('Deck IDs:', deck_ids)
+
         show_hidden = setType == schemas.SetType.post_test or setType == schemas.SetType.test
         filters = schemas.FactSearch(deck_ids=deck_ids, limit=send_limit, studyable=True, show_hidden=show_hidden)
         base_facts_query = crud.fact.build_facts_query(db=db, user=user, filters=filters)
-        logger.info(base_facts_query)
+        #logger.info(base_facts_query)
         if repetition_model is None:
-            repetition_model = user.repetition_model
+            if show_hidden:
+                overriden_model = self.get_overriden_scheduler(db, user, deck_ids[0])
+                repetition_model = overriden_model
+            else:
+                repetition_model = user.repetition_model
+
+        print('Final repetition model:', repetition_model)
         
         if repetition_model == schemas.Repetition.karl:
             eligible_facts = crud.fact.get_eligible_facts(query=base_facts_query, limit=send_limit, randomize=True)
         else:
             eligible_old_facts_query = crud.helper.filter_only_reviewed_facts(query=base_facts_query, user_id=user.id, log_type=schemas.Log.study)
+            print('Num old facts:', setType, len(eligible_old_facts_query.all()), '\n')
             eligible_facts = crud.fact.get_eligible_facts(query=eligible_old_facts_query, limit=send_limit, randomize=True)
 
         logger.info(f"return limit {return_limit}")
@@ -243,9 +253,9 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             # TODO: ADD Post test
             if setType == schemas.SetType.test:
                 test_deck_id = deck_ids[0]
-                schedule_query = self.create_scheduler_query(db=db, facts=eligible_facts, user=user, test_mode=test_deck_id)
+                schedule_query = self.create_scheduler_query(db=db, facts=eligible_facts, user=user, repetition_model=repetition_model, test_mode=test_deck_id)
             else:
-                schedule_query = self.create_scheduler_query(db=db, facts=eligible_facts, user=user)
+                schedule_query = self.create_scheduler_query(db=db, facts=eligible_facts, user=user, repetition_model=repetition_model)
         try:
             logger.info(schedule_query.dict())
             with log_time(description="Scheduler querying", container=time_container, label="scheduler_query_time"):
@@ -266,19 +276,19 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             logger.info("debug id: " + debug_id)
 
             old_facts = facts
-            if user.repetition_model != schemas.Repetition.karl:
+            if repetition_model != schemas.Repetition.karl:
                 eligible_new_facts_query = crud.helper.filter_only_new_facts(query=base_facts_query, user_id=user.id, log_type=schemas.Log.study)
                 new_facts = crud.fact.get_eligible_facts(query=eligible_new_facts_query, limit=return_limit, randomize=True)
                 logger.info("new facts: " + str(new_facts))
                 facts = crud.helper.combine_two_fact_sets(new_facts=new_facts, old_facts=facts, return_limit=return_limit)
             logger.info(f"Study set created of type {setType}")
-            study_set_create = schemas.StudySetCreate(repetition_model=user.repetition_model, user_id=user.id, debug_id=debug_id, set_type=setType)
+            study_set_create = schemas.StudySetCreate(repetition_model=repetition_model, user_id=user.id, debug_id=debug_id, set_type=setType)
             logger.info(f"Study set create: {study_set_create}")
             study_set = self.create_with_facts(db, obj_in=study_set_create,
                                         decks=decks,
                                         facts=facts)
             details = {
-                "study_system": user.repetition_model,
+                "study_system": repetition_model,
                 "first_fact": schemas.Fact.from_orm(facts[0]) if len(facts) != 0 else "empty",
                 "facts": [schemas.Fact.from_orm(fact) for fact in facts],
                 "first_review_fact": schemas.Fact.from_orm(old_facts[0]) if len(old_facts) != 0 else "empty",
