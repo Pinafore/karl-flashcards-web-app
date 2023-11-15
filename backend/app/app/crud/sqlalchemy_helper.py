@@ -65,6 +65,7 @@ class SQLAlchemyHelpers():
         len_new_facts = len(new_facts)
         len_old_facts = len(old_facts)
         lower_lim, upper_lim = math.floor(proportion_new_facts * return_limit), math.ceil(proportion_new_facts * return_limit)
+        print('\n\nNew Facts, Old Facts, Upper Limit, Lower Limit:', len(new_facts), len(old_facts), '\n\n')
         if len_new_facts >= upper_lim and len_old_facts >= upper_lim:
             facts = new_facts[:lower_lim] + old_facts[:upper_lim]
         elif len_new_facts < upper_lim:
