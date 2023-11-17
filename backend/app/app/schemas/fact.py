@@ -62,7 +62,8 @@ class UpdateRequestV2(BaseModel):
     typed: str
     studyset_id: str
     debug_id: Optional[str] # aka schedule_request_id, n/a in test updates
-    test_mode: bool # TODO: update when scheduler supports it
+    test_mode: int
+    set_type: bool
     recommendation: bool
     fact: KarlFactV2
 

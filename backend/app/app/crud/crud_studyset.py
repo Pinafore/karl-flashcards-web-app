@@ -415,7 +415,8 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                 answer=fact.answer,
                 typed=schedule.typed,
                 debug_id=debug_id,
-                test_mode=set_type == schemas.SetType.test,
+                test_mode=fact.deck_id,
+                set_type=set_type,
                 recommendation=schedule.recommendation,
                 fact=schemas.KarlFactV2.from_orm(fact)).dict(exclude_unset=True)
             logger.info("payload update: " + str(payload_update))
