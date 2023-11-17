@@ -369,9 +369,15 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             date_studied = datetime.now(timezone('UTC')).isoformat()
             debug_id = session_fact.studyset.debug_id
             set_type = session_fact.studyset.set_type
+
+            repetition_model = user.repetition_model
+            if set_type in {schemas.SetType.test, schemas.SetType.post_test}:
+                deck_id = session_fact.fact.deck_id
+                repetition_model = self.get_overriden_scheduler(db, user, deck_id)
+
             details = {
                 "studyset_id": session_fact.studyset_id,
-                "study_system": user.repetition_model,
+                "study_system": repetition_model,
                 "typed": schedule.typed,
                 "response": schedule.response,
                 "debug_id": debug_id,
@@ -445,7 +451,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         time_difference = current_time - last_test_set.create_date
         logger.info(f"Time difference between tests: {time_difference}")
         
-        #if time_difference <= timedelta(seconds=30):
+        #if time_difference <= timedelta(seconds=5):
         if time_difference <= timedelta(hours=settings.TEST_MODE_NUM_HOURS):
             if last_test_set.completed:
                 return schemas.SetType.normal
