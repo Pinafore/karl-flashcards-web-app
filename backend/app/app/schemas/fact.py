@@ -6,6 +6,7 @@ from sqlalchemy.orm import Query
 
 from app.schemas.repetition import Repetition
 from app.schemas.deck import Deck
+from app.schemas import SetType
 # Shared properties
 from app.schemas.permission import Permission
 from app.schemas.target_window import TargetWindow
@@ -63,7 +64,7 @@ class UpdateRequestV2(BaseModel):
     studyset_id: str
     debug_id: Optional[str] # aka schedule_request_id, n/a in test updates
     test_mode: int
-    set_type: bool
+    set_type: SetType
     recommendation: bool
     fact: KarlFactV2
 
