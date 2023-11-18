@@ -162,12 +162,13 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         return db_obj
 
 
-    def create_scheduler_query(self, db: Session, facts: List[models.Fact], user: models.User, repetition_model: schemas.SetType,
+    def create_scheduler_query(self, db: Session, facts: List[models.Fact], user: models.User, repetition_model: schemas.Repetition, set_type: schemas.SetType,
             test_mode: Optional[int] = None):
         # TODO: Remove recall_target when confirmed possible!
         scheduler_query = schemas.SchedulerQuery(facts=[schemas.KarlFactV2.from_orm(fact) for fact in facts],
                                                  env=settings.ENVIRONMENT,
                                                  repetition_model=repetition_model,
+                                                 set_type=set_type,
                                                  user_id=user.id,
                                                  recall_target=TargetWindow(target_window_lowest=0, 
                                                  target_window_highest=1, target=.85),
@@ -253,9 +254,9 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             # TODO: ADD Post test
             if setType == schemas.SetType.test:
                 test_deck_id = deck_ids[0]
-                schedule_query = self.create_scheduler_query(db=db, facts=eligible_facts, user=user, repetition_model=repetition_model, test_mode=test_deck_id)
+                schedule_query = self.create_scheduler_query(db=db, facts=eligible_facts, user=user, repetition_model=repetition_model, set_type=setType, test_mode=test_deck_id)
             else:
-                schedule_query = self.create_scheduler_query(db=db, facts=eligible_facts, user=user, repetition_model=repetition_model)
+                schedule_query = self.create_scheduler_query(db=db, facts=eligible_facts, user=user, set_type=setType, repetition_model=repetition_model)
         try:
             logger.info(schedule_query.dict())
             with log_time(description="Scheduler querying", container=time_container, label="scheduler_query_time"):
