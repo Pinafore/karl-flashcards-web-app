@@ -55,7 +55,7 @@ class User(Base):
 
     @hybrid_property
     def decks(self) -> List[Deck]:
-        return [deck for deck in self.all_decks if deck.deck_type != DeckType.hidden]  # Test if should be schema
+        return [deck for deck in self.all_decks if deck.deck_type != DeckType.hidden and deck.deck_type != DeckType.deleted]  # Test if should be schema
         
     @hybrid_property
     def study_set_expiry_date(self) -> Optional[datetime]:
