@@ -49,6 +49,7 @@ class SchedulerQuery(BaseModel):
     env: str
     user_id: int
     recall_target: TargetWindow
+    set_type: SetType
 
 class UpdateRequestV2(BaseModel):
     user_id: int
