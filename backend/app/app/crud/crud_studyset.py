@@ -162,7 +162,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         return db_obj
 
 
-    def create_scheduler_query(self, db: Session, facts: List[models.Fact], user: models.User, repetition_model: schemas.Repetition, set_type: schemas.setType,
+    def create_scheduler_query(self, db: Session, facts: List[models.Fact], user: models.User, repetition_model: schemas.Repetition, set_type: schemas.SetType,
             test_mode: Optional[int] = None):
         # TODO: Remove recall_target when confirmed possible!
         scheduler_query = schemas.SchedulerQuery(facts=[schemas.KarlFactV2.from_orm(fact) for fact in facts],
