@@ -28,9 +28,11 @@
           </v-card-subtitle>
           <v-card-text>
             During the daily test mode for phase 2 research, you must type a response to
-            a question unless you do not know it. While you may override automatic
-            evaluations to correct errors, good faith attempts are required for gift
-            card eligibility. During test mode, the toolbar is unavailable.
+            a question unless you do not know it. To receive rewards, you must make a
+            good faith attempt to study the test mode flashcards. Participants who
+            rapidly flip through the flashcards without providing genuine answers will
+            not receive rewards, up to our own discretion. During test mode, the toolbar
+            is unavailable.
           </v-card-text>
           <v-card-text>
             Outside of test mode, typing answers is still recommended so KAR³L can
