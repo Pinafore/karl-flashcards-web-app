@@ -24,6 +24,21 @@
             seeing the answer, evaluate your performance with 'right' or 'wrong'.
           </v-card-text>
           <v-card-subtitle>
+            Test Mode
+          </v-card-subtitle>
+          <v-card-text>
+            During the daily test mode for phase 2 research, you must type a response to
+            a question unless you do not know it. While you may override automatic
+            evaluations to correct errors, good faith attempts are required for gift
+            card eligibility. During test mode, the toolbar is unavailable.
+          </v-card-text>
+          <v-card-text>
+            Outside of test mode, typing answers is still recommended so KAR³L can
+            automatically suggest an answer evaluation. Press 'Enter' to follow KAR³L's
+            suggestion. If you do not type or disagree with the evaluation, you may
+            manually choose 'right' and 'wrong'.
+          </v-card-text>
+          <v-card-subtitle>
             Answer Evaluation
           </v-card-subtitle>
           <v-card-text>
@@ -33,7 +48,7 @@
             'wrong'.
           </v-card-text>
           <v-card-subtitle>
-            Toolbar Actions
+            Toolbar Actions (Regular Study Only)
           </v-card-subtitle>
           <v-card-text>
             <ul>
