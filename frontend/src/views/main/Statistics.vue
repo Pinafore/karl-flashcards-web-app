@@ -1,7 +1,7 @@
 <template>
   <v-container fluid>
     <connection-popup></connection-popup>
-    <RecallPopup></RecallPopup>
+    <!-- <RecallPopup></RecallPopup> -->
     <v-card class="ma-3 mb-0 pa-3">
       <v-row no-gutters>
         <v-col>

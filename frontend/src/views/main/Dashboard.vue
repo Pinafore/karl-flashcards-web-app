@@ -1,7 +1,7 @@
 <template>
   <v-container fluid>
     <p-w-a v-if="showPWA"></p-w-a>
-    <RecallPopup></RecallPopup>
+    <!-- <RecallPopup></RecallPopup> -->
     <v-row>
       <v-col>
         <v-card class="ma-3 pa-3">

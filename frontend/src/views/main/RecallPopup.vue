@@ -70,7 +70,8 @@
     }
 
     get isRequired() {
-      return this.currentRecallTarget == -1;
+      // return this.currentRecallTarget == -1;
+      return false;
     }
 
     get currentRecallTarget() {
