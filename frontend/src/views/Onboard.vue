@@ -117,8 +117,12 @@
     }
 
     // Not mainStore.recallPopup as that can cause a race, it may not be set to true yet
-    get recallPopup() {
-      return this.currentRecallTarget == -1;
+    // get recallPopup() {
+    //   return this.currentRecallTarget == -1;
+    // }
+
+    get testModePopup() {
+      return mainStore.testModePopup;
     }
 
     get currentRecallTarget() {
@@ -127,7 +131,7 @@
 
     getUpdate() {
       if (this.$router.currentRoute.name === "decks") {
-        mainStore.setOnboarding(this.show_help && !this.recallPopup);
+        mainStore.setOnboarding(this.show_help && !this.testModePopup);
       } else {
         mainStore.setOnboarding(this.show_help);
       }

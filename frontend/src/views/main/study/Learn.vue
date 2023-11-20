@@ -3,7 +3,7 @@
     <onboard></onboard>
     <connection-popup></connection-popup>
     <test-popup :shouldShow="shouldShowTestPopup"></test-popup>
-    <RecallPopup></RecallPopup>
+    <!-- <RecallPopup></RecallPopup> -->
     <study-set></study-set>
     <v-card class="mx-3 my-1 py-1 px-0 px-sm-3">
       <v-card-title primary-title class="mx-3 my-0 pa-0">
@@ -439,7 +439,10 @@
         const currentUrl = window.location.href;
         const url = new URL(currentUrl);
         const urlParams = new URLSearchParams(url.search);
-        return urlParams.get("show_test_mode") === "true" || urlParams.get("resume") === "true";
+        return (
+          urlParams.get("show_test_mode") === "true" ||
+          urlParams.get("resume") === "true"
+        );
       }
       return false;
     }

@@ -2,7 +2,7 @@
   <div>
     <Onboard></Onboard>
     <test-popup :shouldShow="true"></test-popup>
-    <RecallPopup></RecallPopup>
+    <!-- <RecallPopup></RecallPopup> -->
     <v-toolbar style="position: sticky; top: 0; z-index: 10;">
       <v-toolbar-title>
         New Study Set
@@ -58,10 +58,10 @@
   import { IComponents } from "@/interfaces";
   import Onboard from "@/views/Onboard.vue";
   import TestPopup from "@/views/main/TestPopup.vue";
-  import RecallPopup from "@/views/main/RecallPopup.vue";
+  // import RecallPopup from "@/views/main/RecallPopup.vue";
 
   @Component({
-    components: {TestPopup, RecallPopup, Onboard },
+    components: { TestPopup, Onboard },
   })
   export default class Decks extends Vue {
     public headers = [

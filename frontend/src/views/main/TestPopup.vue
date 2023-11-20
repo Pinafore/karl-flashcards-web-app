@@ -35,7 +35,6 @@
 
   @Component
   export default class TestPopup extends Vue {
-
     @Prop() readonly shouldShow!: boolean;
 
     $refs!: {
@@ -67,17 +66,17 @@
     @Watch("inTestMode")
     onIsTestModeChanged() {
       if (this.shouldShow) {
-      mainStore.setTestModePopup(this.inTestMode);
+        mainStore.setTestModePopup(this.inTestMode);
         setTimeout(() => {
-        (this.$refs.begin.$el as HTMLInputElement).focus();
-      });
+          (this.$refs.begin.$el as HTMLInputElement).focus();
+        });
       }
     }
 
-    @Watch("onboarding")
-    onOnboardingChanged() {
-      mainStore.setTestModePopup(false);
-    }
+    // @Watch("onboarding")
+    // onOnboardingChanged() {
+    //   mainStore.setTestModePopup(false);
+    // }
 
     async startTesting() {
       this.$router.push({
