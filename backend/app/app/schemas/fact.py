@@ -64,7 +64,7 @@ class UpdateRequestV2(BaseModel):
     typed: str
     studyset_id: str
     debug_id: Optional[str] # aka schedule_request_id, n/a in test updates
-    test_mode: int
+    test_mode: Optional[int]
     set_type: SetType
     recommendation: bool
     fact: KarlFactV2
