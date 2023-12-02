@@ -5,7 +5,7 @@ DUMP_NAME=$1
 
 # If no argument is provided, use the default name
 if [ -z "$DUMP_NAME" ]; then
-    DUMP_NAME="dump_$(date +"%Y-%m-%d_%H_%M_%S").gz"
+    DUMP_NAME="dump_app_$(date +"%Y-%m-%d_%H_%M_%S").gz"
 else
     DUMP_NAME="${DUMP_NAME}_$(date +"%Y-%m-%d_%H_%M_%S").gz"
 fi
