@@ -77,6 +77,20 @@ def send_test_email(email_to: str) -> None:
         environment={"project_name": settings.PROJECT_NAME, "email": email_to},
     )
 
+def send_test_mode_reminder_email(email_to: str, username: str, rank: str, num_completed_test_mode: str, num_studied: str) -> None:
+    project_name = settings.PROJECT_NAME
+    subject = f"{project_name} - Test mode reminder!"
+    with open(Path(settings.EMAIL_TEMPLATES_DIR) / "test_email.html") as f:
+        template_str = f.read()
+
+    print(email_to, username, rank, num_completed_test_mode, num_studied)
+    send_email(
+        email_to=email_to,
+        subject_template=subject,
+        html_template=template_str,
+        environment={"project_name": settings.PROJECT_NAME, "email": email_to, "username": username, "rank": rank, "num_completed": num_completed_test_mode, "num_studied": num_studied},
+    )   
+
 
 def send_reset_password_email(email_to: str, username: str, token: str) -> None:
     project_name = settings.PROJECT_NAME
