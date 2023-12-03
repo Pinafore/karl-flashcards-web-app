@@ -21,13 +21,7 @@ class CRUDHistory(CRUDBase[models.History, schemas.HistoryCreate, schemas.Histor
         subquery = (
             db.query(
                 models.History.user_id,
-                func.sum(
-                    case(
-                        [(models.History.details['set_type'].astext == 'test', 1.0 / 10),
-                        (models.History.details['set_type'].astext == 'post_test', 1.0 / 20)],
-                        else_=0
-                    )
-                ).label('num_test_modes_completed')
+                (func.count(models.History.id) / 10).label('num_test_modes_completed')
             )
             .filter(models.History.details['response'].astext == 'true')
             .filter(models.History.details['set_type'].astext.in_(['test', 'post_test']))
@@ -46,6 +40,5 @@ class CRUDHistory(CRUDBase[models.History, schemas.HistoryCreate, schemas.Histor
         )
 
         return data.all()
-
 
 history = CRUDHistory(models.History)
