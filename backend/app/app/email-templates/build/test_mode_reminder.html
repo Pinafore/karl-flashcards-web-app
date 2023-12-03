@@ -112,15 +112,21 @@
                             <tr>
                                 <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
                                     <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:16px;line-height:1;text-align:left;color:#555555;">
-                                        Hi {{ username }}! This is an automated email to give you updates about your test mode performance.
-                                        {{ email }}
+                                        Hi {{ username }}!
                                     </div>
                                 </td>
                             </tr>
                             <tr>
                                 <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
                                     <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:16px;line-height:1;text-align:left;color:#555555;">
-                                        Currently, you have completed {{num_studied}} test mode sessions, meaning that you have studied the {{rank}} most test mode sessions out of all users on our app. As a reminder, the first 50 users to complete 12 test mode sessions will each be awarded 50 dollars. As of today, only {{num_test_mode_completed}} users have completed at least 12 test mode sessions, so there is still time to win a prize!
+                                        This is an automated email to give you updates about your test mode performance.
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
+                                    <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:16px;line-height:1;text-align:left;color:#555555;">
+                                        Currently, you have completed {{num_studied}} test mode sessions, meaning that you have studied the {{rank}} most test mode sessions out of all users on our app. As a reminder, the first 50 users to complete 12 test mode sessions will each be awarded 50 dollars. As of today, only <b>{{num_test_mode_completed}}</b> users have completed at least 12 test mode sessions, so there is still time to win a prize!
                                     </div>
                                 </td>
                             </tr>

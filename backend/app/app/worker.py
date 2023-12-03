@@ -51,8 +51,7 @@ def remind_test_mode(db: Session = Depends(deps.get_db)) -> Any:
     data = crud.history.get_test_mode_counts(db)
     num_done = 0
     for idx, data_item in enumerate(data):
-        user, num_studied = data_item
-        num_studied -= (num_studied // 6)
+        user, num_studied = data_item[0], int(data[1])
         if num_studied >= 12:
             num_done += 1
             continue
