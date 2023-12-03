@@ -88,7 +88,13 @@ def send_test_mode_reminder_email(email_to: str, username: str, rank: str, num_c
         email_to=email_to,
         subject_template=subject,
         html_template=template_str,
-        environment={"project_name": settings.PROJECT_NAME, "email": email_to, "username": username, "rank": rank, "num_completed": num_completed_test_mode, "num_studied": num_studied},
+        environment={"project_name": settings.PROJECT_NAME, 
+                     "email": email_to, 
+                     "username": username, 
+                     "rank": rank, 
+                     "num_test_mode_completed": num_completed_test_mode, 
+                     "num_studied": num_studied,
+                     "link": "https://karl.qanta.org/"},
     )   
 
 
