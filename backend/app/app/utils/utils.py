@@ -80,7 +80,7 @@ def send_test_email(email_to: str) -> None:
 def send_test_mode_reminder_email(email_to: str, username: str, rank: str, num_completed_test_mode: str, num_studied: str) -> None:
     project_name = settings.PROJECT_NAME
     subject = f"{project_name} - Test mode reminder!"
-    with open(Path(settings.EMAIL_TEMPLATES_DIR) / "test_email.html") as f:
+    with open(Path(settings.EMAIL_TEMPLATES_DIR) / "test_mode_reminder.html") as f:
         template_str = f.read()
 
     print(email_to, username, rank, num_completed_test_mode, num_studied)
