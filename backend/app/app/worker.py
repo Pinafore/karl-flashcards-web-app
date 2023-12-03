@@ -52,7 +52,8 @@ def remind_test_mode(db: Session = Depends(deps.get_db)) -> Any:
     num_done = 0
     num_emails_sent = 0
     for idx, data_item in enumerate(data):
-        user, num_studied = data_item[0], int(data[1])
+        user, num_studied = data_item
+        num_studied -= (num_studied // 6)
         if num_studied >= 12:
             num_done += 1
             continue
