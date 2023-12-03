@@ -42,7 +42,7 @@ def ordinal(n: int):
         suffix = ['th', 'st', 'nd', 'rd', 'th'][min(n % 10, 4)]
     return str(n) + suffix
 
-@celery_app.task(name="send_reminder_emails")
+@celery_app.task(acks_late=True)
 def remind_test_mode(db: Session = Depends(deps.get_db)) -> Any:
     """
     Remind users about test mode performance
