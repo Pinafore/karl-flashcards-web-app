@@ -459,7 +459,7 @@ If you make changes to `backend/app/app/worker.py` (which contains celery tasks)
 
 
 ## Database Back Ups
-The following backup script identifies the docker container and performs a backup, naming it using the current timestamp.
+The following backup script identifies the docker container and performs a backup of the entire Postgres server, naming it using the current timestamp.
 
 ```bash
 ./scripts/backup.sh
@@ -469,6 +469,17 @@ The following load backup script takes in a relative file path to the file dump 
 
 ```bash
 ./scripts/load-backup.sh [Path to dump] [./.env location]
+```
+
+## Database Backup for local analysis
+To add to your local database, you should backup only the `app` database. The following script does this:
+```bash
+./scripts/backup_app.sh
+```
+Then, on your local postgres (not in docker), you can run the following commands to add the data:
+```bash
+createdb -U postgres karl-backup
+psql -U postgres -d karlapp -f dump_2023-12-02_17_55_34
 ```
 
 ## Frontend development
