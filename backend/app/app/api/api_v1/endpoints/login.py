@@ -1,6 +1,8 @@
 from datetime import timedelta
 from typing import Any
+import time
 
+from app.core.celery_app import celery_app
 from app import crud, models, schemas
 from app.api import deps
 from app.core import security
@@ -10,6 +12,7 @@ from app.utils.utils import (
     generate_password_reset_token,
     send_reset_password_email,
     verify_password_reset_token,
+    send_test_mode_reminder_email,
 )
 from fastapi import APIRouter, Body, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
@@ -65,6 +68,12 @@ def recover_password(email: str, db: Session = Depends(deps.get_db)) -> Any:
         email_to=user.email, username=user.username, token=password_reset_token
     )
     return {"msg": "Password recovery email sent"}
+
+@router.post("/reminder/")
+def remind_test_mode(db: Session = Depends(deps.get_db)) -> Any:
+    # Enqueue the task
+    celery_app.send_task("app.worker.send_reminder_emails")
+    return {"msg": "Test mode reminder emails are being sent in the background"}
 
 
 @router.post("/reset-password/", response_model=schemas.Msg)

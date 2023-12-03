@@ -2,6 +2,7 @@ from app import models, schemas
 from app.crud.base import CRUDBase
 from sqlalchemy.orm import Session
 from app.utils.utils import logger, log_time, time_it
+from sqlalchemy import func, desc, case, cast, String
 
 
 class CRUDHistory(CRUDBase[models.History, schemas.HistoryCreate, schemas.HistoryUpdate]):
@@ -15,6 +16,29 @@ class CRUDHistory(CRUDBase[models.History, schemas.HistoryCreate, schemas.Histor
 
     def get_user_test_study_count(self, user: models.User):
         return len([history_item for history_item in user.history if history_item.log_type == "test_study"])
+    
+    def get_test_mode_counts(self, db: Session):
+        subquery = (
+            db.query(
+                models.History.user_id,
+                (func.count(models.History.id) / 10).label('num_test_modes_completed')
+            )
+            .filter(models.History.details['response'].astext == 'true')
+            .filter(models.History.details['set_type'].astext.in_(['test', 'post_test']))
+            .group_by(models.History.user_id)
+            .subquery()
+        )
 
+        data = (
+            db.query(
+                models.User,
+                subquery.c.num_test_modes_completed
+            )
+            .join(models.User, models.User.id == subquery.c.user_id)
+            .filter(subquery.c.num_test_modes_completed >= 3)
+            .order_by(desc(subquery.c.num_test_modes_completed))
+        )
+
+        return data.all()
 
 history = CRUDHistory(models.History)

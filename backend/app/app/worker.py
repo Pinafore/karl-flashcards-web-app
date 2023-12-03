@@ -1,15 +1,26 @@
 import itertools
 import json
 import os
+import time
 import re
 
 import sentry_sdk
 from app import crud, schemas
 from app.core.celery_app import celery_app
+from app.api import deps
+from app.core import security
 from app.core.config import settings
 from app.db.session import SessionLocal
 from sentry_sdk.integrations.celery import CeleryIntegration
+from fastapi import APIRouter, Body, Depends, HTTPException
+from typing import Any
 from sqlalchemy.orm import Session
+from app.utils.utils import (
+    generate_password_reset_token,
+    send_reset_password_email,
+    verify_password_reset_token,
+    send_test_mode_reminder_email,
+)
 
 from app.schemas import DeckType
 
@@ -23,6 +34,33 @@ if settings.SENTRY_DSN:
 @celery_app.task(acks_late=True)
 def test_celery(word: str) -> str:
     return f"test task return {word}"
+
+def ordinal(n: int):
+    if 11 <= (n % 100) <= 13:
+        suffix = 'th'
+    else:
+        suffix = ['th', 'st', 'nd', 'rd', 'th'][min(n % 10, 4)]
+    return str(n) + suffix
+
+@celery_app.task(name="send_reminder_emails")
+def remind_test_mode(db: Session = Depends(deps.get_db)) -> Any:
+    """
+    Remind users about test mode performance
+    """
+    db: Session = SessionLocal()
+    data = crud.history.get_test_mode_counts(db)
+    num_done = 0
+    for idx, data_item in enumerate(data):
+        user, num_studied = data_item
+        num_studied -= (num_studied // 6)
+        if num_studied >= 12:
+            num_done += 1
+            continue
+        send_test_mode_reminder_email(email_to="nishantbalepur@gmail.com", username=user.username, rank=ordinal(idx+1), num_completed_test_mode=str(num_done), num_studied=str(num_studied))
+        time.sleep(10)
+        break
+    
+    return {"msg": "Test mode reminder emails sent"}
 
 
 @celery_app.task()
