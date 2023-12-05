@@ -43,7 +43,7 @@ def ordinal(n: int):
     return str(n) + suffix
 
 @celery_app.task(acks_late=True)
-def remind_test_mode(db: Session = Depends(deps.get_db)) -> Any:
+def remind_test_mode(num_to_send: int, db: Session = Depends(deps.get_db)) -> Any:
     """
     Remind users about test mode performance
     """
@@ -58,8 +58,10 @@ def remind_test_mode(db: Session = Depends(deps.get_db)) -> Any:
             num_done += 1
             continue
         num_emails_sent += 1
-        send_test_mode_reminder_email(email_to="nishantbalepur@gmail.com", username=user.username, rank=ordinal(idx+1), num_completed_test_mode=str(num_done), num_studied=str(num_studied))
+        send_test_mode_reminder_email(email_to=user.email, username=user.username, rank=ordinal(idx+1), num_completed_test_mode=str(num_done), num_studied=str(num_studied))
         time.sleep(10)
+        if num_emails_sent == num_to_send:
+            break
         break
     
     return {"msg": f"Number of test mode reminder emails sent: {num_emails_sent}"}
