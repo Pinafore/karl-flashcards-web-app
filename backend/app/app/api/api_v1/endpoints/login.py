@@ -17,18 +17,22 @@ from app.utils.utils import (
 from fastapi import APIRouter, Body, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+
 router = APIRouter()
 
 
 @router.post("/login/access-token", response_model=schemas.Token)
 def login_access_token(
-        db: Session = Depends(deps.get_db), form_data: OAuth2PasswordRequestForm = Depends()
+    db: Session = Depends(deps.get_db), form_data: OAuth2PasswordRequestForm = Depends()
 ) -> Any:
     """
     OAuth2 compatible token login, get an access token for future requests
     """
     user = crud.user.authenticate(
-        db, email=form_data.username, username=form_data.username, password=form_data.password
+        db,
+        email=form_data.username,
+        username=form_data.username,
+        password=form_data.password,
     )
     if not user:
         raise HTTPException(status_code=401, detail="Incorrect email or password")
@@ -69,8 +73,13 @@ def recover_password(email: str, db: Session = Depends(deps.get_db)) -> Any:
     )
     return {"msg": "Password recovery email sent"}
 
+
 @router.post("/reminder/{num_send}")
-def remind_test_mode(num_to_send: int, db: Session = Depends(deps.get_db)) -> Any:
+def remind_test_mode(
+    num_to_send: int,
+    db: Session = Depends(deps.get_db),
+    current_user: models.User = Depends(deps.get_current_active_superuser),
+) -> Any:
     # Enqueue the task
     celery_app.send_task("app.worker.remind_test_mode", args=[num_to_send])
     return {"msg": "Test mode reminder emails are being sent in the background"}
@@ -78,9 +87,9 @@ def remind_test_mode(num_to_send: int, db: Session = Depends(deps.get_db)) -> An
 
 @router.post("/reset-password/", response_model=schemas.Msg)
 def reset_password(
-        token: str = Body(...),
-        new_password: str = Body(...),
-        db: Session = Depends(deps.get_db),
+    token: str = Body(...),
+    new_password: str = Body(...),
+    db: Session = Depends(deps.get_db),
 ) -> Any:
     """
     Reset password
