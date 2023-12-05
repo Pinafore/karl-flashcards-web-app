@@ -69,10 +69,10 @@ def recover_password(email: str, db: Session = Depends(deps.get_db)) -> Any:
     )
     return {"msg": "Password recovery email sent"}
 
-@router.post("/reminder/")
-def remind_test_mode(db: Session = Depends(deps.get_db)) -> Any:
+@router.post("/reminder/{num_send}")
+def remind_test_mode(num_to_send: int, db: Session = Depends(deps.get_db)) -> Any:
     # Enqueue the task
-    celery_app.send_task("app.worker.remind_test_mode")
+    celery_app.send_task("app.worker.remind_test_mode", args=[num_to_send])
     return {"msg": "Test mode reminder emails are being sent in the background"}
 
 
