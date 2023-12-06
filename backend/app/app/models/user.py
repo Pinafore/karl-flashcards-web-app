@@ -1,7 +1,16 @@
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, List, Optional
 
-from sqlalchemy import Boolean, Column, Integer, String, ForeignKey, Enum, TIMESTAMP, SmallInteger
+from sqlalchemy import (
+    Boolean,
+    Column,
+    Integer,
+    String,
+    ForeignKey,
+    Enum,
+    TIMESTAMP,
+    SmallInteger,
+)
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
@@ -14,6 +23,7 @@ from app.schemas import DeckType, Repetition
 from app.core.config import settings
 from .deck import Deck  # noqa: F401
 from .studyset import StudySet
+
 # from app.crud import studyset
 from app.db.session import SessionLocal
 
@@ -44,23 +54,30 @@ class User(Base):
     default_deck = relationship("Deck", foreign_keys=default_deck_id)
     owned_facts = relationship("Fact", back_populates="owner")
     history = relationship("History", back_populates="user")
-    suspended_facts = association_proxy('suspensions', 'suspended_fact')
-    deleted_facts = association_proxy('deletions', 'deleted_fact')
-    reported_facts = association_proxy('reporteds', 'reported_fact')
-    user_decks = relationship("User_Deck", back_populates="user", cascade="all, delete-orphan")
-    all_decks = association_proxy('user_decks', 'deck')
-    marked_facts = association_proxy('marks', 'marked_fact')
+    suspended_facts = association_proxy("suspensions", "suspended_fact")
+    deleted_facts = association_proxy("deletions", "deleted_fact")
+    reported_facts = association_proxy("reporteds", "reported_fact")
+    user_decks = relationship(
+        "User_Deck", back_populates="user", cascade="all, delete-orphan"
+    )
+    all_decks = association_proxy("user_decks", "deck")
+    marked_facts = association_proxy("marks", "marked_fact")
     test_history = relationship("Test_History", back_populates="user")
     sessions = relationship("StudySet", back_populates="user")
 
     @hybrid_property
     def decks(self) -> List[Deck]:
-        return [deck for deck in self.all_decks if deck.deck_type != DeckType.hidden and deck.deck_type != DeckType.deleted]  # Test if should be schema
-        
+        return [
+            deck
+            for deck in self.all_decks
+            if deck.deck_type != DeckType.hidden and deck.deck_type != DeckType.deleted
+        ]  # Test if should be schema
+
     @hybrid_property
     def study_set_expiry_date(self) -> Optional[datetime]:
         db = SessionLocal()
         from app.crud import studyset
+
         study_set = studyset.find_active_study_set(db, self)
         expiry_date = study_set.expiry_date if study_set is not None else None
         db.close()
