@@ -65,6 +65,7 @@ def remind_test_mode(num_to_send: int, db: Session = Depends(deps.get_db)) -> An
             rank=ordinal(idx + 1),
             num_completed_test_mode=str(num_done),
             num_studied=str(num_studied),
+            order=idx,
         )
         time.sleep(10)
         if num_emails_sent == num_to_send:
