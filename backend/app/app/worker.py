@@ -47,7 +47,8 @@ def remind_test_mode(num_to_send: int, db: Session = Depends(deps.get_db)) -> An
     Remind users about test mode performance
     """
     db: Session = SessionLocal()
-    data = crud.history.get_test_mode_counts(db)
+    # CHANGEEEEE
+    data = crud.history.get_test_mode_counts(db).reverse()
     num_done = 0
     num_emails_sent = 0
     for idx, data_item in enumerate(data):
