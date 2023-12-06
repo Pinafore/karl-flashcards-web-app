@@ -2,7 +2,7 @@ from app import models, schemas
 from app.crud.base import CRUDBase
 from sqlalchemy.orm import Session
 from app.utils.utils import logger, log_time, time_it
-from sqlalchemy import func, desc, case, cast, String
+from sqlalchemy import func, desc
 
 
 class CRUDHistory(
@@ -34,21 +34,24 @@ class CRUDHistory(
         )
 
     def get_test_mode_counts(self, db: Session):
+        # Modified subquery to include the last study date
         subquery = (
             db.query(
                 models.History.user_id,
-                (func.count(models.History.id) / 10).label("num_test_modes_completed"),
-            )
-            .filter(models.History.details["response"].astext == "true")
-            .filter(
-                models.History.details["set_type"].astext.in_(["test", "post_test"])
+                (func.count(models.History.id) / 10).label('num_test_modes_completed'),
+                func.max(models.History.details['date'].astext).label('last_study_date')  # Getting the last study date
             )
             .group_by(models.History.user_id)
             .subquery()
         )
 
+        # Query to join with the User model and order the results
         data = (
-            db.query(models.User, subquery.c.num_test_modes_completed)
+            db.query(
+                models.User,
+                subquery.c.num_test_modes_completed,
+                subquery.c.last_study_date  # Include the last study date in the final query
+            )
             .join(models.User, models.User.id == subquery.c.user_id)
             .filter(subquery.c.num_test_modes_completed >= 1)
             .order_by(desc(subquery.c.num_test_modes_completed))
