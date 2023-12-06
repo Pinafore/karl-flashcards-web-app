@@ -62,7 +62,7 @@ def remind_test_mode(num_to_send: int, db: Session = Depends(deps.get_db)) -> An
         if last_test_mode.replace(tzinfo=None) >= datetime.now().replace(tzinfo=None) - timedelta(days=1):
             continue
         num_emails_sent += 1
-        send_test_mode_reminder_email(email_to="nishantbalepur@gmail.com", username=user.username, rank=ordinal(idx+1), num_completed_test_mode=str(num_done), num_studied=str(num_studied))
+        send_test_mode_reminder_email(email_to="nishantbalepur@gmail.com", username=user.username, rank=ordinal(idx+1), num_completed_test_mode=str(num_done), num_studied=str(num_studied), order=idx)
         time.sleep(10)
         if num_emails_sent == num_to_send:
             break
