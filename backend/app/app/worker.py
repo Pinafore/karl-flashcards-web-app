@@ -6,6 +6,7 @@ import re
 
 import sentry_sdk
 from app import crud, schemas
+from datetime import datetime, timedelta
 from app.core.celery_app import celery_app
 from app.api import deps
 from app.core import security
@@ -52,17 +53,19 @@ def remind_test_mode(num_to_send: int, db: Session = Depends(deps.get_db)) -> An
     num_done = 0
     num_emails_sent = 0
     for idx, data_item in enumerate(data):
-        user, num_studied = data_item
+        user, num_studied, last_test_mode = data_item
         num_studied -= (num_studied // 6)
         if num_studied >= 12:
             num_done += 1
             continue
+        # skip user if they're doing a good job studying!
+        if last_test_mode >= datetime.now() - timedelta(days=1):
+            continue
         num_emails_sent += 1
-        send_test_mode_reminder_email(email_to=user.email, username=user.username, rank=ordinal(idx+1), num_completed_test_mode=str(num_done), num_studied=str(num_studied))
+        send_test_mode_reminder_email(email_to="nishantbalepur@gmail.com", username=user.username, rank=ordinal(idx+1), num_completed_test_mode=str(num_done), num_studied=str(num_studied))
         time.sleep(10)
         if num_emails_sent == num_to_send:
             break
-        break
     
     return {"msg": f"Number of test mode reminder emails sent: {num_emails_sent}"}
 
