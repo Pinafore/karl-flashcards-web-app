@@ -37,13 +37,20 @@ class CRUDHistory(
         subquery = (
             db.query(
                 models.History.user_id,
-                (func.count(models.History.id) / 10).label('num_test_modes_completed'),
-                func.max(models.StudySet.create_date).label('last_study_date')  # Getting the max date from the studyset table
+                (func.count(models.History.id) / 10).label("num_test_modes_completed"),
+                func.max(models.StudySet.create_date).label(
+                    "last_study_date"
+                ),  # Getting the max date from the studyset table
             )
-            .join(models.StudySet, 
-              cast(models.History.details['studyset_id'].astext, Integer) == models.StudySet.id)
-            .filter(models.History.details['response'].astext == 'true')
-            .filter(models.History.details['set_type'].astext.in_(['test', 'post_test']))
+            .join(
+                models.StudySet,
+                cast(models.History.details["studyset_id"].astext, Integer)
+                == models.StudySet.id,
+            )
+            .filter(models.History.details["response"].astext == "true")
+            .filter(
+                models.History.details["set_type"].astext.in_(["test", "post_test"])
+            )
             .group_by(models.History.user_id)
             .subquery()
         )
@@ -52,7 +59,7 @@ class CRUDHistory(
             db.query(
                 models.User,
                 subquery.c.num_test_modes_completed,
-                subquery.c.last_study_date
+                subquery.c.last_study_date,
             )
             .join(models.User, models.User.id == subquery.c.user_id)
             .filter(subquery.c.num_test_modes_completed >= 3)
@@ -60,7 +67,6 @@ class CRUDHistory(
         )
 
         return data.all()
-
 
 
 history = CRUDHistory(models.History)
