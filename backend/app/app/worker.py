@@ -67,7 +67,7 @@ def remind_test_mode(num_to_send: int, db: Session = Depends(deps.get_db)) -> An
             continue
         num_emails_sent += 1
         send_test_mode_reminder_email(
-            email_to=user.email,
+            email_to="gelatodefeater88@gmail.com",
             username=user.username,
             rank=ordinal(idx + 1),
             num_completed_test_mode=str(num_done),
