@@ -478,8 +478,17 @@ To add to your local database, you should backup only the `app` database. The fo
 ```
 Then, on your local postgres (not in docker), you can run the following commands to add the data:
 ```bash
-createdb -U postgres karl-backup
-psql -U postgres -d karlapp -f dump_2023-12-02_17_55_34
+createdb -U postgres karlapp126new
+psql -U postgres -d karlapp126new -f dump_app_2023-12-06_15_06_37
+```
+
+### Analysis
+```bash
+SELECT h.*, sd.*
+FROM history h
+JOIN session_deck sd ON sd.studyset_id = (h.details::json->>'studyset_id')::int
+WHERE h.time > '2022-11-19'
+AND h.details::json->>'set_type' IN ('test', 'post_test');
 ```
 
 ## Frontend development
