@@ -54,6 +54,9 @@ def remind_test_mode(num_to_send: int, db: Session = Depends(deps.get_db)) -> An
     for idx, data_item in enumerate(data):
         user, num_studied, last_test_mode = data_item
         num_studied -= num_studied // 6
+        # Temporary pass to avoid duplicate email sending
+        if user.id == 914:
+            continue
         if num_studied >= 12:
             num_done += 1
             continue
