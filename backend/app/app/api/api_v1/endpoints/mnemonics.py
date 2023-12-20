@@ -38,6 +38,8 @@ def create_mnemonic(
         'is_difficult_to_understand': mnemonic.is_difficult_to_understand,
         'is_incorrect_definition': mnemonic.is_incorrect_definition,
         'is_offensive': mnemonic.is_offensive,
+        'is_bad_for_other_reason': mnemonic.is_bad_for_other_reason,
+        'other_reason_text': mnemonic.other_reason_text,
         'correct': mnemonic.correct
     }
 

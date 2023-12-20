@@ -21,6 +21,8 @@ class Mnemonic(BaseModel):
     is_incorrect_definition: Optional[bool] = None
     is_difficult_to_understand: Optional[bool] = None
     is_bad_keyword_link: Optional[bool] = None
+    is_bad_for_other_reason: Optional[bool] = None
+    other_reason_text: Optional[str] = None
     correct: bool
 
 class MnemonicFeedback(BaseModel):

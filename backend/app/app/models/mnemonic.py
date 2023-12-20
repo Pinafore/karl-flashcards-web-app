@@ -28,6 +28,8 @@ class Mnemonic(Base):
     is_incorrect_definition = Column(Boolean, nullable=True)
     is_difficult_to_understand = Column(Boolean, nullable=True)
     is_bad_keyword_link = Column(Boolean, nullable=True)
+    is_bad_for_other_reason = Column(Boolean, nullable=True)
+    other_reason_text = Column(String, nullable=True)
 
     correct = Column(Boolean(), index=True)
     

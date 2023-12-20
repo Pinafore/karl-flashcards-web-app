@@ -136,6 +136,8 @@ export interface IComponents {
     is_incorrect_definition?: boolean;
     is_difficult_to_understand?: boolean;
     is_bad_keyword_link?: boolean;
+    is_bad_for_other_reason?: boolean;
+    other_reason_text?: string;
     correct: boolean;
   }
   MnemonicSearch: {
