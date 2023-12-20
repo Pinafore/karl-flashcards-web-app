@@ -478,8 +478,9 @@ To add to your local database, you should backup only the `app` database. The fo
 ```
 Then, on your local postgres (not in docker), you can run the following commands to add the data:
 ```bash
+gunzip -k dump_app_2023-12-11_07_36_31.gz
 createdb -U postgres karlapp126new
-psql -U postgres -d karlapp126new -f dump_app_2023-12-06_15_06_37
+psql -U postgres -d karlapp1211new -f dump_app_2023-12-11_07_36_31
 ```
 
 ### Analysis
