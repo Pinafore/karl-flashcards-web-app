@@ -487,7 +487,7 @@ export default class Learn extends Vue {
       this.response(false);
     } else if (key == "]" && this.showResponseBtns) {
       this.response(true);
-    } else if (key == " " && this.mnemonicData.shouldShowMnemonic) {
+    } else if (key == "escape" && this.mnemonicData.shouldShowMnemonic) {
       this.toggleMnemonic();
     } else if (
       /^[a-z0-9]$/i.test(key) &&
