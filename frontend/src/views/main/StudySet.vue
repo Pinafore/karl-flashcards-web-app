@@ -17,7 +17,7 @@
         <h3 v-show="userPlace !== null">
           You have studied the
           <span v-if="userPlace != 1">{{ userPlace }}th-</span
-          ><span v-else>{' '}</span>most minutes on KAR³L today!
+          ><span v-else>{' '}</span>most facts on KAR³L today!
         </h3>
       </v-card-text>
       <v-card-text v-else-if="status == 'expired'">
@@ -61,11 +61,16 @@
     };
     popup = false;
     status = "studying";
-    rankType = "total_minutes";
+    rankType = "total_seen";
     loading = true;
 
     async mounted() {
       this.popup = this.isFinished != "studying";
+      studyStore.setContinuedSet(false);
+    }
+
+    async destroyed() {
+      studyStore.setContinuedSet(false);
     }
 
     async getLeaderboard() {
@@ -124,12 +129,14 @@
     }
 
     continueStudy() {
+      studyStore.setContinuedSet(true);
       studyStore.getStudyFacts();
       this.popup = false;
     }
 
     goToDeck() {
       studyStore.setInTestMode(false);
+      studyStore.setContinuedSet(false);
       this.popup = false;
       this.$router.push("/main/study/decks");
     }

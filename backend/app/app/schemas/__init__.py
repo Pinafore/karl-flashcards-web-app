@@ -1,4 +1,5 @@
 from .deck_type import DeckType
+from .set_type import SetType
 from .fact import Fact, FactCreate, FactInDB, FactUpdate, KarlFact, KarlFactUpdate, FactSearch, FactBrowse, FactReported, FactToReport, KarlFactV2, SchedulerQuery, UpdateRequestV2
 from .msg import Msg
 from .token import Token, TokenPayload

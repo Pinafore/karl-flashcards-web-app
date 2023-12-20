@@ -21,10 +21,12 @@ class Settings(BaseSettings):
     TEST_MODE_FIRST_TRIGGER_SESSIONS: int = 5
     TEST_MODE_TRIGGER_DAYS: int = 10
     TEST_MODE_TRIGGER_SESSIONS: int = 7
-    TEST_MODE_PER_ROUND: int = 20
+    TEST_MODE_PER_ROUND: int = 10
     TEST_MODE_TRIGGER_FACTS: int = 100
+    TEST_MODE_NUM_HOURS: int = 16
+    POST_TEST_TRIGGER: int = 5
     DEFAULT_DECK_ID: int = 1
-    TEST_DECK_NAME: str = "Test Mode"
+    TEST_MODE_FILE: str = "./data/test_mode_grouped.json"
     STUDY_SET_EXPIRATION_HOURS: int = 2
     TEST_RECALL_WINDOW: TargetWindow = TargetWindow(target_window_lowest=0.0
     ,target_window_highest=1.0

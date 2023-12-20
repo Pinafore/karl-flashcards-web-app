@@ -32,7 +32,7 @@
                 autocomplete="email"
               ></v-text-field>
             </validation-provider>
-            <v-radio-group v-model="recallTarget" row>
+            <!-- <v-radio-group v-model="recallTarget" row>
               <v-radio
                 v-for="num in recallTargetOptions"
                 :key="num"
@@ -40,7 +40,7 @@
                 :value="num"
               >
               </v-radio>
-            </v-radio-group>
+            </v-radio-group> -->
             <v-checkbox v-model="showTips" label="Show Tips"></v-checkbox>
           </v-card-text>
           <v-card-actions>

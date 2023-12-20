@@ -18,11 +18,6 @@ class Test_History(Base):
     fact_id = Column(Integer, ForeignKey("fact.fact_id"))
     response = Column(Boolean(), nullable=False, index=True)
     details = Column(JSONB)
-    # repetition_model = Column(Enum(Repetition), default=Repetition.leitner, nullable=False)
-    # response = Column(String, nullable=False)
-    # front_seconds_elapsed = Column(Integer, nullable=False)
-    # back_seconds_elapsed = Column(Integer, nullable=False)
-    # latest_study = Column(Boolean)
 
     fact = relationship("Fact", back_populates="test_history")
     user = relationship("User", back_populates="test_history")

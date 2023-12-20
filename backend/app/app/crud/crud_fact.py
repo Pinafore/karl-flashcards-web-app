@@ -1,6 +1,4 @@
 import json
-import logging
-import time
 from datetime import datetime
 from tempfile import SpooledTemporaryFile
 from typing import List, Union, Dict, Any, Optional
@@ -14,9 +12,7 @@ from sqlalchemy.orm import Session, Query
 from app import crud, models, schemas
 from app.crud.base import CRUDBase
 from app.schemas import Log, DeckType
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from app.utils.utils import logger, log_time, time_it
 
 
 class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
@@ -245,10 +241,14 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
 
     def build_facts_query(self, db: Session, *, user: models.User,
                           filters: schemas.FactSearch = schemas.FactSearch()) -> Query:
-        visible_decks = (
-            db.query(models.Deck.id).filter(models.Deck.deck_type != DeckType.hidden).join(models.User_Deck).filter(
-                models.User_Deck.owner_id == user.id).subquery())
-
+        if filters.show_hidden:
+            visible_decks = (
+                db.query(models.Deck.id).filter(models.Deck.deck_type == DeckType.hidden).join(models.User_Deck).filter(
+                    models.User_Deck.owner_id == user.id).subquery())
+        else:
+            visible_decks = (
+                db.query(models.Deck.id).filter(models.Deck.deck_type.in_([DeckType.default, DeckType.public])).join(models.User_Deck).filter(
+                    models.User_Deck.owner_id == user.id).subquery())
         user_facts = (db.query(models.Fact).join(visible_decks, models.Fact.deck_id == visible_decks.c.id).filter(
             models.Fact.user_id == user.id))
 
@@ -321,20 +321,16 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         
         return facts_query
 
+    @time_it
     def count_eligible_facts(
             self, query: Query
     ) -> int:
-        begin_overall_start = time.time()
-        facts = query.distinct().count()
-        overall_end_time = time.time()
-        overall_total_time = overall_end_time - begin_overall_start
-        logger.info("overall time count: " + str(overall_total_time))
-        return facts
+        return query.distinct().count()
 
+    @time_it
     def get_eligible_facts(
             self, query: Query, skip: int = None, limit: int = None, randomize: bool = False
     ) -> List[models.Fact]:
-        begin_overall_start = time.time()
         if randomize:
             query = query.order_by(func.random())
         if skip:
@@ -342,9 +338,6 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
         if limit:
             query = query.limit(limit)
         facts = query.all()
-        overall_end_time = time.time()
-        overall_total_time = overall_end_time - begin_overall_start
-        logger.info("overall time facts: " + str(overall_total_time))
         return facts
 
     

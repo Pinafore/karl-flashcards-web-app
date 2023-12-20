@@ -3,14 +3,16 @@ from random import choice
 
 
 class Repetition(str, Enum):
-    leitner = "leitner"
+    leitner = "leitner" # deprecated
     karl = "karl"
-    sm2 = "sm-2"
-    karl100 = "karl100"
-    karl50 = "karl50"
-    karl85 = "karl85"
-    settles = "settles"
+    sm2 = "sm-2" # deprecated
+    karl100 = "karl100" # deprecated
+    karl50 = "karl50" # deprecated
+    karl85 = "karl85" # deprecated
+    settles = "settles" # deprecated
+    fsrs = "fsrs"
+    karlAblation = "karl-ablation" 
 
     @classmethod
     def select_model(cls):
-        return choice([Repetition.leitner, Repetition.karl, Repetition.settles])
+        return choice([Repetition.fsrs, Repetition.karl])

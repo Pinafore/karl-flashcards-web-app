@@ -157,7 +157,15 @@ export interface IComponents {
     email: string;
     username: string;
     is_active?: boolean;
-    repetition_model?: "leitner" | "sm-2" | "karl" | "karl50" | "karl85" | "settles";
+    repetition_model?:
+      | "leitner"
+      | "sm-2"
+      | "karl"
+      | "karl50"
+      | "karl85"
+      | "settles"
+      | "fsrs"
+      | "karl-ablation";
     password: string;
     is_superuser?: boolean;
   };
@@ -165,7 +173,15 @@ export interface IComponents {
     email?: string;
     username?: string;
     is_active?: boolean;
-    repetition_model?: "leitner" | "sm-2" | "karl" | "karl50" | "karl85" | "settles";
+    repetition_model?:
+      | "leitner"
+      | "sm-2"
+      | "karl"
+      | "karl50"
+      | "karl85"
+      | "settles"
+      | "fsrs"
+      | "karl-ablation";
     password?: string;
     default_deck_id?: number;
     is_superuser?: boolean;
@@ -175,7 +191,15 @@ export interface IComponents {
     email: string;
     username: string;
     is_active: boolean;
-    repetition_model?: "leitner" | "sm-2" | "karl" | "karl50" | "karl85" | "settles";
+    repetition_model?:
+      | "leitner"
+      | "sm-2"
+      | "karl"
+      | "karl50"
+      | "karl85"
+      | "settles"
+      | "fsrs"
+      | "karl-ablation";
     id: number;
     is_superuser: boolean;
     show_help: boolean;
@@ -195,14 +219,30 @@ export interface IComponents {
     email: string;
     username: string;
     is_active?: boolean;
-    repetition_model?: "leitner" | "sm-2" | "karl" | "karl50" | "karl85" | "settles";
+    repetition_model?:
+      | "leitner"
+      | "sm-2"
+      | "karl"
+      | "karl50"
+      | "karl85"
+      | "settles"
+      | "fsrs"
+      | "karl-ablation";
     password: string;
   };
   UserUpdate: {
     email?: string;
     username?: string;
     is_active?: boolean;
-    repetition_model?: "leitner" | "sm-2" | "karl" | "karl50" | "karl85" | "settles";
+    repetition_model?:
+      | "leitner"
+      | "sm-2"
+      | "karl"
+      | "karl50"
+      | "karl85"
+      | "settles"
+      | "fsrs"
+      | "karl-ablation";
     password?: string;
     default_deck_id?: number;
     show_help?: boolean;
@@ -260,7 +300,7 @@ export interface IComponents {
     unstudied_facts: IComponents["Fact"][];
     all_decks: IComponents["Deck"][];
     all_facts: IComponents["Fact"][];
-    is_test: boolean;
+    set_type: "normal" | "test" | "post_test";
     num_facts: number;
     num_unstudied: number;
     user: IComponents["User"];

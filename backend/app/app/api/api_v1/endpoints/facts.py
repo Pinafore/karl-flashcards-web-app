@@ -1,5 +1,3 @@
-import logging
-import time
 from datetime import datetime
 from typing import Any, List, Optional
 
@@ -12,9 +10,8 @@ from app import crud, models, schemas
 from app.api import deps
 from app.core.celery_app import celery_app
 from app.core.config import settings
+from app.utils.utils import log_time
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -40,8 +37,9 @@ def read_facts(
     """
     if limit > 1000:
         raise HTTPException(status_code=445, detail="Too many facts requested. Please limit to <1000 facts.")
-    if deck_ids is not None and crud.deck.get_test_deck_id(db=db) in deck_ids:
-        raise HTTPException(status_code=557, detail="This deck is currently unavailable")
+    crud.deck.check_for_test_deck_ids(db=db, deck_ids=deck_ids)
+    # This ensures the user doesn't search for facts that they don't have access to
+    decks = crud.deck.get_user_decks_given_ids(db=db, user=current_user, deck_ids=deck_ids)
 
     if suspended and reported:
         studyable = True
@@ -67,13 +65,10 @@ def read_facts(
     if total == limit:
         total = crud.fact.count_eligible_facts(query=query)
 
-    begin_overall_start = time.time()
-    new_facts: List[schemas.Fact] = []
-    for fact in facts:
-        new_facts.append(crud.fact.get_schema_with_perm(db_obj=fact, user=current_user))
-    overall_end_time = time.time()
-    overall_total_time = overall_end_time - begin_overall_start
-    logger.info("permissions: " + str(overall_total_time))
+    with log_time("Add permissions to facts"):
+        new_facts: List[schemas.Fact] = []
+        for fact in facts:
+            new_facts.append(crud.fact.get_schema_with_perm(db_obj=fact, user=current_user))
 
     fact_browser = schemas.FactBrowse(facts=new_facts, total=total)
     details = search.dict()
@@ -163,7 +158,7 @@ def update_preloaded_facts(
     return True
 
 
-@router.put("/test-mode", response_model=schemas.Deck)
+@router.put("/test-mode", response_model=bool)
 def create_test_mode_facts(
         *,
         current_user: models.User = Depends(deps.get_current_active_superuser),  # noqa
@@ -172,9 +167,8 @@ def create_test_mode_facts(
     """
     Update preloaded facts.
     """
-    celery_app.send_task("app.worker.create_test_mode_facts")
-    deck = crud.deck.assign_test_deck(db, user=current_user)
-    return deck
+    celery_app.send_task("app.worker.create_test_mode_facts", kwargs={"filename": settings.TEST_MODE_FILE})
+    return True
 
 
 @router.put("/{fact_id}", response_model=schemas.Fact)

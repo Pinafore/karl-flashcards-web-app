@@ -1,7 +1,7 @@
 <template>
   <v-container fluid>
     <p-w-a v-if="showPWA"></p-w-a>
-    <RecallPopup></RecallPopup>
+    <!-- <RecallPopup></RecallPopup> -->
     <v-row>
       <v-col>
         <v-card class="ma-3 pa-3">
@@ -9,7 +9,7 @@
             <div class="headline primary--text">Hi {{ greetedUser }}</div>
           </v-card-title>
           <v-card-actions class="pa-4">
-            <v-btn to="/main/study/learn">Quick Study</v-btn>
+            <v-btn to="/main/study/learn?show_test_mode=true">Quick Study</v-btn>
             <v-btn to="/main/study/decks">New Study Set</v-btn>
           </v-card-actions>
         </v-card>

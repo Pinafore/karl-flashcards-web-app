@@ -93,20 +93,6 @@ def assign_decks(
     return decks
 
 
-@router.put("/test", response_model=schemas.Deck)
-def assign_all_test_deck(
-        *,
-        db: Session = Depends(deps.get_db),
-        current_user: models.User = Depends(deps.get_current_active_superuser),
-) -> Any:
-    """
-    Assign test deck to all users
-    """
-    for user in crud.user.get_all_with_status(db=db, is_beta=False):
-        deck = crud.deck.assign_test_deck(db, user)
-    return deck
-
-
 @router.put("/{deck_id}", response_model=schemas.Deck)
 def update_deck(
         *,
@@ -154,10 +140,26 @@ def delete_deck(
         current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
-    Delete an deck.
+    Delete a deck for a user.
     """
     deck = crud.deck.get(db=db, id=deck_id)
     if not deck:
         raise HTTPException(status_code=404, detail="Deck not found")
     deck = crud.deck.remove_for_user(db=db, db_obj=deck, user=current_user)
+    return deck
+
+@router.delete("/bulk/{deck_id}", response_model=schemas.Deck)
+def delete_deck_for_all(
+        *,
+        db: Session = Depends(deps.get_db),
+        deck_id: int,
+        current_user: models.User = Depends(deps.get_current_active_superuser),
+) -> Any:
+    """
+    Delete a deck for all users.
+    """
+    deck = crud.deck.get(db=db, id=deck_id)
+    if not deck:
+        raise HTTPException(status_code=404, detail="Deck not found")
+    deck = crud.deck.soft_delete_deck(db=db, db_obj=deck)
     return deck

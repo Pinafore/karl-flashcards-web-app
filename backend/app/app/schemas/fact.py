@@ -6,6 +6,7 @@ from sqlalchemy.orm import Query
 
 from app.schemas.repetition import Repetition
 from app.schemas.deck import Deck
+from app.schemas import SetType
 # Shared properties
 from app.schemas.permission import Permission
 from app.schemas.target_window import TargetWindow
@@ -48,6 +49,7 @@ class SchedulerQuery(BaseModel):
     env: str
     user_id: int
     recall_target: TargetWindow
+    set_type: SetType
 
 class UpdateRequestV2(BaseModel):
     user_id: int
@@ -62,11 +64,13 @@ class UpdateRequestV2(BaseModel):
     typed: str
     studyset_id: str
     debug_id: Optional[str] # aka schedule_request_id, n/a in test updates
-    test_mode: bool
+    test_mode: Optional[int]
+    set_type: SetType
     recommendation: bool
     viewed_mnemonic: Optional[bool]
     fact: KarlFactV2
 
+# Deprecated?
 class KarlFactUpdate(KarlFact):
     elapsed_seconds_text: Optional[int] = None
     elapsed_seconds_answer: Optional[int] = None
@@ -118,6 +122,7 @@ class FactSearch(InternalFactBase):
     studyable: Optional[bool] = None
     suspended: Optional[bool] = None
     reported: Optional[bool] = None
+    show_hidden: Optional[bool] = None
     skip: Optional[int] = None
     limit: Optional[int] = None
 

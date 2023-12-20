@@ -1,7 +1,7 @@
 import { api } from "@/api";
 import { Action, Module, Mutation, VuexModule } from "vuex-module-decorators";
 import { IComponents, IStudyShow, Permission } from "@/interfaces";
-import { mainStore, studyStore } from "@/utils/store-accessor";
+import { mainStore } from "@/utils/store-accessor";
 import router from "@/router";
 
 @Module({ name: "study" })
@@ -26,6 +26,8 @@ export default class StudyModule extends VuexModule {
   inTestMode = false;
   forceNew = false;
   selectedNum = 20;
+  isResume = false;
+  isContinuedSet = false;
 
   @Mutation
   setDeckIds(payload) {
@@ -155,6 +157,16 @@ export default class StudyModule extends VuexModule {
   }
 
   @Mutation
+  setResume(payload) {
+    this.isResume = payload;
+  }
+
+  @Mutation
+  setContinuedSet(payload) {
+    this.isContinuedSet = payload;
+  }
+
+  @Mutation
   editShowFact(payload: IComponents["FactUpdate"]) {
     if (payload.text) {
       this.show.text = payload.text;
@@ -260,6 +272,26 @@ export default class StudyModule extends VuexModule {
   }
 
   @Action
+  async checkIfInTestMode() {
+    this.setStudySet(null);
+    this.clearTimer();
+    try {
+      const response = await api.checkIfInTestMode(
+        mainStore.token,
+      );
+      this.setInTestMode(response.data);
+      this.setForceNew(false);
+      mainStore.setConnectionError(false);
+      mainStore.setSchedulerError(false);
+      await mainStore.getUserProfile();
+    } catch (error) {
+      console.log(error);
+      await mainStore.checkApiError(error);
+      this.setShowError();
+    }
+  }
+
+  @Action
   async getStudyFacts() {
     this.setStudySet(null);
     this.clearTimer();
@@ -270,6 +302,7 @@ export default class StudyModule extends VuexModule {
         this.deckIds ?? [],
         this.selectedNum,
         this.forceNew,
+        this.isResume,
       );
       this.setForceNew(false);
       if (response.data.unstudied_facts.length == 0) {
@@ -279,7 +312,7 @@ export default class StudyModule extends VuexModule {
         this.setStudySet(response.data);
         this.setStudy(response.data.unstudied_facts);
         this.setInitUnstudied(response.data.num_unstudied);
-        this.setInTestMode(response.data.is_test);
+        this.setInTestMode(response.data.set_type != "normal");
         await this.getNextShow();
       }
       mainStore.setConnectionError(false);

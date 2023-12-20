@@ -7,13 +7,51 @@ import emails
 from app.core.config import settings
 from emails.template import JinjaTemplate
 from jose import jwt
+from contextlib import contextmanager
+import time
+from functools import wraps
+
+# Setup the logger
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
+class TimeContainer:
+    def __init__(self):
+        self.elapsed_times = {}
+
+    def store_time(self, label, time_value):
+        self.elapsed_times[label] = time_value
+
+
+@contextmanager
+def log_time(description="Elapsed time", container=None, label="elapsed"):
+    start_time = time.time()
+    yield
+    elapsed_time = time.time() - start_time
+    logger.info(f"{description}: {elapsed_time:.2f} seconds")
+    if container is not None and isinstance(container, TimeContainer):
+        container.store_time(label, elapsed_time)
+
+
+# Decorator for timing entire functions
+def time_it(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        elapsed_time = time.time() - start_time
+        logger.info(f"{func.__name__} executed in: {elapsed_time:.2f} seconds")
+        return result
+
+    return wrapper
 
 
 def send_email(
-        email_to: str,
-        subject_template: str = "",
-        html_template: str = "",
-        environment: Dict[str, Any] = {},
+    email_to: str,
+    subject_template: str = "",
+    html_template: str = "",
+    environment: Dict[str, Any] = {},
 ) -> None:
     assert settings.EMAILS_ENABLED, "no provided configuration for email variables"
     message = emails.Message(
@@ -42,6 +80,37 @@ def send_test_email(email_to: str) -> None:
         subject_template=subject,
         html_template=template_str,
         environment={"project_name": settings.PROJECT_NAME, "email": email_to},
+    )
+
+
+def send_test_mode_reminder_email(
+    email_to: str,
+    username: str,
+    rank: str,
+    num_completed_test_mode: str,
+    num_studied: str,
+    order: int,
+) -> None:
+    project_name = settings.PROJECT_NAME
+    subject = f"{project_name} - Test mode reminder!"
+    with open(Path(settings.EMAIL_TEMPLATES_DIR) / "test_mode_reminder.html") as f:
+        template_str = f.read()
+
+    print(email_to, username, rank, num_completed_test_mode, num_studied)
+    send_email(
+        email_to=email_to,
+        subject_template=subject,
+        html_template=template_str,
+        environment={
+            "project_name": settings.PROJECT_NAME,
+            "email": email_to,
+            "username": username,
+            "rank": rank,
+            "num_test_mode_completed": num_completed_test_mode,
+            "num_studied": num_studied,
+            "link": "https://karl.qanta.org/",
+            "order": order,
+        },
     )
 
 
@@ -91,7 +160,9 @@ def generate_password_reset_token(email: str) -> str:
     expires = now + delta
     exp = expires.timestamp()
     encoded_jwt = jwt.encode(
-        {"exp": exp, "nbf": now, "sub": email}, settings.SECRET_KEY, algorithm="HS256",
+        {"exp": exp, "nbf": now, "sub": email},
+        settings.SECRET_KEY,
+        algorithm="HS256",
     )
     return encoded_jwt
 

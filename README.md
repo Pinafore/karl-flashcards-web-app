@@ -454,6 +454,44 @@ docker compose up -d
 
 and check all the corresponding available URLs in the section at the end.
 
+## Working with Celeryworker in Dev
+If you make changes to `backend/app/app/worker.py` (which contains celery tasks), you have to restart the celeryworker `docker compose restart celeryworker`.
+
+
+## Database Back Ups
+The following backup script identifies the docker container and performs a backup of the entire Postgres server, naming it using the current timestamp.
+
+```bash
+./scripts/backup.sh
+```
+
+The following load backup script takes in a relative file path to the file dump and restores it.
+
+```bash
+./scripts/load-backup.sh [Path to dump] [./.env location]
+```
+
+## Database Backup for local analysis
+To add to your local database, you should backup only the `app` database. The following script does this:
+```bash
+./scripts/backup_app.sh
+```
+Then, on your local postgres (not in docker), you can run the following commands to add the data:
+```bash
+gunzip -k dump_app_2023-12-11_07_36_31.gz
+createdb -U postgres karlapp126new
+psql -U postgres -d karlapp1211new -f dump_app_2023-12-11_07_36_31
+```
+
+### Analysis
+```bash
+SELECT h.*, sd.*
+FROM history h
+JOIN session_deck sd ON sd.studyset_id = (h.details::json->>'studyset_id')::int
+WHERE h.time > '2022-11-19'
+AND h.details::json->>'set_type' IN ('test', 'post_test');
+```
+
 ## Frontend development
 
 * Enter the `frontend` directory, install the NPM packages and start the live server using the `npm` scripts:

@@ -38,7 +38,7 @@
             -----
           </div>
         </div>
-        <div class="my-3">
+        <!-- <div class="my-3">
           <div class="subheading secondary--text">
             Target Recall Percentage (Only Affects Certain Randomly Assigned Users)
           </div>
@@ -51,7 +51,7 @@
           <div v-else class="title primary--text">
             -----
           </div>
-        </div>
+        </div> -->
       </v-card-text>
       <v-card-actions>
         <v-btn to="/main/profile/edit">Edit</v-btn>

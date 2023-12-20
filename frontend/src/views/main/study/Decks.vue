@@ -1,7 +1,8 @@
 <template>
   <div>
     <Onboard></Onboard>
-    <RecallPopup></RecallPopup>
+    <test-popup :shouldShow="true"></test-popup>
+    <!-- <RecallPopup></RecallPopup> -->
     <v-toolbar style="position: sticky; top: 0; z-index: 10;">
       <v-toolbar-title>
         New Study Set
@@ -73,11 +74,11 @@
   import { mainStore, studyStore } from "@/utils/store-accessor";
   import { IComponents } from "@/interfaces";
   import Onboard from "@/views/Onboard.vue";
-  import RecallPopup from "@/views/main/RecallPopup.vue";
-import UserProfile from "../profile/UserProfile.vue";
+  import TestPopup from "@/views/main/TestPopup.vue";
+  import UserProfile from "../profile/UserProfile.vue";
 
   @Component({
-    components: { RecallPopup, Onboard },
+    components: { TestPopup, Onboard },
   })
   export default class Decks extends Vue {
     public headers = [
@@ -94,8 +95,11 @@ import UserProfile from "../profile/UserProfile.vue";
     vocabIdentifier = process.env.VUE_APP_VOCAB_DECK + " (Can only be studied on its own!)";
 
     async mounted() {
-      studyStore.setInTestMode(false);
+      studyStore.setStudySet(null);
       await mainStore.getUserProfile();
+      mainStore.setConnectionError(false);
+      mainStore.setSchedulerError(false);
+      await studyStore.checkIfInTestMode();
     }
 
     get decks() {
@@ -155,7 +159,7 @@ import UserProfile from "../profile/UserProfile.vue";
       const selectedIds = this.selected.map((a) => String(a.id));
       studyStore.setForceNew(true);
       this.$router.push({
-        path: "/main/study/learn",
+        path: "/main/study/learn?show_test_mode=true",
         query: { deck: selectedIds, num: String(this.selectedNum) },
       });
     }
@@ -163,7 +167,7 @@ import UserProfile from "../profile/UserProfile.vue";
     public openDeck(deck) {
       studyStore.setForceNew(true);
       this.$router.push({
-        path: "/main/study/learn",
+        path: "/main/study/learn?show_test_mode=true",
         query: { deck: String(deck.id), num: String(this.selectedNum) },
       });
     }
@@ -171,7 +175,7 @@ import UserProfile from "../profile/UserProfile.vue";
     public openAll() {
       studyStore.setForceNew(true);
       this.$router.push({
-        path: "/main/study/learn",
+        path: "/main/study/learn?show_test_mode=true",
       });
     }
 

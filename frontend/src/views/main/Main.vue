@@ -40,15 +40,23 @@
       </v-list>
       <v-divider></v-divider>
       <v-list subheader>
-        <v-list-item v-if="recallPopup" to="/main/study/learn">
+        <v-list-item v-if="expiration != null" to="/main/study/learn?resume=true">
           <v-list-item-action>
             <v-icon>mdi-lightbulb-on</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title v-if="expiration != null"
-              >Resume Study</v-list-item-title
-            >
-            <v-list-item-title v-else>Quick Study (All)</v-list-item-title>
+            <v-list-item-title>Resume Study</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item
+          v-if="expiration == null"
+          to="/main/study/learn?show_test_mode=true"
+        >
+          <v-list-item-action>
+            <v-icon>mdi-lightbulb-on</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Quick Study (All)</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
         <v-list-item to="/main/study/decks">
@@ -339,14 +347,6 @@
 
     public async logout() {
       await mainStore.userLogOut();
-    }
-
-    get recallPopup() {
-      if (mainStore.userProfile) {
-        return (mainStore.userProfile.recall_target ?? -1) != -1;
-      } else {
-        return false;
-      }
     }
 
     get expiration() {

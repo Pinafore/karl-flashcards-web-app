@@ -1,4 +1,4 @@
-import logging
+from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, Tuple, Union, List
 
@@ -20,9 +20,7 @@ from app.schemas.history import HistoryCreate
 from sqlalchemy.orm import Session
 import numpy as np
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-import sys
+from app.utils.utils import logger, log_time, time_it
 
 
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
@@ -43,8 +41,8 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
     def create(self, db: Session, *, obj_in: UserCreate) -> User:
         model, assignment_method = self.assign_scheduler_to_new_user(db, obj_in)
-        logger.info(model)
-        logger.info(assignment_method)
+        logger.info(f"model: {model}")
+        logger.info(f"assignment_method: {assignment_method}")
         db_obj = User(
             email=obj_in.email,
             hashed_password=get_password_hash(obj_in.password),
@@ -59,7 +57,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         crud.deck.assign_viewer(db=db, db_obj=deck, user=db_obj)
         db.refresh(db_obj)
         # Assign test
-        crud.deck.assign_test_deck(db=db, user=db_obj)
+        crud.deck.assign_test_decks(db=db, user=db_obj)
         db.refresh(db_obj)
         change_assignment(user=db_obj, repetition_model=model)
         return db_obj
@@ -68,7 +66,9 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         if obj_in.repetition_model:
             return obj_in.repetition_model, "assigned"
         if self.get_count(db, False) > 250:
-            return Repetition.select_model(), "random"
+            model = Repetition.select_model()
+            logger.info("Randomly assigning new user")
+            return model, "random"
         scheduler_counts = self.get_scheduler_counts(db, is_beta=False)
         keys_list = list(scheduler_counts.keys())
         params = [max(55 - scheduler_counts[i], 1) for i in keys_list]
@@ -102,14 +102,13 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             hashed_password = get_password_hash(update_data["password"])
             del update_data["password"]
             update_data["hashed_password"] = hashed_password
-        if obj_in.recall_target and update_data["recall_target"]:
-            # 
+        # Previously we had to retire test sets if recall target is updated, but no longer necessary
+        # if obj_in.recall_target and update_data["recall_target"]:
             # set_user_settings(user=db_obj, new_settings=obj_in)
-
             # Need to retire current study set when settings change
-            uncompleted_last_set = crud.studyset.find_existing_study_set(db, db_obj)
-            if uncompleted_last_set:
-                crud.studyset.mark_retired(db, db_obj=uncompleted_last_set)
+            # uncompleted_last_set = crud.studyset.find_active_study_set(db, db_obj)
+            # if uncompleted_last_set:
+            #     crud.studyset.mark_retired(db, db_obj=uncompleted_last_set)
         
         history_in = schemas.HistoryCreate(
             time=datetime.now(timezone('UTC')),
@@ -169,11 +168,13 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
     def reassign_schedulers(self, db: Session):
         all_users = db.query(self.model).all()
+        repetition_model_counts = defaultdict(int)
         for found_user in all_users:
             old_repetition = found_user.repetition_model
             new_repetition = Repetition.select_model()
             found_user = crud.user.update(db, db_obj=found_user,
                                           obj_in=UserUpdate(repetition_model=new_repetition))
+            repetition_model_counts[new_repetition] += 1
             change_assignment(user=found_user, repetition_model=new_repetition)
             history_in = HistoryCreate(
                 time=datetime.now(timezone('UTC')),
@@ -182,6 +183,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
                 details={"old_repetition_model": old_repetition, "new_repetition_model": found_user.repetition_model}
             )
             crud.history.create(db=db, obj_in=history_in)
+        logger.info(f"Repetition model assignment counts: {str(repetition_model_counts)}")
 
     def get_scheduler_counts(self, db: Session, is_beta: Optional[bool] = None) -> Dict[Repetition, int]:
         all_users = self.get_all_with_status(db, is_beta)

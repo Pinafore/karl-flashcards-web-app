@@ -12,15 +12,11 @@
       </v-card-title>
       <v-card-text>
         <p>
-          In KAR³L phase 2, we ask users to periodically study a test set of general
-          knowledge flashcards. This will allow us to perform a more rigorous evaluation
-          of current and future scheduling systems. We expect each session of test mode
-          to generally take less than fifteen minutes. You may resume your regular study
-          after completing this test mode.
-        </p>
-        <p>
-          You must complete test mode within two hours of starting or your progress in
-          the session will be reset.
+          In KAR³L phase 2, we are running a study to perform a more rigorous evaluation
+          of flashcard scheduling systems. We therefore require you to first complete
+          studying our 10 test mode flashcards during this ~3 week period. Please
+          complete this test mode studyset before it expires two hours after creation.
+          You may resume your regular study after completing these cards.
         </p>
       </v-card-text>
       <v-card-actions class="pt-0">
@@ -34,11 +30,13 @@
 </template>
 
 <script lang="ts">
-  import { Component, Vue, Watch } from "vue-property-decorator";
+  import { Component, Vue, Watch, Prop } from "vue-property-decorator";
   import { mainStore, studyStore } from "@/store";
 
   @Component
   export default class TestPopup extends Vue {
+    @Prop() readonly shouldShow!: boolean;
+
     $refs!: {
       begin: Vue;
     };
@@ -46,7 +44,7 @@
     // May be good to have a popup when test mode is done
 
     async mounted() {
-      mainStore.setTestModePopup(this.inTestMode);
+      mainStore.setTestModePopup(this.inTestMode && this.shouldShow);
     }
 
     get inTestMode() {
@@ -67,20 +65,22 @@
 
     @Watch("inTestMode")
     onIsTestModeChanged() {
-      mainStore.setTestModePopup(this.inTestMode);
-      setTimeout(() => {
-        (this.$refs.begin.$el as HTMLInputElement).focus();
-      });
+      if (this.shouldShow) {
+        mainStore.setTestModePopup(this.inTestMode);
+        setTimeout(() => {
+          (this.$refs.begin.$el as HTMLInputElement).focus();
+        });
+      }
     }
 
-    @Watch("onboarding")
-    onOnboardingChanged() {
-      mainStore.setTestModePopup(false);
-    }
+    // @Watch("onboarding")
+    // onOnboardingChanged() {
+    //   mainStore.setTestModePopup(false);
+    // }
 
     async startTesting() {
       this.$router.push({
-        path: "/main/study/learn",
+        path: "/main/study/learn?show_test_mode=false",
         query: { test: String(1) },
       });
       mainStore.setTestModePopup(false);

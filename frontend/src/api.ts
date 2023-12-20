@@ -112,6 +112,7 @@ export const api = {
     deckIds: number[],
     selectedNum: number,
     forceNew: boolean,
+    isResume: boolean,
   ) {
     let url = `${apiUrl}/api/study/`;
     url += `?`;
@@ -123,7 +124,14 @@ export const api = {
     }
     url += `&limit=${selectedNum}`;
     url += `&force_new=${forceNew}`;
+    url += `&is_resume=${isResume}`;
     return axios.get<IComponents["StudySet"]>(url, authHeaders(token));
+  },
+  async checkIfInTestMode(
+    token: string,
+  ) {
+    const url = `${apiUrl}/api/study/test_mode`;
+    return axios.get<boolean>(url, authHeaders(token)); 
   },
   async createFact(token: string, data: IComponents["FactCreate"]) {
     return axios.post(`${apiUrl}/api/facts/`, data, authHeaders(token));

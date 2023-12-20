@@ -1,7 +1,6 @@
 import json
 from typing import Any, List, Optional
 
-import logging
 import requests
 from fastapi import BackgroundTasks
 
@@ -11,32 +10,33 @@ from app.core.config import settings
 from app.utils.utils import send_new_account_email
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from app.utils.utils import logger, log_time, time_it
 
 router = APIRouter()
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 @router.get("/", response_model=List[schemas.User])
 def read_users(
-        db: Session = Depends(deps.get_db),
-        skip: Optional[int] = None,
-        limit: Optional[int] = None,
-        current_user: models.User = Depends(deps.get_current_active_superuser),  # noqa
+    db: Session = Depends(deps.get_db),
+    skip: Optional[int] = None,
+    limit: Optional[int] = None,
+    current_user: models.User = Depends(deps.get_current_active_superuser),  # noqa
 ) -> Any:
     """
     Retrieve users.
     """
+    if limit is None or limit > 100:
+        limit = 100
     users = crud.user.get_multi(db, skip=skip, limit=limit)
     return users
 
 
 @router.post("/", response_model=schemas.User)
 def create_user(
-        *,
-        db: Session = Depends(deps.get_db),
-        user_in: schemas.SuperUserCreate,
-        current_user: models.User = Depends(deps.get_current_active_superuser),  # noqa
+    *,
+    db: Session = Depends(deps.get_db),
+    user_in: schemas.SuperUserCreate,
+    current_user: models.User = Depends(deps.get_current_active_superuser),  # noqa
 ) -> Any:
     """
     Create new user.
@@ -60,10 +60,10 @@ def create_user(
 
 @router.put("/me", response_model=schemas.User)
 def update_user_me(
-        *,
-        db: Session = Depends(deps.get_db),
-        user_in: schemas.UserUpdate,
-        current_user: models.User = Depends(deps.get_current_active_user),
+    *,
+    db: Session = Depends(deps.get_db),
+    user_in: schemas.UserUpdate,
+    current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Update own user.
@@ -90,8 +90,8 @@ def update_user_me(
 
 @router.get("/me", response_model=schemas.UserWithStudySet)
 def read_user_me(
-        db: Session = Depends(deps.get_db),  # noqa
-        current_user: models.User = Depends(deps.get_current_active_user),
+    db: Session = Depends(deps.get_db),  # noqa
+    current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Get current user.
@@ -101,9 +101,9 @@ def read_user_me(
 
 @router.post("/open", response_model=schemas.User)
 def create_user_open(
-        *,
-        db: Session = Depends(deps.get_db),
-        user_in: schemas.UserCreate,
+    *,
+    db: Session = Depends(deps.get_db),
+    user_in: schemas.UserCreate,
 ) -> Any:
     """
     Create new user without the need to be logged in.
@@ -127,7 +127,9 @@ def create_user_open(
             detail="A user with this username already exists in the system.",
         )
 
-    user_in = schemas.UserCreate(password=user_in.password, email=user_in.email, username=user_in.username)
+    user_in = schemas.UserCreate(
+        password=user_in.password, email=user_in.email, username=user_in.username
+    )
     user = crud.user.create(db, obj_in=user_in)
 
     # if settings.EMAILS_ENABLED and user_in.email:
@@ -139,9 +141,9 @@ def create_user_open(
 
 @router.get("/{user_id}", response_model=schemas.User)
 def read_user_by_id(
-        user_id: int,
-        current_user: models.User = Depends(deps.get_current_active_user),
-        db: Session = Depends(deps.get_db),
+    user_id: int,
+    current_user: models.User = Depends(deps.get_current_active_user),
+    db: Session = Depends(deps.get_db),
 ) -> Any:
     """
     Get a specific user by id.
@@ -158,16 +160,18 @@ def read_user_by_id(
 
 @router.put("/me/reassign", response_model=schemas.User)
 def reassign_scheduler_me(
-        *,
-        db: Session = Depends(deps.get_db),
-        repetition_model: Optional[schemas.Repetition],
-        current_user: models.User = Depends(deps.get_current_active_user),
+    *,
+    db: Session = Depends(deps.get_db),
+    repetition_model: Optional[schemas.Repetition],
+    current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """
     Reassign current user to assigned scheduler or create random new assignment
     """
 
-    response = crud.user.reassign_scheduler(db=db, user=current_user, repetition_model=repetition_model)
+    response = crud.user.reassign_scheduler(
+        db=db, user=current_user, repetition_model=repetition_model
+    )
 
     if isinstance(response, requests.exceptions.RequestException):
         raise HTTPException(status_code=555, detail="Connection to scheduler is down")
@@ -179,18 +183,20 @@ def reassign_scheduler_me(
 
 @router.put("/{user_id}/reassign", response_model=schemas.User)
 def reassign_scheduler(
-        *,
-        db: Session = Depends(deps.get_db),
-        repetition_model: Optional[schemas.Repetition],
-        user_id: int,
-        current_user: models.User = Depends(deps.get_current_active_superuser),
+    *,
+    db: Session = Depends(deps.get_db),
+    repetition_model: Optional[schemas.Repetition],
+    user_id: int,
+    current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """
     Reassign user to assigned scheduler or create random new assignment
     """
 
     user = crud.user.get(db, id=user_id)
-    response = crud.user.reassign_scheduler(db=db, user=user, repetition_model=repetition_model)
+    response = crud.user.reassign_scheduler(
+        db=db, user=user, repetition_model=repetition_model
+    )
 
     if isinstance(response, requests.exceptions.RequestException):
         raise HTTPException(status_code=555, detail="Connection to scheduler is down")
@@ -202,11 +208,11 @@ def reassign_scheduler(
 
 @router.put("/{user_id}", response_model=schemas.User)
 def update_user(
-        *,
-        db: Session = Depends(deps.get_db),
-        user_id: int,
-        user_in: schemas.SuperUserUpdate,
-        current_user: models.User = Depends(deps.get_current_active_superuser),
+    *,
+    db: Session = Depends(deps.get_db),
+    user_id: int,
+    user_in: schemas.SuperUserUpdate,
+    current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """
     Update a user.
@@ -227,10 +233,10 @@ def update_user(
 
 @router.post("/bulk/reassign", response_model=bool)
 def reassign_schedulers(
-        *,
-        db: Session = Depends(deps.get_db),
-        background_tasks: BackgroundTasks,
-        current_user: models.User = Depends(deps.get_current_active_superuser),
+    *,
+    db: Session = Depends(deps.get_db),
+    background_tasks: BackgroundTasks,
+    current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """
     Reassign the assigned scheduler for all users
@@ -240,17 +246,18 @@ def reassign_schedulers(
 
     return True
 
+
 @router.post("/bulk/test", response_model=bool)
-def assign_all_test_deck(
-        *,
-        db: Session = Depends(deps.get_db),
-        background_tasks: BackgroundTasks,
-        current_user: models.User = Depends(deps.get_current_active_superuser),
+def assign_bulk_test_deck(
+    *,
+    db: Session = Depends(deps.get_db),
+    background_tasks: BackgroundTasks,
+    current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """
     Reassign the assigned scheduler for all users
     """
 
-    background_tasks.add_task(crud.deck.assign_test_deck_to_all, db=db)
+    background_tasks.add_task(crud.deck.assign_test_decks_to_all, db=db)
 
     return True

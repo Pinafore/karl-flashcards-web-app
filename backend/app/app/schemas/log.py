@@ -23,3 +23,5 @@ class Log(str, Enum):
     test_study = "test_study"
     get_test_facts = "get_test_facts"
     update_mnemonic = "update_mnemonic"
+    get_post_test_facts = "get_post_test_facts"
+    post_test_study = "post_test_study"

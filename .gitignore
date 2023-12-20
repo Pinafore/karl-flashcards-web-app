@@ -7,3 +7,5 @@ cookiecutter-config-file.yml
 .idea/
 backend/3.8/
 *.code-workspace
+*test_mode*.json
+*.gz
