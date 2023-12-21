@@ -63,7 +63,6 @@ def get_next_set(
     for i in range(len(study_set.facts)):
         study_set.all_facts[i].extra = study_set.facts[i].extra
 
-
     if isinstance(study_set, HTTPException):
         raise study_set
     if isinstance(study_set, requests.exceptions.RequestException):

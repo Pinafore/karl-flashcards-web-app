@@ -725,7 +725,6 @@
             },
           });
           this.mnemonicData.feedbackFactIds = new Set(res.fact_ids);
-          //console.log(this.mnemonicData.feedbackFactIds)
         }
       }
     }
@@ -852,7 +851,7 @@
         this.studyset &&
         this.mnemonicData.shouldShowMnemonic
       ) {
-        await mainStore.createMnemonic({
+        await mainStore.createMnemonicFeedbackLog({
           data: {
             study_id: this.studyset.id,
             fact_id: this.show.fact.fact_id,

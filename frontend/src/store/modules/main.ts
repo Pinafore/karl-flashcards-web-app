@@ -644,11 +644,11 @@ export default class MainModule extends VuexModule {
   }
 
   @Action
-  async createMnemonic(payload: { data: IComponents["MnemonicCreate"] }) {
+  async createMnemonicFeedbackLog(payload: { data: IComponents["MnemonicCreate"] }) {
     try {
       const _response = (
         await Promise.all([
-          api.createMnemonic(this.token, payload.data),
+          api.createMnemonicFeedbackLog(this.token, payload.data),
           await new Promise((resolve, _reject) => setTimeout(() => resolve(), 500)),
         ])
       )[0];
