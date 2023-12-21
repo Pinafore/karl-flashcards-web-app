@@ -346,9 +346,7 @@
         <div v-if="!mnemonicData.shouldShowMnemonic" class="title primary--text">
           {{ show.fact && show.fact.answer }}
         </div>
-        <div v-else class="title primary--text" style="white-space: pre-wrap;">
-          {{ show.fact && show.fact.answer }}
-        </div>
+        <div v-else class="title primary--text" style="white-space: pre-wrap;">{{show.fact && show.fact.answer}}</div>
         <span v-show="showResponseBtns" v-if="!mnemonicData.shouldShowMnemonic">
           <div class="title">You typed: '{{ typed }}'</div>
           <div
