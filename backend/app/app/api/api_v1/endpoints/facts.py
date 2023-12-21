@@ -132,14 +132,18 @@ def create_facts_json(
         db: Session = Depends(deps.get_db),
         upload_file: UploadFile = File(...),
         background_tasks: BackgroundTasks,
+        deck_type: schemas.DeckType = Form(schemas.DeckType.default),
         current_user: models.User = Depends(deps.get_current_active_user)
 ):
     """
     Upload a json file with facts
     """
 
+    if not current_user.is_superuser and deck_type != schemas.DeckType.default:
+        raise HTTPException(status_code=423, detail="Only superusers may upload with this deck type")
+    
     if "application/json" == upload_file.content_type:
-        background_tasks.add_task(crud.fact.load_json_facts, db=db, file=upload_file.file, user=current_user)
+        background_tasks.add_task(crud.fact.load_json_facts, db=db, file=upload_file.file, user=current_user, deck_type=deck_type)
     else:
         raise HTTPException(status_code=423, detail="This file type is unsupported")
 

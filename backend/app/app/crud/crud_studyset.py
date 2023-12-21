@@ -439,6 +439,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
     def check_next_set_type(
             self, db: Session, *, user: models.User, test_deck: models.Deck, num_test_deck_studies: int
     ) -> bool:
+        return schemas.SetType.normal
         logger.info("Checking in Test Mode")
         last_test_set = studyset.find_last_test_or_post_test_set(db, user)
         if last_test_set:

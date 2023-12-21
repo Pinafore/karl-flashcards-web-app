@@ -187,10 +187,12 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
             self, db: Session, *, proposed_deck: str, user: User, deck_type: DeckType = DeckType.default
     ) -> Deck:
         user_decks = self.get_multi_by_owner(db, user=user)
-        owned_deck = [user_deck for user_deck in user_decks if user_deck.title == proposed_deck]
+        owned_deck = [user_deck for user_deck in user_decks if user_deck.title == proposed_deck and user_deck.deck_type == deck_type]
         if owned_deck:
             user_deck = owned_deck[0]
         else:
+            if not user.is_superuser and deck_type != DeckType.default:
+                raise HTTPException(status_code=423, detail="Only superusers may upload with this deck type")
             user_deck = self.create_with_owner(db=db, obj_in=SuperDeckCreate(title=proposed_deck, deck_type=deck_type),
                                                user=user)
         return user_deck

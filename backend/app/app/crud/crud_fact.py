@@ -342,11 +342,11 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
 
     
 
-    def load_json_facts(self, db: Session, file: SpooledTemporaryFile, user: models.User) -> None:
+    def load_json_facts(self, db: Session, file: SpooledTemporaryFile, user: models.User, deck_type: schemas.DeckType) -> None:
         count = 0
         json_data = json.load(file)
         for fact_obj in json_data:
-            self.create_fact(db, fact_obj, user, DeckType.default)
+            self.create_fact(db, fact_obj, user, deck_type)
             count += 1
         logger.info(f"{count} facts loaded from txt file")
 
