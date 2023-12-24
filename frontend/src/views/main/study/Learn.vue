@@ -185,7 +185,7 @@
         </span>
       </v-card-title>
     </v-card>
-    <v-card class="my-2 mx-3 px-3 py-4 pb-5">
+    <v-card class="my-2 mx-3 px-3 py-4 pb-5" v-show="!mnemonicData.isStudyingMnemonic">
       <v-card-title class="py-0">
         <v-row no-gutters>
           <v-col cols="12" sm="auto">
@@ -210,7 +210,7 @@
             >
               <span class="hidden-xs-only">—</span>
 
-              <span v-if="!mnemonicData.shouldShowMnemonic" class="hidden-xs-only"
+              <span v-if="!mnemonicData.cardHasMnemonic" class="hidden-xs-only"
                 >Identify {{ show.fact && show.fact.identifier }}</span
               >
               <span v-else class="hidden-xs-only">What's the definition?</span>
@@ -234,7 +234,6 @@
           autofocus
           hide-details="auto"
           @keydown="keyHandler"
-          v-if="!mnemonicData.shouldShowMnemonic"
           ><template v-slot:label>
             <span v-if="inTestMode">Required (Test Mode) - </span>
             <span v-else>Recommended - </span>
@@ -252,18 +251,18 @@
     </v-card>
 
     <div
-      v-show="showBack && mnemonicData.shouldShowMnemonic"
+      v-show="mnemonicData.isStudyingMnemonic && mnemonicData.cardHasMnemonic"
       class="my-2 mx-3 px-3 py-4"
     >
       <v-expansion-panels>
         <v-expansion-panels>
           <v-expansion-panel @click="updateMnemonicClick()">
-            <v-expansion-panel-header color="#e0f0ff"
-              ><b>KAR³L-generated Mnemonic Device</b>
+            <v-expansion-panel-header color="#e0f0ff" class="title py-0"
+              ><b>KAR³L-generated Mnemonic Device (ESC)</b>
               <div ref="mnemonicPaneTop"></div>
             </v-expansion-panel-header>
             <v-expansion-panel-content color="#e0f0ff">
-              <p>
+              <p class="title">
                 {{
                   show.fact &&
                     show.fact.extra &&
@@ -271,7 +270,7 @@
                 }}
               </p>
               <v-container class="pl-0" v-if="show.fact && !hasSubmittedFeedback()">
-                <v-subheader class="pl-0 pt-4">Submit Feedback (Optional)</v-subheader>
+                <v-subheader class="pl-0 pt-0 body-1">Submit Feedback (Optional)</v-subheader>
                 <v-rating
                   hover
                   :length="5"
@@ -279,14 +278,14 @@
                   :model-value="5"
                   active-color="black"
                   v-model="mnemonicData.mnemonicRating"
-                  class="pb-2"
+                  class="pb-5"
                 />
                 <v-subheader
                   v-show="
                     mnemonicData.mnemonicRating === 1 ||
                       mnemonicData.mnemonicRating === 2
                   "
-                  class="pl-0 pt-0"
+                  class="pl-0 pt-0 body-1"
                   >Why is this mnemonic bad? (Optional)</v-subheader
                 >
                 <v-container
@@ -327,7 +326,8 @@
                     v-model="mnemonicData.otherReason"
                   ></v-text-field>
                 </v-container>
-                <v-btn medium class="pt-0 mt-0" @click="submitFeedback()">Submit</v-btn>
+
+                <v-btn medium @click="submitFeedback()">Submit</v-btn>                
               </v-container>
               <v-container class="pl-0 pt-8" v-else>
                 <p class="primary--text"><i>Thank you for submitting feedback!</i></p>
@@ -339,15 +339,16 @@
     </div>
 
     <v-card v-show="showBack && show.enable_show_back" class="my-2 mx-3 px-3 py-4">
-      <v-card-title class="py-0">
-        <div class="title">Answer</div>
+      <v-card-title class="py-0" v-if="mnemonicData.cardHasMnemonic">
+        <span>Definition for <a :href="'https://www.merriam-webster.com/dictionary/' + show.text"><b>{{show.text}}</b></a></span>
       </v-card-title>
+      <v-card-title class="py-0" v-else>Answer</v-card-title>
       <v-card-text class="pb-0 pt-1">
-        <div v-if="!mnemonicData.shouldShowMnemonic" class="title primary--text">
+        <div v-if="!mnemonicData.cardHasMnemonic" class="title primary--text">
           {{ show.fact && show.fact.answer }}
-        </div>
-        <div v-else class="title primary--text" style="white-space: pre-wrap;">{{show.fact && show.fact.answer}}</div>
-        <span v-show="showResponseBtns" v-if="!mnemonicData.shouldShowMnemonic">
+        </div><div v-else class="title primary--text" style="white-space: pre-wrap;">{{ show.fact && show.fact.answer }}</div>
+        <div v-show="mnemonicData.cardHasMnemonic && !mnemonicData.isStudyingMnemonic"><br /></div>
+        <span v-show="showResponseBtns && !mnemonicData.isStudyingMnemonic">
           <div class="title">You typed: '{{ typed }}'</div>
           <div
             v-if="recommendation"
@@ -372,13 +373,13 @@
           label="Optional - Retype Answer (Press any letter to focus)"
           autofocus
           hide-details="auto"
-          v-if="!mnemonicData.shouldShowMnemonic"
+          v-if="!mnemonicData.cardHasMnemonic || (mnemonicData.cardHasMnemonic && mnemonicData.isStudyingMnemonic)"
         ></v-text-field>
       </v-card-text>
       <v-card-actions class="pt-3 pb-1 px-5">
         <v-row class="shrink" justify="space-around">
           <v-col
-            v-show="showResponseBtns"
+            v-show="showResponseBtns && !mnemonicData.isStudyingMnemonic"
             cols="5"
             sm="auto"
             class="ma-1 pa-1 py-0 shrink"
@@ -387,12 +388,25 @@
               ref="wrong"
               :color="!recommendation ? 'red' : ''"
               class="px-2"
-              @click="response(false)"
+              @click="mnemonicData.cardHasMnemonic ? mnemonicResponse() : response(false)"
               >wrong ([)</v-btn
             >
           </v-col>
           <v-col
-            v-show="showResponseBtns"
+            v-show="mnemonicData.isStudyingMnemonic"
+            cols="5"
+            sm="auto"
+            class="ma-1 pa-1 py-0 shrink"
+          >
+            <v-btn
+              ref="continue"
+              class="px-2"
+              @click=response(false)
+              >Continue ([)</v-btn
+            >
+          </v-col>
+          <v-col
+            v-show="showResponseBtns && !mnemonicData.isStudyingMnemonic"
             id="response"
             cols="5"
             sm="auto"
@@ -400,7 +414,7 @@
           >
             <v-btn
               ref="right"
-              :color="recommendation || mnemonicData.shouldShowMnemonic ? 'green' : ''"
+              :color="recommendation ? 'green' : ''"
               class="px-2"
               @click="response(true)"
               >right (])</v-btn
@@ -476,7 +490,8 @@
       mnemonicGroup: "",
       mnemonicClick: false,
       mnemonicHasBeenClicked: false,
-      shouldShowMnemonic: false,
+      cardHasMnemonic: false,
+      isStudyingMnemonic: false,
       isIncorrectDefinition: false,
       isDifficultToUnderstand: false,
       isBadKeywordLink: false,
@@ -484,6 +499,7 @@
       isOther: false,
       otherReason: "",
       mnemonicRating: 0,
+      response: null,
       feedbackFactIds: new Set(),
     };
     fromQuickStudy = true;
@@ -571,10 +587,10 @@
       studyStore.setResume(this.is_resume);
       await studyStore.getStudyFacts();
 
-      this.mnemonicData.shouldShowMnemonic =
+      this.mnemonicData.cardHasMnemonic =
         this.show.fact !== undefined &&
         this.show.fact.deck.title === this.mnemonicData.vocabIdentifier;
-      if (this.mnemonicData.shouldShowMnemonic) {
+      if (this.mnemonicData.cardHasMnemonic) {
         await this.setupMnemonicData();
       }
       studyStore.setResume(false);
@@ -653,7 +669,7 @@
           !e.altKey &&
           !e.metaKey &&
           !e.shiftKey &&
-          !e.ctrlKey
+          !e.ctrlKey && !this.mnemonicData.cardHasMnemonic
         ) {
           this.$nextTick(() => {
             this.$refs.answerfield.focus();
@@ -669,12 +685,17 @@
     public determineResponse(e: KeyboardEvent, key: string) {
       if (key == "enter" && !e.shiftKey) {
         // this.showResponseBtns ensures that response is never true when user doesn't know
-        this.response(this.recommendation && this.showResponseBtns);
+        // !this.mnemonicData.isStudyingMnemonic ensures that response is never true when the user is studying the mnemonic (only studies the mnemonic when wrong)
+        this.response(this.recommendation && this.showResponseBtns && !this.mnemonicData.isStudyingMnemonic);
       } else if (key == "[") {
-        this.response(false);
-      } else if (key == "]" && this.showResponseBtns) {
+        if (this.mnemonicData.cardHasMnemonic && !this.mnemonicData.isStudyingMnemonic) {
+          this.mnemonicResponse();
+        } else if (this.showResponseBtns) {
+          this.response(false);
+        }
+      } else if (key == "]" && this.showResponseBtns && !this.mnemonicData.isStudyingMnemonic) {
         this.response(true);
-      } else if (key == "escape" && this.mnemonicData.shouldShowMnemonic) {
+      } else if (key == "escape" && this.mnemonicData.cardHasMnemonic) {
         this.toggleMnemonic();
       } else if (
         /^[a-z0-9]$/i.test(key) &&
@@ -763,6 +784,7 @@
       this.mnemonicData.isOffensive = false;
       this.mnemonicData.isOther = false;
       this.mnemonicData.isIncorrectDefinition = false;
+      this.mnemonicData.isStudyingMnemonic = false;
     }
 
     public async dontKnow() {
@@ -829,6 +851,11 @@
       });
     }
 
+    public async mnemonicResponse() {
+      this.mnemonicData.isStudyingMnemonic = true;
+      this.toggleMnemonic();
+    }
+
     public async response(response) {
       if (response) {
         mainStore.addNotification({
@@ -847,7 +874,7 @@
         this.show &&
         this.show.fact &&
         this.studyset &&
-        this.mnemonicData.shouldShowMnemonic
+        this.mnemonicData.cardHasMnemonic
       ) {
         await mainStore.createMnemonicFeedbackLog({
           data: {
@@ -884,7 +911,7 @@
         this.resetCard();
       }
 
-      if (this.mnemonicData.shouldShowMnemonic) {
+      if (this.mnemonicData.cardHasMnemonic) {
         await this.resetMnemonicData();
       }
     }
