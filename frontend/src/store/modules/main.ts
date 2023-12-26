@@ -644,7 +644,7 @@ export default class MainModule extends VuexModule {
   }
 
   @Action
-  async createMnemonicFeedbackLog(payload: { data: IComponents["MnemonicCreate"] }) {
+  async createMnemonicFeedbackLog(payload: { data: IComponents["MnemonicCreateLog"] }) {
     try {
       const _response = (
         await Promise.all([

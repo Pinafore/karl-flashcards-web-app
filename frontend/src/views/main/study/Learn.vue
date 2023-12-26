@@ -497,7 +497,6 @@
       mnemonicGroup: "",
       retypedMnemonic: "",
       mnemonicClick: false,
-      mnemonicHasBeenClicked: false,
       cardHasMnemonic: false,
       isStudyingMnemonic: false,
       isIncorrectDefinition: false,
@@ -768,8 +767,6 @@
 
     public async updateMnemonicClick() {
       this.mnemonicData.mnemonicClick = !this.mnemonicData.mnemonicClick;
-      this.mnemonicData.mnemonicHasBeenClicked =
-        this.mnemonicData.mnemonicHasBeenClicked || this.mnemonicData.mnemonicClick;
     }
 
     public async toggleMnemonic() {
@@ -795,7 +792,6 @@
       if (this.mnemonicData.mnemonicClick) {
         await this.toggleMnemonic();
       }
-      this.mnemonicData.mnemonicHasBeenClicked = false;
       this.mnemonicData.mnemonicRating = 0;
       this.mnemonicData.isBadKeywordLink = false;
       this.mnemonicData.isDifficultToUnderstand = false;
@@ -903,7 +899,6 @@
             study_id: this.studyset.id,
             fact_id: this.show.fact.fact_id,
             user_id: this.studyset.user.id,
-            viewed_mnemonic: this.mnemonicData.mnemonicHasBeenClicked,
             user_rating: this.mnemonicData.mnemonicRating,
             is_offensive: this.mnemonicData.isOffensive,
             is_incorrect_definition: this.mnemonicData.isIncorrectDefinition,
@@ -926,7 +921,6 @@
           elapsed_milliseconds_answer: this.backTime,
           test_mode: this.inTestMode,
           recommendation: this.recommendation,
-          viewed_mnemonic: this.mnemonicData.mnemonicHasBeenClicked,
         });
         this.resetCard();
         await studyStore.updateSchedule();

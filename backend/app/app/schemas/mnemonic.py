@@ -16,7 +16,6 @@ class Mnemonic(BaseModel):
     fact_id: int
     user_id: int
     user_rating: Optional[int] = None
-    viewed_mnemonic: Optional[bool] = False
     is_offensive: Optional[bool] = None
     is_incorrect_definition: Optional[bool] = None
     is_difficult_to_understand: Optional[bool] = None

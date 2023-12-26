@@ -126,11 +126,10 @@ export interface IComponents {
   HTTPValidationError: {
     detail?: IComponents["ValidationError"][];
   };
-  MnemonicCreate: {
+  MnemonicCreateLog: {
     study_id: number;
     fact_id: number;
     user_id: number;
-    viewed_mnemonic?: boolean;
     user_rating?: number;
     is_offensive?: boolean;
     is_incorrect_definition?: boolean;

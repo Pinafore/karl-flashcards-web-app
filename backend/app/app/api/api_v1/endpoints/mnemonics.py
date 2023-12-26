@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 @router.post("/", response_model=schemas.Mnemonic)
-def create_mnemonic(
+def create_mnemonic_log(
         *,
         db: Session = Depends(deps.get_db),
         mnemonic_in: schemas.Mnemonic,
@@ -33,7 +33,6 @@ def create_mnemonic(
         'fact_id': mnemonic.fact_id,
         'user_id': mnemonic.user_id,
         'user_rating': mnemonic.user_rating,
-        'viewed_mnemonic': mnemonic.viewed_mnemonic,
         'is_bad_keyword_link': mnemonic.is_bad_keyword_link,
         'is_difficult_to_understand': mnemonic.is_difficult_to_understand,
         'is_incorrect_definition': mnemonic.is_incorrect_definition,
