@@ -258,7 +258,7 @@
         <v-expansion-panels>
           <v-expansion-panel @click="updateMnemonicClick()">
             <v-expansion-panel-header color="#e0f0ff" class="title py-0"
-              ><b>KAR³L-generated Mnemonic Device (ESC)</b>
+              ><b>KAR³L-generated Mnemonic Device</b>
               <div ref="mnemonicPaneTop"></div>
             </v-expansion-panel-header>
             <v-expansion-panel-content color="#e0f0ff">
@@ -373,7 +373,16 @@
           label="Optional - Retype Answer (Press any letter to focus)"
           autofocus
           hide-details="auto"
-          v-if="!mnemonicData.cardHasMnemonic || (mnemonicData.cardHasMnemonic && mnemonicData.isStudyingMnemonic)"
+          v-if="!mnemonicData.cardHasMnemonic"
+        ></v-text-field>
+        <v-text-field
+          id="retype_answer"
+          ref="retype_mnemonic"
+          v-model="mnemonicData.retypedMnemonic"
+          solo
+          label="Optional - Retype Answer"
+          hide-details="auto"
+          v-if="mnemonicData.cardHasMnemonic && mnemonicData.isStudyingMnemonic"
         ></v-text-field>
       </v-card-text>
       <v-card-actions class="pt-3 pb-1 px-5">
@@ -393,19 +402,6 @@
             >
           </v-col>
           <v-col
-            v-show="mnemonicData.isStudyingMnemonic"
-            cols="5"
-            sm="auto"
-            class="ma-1 pa-1 py-0 shrink"
-          >
-            <v-btn
-              ref="continue"
-              class="px-2"
-              @click=response(false)
-              >Continue ([)</v-btn
-            >
-          </v-col>
-          <v-col
             v-show="showResponseBtns && !mnemonicData.isStudyingMnemonic"
             id="response"
             cols="5"
@@ -421,7 +417,7 @@
             >
           </v-col>
           <v-col
-            v-show="!showResponseBtns"
+            v-show="!showResponseBtns || mnemonicData.isStudyingMnemonic"
             cols="5"
             sm="auto"
             class="ma-1 pa-1 py-0 shrink"
@@ -488,6 +484,7 @@
     mnemonicData = {
       vocabIdentifier: process.env.VUE_APP_VOCAB_DECK,
       mnemonicGroup: "",
+      retypedMnemonic: "",
       mnemonicClick: false,
       mnemonicHasBeenClicked: false,
       cardHasMnemonic: false,
@@ -661,7 +658,7 @@
         } else if (this.showBack) {
           this.determineResponse(e, key);
         } else if (e.shiftKey && key == "enter" && this.show.enable_show_back) {
-          this.dontKnow();
+            this.dontKnow();
         } else if (key == "enter" && this.show.enable_show_back) {
           this.showAnswer();
         } else if (
@@ -669,7 +666,7 @@
           !e.altKey &&
           !e.metaKey &&
           !e.shiftKey &&
-          !e.ctrlKey && !this.mnemonicData.cardHasMnemonic
+          !e.ctrlKey
         ) {
           this.$nextTick(() => {
             this.$refs.answerfield.focus();
@@ -788,6 +785,9 @@
     }
 
     public async dontKnow() {
+      if (this.mnemonicData.cardHasMnemonic && !this.mnemonicData.isStudyingMnemonic) {
+        this.mnemonicResponse();
+      }
       this.showResponseBtns = false;
       this.showBack = true;
       this.scrollToResponseButtons();
@@ -808,6 +808,7 @@
       this.showResponseBtns = true;
       this.typed = "";
       this.retyped = "";
+      this.mnemonicData.retypedMnemonic = "";
       this.scrollToFront();
     }
 
