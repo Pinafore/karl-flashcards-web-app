@@ -19,8 +19,6 @@ class Mnemonic(Base):
     study_id = Column(Integer, ForeignKey("studyset.id"))
     fact_id = Column(Integer, ForeignKey("fact.fact_id"))
     user_id = Column(Integer, ForeignKey("user.id"))
-    
-    viewed_mnemonic = Column(Boolean, nullable=True, default=False)
 
     user_rating = Column(Integer, nullable=True)
     

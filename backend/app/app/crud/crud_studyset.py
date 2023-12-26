@@ -387,7 +387,6 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                 "debug_id": debug_id,
                 "recall_target": user.recall_target,
                 "recommendation": schedule.recommendation,
-                "viewed_mnemonic": schedule.viewed_mnemonic,
                 "set_type": set_type
             }
             if schedule.elapsed_seconds_text:
@@ -423,7 +422,6 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                 test_mode=fact.deck_id if set_type in {schemas.SetType.test, schemas.SetType.post_test} else None,
                 set_type=set_type,
                 recommendation=schedule.recommendation,
-                viewed_mnemonic=schedule.viewed_mnemonic,
                 fact=schemas.KarlFactV2.from_orm(fact)).dict(exclude_unset=True)
             logger.info("payload update: " + str(payload_update))
             request = requests.post(settings.INTERFACE + "api/karl/update_v2", json=payload_update)

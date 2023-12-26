@@ -15,7 +15,6 @@ class Schedule(BaseModel):
     elapsed_seconds_answer: Optional[int] = None
     elapsed_milliseconds_text: Optional[int] = None
     elapsed_milliseconds_answer: Optional[int] = None
-    viewed_mnemonic: Optional[bool] = False
 
 
 class ScheduleResponse(BaseModel):

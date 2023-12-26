@@ -67,7 +67,6 @@ class UpdateRequestV2(BaseModel):
     test_mode: Optional[int]
     set_type: SetType
     recommendation: bool
-    viewed_mnemonic: Optional[bool]
     fact: KarlFactV2
 
 # Deprecated?

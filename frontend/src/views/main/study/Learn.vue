@@ -692,11 +692,15 @@
       if (key == "enter" && !e.shiftKey) {
         // this.showResponseBtns ensures that response is never true when user doesn't know
         // !this.mnemonicData.isStudyingMnemonic ensures that response is never true when the user is studying the mnemonic (only studies the mnemonic when wrong)
+        if (!this.recommendation && this.mnemonicData.cardHasMnemonic) {
+          this.mnemonicResponse();
+        } else {
         this.response(
           this.recommendation &&
             this.showResponseBtns &&
             !this.mnemonicData.isStudyingMnemonic,
         );
+      }
       } else if (key == "[") {
         if (
           this.mnemonicData.cardHasMnemonic &&
@@ -719,7 +723,7 @@
         !e.altKey &&
         !e.metaKey &&
         !e.shiftKey &&
-        !e.ctrlKey
+        !e.ctrlKey && !this.mnemonicData.cardHasMnemonic
       ) {
         this.$nextTick(() => {
           this.$refs.retype.focus();
