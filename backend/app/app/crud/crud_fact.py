@@ -247,7 +247,7 @@ class CRUDFact(CRUDBase[models.Fact, schemas.FactCreate, schemas.FactUpdate]):
                     models.User_Deck.owner_id == user.id).subquery())
         else:
             visible_decks = (
-                db.query(models.Deck.id).filter(models.Deck.deck_type.in_([DeckType.default, DeckType.public])).join(models.User_Deck).filter(
+                db.query(models.Deck.id).filter(models.Deck.deck_type.in_([DeckType.default, DeckType.public, DeckType.public_mnemonic])).join(models.User_Deck).filter(
                     models.User_Deck.owner_id == user.id).subquery())
         user_facts = (db.query(models.Fact).join(visible_decks, models.Fact.deck_id == visible_decks.c.id).filter(
             models.Fact.user_id == user.id))

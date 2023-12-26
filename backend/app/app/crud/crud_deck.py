@@ -92,7 +92,7 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
     def get_public(
             self, db: Session, unowned: bool, user: User
     ) -> List[Deck]:
-        query = db.query(self.model).filter(Deck.deck_type == DeckType.public,
+        query = db.query(self.model).filter(Deck.deck_type.in_([DeckType.public, DeckType.public_mnemonic]),
                                             Deck.id != 1)
         if unowned:
             query = query.filter(not_(Deck.users.any(id=user.id)))

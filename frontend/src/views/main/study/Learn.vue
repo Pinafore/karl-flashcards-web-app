@@ -270,7 +270,9 @@
                 }}
               </p>
               <v-container class="pl-0" v-if="show.fact && !hasSubmittedFeedback()">
-                <v-subheader class="pl-0 pt-0 body-1">Submit Feedback (Optional)</v-subheader>
+                <v-subheader class="pl-0 pt-0 body-1"
+                  >Submit Feedback (Optional)</v-subheader
+                >
                 <v-rating
                   hover
                   :length="5"
@@ -327,7 +329,7 @@
                   ></v-text-field>
                 </v-container>
 
-                <v-btn medium @click="submitFeedback()">Submit</v-btn>                
+                <v-btn medium @click="submitFeedback()">Submit</v-btn>
               </v-container>
               <v-container class="pl-0 pt-8" v-else>
                 <p class="primary--text"><i>Thank you for submitting feedback!</i></p>
@@ -340,14 +342,22 @@
 
     <v-card v-show="showBack && show.enable_show_back" class="my-2 mx-3 px-3 py-4">
       <v-card-title class="py-0" v-if="mnemonicData.cardHasMnemonic">
-        <span>Definition for <a :href="'https://www.merriam-webster.com/dictionary/' + show.text"><b>{{show.text}}</b></a></span>
+        <span
+          >Definition for
+          <a :href="'https://www.merriam-webster.com/dictionary/' + show.text"
+            ><b>{{ show.text }}</b></a
+          ></span
+        >
       </v-card-title>
       <v-card-title class="py-0" v-else>Answer</v-card-title>
       <v-card-text class="pb-0 pt-1">
         <div v-if="!mnemonicData.cardHasMnemonic" class="title primary--text">
           {{ show.fact && show.fact.answer }}
-        </div><div v-else class="title primary--text" style="white-space: pre-wrap;">{{ show.fact && show.fact.answer }}</div>
-        <div v-show="mnemonicData.cardHasMnemonic && !mnemonicData.isStudyingMnemonic"><br /></div>
+        </div>
+        <div v-else class="title primary--text" style="white-space: pre-wrap;">{{ show.fact && show.fact.answer }}</div>
+        <div v-show="mnemonicData.cardHasMnemonic && !mnemonicData.isStudyingMnemonic">
+          <br />
+        </div>
         <span v-show="showResponseBtns && !mnemonicData.isStudyingMnemonic">
           <div class="title">You typed: '{{ typed }}'</div>
           <div
@@ -397,7 +407,9 @@
               ref="wrong"
               :color="!recommendation ? 'red' : ''"
               class="px-2"
-              @click="mnemonicData.cardHasMnemonic ? mnemonicResponse() : response(false)"
+              @click="
+                mnemonicData.cardHasMnemonic ? mnemonicResponse() : response(false)
+              "
               >wrong ([)</v-btn
             >
           </v-col>
@@ -482,7 +494,6 @@
     pressed = false;
     showResponseBtns = true;
     mnemonicData = {
-      vocabIdentifier: process.env.VUE_APP_VOCAB_DECK,
       mnemonicGroup: "",
       retypedMnemonic: "",
       mnemonicClick: false,
@@ -583,10 +594,9 @@
       window.addEventListener("keyup", this.resetKeyListener);
       studyStore.setResume(this.is_resume);
       await studyStore.getStudyFacts();
-
       this.mnemonicData.cardHasMnemonic =
         this.show.fact !== undefined &&
-        this.show.fact.deck.title === this.mnemonicData.vocabIdentifier;
+        this.show.fact.deck.deck_type == "public_mnemonic";
       if (this.mnemonicData.cardHasMnemonic) {
         await this.setupMnemonicData();
       }
@@ -619,7 +629,7 @@
         }
       } else {
         const decks = mainStore.publicDecks
-          .filter((deck) => deck.title === this.mnemonicData.vocabIdentifier)
+          .filter((deck) => deck.deck_type === "public_mnemonic")
           .map((deck) => deck.id);
         studyStore.setDeckIds(decks);
       }
@@ -658,7 +668,7 @@
         } else if (this.showBack) {
           this.determineResponse(e, key);
         } else if (e.shiftKey && key == "enter" && this.show.enable_show_back) {
-            this.dontKnow();
+          this.dontKnow();
         } else if (key == "enter" && this.show.enable_show_back) {
           this.showAnswer();
         } else if (
@@ -683,14 +693,25 @@
       if (key == "enter" && !e.shiftKey) {
         // this.showResponseBtns ensures that response is never true when user doesn't know
         // !this.mnemonicData.isStudyingMnemonic ensures that response is never true when the user is studying the mnemonic (only studies the mnemonic when wrong)
-        this.response(this.recommendation && this.showResponseBtns && !this.mnemonicData.isStudyingMnemonic);
+        this.response(
+          this.recommendation &&
+            this.showResponseBtns &&
+            !this.mnemonicData.isStudyingMnemonic,
+        );
       } else if (key == "[") {
-        if (this.mnemonicData.cardHasMnemonic && !this.mnemonicData.isStudyingMnemonic) {
+        if (
+          this.mnemonicData.cardHasMnemonic &&
+          !this.mnemonicData.isStudyingMnemonic
+        ) {
           this.mnemonicResponse();
         } else if (this.showResponseBtns) {
           this.response(false);
         }
-      } else if (key == "]" && this.showResponseBtns && !this.mnemonicData.isStudyingMnemonic) {
+      } else if (
+        key == "]" &&
+        this.showResponseBtns &&
+        !this.mnemonicData.isStudyingMnemonic
+      ) {
         this.response(true);
       } else if (key == "escape" && this.mnemonicData.cardHasMnemonic) {
         this.toggleMnemonic();

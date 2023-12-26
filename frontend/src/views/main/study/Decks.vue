@@ -48,23 +48,20 @@
       show-select
       @click:row="openDeck"
     >
+      <template v-slot:header.data-table-select>
+        <v-simple-checkbox
+          :value="areAllSelectedExceptMnemonic()"
+          @input="toggleAllExceptMnemonic"
+        ></v-simple-checkbox>
+      </template>
 
-    <template v-slot:header.data-table-select>
-      <v-simple-checkbox
-        :value="areAllSelectedExceptVocab()"
-        @input="toggleAllExceptVocab"
-      ></v-simple-checkbox>
-    </template>
-    
-    <template v-slot:item.data-table-select="{item}">
-      <v-simple-checkbox
-        v-ripple
-        :value="isSelected(item)"
-        @input="updateSelection(item)"
-      ></v-simple-checkbox>
-    </template>
-
-
+      <template v-slot:item.data-table-select="{ item }">
+        <v-simple-checkbox
+          v-ripple
+          :value="isSelected(item)"
+          @input="updateSelection(item)"
+        ></v-simple-checkbox>
+      </template>
     </v-data-table>
   </div>
 </template>
@@ -92,7 +89,6 @@
     selected: IComponents["Deck"][] = [];
     studyNumOptions: number[] = [5, 10, 20, 30, 50];
     selectedNum = 20;
-    vocabIdentifier = process.env.VUE_APP_VOCAB_DECK + " (Can only be studied on its own!)";
 
     async mounted() {
       studyStore.setStudySet(null);
@@ -104,9 +100,18 @@
 
     get decks() {
       if (!mainStore.userProfile || !mainStore.userProfile.decks) {
-        return []
+        return [];
       }
-      return mainStore.userProfile.decks.map(i => (this.vocabIdentifier.includes(i.title) ? {'title': i.title + " (Can only be studied on its own!)", 'id': i.id, 'public': i.public} : i))
+      return mainStore.userProfile.decks.map((i) =>
+        i.deck_type == "public_mnemonic"
+          ? {
+              title: i.title + " (Mnemonic Deck—Can only be studied on its own!)",
+              id: i.id,
+              public: i.public,
+              deck_type: i.deck_type,
+            }
+          : i,
+      );
     }
 
     get resumeAvail() {
@@ -117,40 +122,44 @@
       return this.selected.length == 0 || this.selected.length == this.decks.length;
     }
 
-    public areAllSelectedExceptVocab() {
-      return this.decks.filter(i => i.title !== this.vocabIdentifier).every(i => this.selected.map(j => j.title).includes(i.title));
+    public areAllSelectedExceptMnemonic() {
+      return this.decks
+        .filter((i) => i.deck_type !== 'public_mnemonic')
+        .every((i) => this.selected.map((j) => j.title).includes(i.title));
     }
 
-    public toggleAllExceptVocab() {
-      if (this.areAllSelectedExceptVocab()) {
+    public toggleAllExceptMnemonic() {
+      if (this.areAllSelectedExceptMnemonic()) {
         this.selected = [];
       } else {
-        this.selected = this.decks.filter(i => i.title !== this.vocabIdentifier);
+        this.selected = this.decks.filter((i) => i.deck_type !== 'public_mnemonic');
       }
     }
 
     public isSelected(id) {
       return this.selected.includes(id);
-    };
-    
+    }
+
     public updateSelection(id) {
-      if (id.title === this.vocabIdentifier) {
+      if (id.deck_type == 'public_mnemonic') {
         if (this.isSelected(id)) {
           this.selected = [];
         } else {
           this.selected = [id];
         }
       } else {
-        const specialIndex = this.selected.map(i => i.title).indexOf(this.vocabIdentifier);
+        const specialIndex = this.selected
+          .map((i) => i.deck_type)
+          .indexOf('public_mnemonic');
         if (specialIndex !== -1) {
-          this.selected.splice(specialIndex, 1)
+          this.selected.splice(specialIndex, 1);
         }
         const index = this.selected.indexOf(id);
-    if (index === -1) {
-      this.selected.push(id);
-    } else {
-      this.selected.splice(index, 1);
-    }
+        if (index == -1) {
+          this.selected.push(id);
+        } else {
+          this.selected.splice(index, 1);
+        }
       }
     }
 

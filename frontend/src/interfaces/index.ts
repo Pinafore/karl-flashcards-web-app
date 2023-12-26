@@ -35,7 +35,7 @@ export interface IStatus {
   reported?: boolean;
 }
 export interface IComponents {
-  Deck: { title: string; public: boolean; id: number };
+  Deck: { title: string; public: boolean; id: number; deck_type: string; };
   DeckCreate: { title: string };
   SuperDeckCreate: { title: string; public?: boolean };
   DeckUpdate: { title?: string };
