@@ -229,6 +229,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         print('Deck IDs:', deck_ids)
 
         show_hidden = setType == schemas.SetType.post_test or setType == schemas.SetType.test
+        is_mnemonic_deck = (decks[0].deck_type == schemas.DeckType.public_mnemonic)
         filters = schemas.FactSearch(deck_ids=deck_ids, limit=send_limit, studyable=True, show_hidden=show_hidden)
         base_facts_query = crud.fact.build_facts_query(db=db, user=user, filters=filters)
         #logger.info(base_facts_query)
@@ -241,7 +242,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
 
         print('Final repetition model:', repetition_model)
         
-        if repetition_model == schemas.Repetition.karl:
+        if repetition_model == schemas.Repetition.karl and not is_mnemonic_deck:
             eligible_facts = crud.fact.get_eligible_facts(query=base_facts_query, limit=send_limit, randomize=True)
         else:
             eligible_old_facts_query = crud.helper.filter_only_reviewed_facts(query=base_facts_query, user_id=user.id, log_type=schemas.Log.study)
@@ -277,11 +278,13 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             logger.info("debug id: " + debug_id)
 
             old_facts = facts
-            if repetition_model != schemas.Repetition.karl:
+            if repetition_model != schemas.Repetition.karl or is_mnemonic_deck:
                 eligible_new_facts_query = crud.helper.filter_only_new_facts(query=base_facts_query, user_id=user.id, log_type=schemas.Log.study)
                 new_facts = crud.fact.get_eligible_facts(query=eligible_new_facts_query, limit=return_limit, randomize=True)
                 logger.info("new facts: " + str(new_facts))
-                facts = crud.helper.combine_two_fact_sets(new_facts=new_facts, old_facts=facts, return_limit=return_limit)
+                # prioritize newer facts for the mnemonic study
+                proportion_new_facts = 1.0 if is_mnemonic_deck else 0.5
+                facts = crud.helper.combine_two_fact_sets(new_facts=new_facts, old_facts=facts, return_limit=return_limit, proportion_new_facts=proportion_new_facts)
             logger.info(f"Study set created of type {setType}")
             study_set_create = schemas.StudySetCreate(repetition_model=repetition_model, user_id=user.id, debug_id=debug_id, set_type=setType)
             logger.info(f"Study set create: {study_set_create}")

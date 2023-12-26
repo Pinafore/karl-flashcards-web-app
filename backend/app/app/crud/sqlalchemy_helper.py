@@ -60,8 +60,7 @@ class SQLAlchemyHelpers():
     # def is_test_deck(deck_id: int):
     #     return deck_id == settings.TEST_DECK_ID
 
-    def combine_two_fact_sets(self, new_facts: List[models.Fact], old_facts: List[models.Fact], return_limit: int):
-        proportion_new_facts = 0.5
+    def combine_two_fact_sets(self, new_facts: List[models.Fact], old_facts: List[models.Fact], return_limit: int, proportion_new_facts: Optional[float] = 0.5):
         len_new_facts = len(new_facts)
         len_old_facts = len(old_facts)
         lower_lim, upper_lim = math.floor(proportion_new_facts * return_limit), math.ceil(proportion_new_facts * return_limit)
