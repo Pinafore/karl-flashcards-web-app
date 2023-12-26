@@ -58,10 +58,6 @@ def get_next_set(
     else:
         user = current_user
     study_set = crud.studyset.get_study_set(db, user=user, deck_ids=deck_ids, return_limit=limit, force_new=force_new, is_resume=is_resume)
-    print("\n\nSTUDY SET:", study_set.facts, len(study_set.facts), '\n\n')
-
-    for i in range(len(study_set.facts)):
-        study_set.all_facts[i].extra = study_set.facts[i].extra
 
     if isinstance(study_set, HTTPException):
         raise study_set
