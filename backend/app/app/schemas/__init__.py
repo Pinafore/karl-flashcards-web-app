@@ -10,7 +10,7 @@ from .repetition import Repetition
 from .suspend_type import SuspendType
 from .permission import Permission
 from .log import Log
-from .mnemonic import Mnemonic, MnemonicFeedback
+from .mnemonic import MnemonicLearningFeedbackLog, MnemonicComparisonFeedbackLog, MnemonicFeedback
 from .schedule import Schedule, ScheduleResponse
 from .statistics import Statistics
 from .field import Field

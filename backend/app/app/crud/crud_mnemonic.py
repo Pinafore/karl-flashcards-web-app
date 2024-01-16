@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-class CRUDMnemonic(CRUDBase[schemas.Mnemonic, schemas.Mnemonic, schemas.Mnemonic]):
+class CRUDMnemonic(CRUDBase[schemas.MnemonicLearningFeedbackLog, schemas.MnemonicLearningFeedbackLog, schemas.MnemonicLearningFeedbackLog]):
 
     def get(self, db: Session, study_id: Any, fact_id: Any) -> Optional[models.Mnemonic]:
         db_obj = db.query(self.model).filter(models.Mnemonic.fact_id == fact_id and models.Mnemonic.study_id == study_id).first()
@@ -34,7 +34,7 @@ class CRUDMnemonic(CRUDBase[schemas.Mnemonic, schemas.Mnemonic, schemas.Mnemonic
         return {'fact_ids': [list(r)[0] for r in db_obj], 'user_id': obj_in.user_id}
 
     def create_with_owner(
-            self, db: Session, *, obj_in: schemas.Mnemonic, user: models.User,
+            self, db: Session, *, obj_in: schemas.MnemonicLearningFeedbackLog, user: models.User,
     ) -> models.Mnemonic:
         obj_in_data = jsonable_encoder(obj_in)
         now = datetime.now(timezone('UTC')).isoformat()

@@ -1,5 +1,6 @@
 import logging
 import time
+import json
 from datetime import datetime
 from typing import Any, List, Optional
 
@@ -17,30 +18,30 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-@router.post("/", response_model=schemas.Mnemonic)
+@router.post("/", response_model=schemas.MnemonicLearningFeedbackLog or schemas.MnemonicComparisonFeedbackLog)
 def create_mnemonic_log(
         *,
         db: Session = Depends(deps.get_db),
-        mnemonic_in: schemas.Mnemonic,
+        mnemonic_feedback_in: schemas.MnemonicLearningFeedbackLog or schemas.MnemonicComparisonFeedbackLog,
         current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Create new mnemonic data.
     """
-    mnemonic = crud.mnemonic.create_with_owner(db=db, obj_in=mnemonic_in, user=current_user)
-    return {
-        'study_id': mnemonic.study_id,
-        'fact_id': mnemonic.fact_id,
-        'user_id': mnemonic.user_id,
-        'user_rating': mnemonic.user_rating,
-        'is_bad_keyword_link': mnemonic.is_bad_keyword_link,
-        'is_difficult_to_understand': mnemonic.is_difficult_to_understand,
-        'is_incorrect_definition': mnemonic.is_incorrect_definition,
-        'is_offensive': mnemonic.is_offensive,
-        'is_bad_for_other_reason': mnemonic.is_bad_for_other_reason,
-        'other_reason_text': mnemonic.other_reason_text,
-        'correct': mnemonic.correct
-    }
+    #mnemonic = crud.mnemonic.create_with_owner(db=db, obj_in=mnemonic_in, user=current_user)
+
+    log_type = schemas.log.comparison_feedback if (type(mnemonic_feedback_in) == schemas.MnemonicComparisonFeedbackLog) else schemas.log.mnemonic_individual_feedback
+    details = json.dumps(mnemonic_feedback_in.to_dict())
+    history_in = schemas.HistoryCreate(
+        time=datetime.now(timezone('UTC')).isoformat(),
+        user_id=current_user.id,
+        log_type=log_type,
+        fact_id=mnemonic_feedback_in.fact_id,
+        details=details,
+    )
+    crud.history.create(db, history_in)
+
+    return mnemonic_feedback_in
 
 @router.post("/feedback_ids", response_model=schemas.MnemonicFeedback)
 def get_mnemonic_feedback_ids(

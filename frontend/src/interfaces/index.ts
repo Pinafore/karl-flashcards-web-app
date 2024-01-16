@@ -126,7 +126,7 @@ export interface IComponents {
   HTTPValidationError: {
     detail?: IComponents["ValidationError"][];
   };
-  MnemonicCreateLog: {
+  MnemonicLearningFeedbackLog: {
     study_id: number;
     fact_id: number;
     user_id: number;
@@ -138,6 +138,14 @@ export interface IComponents {
     is_bad_for_other_reason?: boolean;
     other_reason_text?: string;
     correct: boolean;
+  }
+  MnemonicComparisonFeedbackLog: {
+    study_id: number;
+    fact_id: number;
+    user_id: number;
+    mnemonic_a: string;
+    mnemonic_b: string;
+    comparison_rating: string;
   }
   MnemonicSearch: {
     user_id: number;

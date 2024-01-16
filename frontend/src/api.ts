@@ -205,7 +205,7 @@ export const api = {
     return axios.put(`${apiUrl}/api/facts/${id}`, data, authHeaders(token));
   },
 
-  async createMnemonicFeedbackLog(token: string, data: IComponents["MnemonicCreateLog"]) {
+  async createMnemonicFeedbackLog(token: string, data: IComponents["MnemonicLearningFeedbackLog"] | IComponents["MnemonicComparisonFeedbackLog"] ) {
     return axios.post(`${apiUrl}/api/mnemonics/`, data, authHeaders(token));
   },
 

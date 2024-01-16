@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import List, Optional, Set
-
+from enum import Enum
 from pydantic import BaseModel, validator
 from sqlalchemy.orm import Query
 
@@ -11,7 +11,7 @@ from app.schemas.permission import Permission
 from app.schemas.target_window import TargetWindow
 
 
-class Mnemonic(BaseModel):
+class MnemonicLearningFeedbackLog(BaseModel):
     study_id: int
     fact_id: int
     user_id: int
@@ -23,6 +23,19 @@ class Mnemonic(BaseModel):
     is_bad_for_other_reason: Optional[bool] = None
     other_reason_text: Optional[str] = None
     correct: bool
+
+class MnemonicComparisonLog(str, Enum):
+    a_better = 'a_better'
+    b_better = 'b_better'
+    equal = 'equal'
+
+class MnemonicComparisonFeedbackLog(BaseModel):
+    study_id: int
+    fact_id: int
+    user_id: int
+    mnemonic_a: str
+    mnemonic_b: str
+    mnemonic_choice: MnemonicComparisonLog
 
 class MnemonicFeedback(BaseModel):
     fact_ids: List[int]
