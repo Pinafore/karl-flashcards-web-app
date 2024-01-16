@@ -25,5 +25,5 @@ class Log(str, Enum):
     update_mnemonic = "update_mnemonic"
     get_post_test_facts = "get_post_test_facts"
     post_test_study = "post_test_study"
-    mnemonic_individual_feedback = "mnemonic_learning_feedback"
+    mnemonic_learning_feedback = "mnemonic_learning_feedback"
     mnemonic_comparison_feedback = "mnemonic_comparison_feedback"

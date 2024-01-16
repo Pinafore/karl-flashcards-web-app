@@ -1,8 +1,6 @@
 import logging
-import time
-import json
 from datetime import datetime
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Form
 from pytz import timezone
@@ -18,20 +16,20 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-@router.post("/", response_model=schemas.MnemonicLearningFeedbackLog or schemas.MnemonicComparisonFeedbackLog)
+@router.post("/", response_model=Union[schemas.MnemonicLearningFeedbackLog, schemas.MnemonicComparisonFeedbackLog])
 def create_mnemonic_log(
         *,
         db: Session = Depends(deps.get_db),
-        mnemonic_feedback_in: schemas.MnemonicLearningFeedbackLog or schemas.MnemonicComparisonFeedbackLog,
+        mnemonic_feedback_in: Union[schemas.MnemonicLearningFeedbackLog, schemas.MnemonicComparisonFeedbackLog],
         current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
-    Create new mnemonic data.
+    Log mnemonic feedback        
     """
-    #mnemonic = crud.mnemonic.create_with_owner(db=db, obj_in=mnemonic_in, user=current_user)
-
-    log_type = schemas.log.comparison_feedback if (type(mnemonic_feedback_in) == schemas.MnemonicComparisonFeedbackLog) else schemas.log.mnemonic_individual_feedback
-    details = json.dumps(mnemonic_feedback_in.to_dict())
+    print('\n\nwe entered!\n\n')
+    log_type = schemas.Log.mnemonic_comparison_feedback if (type(mnemonic_feedback_in) == schemas.MnemonicComparisonFeedbackLog) else schemas.Log.mnemonic_learning_feedback
+    details = mnemonic_feedback_in.dict()
+    print('\n', details, '\n')
     history_in = schemas.HistoryCreate(
         time=datetime.now(timezone('UTC')).isoformat(),
         user_id=current_user.id,
@@ -39,7 +37,7 @@ def create_mnemonic_log(
         fact_id=mnemonic_feedback_in.fact_id,
         details=details,
     )
-    crud.history.create(db, history_in)
+    crud.history.create(db=db, obj_in=history_in)
 
     return mnemonic_feedback_in
 
@@ -51,7 +49,7 @@ def get_mnemonic_feedback_ids(
         current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
-    Create new mnemonic data.
+    Get feedback IDs
     """
     mnemonic_feedback = crud.mnemonic.get_submitted_feedback_ids(db=db, obj_in=mnemonic_feedback_in)
     if type(mnemonic_feedback) == dict:

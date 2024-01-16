@@ -130,13 +130,13 @@ export interface IComponents {
     study_id: number;
     fact_id: number;
     user_id: number;
-    user_rating?: number;
-    is_offensive?: boolean;
-    is_incorrect_definition?: boolean;
-    is_difficult_to_understand?: boolean;
-    is_bad_keyword_link?: boolean;
-    is_bad_for_other_reason?: boolean;
-    other_reason_text?: string;
+    user_rating: number;
+    is_offensive: boolean;
+    is_incorrect_definition: boolean;
+    is_difficult_to_understand: boolean;
+    is_bad_keyword_link: boolean;
+    is_bad_for_other_reason: boolean;
+    other_reason_text: string;
     correct: boolean;
   }
   MnemonicComparisonFeedbackLog: {
@@ -146,6 +146,7 @@ export interface IComponents {
     mnemonic_a: string;
     mnemonic_b: string;
     comparison_rating: string;
+    correct: boolean;
   }
   MnemonicSearch: {
     user_id: number;

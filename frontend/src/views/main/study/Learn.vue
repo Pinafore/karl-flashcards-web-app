@@ -473,7 +473,7 @@
             sm="auto"
             class="ma-1 pa-1 py-0 shrink"
           >
-            <v-btn ref="continue" class="px-2" @click="response(false)"
+            <v-btn ref="continue" class="px-2" @click="response(mnemonicData.response)"
               >continue (Enter)</v-btn
             >
           </v-col>
@@ -607,7 +607,6 @@
     }
 
     get shouldShowTestPopup() {
-      console.log("checking!", studyStore.isContinuedSet);
       if (studyStore.isContinuedSet) {
         return true;
       }
@@ -733,11 +732,10 @@
       if (key == "enter" && !e.shiftKey) {
         // this.showResponseBtns ensures that response is never true when user doesn't know
         // !this.mnemonicData.isStudyingMnemonic ensures that response is never true when the user is studying the mnemonic (only studies the mnemonic when wrong)
-        if (this.mnemonicData.cardHasMnemonic) {
+        if (!this.mnemonicData.isStudyingMnemonic && this.mnemonicData.cardHasMnemonic) {
           this.mnemonicResponse(
             this.recommendation &&
-              this.showResponseBtns &&
-              !this.mnemonicData.isStudyingMnemonic,
+              this.showResponseBtns,
           );
         } else {
           this.response(
@@ -859,12 +857,8 @@
       if (this.mnemonicData.mnemonicClick) {
         await this.toggleMnemonic();
       }
-      const oldFeedbackIDs = this.mnemonicData.feedbackFactIds;
-      this.mnemonicData = {
-        mnemonicGroup: "",
+      const defaultValues = {
         retypedMnemonic: "",
-        mnemonicClick: false,
-        cardHasMnemonic: false,
         isStudyingMnemonic: false,
         isIncorrectDefinition: false,
         isDifficultToUnderstand: false,
@@ -876,8 +870,8 @@
         response: null,
         panelOpen: 0,
         comparisonChoice: "",
-        feedbackFactIds: oldFeedbackIDs,
       };
+      this.mnemonicData = Object.assign({}, this.mnemonicData, defaultValues);
     }
 
     public async dontKnow() {
@@ -975,6 +969,7 @@
         this.mnemonicData.cardHasMnemonic
       ) {
         if (response) {
+          console.log('creating the correct feedback log!')
           await mainStore.createMnemonicFeedbackLog({
             data: {
               study_id: this.studyset.id,

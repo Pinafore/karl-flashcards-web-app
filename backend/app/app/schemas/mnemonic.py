@@ -15,13 +15,13 @@ class MnemonicLearningFeedbackLog(BaseModel):
     study_id: int
     fact_id: int
     user_id: int
-    user_rating: Optional[int] = None
-    is_offensive: Optional[bool] = None
-    is_incorrect_definition: Optional[bool] = None
-    is_difficult_to_understand: Optional[bool] = None
-    is_bad_keyword_link: Optional[bool] = None
-    is_bad_for_other_reason: Optional[bool] = None
-    other_reason_text: Optional[str] = None
+    user_rating: int
+    is_offensive: bool
+    is_incorrect_definition: bool
+    is_difficult_to_understand: bool
+    is_bad_keyword_link: bool
+    is_bad_for_other_reason: bool
+    other_reason_text: str
     correct: bool
 
 class MnemonicComparisonLog(str, Enum):
@@ -35,7 +35,8 @@ class MnemonicComparisonFeedbackLog(BaseModel):
     user_id: int
     mnemonic_a: str
     mnemonic_b: str
-    mnemonic_choice: MnemonicComparisonLog
+    comparison_rating: MnemonicComparisonLog
+    correct: bool
 
 class MnemonicFeedback(BaseModel):
     fact_ids: List[int]
