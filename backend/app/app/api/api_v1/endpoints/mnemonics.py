@@ -26,10 +26,8 @@ def create_mnemonic_log(
     """
     Log mnemonic feedback        
     """
-    print('\n\nwe entered!\n\n')
     log_type = schemas.Log.mnemonic_comparison_feedback if (type(mnemonic_feedback_in) == schemas.MnemonicComparisonFeedbackLog) else schemas.Log.mnemonic_learning_feedback
     details = mnemonic_feedback_in.dict()
-    print('\n', details, '\n')
     history_in = schemas.HistoryCreate(
         time=datetime.now(timezone('UTC')).isoformat(),
         user_id=current_user.id,
@@ -41,7 +39,7 @@ def create_mnemonic_log(
 
     return mnemonic_feedback_in
 
-@router.post("/feedback_ids", response_model=schemas.MnemonicFeedback)
+@router.post("/feedback_ids", response_model=schemas.MnemonicFeedbackDetailed)
 def get_mnemonic_feedback_ids(
         *,
         db: Session = Depends(deps.get_db),
@@ -55,9 +53,11 @@ def get_mnemonic_feedback_ids(
     if type(mnemonic_feedback) == dict:
         return {
             'user_id': mnemonic_feedback_in.user_id,
-            'fact_ids': mnemonic_feedback.get('fact_ids', [])
+            'fact_ids_learning': mnemonic_feedback.get('fact_ids_learning', []),
+            'fact_ids_comparison': mnemonic_feedback.get('fact_ids_comparison', [])
         }
     return {
         'user_id': mnemonic_feedback_in.user_id,
-        'fact_ids': []
+        'fact_ids_learning': [],
+        'fact_ids_comparison': []
     }

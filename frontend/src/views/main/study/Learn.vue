@@ -263,6 +263,7 @@
           </v-expansion-panel-header>
 
           <v-expansion-panel-content v-if="mnemonicData.response" color="#e0f0ff">
+            <v-container v-if="!hasSubmittedFeedback()">
             <v-row>
               <v-col cols="6" class="d-flex">
                 <v-card class="flex">
@@ -297,6 +298,10 @@
                 <v-btn medium @click="submitFeedback(false)">Submit</v-btn>
               </v-col>
             </v-row>
+          </v-container>
+          <v-container class="pl-0 pt-8" v-else>
+              <p class="primary--text"><i>Thank you for submitting feedback!</i></p>
+            </v-container>
           </v-expansion-panel-content>
 
           <v-expansion-panel-content v-else color="#e0f0ff">
@@ -547,9 +552,11 @@
       mnemonicRating: 0,
       response: null,
       panelOpen: 0,
-      comparisonChoice: "",
-      feedbackFactIds: new Set(),
+      comparisonChoice: null,
+      feedbackFactIdsLearning: new Set(),
+      feedbackFactIdsComparison: new Set(),
     };
+
     fromQuickStudy = true;
 
     get studyset() {
@@ -811,7 +818,8 @@
               }),
             },
           });
-          this.mnemonicData.feedbackFactIds = new Set(res.fact_ids);
+          this.mnemonicData.feedbackFactIdsLearning = new Set(res.fact_ids_learning);
+          this.mnemonicData.feedbackFactIdsComparison = new Set(res.fact_ids_comparison);
         }
       }
     }
@@ -825,8 +833,9 @@
     }
 
     public hasSubmittedFeedback() {
+      const feedbackSet = this.mnemonicData.response ? this.mnemonicData.feedbackFactIdsComparison : this.mnemonicData.feedbackFactIdsLearning
       return (
-        this.show.fact && this.mnemonicData.feedbackFactIds.has(this.show.fact.fact_id)
+        this.show.fact && feedbackSet.has(this.show.fact.fact_id)
       );
     }
 
@@ -838,17 +847,22 @@
             color: "error",
           });
         } else if (this.show.fact) {
-          this.mnemonicData.feedbackFactIds.add(this.show.fact.fact_id);
-          this.mnemonicData.feedbackFactIds = new Set([
-            ...this.mnemonicData.feedbackFactIds,
+          this.mnemonicData.feedbackFactIdsLearning.add(this.show.fact.fact_id);
+          this.mnemonicData.feedbackFactIdsLearning = new Set([
+            ...this.mnemonicData.feedbackFactIdsLearning,
           ]);
         }
       } else {
-        if (this.mnemonicData.comparisonChoice == "") {
+        if (this.mnemonicData.comparisonChoice == null) {
           mainStore.addNotification({
             content: "You must make a selection to submit feedback!",
             color: "error",
           });
+        } else if (this.show.fact) {
+          this.mnemonicData.feedbackFactIdsComparison.add(this.show.fact.fact_id);
+          this.mnemonicData.feedbackFactIdsComparison = new Set([
+            ...this.mnemonicData.feedbackFactIdsComparison,
+          ]);
         }
       }
     }

@@ -35,9 +35,15 @@ class MnemonicComparisonFeedbackLog(BaseModel):
     user_id: int
     mnemonic_a: str
     mnemonic_b: str
-    comparison_rating: MnemonicComparisonLog
+    comparison_rating: Optional[MnemonicComparisonLog] = None
     correct: bool
 
 class MnemonicFeedback(BaseModel):
     fact_ids: List[int]
     user_id: int
+
+class MnemonicFeedbackDetailed(BaseModel):
+    fact_ids_learning: List[int]
+    fact_ids_comparison: List[int]
+    user_id: int
+
