@@ -254,8 +254,10 @@
       v-show="mnemonicData.isStudyingMnemonic && mnemonicData.cardHasMnemonic"
       class="my-2 mx-3 px-3 py-4"
     >
-      <v-expansion-panels>
-        <v-expansion-panel @click="updateMnemonicClick()">
+      <v-expansion-panels v-model="mnemonicData.panelOpen" :readonly="mnemonicData.response">
+        <v-expansion-panel
+          @click="updateMnemonicClick()"
+        >
           <v-expansion-panel-header color="#e0f0ff" class="title py-0"
             ><b v-if="mnemonicData.response">KAR³L-generated Mnemonic Devices</b>
             <b v-else>KAR³L-generated Mnemonic Device</b>
@@ -263,44 +265,53 @@
           </v-expansion-panel-header>
 
           <v-expansion-panel-content v-if="mnemonicData.response" color="#e0f0ff">
-            <v-container v-if="!hasSubmittedFeedback()">
-            <v-row>
-              <v-col cols="6" class="d-flex">
-                <v-card class="flex">
-                  <v-card-title class="title">
-                    Mnemonic A
-                  </v-card-title>
-                  <v-card-text class="body-1" style="color: black">
-                    {{ show.fact && show.fact.extra && show.fact.extra["mnemonic_1"] }}
-                  </v-card-text>
-                </v-card>
-              </v-col>
+            <v-container>
+              <v-row>
+                <v-col cols="6" class="d-flex">
+                  <v-card class="flex">
+                    <v-card-title class="title">
+                      Mnemonic A
+                    </v-card-title>
+                    <v-card-text class="body-1" style="color: black">
+                      {{
+                        show.fact &&
+                          show.fact.extra &&
+                          show.fact.extra[
+                            "mnemonic_" + mnemonicData.mnemonicComparisons[0]
+                          ]
+                      }}
+                    </v-card-text>
+                  </v-card>
+                </v-col>
 
-              <v-col cols="6" class="d-flex">
-                <v-card class="flex">
-                  <v-card-title class="title">
-                    Mnemonic B
-                  </v-card-title>
-                  <v-card-text class="body-1" style="color: black">
-                    {{ show.fact && show.fact.extra && show.fact.extra["mnemonic_2"] }}
-                  </v-card-text>
-                </v-card>
-              </v-col>
-              <v-col cols="12"
-                ><div class="body-1" style="color: black;">
-                  Which mnemonic is better?
-                </div>
-                <v-radio-group class="pt-0" v-model="mnemonicData.comparisonChoice">
-                  <v-radio label="Mnemonic A is better" value="a_better"></v-radio>
-                  <v-radio label="Mnemonic A and B are equal" value="equal"></v-radio>
-                  <v-radio label="Mnemonic B is better" value="b_better"></v-radio>
-                </v-radio-group>
-                <v-btn medium @click="submitFeedback(false)">Submit</v-btn>
-              </v-col>
-            </v-row>
-          </v-container>
-          <v-container class="pl-0 pt-8" v-else>
-              <p class="primary--text"><i>Thank you for submitting feedback!</i></p>
+                <v-col cols="6" class="d-flex">
+                  <v-card class="flex">
+                    <v-card-title class="title">
+                      Mnemonic B
+                    </v-card-title>
+                    <v-card-text class="body-1" style="color: black">
+                      {{
+                        show.fact &&
+                          show.fact.extra &&
+                          show.fact.extra[
+                            "mnemonic_" + mnemonicData.mnemonicComparisons[1]
+                          ]
+                      }}
+                    </v-card-text>
+                  </v-card>
+                </v-col>
+                <v-col cols="12"
+                  ><div class="body-1" style="color: black;">
+                    Which mnemonic is better?
+                  </div>
+                  <v-radio-group class="pt-0" v-model="mnemonicData.comparisonChoice">
+                    <v-radio label="Mnemonic A is better" value="a_better"></v-radio>
+                    <v-radio label="Mnemonic A and B are equal" value="equal"></v-radio>
+                    <v-radio label="Mnemonic B is better" value="b_better"></v-radio>
+                  </v-radio-group>
+                  <v-btn medium @click="submitFeedback(false)">Submit (Enter)</v-btn>
+                </v-col>
+              </v-row>
             </v-container>
           </v-expansion-panel-content>
 
@@ -380,7 +391,14 @@
       </v-expansion-panels>
     </div>
 
-    <v-card v-show="showBack && show.enable_show_back" class="my-2 mx-3 px-3 py-4">
+    <v-card
+      v-show="
+        showBack &&
+          show.enable_show_back &&
+          !(mnemonicData.isStudyingMnemonic && mnemonicData.response)
+      "
+      class="my-2 mx-3 px-3 py-4"
+    >
       <v-card-title class="py-0" v-if="mnemonicData.cardHasMnemonic">
         <span
           >Definition for
@@ -518,6 +536,7 @@
   import RecallPopup from "@/views/main/RecallPopup.vue";
   import TestPopup from "@/views/main/TestPopup.vue";
   import StudySet from "@/views/main/StudySet.vue";
+  import { integer } from "vee-validate/dist/rules";
 
   @Component({
     components: { TestPopup, ConnectionPopup, Onboard, RecallPopup, StudySet },
@@ -551,10 +570,11 @@
       otherReason: "",
       mnemonicRating: 0,
       response: null,
-      panelOpen: 0,
+      panelOpen: -1,
       comparisonChoice: null,
       feedbackFactIdsLearning: new Set(),
       feedbackFactIdsComparison: new Set(),
+      mnemonicComparisons: ["", ""],
     };
 
     fromQuickStudy = true;
@@ -739,12 +759,25 @@
       if (key == "enter" && !e.shiftKey) {
         // this.showResponseBtns ensures that response is never true when user doesn't know
         // !this.mnemonicData.isStudyingMnemonic ensures that response is never true when the user is studying the mnemonic (only studies the mnemonic when wrong)
-        if (!this.mnemonicData.isStudyingMnemonic && this.mnemonicData.cardHasMnemonic) {
-          this.mnemonicResponse(
-            this.recommendation &&
-              this.showResponseBtns,
-          );
-        } else {
+        if (
+          this.mnemonicData.cardHasMnemonic &&
+          !this.mnemonicData.isStudyingMnemonic
+        ) {
+          this.mnemonicResponse(this.recommendation && this.showResponseBtns);
+        } else if (
+          this.mnemonicData.cardHasMnemonic &&
+          this.mnemonicData.isStudyingMnemonic
+        ) {
+          if (this.mnemonicData.response && this.mnemonicData.comparisonChoice == null) {
+            mainStore.addNotification({
+              content: "You must make a selection to submit feedback!",
+              color: "error",
+            });
+          } else {
+            this.response(this.mnemonicData.response && this.showResponseBtns)
+          }
+        }
+        else {
           this.response(
             this.recommendation &&
               this.showResponseBtns &&
@@ -752,24 +785,56 @@
           );
         }
       } else if (key == "[") {
+        // when the card has a mnemonic and the user has just entered their answer => show the mnemonic
         if (
           this.mnemonicData.cardHasMnemonic &&
           !this.mnemonicData.isStudyingMnemonic
         ) {
           this.mnemonicResponse(false);
-        } else if (this.showResponseBtns) {
+        }
+        // when the card has a mnemonic and the user already sees the mnemonic => log the response as normal
+        else if (
+          this.mnemonicData.cardHasMnemonic &&
+          this.mnemonicData.isStudyingMnemonic &&
+          !this.mnemonicData.response
+        ) {
+            this.response(false);
+        }
+        // previous response logging logic
+        else if (!this.mnemonicData.cardHasMnemonic && this.showResponseBtns) {
           this.response(false);
         }
       } else if (key == "]") {
+        // when the card has a mnemonic and the user has just entered their answer => show the mnemonic
         if (
           this.mnemonicData.cardHasMnemonic &&
           !this.mnemonicData.isStudyingMnemonic
         ) {
           this.mnemonicResponse(true);
-        } else if (this.showResponseBtns) {
+        }
+        // when the card has a mnemonic and the user already sees the mnemonic => log the response as normal
+        else if (
+          this.mnemonicData.cardHasMnemonic &&
+          this.mnemonicData.isStudyingMnemonic &&
+          this.mnemonicData.response
+        ) {
+          // check that the user has submitted feedback
+          if (this.mnemonicData.comparisonChoice == null) {
+            mainStore.addNotification({
+              content: "You must make a selection to submit feedback!",
+              color: "error",
+            });
+          } else {
+            this.response(true);
+          }
+        }
+        // previous response logging logic
+        else if (!this.mnemonicData.cardHasMnemonic && this.showResponseBtns) {
           this.response(true);
         }
-      } else if (key == "escape" && this.mnemonicData.cardHasMnemonic) {
+      }
+      // toggle the mnemonic pane if possible
+      else if (key == "escape" && this.mnemonicData.cardHasMnemonic) {
         this.toggleMnemonic();
       } else if (
         /^[a-z0-9]$/i.test(key) &&
@@ -819,9 +884,14 @@
             },
           });
           this.mnemonicData.feedbackFactIdsLearning = new Set(res.fact_ids_learning);
-          this.mnemonicData.feedbackFactIdsComparison = new Set(res.fact_ids_comparison);
+          this.mnemonicData.feedbackFactIdsComparison = new Set(
+            res.fact_ids_comparison,
+          );
         }
       }
+      const random_n = Math.random();
+      this.mnemonicData.mnemonicComparisons[0] = random_n > 0.5 ? "1" : "2";
+      this.mnemonicData.mnemonicComparisons[1] = random_n > 0.5 ? "2" : "1";
     }
 
     public async updateMnemonicClick() {
@@ -833,10 +903,10 @@
     }
 
     public hasSubmittedFeedback() {
-      const feedbackSet = this.mnemonicData.response ? this.mnemonicData.feedbackFactIdsComparison : this.mnemonicData.feedbackFactIdsLearning
-      return (
-        this.show.fact && feedbackSet.has(this.show.fact.fact_id)
-      );
+      const feedbackSet = this.mnemonicData.response
+        ? this.mnemonicData.feedbackFactIdsComparison
+        : this.mnemonicData.feedbackFactIdsLearning;
+      return this.show.fact && feedbackSet.has(this.show.fact.fact_id);
     }
 
     public async submitFeedback(isIndividualFeedback: boolean) {
@@ -863,6 +933,7 @@
           this.mnemonicData.feedbackFactIdsComparison = new Set([
             ...this.mnemonicData.feedbackFactIdsComparison,
           ]);
+          this.response(true);
         }
       }
     }
@@ -882,8 +953,8 @@
         otherReason: "",
         mnemonicRating: 0,
         response: null,
-        panelOpen: 0,
-        comparisonChoice: "",
+        panelOpen: -1,
+        comparisonChoice: null,
       };
       this.mnemonicData = Object.assign({}, this.mnemonicData, defaultValues);
     }
@@ -957,9 +1028,15 @@
     }
 
     public async mnemonicResponse(response) {
-      this.mnemonicData.isStudyingMnemonic = true;
+      this.mnemonicData.panelOpen = response ? 0 : -1;
       this.mnemonicData.response = response;
-      this.toggleMnemonic();
+      if (response && this.hasSubmittedFeedback()) {
+        this.response(response);
+      }
+      this.mnemonicData.isStudyingMnemonic = true;
+      if (!response) {
+        this.toggleMnemonic();
+      }
     }
 
     public async response(response) {
@@ -983,7 +1060,7 @@
         this.mnemonicData.cardHasMnemonic
       ) {
         if (response) {
-          console.log('creating the correct feedback log!')
+          console.log("creating the correct feedback log!");
           await mainStore.createMnemonicFeedbackLog({
             data: {
               study_id: this.studyset.id,
@@ -993,12 +1070,16 @@
                 this.show &&
                 this.show.fact &&
                 this.show.fact.extra &&
-                this.show.fact.extra["mnemonic_1"],
+                this.show.fact.extra[
+                  "mnemonic_" + this.mnemonicData.mnemonicComparisons[0]
+                ],
               mnemonic_b:
                 this.show &&
                 this.show.fact &&
                 this.show.fact.extra &&
-                this.show.fact.extra["mnemonic_2"],
+                this.show.fact.extra[
+                  "mnemonic_" + this.mnemonicData.mnemonicComparisons[1]
+                ],
               comparison_rating: this.mnemonicData.comparisonChoice,
               correct: response,
             },

@@ -145,7 +145,7 @@ export interface IComponents {
     user_id: number;
     mnemonic_a: string;
     mnemonic_b: string;
-    comparison_rating?: string;
+    comparison_rating: string | null;
     correct: boolean;
   }
   MnemonicSearch: {
