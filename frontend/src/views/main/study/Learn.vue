@@ -254,10 +254,11 @@
       v-show="mnemonicData.isStudyingMnemonic && mnemonicData.cardHasMnemonic"
       class="my-2 mx-3 px-3 py-4"
     >
-      <v-expansion-panels v-model="mnemonicData.panelOpen" :readonly="mnemonicData.response">
-        <v-expansion-panel
-          @click="updateMnemonicClick()"
-        >
+      <v-expansion-panels
+        v-model="mnemonicData.panelOpen"
+        :readonly="mnemonicData.response"
+      >
+        <v-expansion-panel @click="updateMnemonicClick()">
           <v-expansion-panel-header color="#e0f0ff" class="title py-0"
             ><b v-if="mnemonicData.response">KAR³L-generated Mnemonic Devices</b>
             <b v-else>KAR³L-generated Mnemonic Device</b>
@@ -266,9 +267,20 @@
 
           <v-expansion-panel-content v-if="mnemonicData.response" color="#e0f0ff">
             <v-container>
+              <p class="title">Which mnemonic do you prefer?</p>
               <v-row>
                 <v-col cols="6" class="d-flex">
-                  <v-card class="flex">
+                  <v-card
+                    class="flex"
+                    @mouseover="mnemonicData.hoverA = true"
+                    @mouseleave="mnemonicData.hoverA = false"
+                    :style="
+                      mnemonicData.hoverA
+                        ? { backgroundColor: '#e0e0e0', cursor: 'pointer' }
+                        : {}
+                    "
+                    @click="submitComparisonFeedback('a_better')"
+                  >
                     <v-card-title class="title">
                       Mnemonic A
                     </v-card-title>
@@ -285,7 +297,17 @@
                 </v-col>
 
                 <v-col cols="6" class="d-flex">
-                  <v-card class="flex">
+                  <v-card
+                    class="flex"
+                    @mouseover="mnemonicData.hoverB = true"
+                    @mouseleave="mnemonicData.hoverB = false"
+                    :style="
+                      mnemonicData.hoverB
+                        ? { backgroundColor: '#e0e0e0', cursor: 'pointer' }
+                        : {}
+                    "
+                    @click="submitComparisonFeedback('b_better')"
+                  >
                     <v-card-title class="title">
                       Mnemonic B
                     </v-card-title>
@@ -300,17 +322,17 @@
                     </v-card-text>
                   </v-card>
                 </v-col>
-                <v-col cols="12"
-                  ><div class="body-1" style="color: black;">
-                    Which mnemonic is better?
-                  </div>
-                  <v-radio-group class="pt-0" v-model="mnemonicData.comparisonChoice">
-                    <v-radio label="Mnemonic A is better" value="a_better"></v-radio>
-                    <v-radio label="Mnemonic A and B are equal" value="equal"></v-radio>
-                    <v-radio label="Mnemonic B is better" value="b_better"></v-radio>
-                  </v-radio-group>
-                  <v-btn medium @click="submitFeedback(false)">Submit (Enter)</v-btn>
-                </v-col>
+                <v-col cols="5" sm="auto" class="ma-1 pa-2 pt-5 pb-0 shrink"
+                  ><v-btn medium @click="submitComparisonFeedback('')"
+                    >Skip (Enter)</v-btn
+                  ></v-col
+                >
+                <v-col cols="5" sm="auto" class="ma-1 pa-0 pt-5 pb-0 shrink"
+                  ><v-btn medium @click="submitComparisonFeedback('equal')"
+                    >Equal Preference (Shift-Enter)</v-btn
+                  ></v-col
+                >
+                <v-col cols="12"> </v-col>
               </v-row>
             </v-container>
           </v-expansion-panel-content>
@@ -324,7 +346,7 @@
               }}
             </p>
             <v-container class="pl-0" v-if="show.fact && !hasSubmittedFeedback()">
-              <v-subheader class="pl-0 pt-0 body-1"
+              <v-subheader class="pl-0 pt-0 title"
                 >Submit Feedback (Optional)</v-subheader
               >
               <v-rating
@@ -340,7 +362,7 @@
                 v-show="
                   mnemonicData.mnemonicRating === 1 || mnemonicData.mnemonicRating === 2
                 "
-                class="pl-0 pt-0 body-1"
+                class="pl-0 pt-0 title"
                 >Why is this mnemonic bad? (Optional)</v-subheader
               >
               <v-container
@@ -381,7 +403,7 @@
                 ></v-text-field>
               </v-container>
 
-              <v-btn medium @click="submitFeedback(true)">Submit</v-btn>
+              <v-btn medium @click="submitFeedbackIndividualFeedback()">Submit</v-btn>
             </v-container>
             <v-container class="pl-0 pt-8" v-else>
               <p class="primary--text"><i>Thank you for submitting feedback!</i></p>
@@ -412,7 +434,7 @@
         <div v-if="!mnemonicData.cardHasMnemonic" class="title primary--text">
           {{ show.fact && show.fact.answer }}
         </div>
-        <div v-else class="title primary--text" style="white-space: pre-wrap;">
+        <div v-else class="title primary--text" style="white-space: pre-line;">
           {{ show.fact && show.fact.answer }}
         </div>
         <div v-show="mnemonicData.cardHasMnemonic && !mnemonicData.isStudyingMnemonic">
@@ -571,10 +593,12 @@
       mnemonicRating: 0,
       response: null,
       panelOpen: -1,
-      comparisonChoice: null,
+      comparisonChoice: "",
       feedbackFactIdsLearning: new Set(),
       feedbackFactIdsComparison: new Set(),
       mnemonicComparisons: ["", ""],
+      hoverA: false,
+      hoverB: false,
     };
 
     fromQuickStudy = true;
@@ -734,7 +758,7 @@
         } else if (this.showBack) {
           this.determineResponse(e, key);
         } else if (e.shiftKey && key == "enter" && this.show.enable_show_back) {
-          this.dontKnow();
+            this.dontKnow();
         } else if (key == "enter" && this.show.enable_show_back) {
           this.showAnswer();
         } else if (
@@ -768,16 +792,12 @@
           this.mnemonicData.cardHasMnemonic &&
           this.mnemonicData.isStudyingMnemonic
         ) {
-          if (this.mnemonicData.response && this.mnemonicData.comparisonChoice == null) {
-            mainStore.addNotification({
-              content: "You must make a selection to submit feedback!",
-              color: "error",
-            });
+          if (this.mnemonicData.response) {
+            this.submitComparisonFeedback("");
           } else {
-            this.response(this.mnemonicData.response && this.showResponseBtns)
+            this.response(this.mnemonicData.response && this.showResponseBtns);
           }
-        }
-        else {
+        } else {
           this.response(
             this.recommendation &&
               this.showResponseBtns &&
@@ -795,10 +815,13 @@
         // when the card has a mnemonic and the user already sees the mnemonic => log the response as normal
         else if (
           this.mnemonicData.cardHasMnemonic &&
-          this.mnemonicData.isStudyingMnemonic &&
-          !this.mnemonicData.response
+          this.mnemonicData.isStudyingMnemonic
         ) {
+          if (!this.mnemonicData.response) {
             this.response(false);
+          } else {
+            this.submitComparisonFeedback("a_better");
+          }
         }
         // previous response logging logic
         else if (!this.mnemonicData.cardHasMnemonic && this.showResponseBtns) {
@@ -818,15 +841,7 @@
           this.mnemonicData.isStudyingMnemonic &&
           this.mnemonicData.response
         ) {
-          // check that the user has submitted feedback
-          if (this.mnemonicData.comparisonChoice == null) {
-            mainStore.addNotification({
-              content: "You must make a selection to submit feedback!",
-              color: "error",
-            });
-          } else {
-            this.response(true);
-          }
+          this.submitComparisonFeedback("b_better");
         }
         // previous response logging logic
         else if (!this.mnemonicData.cardHasMnemonic && this.showResponseBtns) {
@@ -847,6 +862,8 @@
         this.$nextTick(() => {
           this.$refs.retype.focus();
         });
+      } else if (e.shiftKey && key == "enter" && this.mnemonicData.cardHasMnemonic && this.mnemonicData.isStudyingMnemonic && this.mnemonicData.response) {
+        this.submitComparisonFeedback("equal");
       }
     }
 
@@ -909,33 +926,29 @@
       return this.show.fact && feedbackSet.has(this.show.fact.fact_id);
     }
 
-    public async submitFeedback(isIndividualFeedback: boolean) {
-      if (isIndividualFeedback) {
-        if (this.mnemonicData.mnemonicRating == 0) {
-          mainStore.addNotification({
-            content: "You must make a selection to submit feedback!",
-            color: "error",
-          });
-        } else if (this.show.fact) {
-          this.mnemonicData.feedbackFactIdsLearning.add(this.show.fact.fact_id);
-          this.mnemonicData.feedbackFactIdsLearning = new Set([
-            ...this.mnemonicData.feedbackFactIdsLearning,
-          ]);
-        }
-      } else {
-        if (this.mnemonicData.comparisonChoice == null) {
-          mainStore.addNotification({
-            content: "You must make a selection to submit feedback!",
-            color: "error",
-          });
-        } else if (this.show.fact) {
-          this.mnemonicData.feedbackFactIdsComparison.add(this.show.fact.fact_id);
-          this.mnemonicData.feedbackFactIdsComparison = new Set([
-            ...this.mnemonicData.feedbackFactIdsComparison,
-          ]);
-          this.response(true);
-        }
+    public async submitFeedbackIndividualFeedback() {
+      if (this.mnemonicData.mnemonicRating == 0) {
+        mainStore.addNotification({
+          content: "You must make a selection to submit feedback!",
+          color: "error",
+        });
+      } else if (this.show.fact) {
+        this.mnemonicData.feedbackFactIdsLearning.add(this.show.fact.fact_id);
+        this.mnemonicData.feedbackFactIdsLearning = new Set([
+          ...this.mnemonicData.feedbackFactIdsLearning,
+        ]);
       }
+    }
+
+    public async submitComparisonFeedback(selection: string) {
+      if (this.show.fact && selection != "") {
+        this.mnemonicData.feedbackFactIdsComparison.add(this.show.fact.fact_id);
+        this.mnemonicData.feedbackFactIdsComparison = new Set([
+          ...this.mnemonicData.feedbackFactIdsComparison,
+        ]);
+        this.mnemonicData.comparisonChoice = selection;
+      }
+      this.response(true);
     }
 
     public async resetMnemonicData() {
@@ -954,7 +967,7 @@
         mnemonicRating: 0,
         response: null,
         panelOpen: -1,
-        comparisonChoice: null,
+        comparisonChoice: "",
       };
       this.mnemonicData = Object.assign({}, this.mnemonicData, defaultValues);
     }
@@ -1080,7 +1093,10 @@
                 this.show.fact.extra[
                   "mnemonic_" + this.mnemonicData.mnemonicComparisons[1]
                 ],
-              comparison_rating: this.mnemonicData.comparisonChoice,
+              comparison_rating:
+                this.mnemonicData.comparisonChoice == ""
+                  ? null
+                  : this.mnemonicData.comparisonChoice,
               correct: response,
             },
           });
