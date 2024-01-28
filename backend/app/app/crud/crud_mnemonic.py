@@ -30,7 +30,10 @@ class CRUDMnemonic(CRUDBase[schemas.MnemonicFeedback, schemas.MnemonicFeedback, 
                                                      and_(models.History.details.has_key("user_rating"), models.History.details["user_rating"].astext != "0"))
                                         ).filter(models.History.fact_id.in_(fact_ids)
                                         ).all()
-        
+        # print('\n=========\n')
+        # print('Facts with Feedback:', len([x.fact_id for x in db_obj if 'mnemonic_a' not in x.details.keys()]), len([x.fact_id for x in db_obj if 'mnemonic_a' in x.details.keys()]))
+        # print('\n=========\n')
+
         return {'fact_ids_learning': [x.fact_id for x in db_obj if 'mnemonic_a' not in x.details.keys()],
                'fact_ids_comparison': [x.fact_id for x in db_obj if 'mnemonic_a' in x.details.keys()],
                 'user_id': obj_in.user_id}

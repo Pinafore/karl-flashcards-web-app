@@ -758,7 +758,7 @@
         } else if (this.showBack) {
           this.determineResponse(e, key);
         } else if (e.shiftKey && key == "enter" && this.show.enable_show_back) {
-            this.dontKnow();
+          this.dontKnow();
         } else if (key == "enter" && this.show.enable_show_back) {
           this.showAnswer();
         } else if (
@@ -862,7 +862,13 @@
         this.$nextTick(() => {
           this.$refs.retype.focus();
         });
-      } else if (e.shiftKey && key == "enter" && this.mnemonicData.cardHasMnemonic && this.mnemonicData.isStudyingMnemonic && this.mnemonicData.response) {
+      } else if (
+        e.shiftKey &&
+        key == "enter" &&
+        this.mnemonicData.cardHasMnemonic &&
+        this.mnemonicData.isStudyingMnemonic &&
+        this.mnemonicData.response
+      ) {
         this.submitComparisonFeedback("equal");
       }
     }
@@ -1041,14 +1047,15 @@
     }
 
     public async mnemonicResponse(response) {
-      this.mnemonicData.panelOpen = response ? 0 : -1;
       this.mnemonicData.response = response;
       if (response && this.hasSubmittedFeedback()) {
         this.response(response);
-      }
-      this.mnemonicData.isStudyingMnemonic = true;
-      if (!response) {
-        this.toggleMnemonic();
+      } else {
+        this.mnemonicData.panelOpen = response ? 0 : -1;
+        this.mnemonicData.isStudyingMnemonic = true;
+        if (!response) {
+          this.toggleMnemonic();
+        }
       }
     }
 
@@ -1073,7 +1080,6 @@
         this.mnemonicData.cardHasMnemonic
       ) {
         if (response) {
-          console.log("creating the correct feedback log!");
           await mainStore.createMnemonicFeedbackLog({
             data: {
               study_id: this.studyset.id,

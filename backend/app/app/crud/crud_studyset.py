@@ -285,7 +285,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                 print("=============\n\nnew facts: ", len(new_facts))
                 # prioritize newer facts for the mnemonic study
                 if is_mnemonic_deck and len(new_facts) > 0:
-                    facts = new_facts
+                    facts = new_facts + facts[:20-len(new_facts)]
                 else:
                     facts = crud.helper.combine_two_fact_sets(new_facts=new_facts, old_facts=facts, return_limit=return_limit, proportion_new_facts=0.5)
                     
