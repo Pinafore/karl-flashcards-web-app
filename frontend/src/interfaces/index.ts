@@ -35,7 +35,7 @@ export interface IStatus {
   reported?: boolean;
 }
 export interface IComponents {
-  Deck: { title: string; public: boolean; id: number; deck_type: string; };
+  Deck: { title: string; public: boolean; id: number; deck_type: string };
   DeckCreate: { title: string };
   SuperDeckCreate: { title: string; public?: boolean };
   DeckUpdate: { title?: string };
@@ -138,7 +138,7 @@ export interface IComponents {
     is_bad_for_other_reason: boolean;
     other_reason_text: string;
     correct: boolean;
-  }
+  };
   MnemonicComparisonFeedbackLog: {
     study_id: number;
     fact_id: number;
@@ -147,11 +147,11 @@ export interface IComponents {
     mnemonic_b: string;
     comparison_rating: string | null;
     correct: boolean;
-  }
+  };
   MnemonicSearch: {
     user_id: number;
     fact_ids: number[];
-  }
+  };
   Msg: { msg: string };
   Schedule: {
     fact_id: number;

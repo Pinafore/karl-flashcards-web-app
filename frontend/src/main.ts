@@ -20,14 +20,14 @@ if (process.env.VUE_APP_ENV == "production") {
     dsn: "https://ac296d2d7e8c4115ab8f2713520612cf@o283930.ingest.sentry.io/5259730",
     integrations: [new VueIntegration({ Vue, attachProps: true, logErrors: true })],
     beforeSend: function(event, hint: Sentry.EventHint) {
-      console.log("Processing before sending to Sentry")
+      console.log("Processing before sending to Sentry");
       console.log(event.message);
       console.log(hint.originalException);
       const error = hint.originalException;
       if (error instanceof Error) {
         console.log(error.message);
       } else {
-        console.log("not instance of error")
+        console.log("not instance of error");
       }
       if (hint) {
         const error = hint.originalException;
@@ -47,7 +47,7 @@ if (process.env.VUE_APP_ENV == "production") {
           }
         }
       }
-      if(event.message) {
+      if (event.message) {
         if (shouldIgnoreException(event.message)) {
           console.log("ignoring error");
           return null;
@@ -55,7 +55,7 @@ if (process.env.VUE_APP_ENV == "production") {
           console.log("Not ignoring error 1");
         }
       }
-      console.log("Sending Sentry event")
+      console.log("Sending Sentry event");
       return event;
     },
   });

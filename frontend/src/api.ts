@@ -1,4 +1,4 @@
-import axios, { CancelTokenStatic } from "axios";
+import axios from "axios";
 import { apiUrl } from "@/env";
 import { IComponents } from "./interfaces";
 import { endOfDay, format, parse, startOfDay } from "date-fns";
@@ -127,11 +127,9 @@ export const api = {
     url += `&is_resume=${isResume}`;
     return axios.get<IComponents["StudySet"]>(url, authHeaders(token));
   },
-  async checkIfInTestMode(
-    token: string,
-  ) {
+  async checkIfInTestMode(token: string) {
     const url = `${apiUrl}/api/study/test_mode`;
-    return axios.get<boolean>(url, authHeaders(token)); 
+    return axios.get<boolean>(url, authHeaders(token));
   },
   async createFact(token: string, data: IComponents["FactCreate"]) {
     return axios.post(`${apiUrl}/api/facts/`, data, authHeaders(token));
@@ -205,7 +203,12 @@ export const api = {
     return axios.put(`${apiUrl}/api/facts/${id}`, data, authHeaders(token));
   },
 
-  async createMnemonicFeedbackLog(token: string, data: IComponents["MnemonicLearningFeedbackLog"] | IComponents["MnemonicComparisonFeedbackLog"] ) {
+  async createMnemonicFeedbackLog(
+    token: string,
+    data:
+      | IComponents["MnemonicLearningFeedbackLog"]
+      | IComponents["MnemonicComparisonFeedbackLog"],
+  ) {
     return axios.post(`${apiUrl}/api/mnemonics/`, data, authHeaders(token));
   },
 

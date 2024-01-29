@@ -644,7 +644,11 @@ export default class MainModule extends VuexModule {
   }
 
   @Action
-  async createMnemonicFeedbackLog(payload: { data: IComponents["MnemonicLearningFeedbackLog"] | IComponents["MnemonicComparisonFeedbackLog"] }) {
+  async createMnemonicFeedbackLog(payload: {
+    data:
+      | IComponents["MnemonicLearningFeedbackLog"]
+      | IComponents["MnemonicComparisonFeedbackLog"];
+  }) {
     try {
       const _response = (
         await Promise.all([
@@ -658,7 +662,7 @@ export default class MainModule extends VuexModule {
   }
 
   @Action
-  async getMnemonic(payload: { data: IComponents["MnemonicSearch"]  }) {
+  async getMnemonic(payload: { data: IComponents["MnemonicSearch"] }) {
     try {
       const _response = (
         await Promise.all([
@@ -666,7 +670,7 @@ export default class MainModule extends VuexModule {
           await new Promise((resolve, _reject) => setTimeout(() => resolve(), 500)),
         ])
       )[0];
-      return _response.data
+      return _response.data;
     } catch (error) {
       await mainStore.checkApiError(error);
     }

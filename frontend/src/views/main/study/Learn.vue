@@ -2,7 +2,7 @@
   <v-container fluid style="max-width:1250px">
     <onboard></onboard>
     <connection-popup></connection-popup>
-    <test-popup :shouldShow="shouldShowTestPopup"></test-popup>
+    <test-popup :should-show="shouldShowTestPopup"></test-popup>
     <!-- <RecallPopup></RecallPopup> -->
     <study-set></study-set>
     <v-card class="mx-3 my-1 py-1 px-0 px-sm-3">
@@ -185,7 +185,7 @@
         </span>
       </v-card-title>
     </v-card>
-    <v-card class="my-2 mx-3 px-3 py-4 pb-5" v-show="!mnemonicData.isStudyingMnemonic">
+    <v-card v-show="!mnemonicData.isStudyingMnemonic" class="my-2 mx-3 px-3 py-4 pb-5">
       <v-card-title class="py-0">
         <v-row no-gutters>
           <v-col cols="12" sm="auto">
@@ -272,13 +272,13 @@
                 <v-col cols="6" class="d-flex">
                   <v-card
                     class="flex"
-                    @mouseover="mnemonicData.hoverA = true"
-                    @mouseleave="mnemonicData.hoverA = false"
                     :style="
                       mnemonicData.hoverA
                         ? { backgroundColor: '#e0e0e0', cursor: 'pointer' }
                         : {}
                     "
+                    @mouseover="mnemonicData.hoverA = true"
+                    @mouseleave="mnemonicData.hoverA = false"
                     @click="submitComparisonFeedback('a_better')"
                   >
                     <v-card-title class="title">
@@ -299,13 +299,13 @@
                 <v-col cols="6" class="d-flex">
                   <v-card
                     class="flex"
-                    @mouseover="mnemonicData.hoverB = true"
-                    @mouseleave="mnemonicData.hoverB = false"
                     :style="
                       mnemonicData.hoverB
                         ? { backgroundColor: '#e0e0e0', cursor: 'pointer' }
                         : {}
                     "
+                    @mouseover="mnemonicData.hoverB = true"
+                    @mouseleave="mnemonicData.hoverB = false"
                     @click="submitComparisonFeedback('b_better')"
                   >
                     <v-card-title class="title">
@@ -345,17 +345,17 @@
                   show.fact.extra[mnemonicData.mnemonicGroup]
               }}
             </p>
-            <v-container class="pl-0" v-if="show.fact && !hasSubmittedFeedback()">
+            <v-container v-if="show.fact && !hasSubmittedFeedback()" class="pl-0">
               <v-subheader class="pl-0 pt-0 title"
                 >Submit Feedback (Optional)</v-subheader
               >
               <v-rating
+                v-model="mnemonicData.mnemonicRating"
                 hover
                 :length="5"
                 :size="30"
                 :model-value="5"
                 active-color="black"
-                v-model="mnemonicData.mnemonicRating"
                 class="pb-5"
               />
               <v-subheader
@@ -372,40 +372,40 @@
                 fluid
               >
                 <v-checkbox
-                  style="margin-top: -15px;"
                   v-model="mnemonicData.isIncorrectDefinition"
+                  style="margin-top: -15px;"
                   label="Incorrect Definition"
                 ></v-checkbox>
                 <v-checkbox
-                  style="margin-top: -15px;"
                   v-model="mnemonicData.isDifficultToUnderstand"
+                  style="margin-top: -15px;"
                   label="Difficult to Understand"
                 ></v-checkbox>
                 <v-checkbox
-                  style="margin-top: -15px;"
                   v-model="mnemonicData.isBadKeywordLink"
+                  style="margin-top: -15px;"
                   label="Bad Keyword Link"
                 ></v-checkbox>
                 <v-checkbox
-                  style="margin-top: -15px;"
                   v-model="mnemonicData.isOffensive"
+                  style="margin-top: -15px;"
                   label="Offensive"
                 ></v-checkbox>
                 <v-checkbox
-                  style="margin-top: -15px;"
                   v-model="mnemonicData.isOther"
+                  style="margin-top: -15px;"
                   label="Other Reason"
                 ></v-checkbox>
                 <v-text-field
                   v-show="mnemonicData.isOther"
-                  label="Please specify the reason"
                   v-model="mnemonicData.otherReason"
+                  label="Please specify the reason"
                 ></v-text-field>
               </v-container>
 
               <v-btn medium @click="submitFeedbackIndividualFeedback()">Submit</v-btn>
             </v-container>
-            <v-container class="pl-0 pt-8" v-else>
+            <v-container v-else class="pl-0 pt-8">
               <p class="primary--text"><i>Thank you for submitting feedback!</i></p>
             </v-container>
           </v-expansion-panel-content>
@@ -421,7 +421,7 @@
       "
       class="my-2 mx-3 px-3 py-4"
     >
-      <v-card-title class="py-0" v-if="mnemonicData.cardHasMnemonic">
+      <v-card-title v-if="mnemonicData.cardHasMnemonic" class="py-0">
         <span
           >Definition for
           <a :href="'https://www.merriam-webster.com/dictionary/' + show.text"
@@ -429,7 +429,7 @@
           ></span
         >
       </v-card-title>
-      <v-card-title class="py-0" v-else>Answer</v-card-title>
+      <v-card-title v-else class="py-0">Answer</v-card-title>
       <v-card-text class="pb-0 pt-1">
         <div v-if="!mnemonicData.cardHasMnemonic" class="title primary--text">
           {{ show.fact && show.fact.answer }}
@@ -458,6 +458,7 @@
       </v-card-text>
       <v-card-text v-show="show.enable_show_back" class="py-2">
         <v-text-field
+          v-if="!mnemonicData.cardHasMnemonic"
           id="retype_answer"
           ref="retype"
           v-model="retyped"
@@ -465,16 +466,15 @@
           label="Optional - Retype Answer (Press any letter to focus)"
           autofocus
           hide-details="auto"
-          v-if="!mnemonicData.cardHasMnemonic"
         ></v-text-field>
         <v-text-field
+          v-if="mnemonicData.cardHasMnemonic && mnemonicData.isStudyingMnemonic"
           id="retype_answer"
           ref="retype_mnemonic"
           v-model="mnemonicData.retypedMnemonic"
           solo
           label="Optional - Retype Answer"
           hide-details="auto"
-          v-if="mnemonicData.cardHasMnemonic && mnemonicData.isStudyingMnemonic"
         ></v-text-field>
       </v-card-text>
       <v-card-actions class="pt-3 pb-1 px-5">
