@@ -229,7 +229,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         print('Deck IDs:', deck_ids)
 
         show_hidden = setType == schemas.SetType.post_test or setType == schemas.SetType.test
-        is_mnemonic_deck = (decks[0].deck_type == schemas.DeckType.public_mnemonic)
+        is_mnemonic_deck = (decks[0].deck_type == schemas.DeckType.public_mnemonic) if decks else False
         filters = schemas.FactSearch(deck_ids=deck_ids, limit=send_limit, studyable=True, show_hidden=show_hidden)
         base_facts_query = crud.fact.build_facts_query(db=db, user=user, filters=filters)
         #logger.info(base_facts_query)
