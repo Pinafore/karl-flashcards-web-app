@@ -2,7 +2,7 @@
   <v-container fluid style="max-width:1250px">
     <onboard></onboard>
     <connection-popup></connection-popup>
-    <test-popup :shouldShow="shouldShowTestPopup"></test-popup>
+    <test-popup :should-show="shouldShowTestPopup"></test-popup>
     <!-- <RecallPopup></RecallPopup> -->
     <study-set></study-set>
     <v-card class="mx-3 my-1 py-1 px-0 px-sm-3">
@@ -185,7 +185,7 @@
         </span>
       </v-card-title>
     </v-card>
-    <v-card class="my-2 mx-3 px-3 py-4 pb-5" v-show="!mnemonicData.isStudyingMnemonic">
+    <v-card v-show="!mnemonicData.isStudyingMnemonic" class="my-2 mx-3 px-3 py-4 pb-5">
       <v-card-title class="py-0">
         <v-row no-gutters>
           <v-col cols="12" sm="auto">
@@ -272,13 +272,13 @@
                 <v-col cols="6" class="d-flex">
                   <v-card
                     class="flex"
-                    @mouseover="mnemonicData.hoverA = true"
-                    @mouseleave="mnemonicData.hoverA = false"
                     :style="
                       mnemonicData.hoverA
                         ? { backgroundColor: '#e0e0e0', cursor: 'pointer' }
                         : {}
                     "
+                    @mouseover="mnemonicData.hoverA = true"
+                    @mouseleave="mnemonicData.hoverA = false"
                     @click="submitComparisonFeedback('a_better')"
                   >
                     <v-card-title class="title">
@@ -299,13 +299,13 @@
                 <v-col cols="6" class="d-flex">
                   <v-card
                     class="flex"
-                    @mouseover="mnemonicData.hoverB = true"
-                    @mouseleave="mnemonicData.hoverB = false"
                     :style="
                       mnemonicData.hoverB
                         ? { backgroundColor: '#e0e0e0', cursor: 'pointer' }
                         : {}
                     "
+                    @mouseover="mnemonicData.hoverB = true"
+                    @mouseleave="mnemonicData.hoverB = false"
                     @click="submitComparisonFeedback('b_better')"
                   >
                     <v-card-title class="title">
@@ -345,17 +345,17 @@
                   show.fact.extra[mnemonicData.mnemonicGroup]
               }}
             </p>
-            <v-container class="pl-0" v-if="show.fact && !hasSubmittedFeedback()">
+            <v-container v-if="show.fact && !hasSubmittedFeedback()" class="pl-0">
               <v-subheader class="pl-0 pt-0 title"
                 >Submit Feedback (Optional)</v-subheader
               >
               <v-rating
+                v-model="mnemonicData.mnemonicRating"
                 hover
                 :length="5"
                 :size="30"
                 :model-value="5"
                 active-color="black"
-                v-model="mnemonicData.mnemonicRating"
                 @click.native="handleMnemonicRatingClick"
                 class="pb-5"
               />
@@ -373,7 +373,6 @@
                 fluid
               >
                 <v-checkbox
-                  style="margin-top: -15px;"
                   v-model="mnemonicData.isIncorrectDefinition"
                 >
                   <template v-slot:label>
@@ -389,7 +388,6 @@
                   </template>
                 </v-checkbox>
                 <v-checkbox
-                  style="margin-top: -15px;"
                   v-model="mnemonicData.isDifficultToUnderstand"
                 >
                   <template v-slot:label>
@@ -421,18 +419,17 @@
                   </template>
                 </v-checkbox>
                 <v-checkbox
-                  style="margin-top: -15px;"
                   v-model="mnemonicData.isBadKeywordLink"
                 >
                   <template v-slot:label>
-                    <span>Bad Equivalent Keyword</span>
+                    <span>Bad Circular Keyword</span>
                     <v-tooltip right>
                       <template v-slot:activator="{ on, attrs }">
                         <v-icon small class="ml-2" v-bind="attrs" v-on="on"
                           >mdi-information</v-icon
                         >
                       </template>
-                      <span>The generated keyword is essentially the same as the original vocab term</span>
+                      <span>The generated keyword is the same or too similar to the original vocab term</span>
                     </v-tooltip>
                   </template>
                 </v-checkbox>
@@ -453,7 +450,6 @@
                   </template>
                 </v-checkbox>
                 <v-checkbox
-                  style="margin-top: -15px;"
                   v-model="mnemonicData.isOffensive"
                 >
                   <template v-slot:label>
@@ -492,7 +488,7 @@
       "
       class="my-2 mx-3 px-3 py-4"
     >
-      <v-card-title class="py-0" v-if="mnemonicData.cardHasMnemonic">
+      <v-card-title v-if="mnemonicData.cardHasMnemonic" class="py-0">
         <span
           >Definition for
           <a :href="'https://www.merriam-webster.com/dictionary/' + show.text"
@@ -500,7 +496,7 @@
           ></span
         >
       </v-card-title>
-      <v-card-title class="py-0" v-else>Answer</v-card-title>
+      <v-card-title v-else class="py-0">Answer</v-card-title>
       <v-card-text class="pb-0 pt-1">
         <div v-if="!mnemonicData.cardHasMnemonic" class="title primary--text">
           {{ show.fact && show.fact.answer }}
@@ -529,6 +525,7 @@
       </v-card-text>
       <v-card-text v-show="show.enable_show_back" class="py-2">
         <v-text-field
+          v-if="!mnemonicData.cardHasMnemonic"
           id="retype_answer"
           ref="retype"
           v-model="retyped"
@@ -536,16 +533,15 @@
           label="Optional - Retype Answer (Press any letter to focus)"
           autofocus
           hide-details="auto"
-          v-if="!mnemonicData.cardHasMnemonic"
         ></v-text-field>
         <v-text-field
+          v-if="mnemonicData.cardHasMnemonic && mnemonicData.isStudyingMnemonic"
           id="retype_answer"
           ref="retype_mnemonic"
           v-model="mnemonicData.retypedMnemonic"
           solo
           label="Optional - Retype Answer"
           hide-details="auto"
-          v-if="mnemonicData.cardHasMnemonic && mnemonicData.isStudyingMnemonic"
         ></v-text-field>
       </v-card-text>
       <v-card-actions class="pt-3 pb-1 px-5">
@@ -1206,8 +1202,10 @@
               is_offensive: this.mnemonicData.isOffensive,
               is_incorrect_definition: this.mnemonicData.isIncorrectDefinition,
               is_difficult_to_understand: this.mnemonicData.isDifficultToUnderstand,
-              is_bad_keyword_link: this.mnemonicData.isBadKeywordLink,
-              is_bad_for_other_reason: this.mnemonicData.isOther,
+              is_bad_for_other_reason: (this.mnemonicData.otherReason != ""),
+              is_bad_phonetic_keyword: this.mnemonicData.isBadPhoneticKeyword,
+              is_bad_circular_keyword: this.mnemonicData.isBadCircularKeyword,
+              is_bad_keyword_explanation: this.mnemonicData.isBadPhoneticKeyword,
               other_reason_text: this.mnemonicData.otherReason,
               correct: response,
             },

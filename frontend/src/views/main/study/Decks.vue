@@ -1,7 +1,7 @@
 <template>
   <div>
     <Onboard></Onboard>
-    <test-popup :shouldShow="true"></test-popup>
+    <test-popup :should-show="true"></test-popup>
     <!-- <RecallPopup></RecallPopup> -->
     <v-toolbar style="position: sticky; top: 0; z-index: 10;">
       <v-toolbar-title>
@@ -72,7 +72,6 @@
   import { IComponents } from "@/interfaces";
   import Onboard from "@/views/Onboard.vue";
   import TestPopup from "@/views/main/TestPopup.vue";
-  import UserProfile from "../profile/UserProfile.vue";
 
   @Component({
     components: { TestPopup, Onboard },
@@ -124,7 +123,7 @@
 
     public areAllSelectedExceptMnemonic() {
       return this.decks
-        .filter((i) => i.deck_type !== 'public_mnemonic')
+        .filter((i) => i.deck_type !== "public_mnemonic")
         .every((i) => this.selected.map((j) => j.title).includes(i.title));
     }
 
@@ -132,7 +131,7 @@
       if (this.areAllSelectedExceptMnemonic()) {
         this.selected = [];
       } else {
-        this.selected = this.decks.filter((i) => i.deck_type !== 'public_mnemonic');
+        this.selected = this.decks.filter((i) => i.deck_type !== "public_mnemonic");
       }
     }
 
@@ -141,7 +140,7 @@
     }
 
     public updateSelection(id) {
-      if (id.deck_type == 'public_mnemonic') {
+      if (id.deck_type == "public_mnemonic") {
         if (this.isSelected(id)) {
           this.selected = [];
         } else {
@@ -150,7 +149,7 @@
       } else {
         const specialIndex = this.selected
           .map((i) => i.deck_type)
-          .indexOf('public_mnemonic');
+          .indexOf("public_mnemonic");
         if (specialIndex !== -1) {
           this.selected.splice(specialIndex, 1);
         }
