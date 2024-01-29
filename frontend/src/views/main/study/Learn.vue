@@ -373,6 +373,7 @@
                 fluid
               >
                 <v-checkbox
+                  style="margin-top: -15px;"
                   v-model="mnemonicData.isIncorrectDefinition"
                 >
                   <template v-slot:label>
@@ -388,6 +389,7 @@
                   </template>
                 </v-checkbox>
                 <v-checkbox
+                  style="margin-top: -15px;"
                   v-model="mnemonicData.isDifficultToUnderstand"
                 >
                   <template v-slot:label>
@@ -420,6 +422,7 @@
                 </v-checkbox>
                 <v-checkbox
                   v-model="mnemonicData.isBadKeywordLink"
+                  style="margin-top: -15px;"
                 >
                   <template v-slot:label>
                     <span>Bad Circular Keyword</span>
@@ -450,6 +453,7 @@
                   </template>
                 </v-checkbox>
                 <v-checkbox
+                  style="margin-top: -15px;"
                   v-model="mnemonicData.isOffensive"
                 >
                   <template v-slot:label>

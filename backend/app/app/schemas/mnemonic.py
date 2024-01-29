@@ -19,7 +19,9 @@ class MnemonicLearningFeedbackLog(BaseModel):
     is_offensive: bool
     is_incorrect_definition: bool
     is_difficult_to_understand: bool
-    is_bad_keyword_link: bool
+    is_bad_phonetic_keyword: bool
+    is_bad_circular_keyword: bool
+    is_bad_keyword_explanation: bool
     is_bad_for_other_reason: bool
     other_reason_text: str
     correct: bool
