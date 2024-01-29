@@ -243,10 +243,16 @@
       </v-card-text>
       <v-card-actions
         v-show="show.enable_show_back && !showBack"
-        class="px-4 pt-3 pb-2"
+        class="px-5 pt-3 pb-2"
       >
-        <v-btn @click="showAnswer">Show Answer (Enter)</v-btn>
-        <v-btn @click="dontKnow">Don't Know (Shift-Enter)</v-btn>
+        <v-row class="shrink" justify="start">
+          <v-col cols="5" sm="auto" class="ma-1 pa-1 py-0">
+            <v-btn @click="showAnswer">Show Answer (Enter)</v-btn>
+          </v-col>
+          <v-col cols="5" sm="auto" class="ma-1 pa-1 py-0">
+            <v-btn @click="dontKnow">Don't Know (Shift-Enter)</v-btn>
+          </v-col>
+        </v-row>
       </v-card-actions>
     </v-card>
 
@@ -259,7 +265,7 @@
         :readonly="mnemonicData.response"
       >
         <v-expansion-panel @click="updateMnemonicClick()">
-          <v-expansion-panel-header color="#e0f0ff" class="title py-0"
+          <v-expansion-panel-header color="#e0f0ff" class="title py-1"
             ><b v-if="mnemonicData.response">KAR³L-generated Mnemonic Devices</b>
             <b v-else>KAR³L-generated Mnemonic Device</b>
             <div ref="mnemonicPaneTop"></div>
@@ -322,32 +328,35 @@
                     </v-card-text>
                   </v-card>
                 </v-col>
-                <v-col cols="5" sm="auto" class="ma-1 pa-2 pt-5 pb-0 shrink"
-                  ><v-btn medium @click="submitComparisonFeedback('')"
-                    >Skip (Enter)</v-btn
-                  ></v-col
-                >
-                <v-col cols="5" sm="auto" class="ma-1 pa-0 pt-5 pb-0 shrink"
-                  ><v-btn medium @click="submitComparisonFeedback('equal')"
-                    >Equal Preference (Shift-Enter)</v-btn
-                  ></v-col
-                >
-                <v-col cols="12"> </v-col>
+                <v-col rows="12">
+                <v-row class="shrink pl-1" justify="start">
+                  <v-col cols="5" sm="auto" class="ma-1 pa-1 py-0">
+                    <v-btn medium @click="submitComparisonFeedback('')"
+                      >Skip (Enter)</v-btn
+                    ></v-col
+                  >
+                  <v-col cols="5" sm="auto" class="ma-1 pa-1 py-0">
+                    <v-btn medium @click="submitComparisonFeedback('equal')"
+                      >Equal (Shift-Enter)</v-btn
+                    ></v-col
+                  >
+                </v-row>
+              </v-col>
               </v-row>
             </v-container>
           </v-expansion-panel-content>
 
           <v-expansion-panel-content v-else color="#e0f0ff">
-            <p class="title">
+            <p class="title pb-0">
               {{
                 show.fact &&
                   show.fact.extra &&
                   show.fact.extra[mnemonicData.mnemonicGroup]
               }}
             </p>
-            <v-container v-if="show.fact && !hasSubmittedFeedback()" class="pl-0">
+            <v-container v-if="show.fact && !hasSubmittedFeedback()" class="pl-0 pb-0">
               <v-subheader class="pl-0 pt-0 title"
-                >Submit Feedback (Optional)</v-subheader
+                >Give Feedback (Optional)</v-subheader
               >
               <v-rating
                 v-model="mnemonicData.mnemonicRating"
@@ -371,109 +380,143 @@
                   mnemonicData.mnemonicRating === 1 || mnemonicData.mnemonicRating === 2
                 "
                 fluid
+                class="pa-0"
               >
-                <v-checkbox
-                  style="margin-top: -15px;"
-                  v-model="mnemonicData.isIncorrectDefinition"
-                >
-                  <template v-slot:label>
-                    <span>Incorrect Definition</span>
-                    <v-tooltip right>
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-icon small class="ml-2" v-bind="attrs" v-on="on"
-                          >mdi-information</v-icon
-                        >
+                <v-row>
+                  <v-col>
+                    <v-checkbox
+                      class="shrink mb-2 mt-2"
+                      density="compact"
+                      hide-details
+                      v-model="mnemonicData.isIncorrectDefinition"
+                    >
+                      <template v-slot:label>
+                        <span>Incorrect Definition</span>
+                        <v-tooltip right>
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-icon small class="ml-2" v-bind="attrs" v-on="on"
+                              >mdi-information</v-icon
+                            >
+                          </template>
+                          <span
+                            >The definition in the mnemonic is not the definition of the
+                            vocab term</span
+                          >
+                        </v-tooltip>
                       </template>
-                      <span>The definition in the mnemonic is not the definition of the vocab term</span>
-                    </v-tooltip>
-                  </template>
-                </v-checkbox>
-                <v-checkbox
-                  style="margin-top: -15px;"
-                  v-model="mnemonicData.isDifficultToUnderstand"
-                >
-                  <template v-slot:label>
-                    <span>Difficult to Understand</span>
-                    <v-tooltip right>
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-icon small class="ml-2" v-bind="attrs" v-on="on"
-                          >mdi-information</v-icon
-                        >
+                    </v-checkbox>
+                    <v-checkbox
+                      class="shrink my-2"
+                      density="compact"
+                      hide-details
+                      v-model="mnemonicData.isDifficultToUnderstand"
+                    >
+                      <template v-slot:label>
+                        <span>Difficult to Understand</span>
+                        <v-tooltip right>
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-icon small class="ml-2" v-bind="attrs" v-on="on"
+                              >mdi-information</v-icon
+                            >
+                          </template>
+                          <span
+                            >The mnemonic is difficult to understand through grammar,
+                            word choice, etc.</span
+                          >
+                        </v-tooltip>
                       </template>
-                      <span>The mnemonic is difficult to understand through grammar, word choice, etc.</span>
-                    </v-tooltip>
-                  </template>
-                </v-checkbox>
-                <v-checkbox
-                  style="margin-top: -15px;"
-                  v-model="mnemonicData.isBadPhoneticKeyword"
-                >
-                  <template v-slot:label>
-                    <span>Bad Phonetic Keyword</span>
-                    <v-tooltip right>
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-icon small class="ml-2" v-bind="attrs" v-on="on"
-                          >mdi-information</v-icon
-                        >
+                    </v-checkbox>
+                    <v-checkbox
+                      class="shrink my-2"
+                      density="compact"
+                      hide-details
+                      v-model="mnemonicData.isBadPhoneticKeyword"
+                    >
+                      <template v-slot:label>
+                        <span>Bad Phonetic Keyword</span>
+                        <v-tooltip right>
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-icon small class="ml-2" v-bind="attrs" v-on="on"
+                              >mdi-information</v-icon
+                            >
+                          </template>
+                          <span
+                            >The generated keyword does not sound like the original
+                            vocab term</span
+                          >
+                        </v-tooltip>
                       </template>
-                      <span>The generated keyword does not sound like the original vocab term</span>
-                    </v-tooltip>
-                  </template>
-                </v-checkbox>
-                <v-checkbox
-                  v-model="mnemonicData.isBadKeywordLink"
-                  style="margin-top: -15px;"
-                >
-                  <template v-slot:label>
-                    <span>Bad Circular Keyword</span>
-                    <v-tooltip right>
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-icon small class="ml-2" v-bind="attrs" v-on="on"
-                          >mdi-information</v-icon
-                        >
+                    </v-checkbox>
+                    <v-checkbox
+                      v-model="mnemonicData.isBadKeywordLink"
+                      class="shrink my-2"
+                      density="compact"
+                      hide-details
+                    >
+                      <template v-slot:label>
+                        <span>Bad Circular Keyword</span>
+                        <v-tooltip right>
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-icon small class="ml-2" v-bind="attrs" v-on="on"
+                              >mdi-information</v-icon
+                            >
+                          </template>
+                          <span
+                            >The generated keyword is the same as or too similar to the
+                            original vocab term</span
+                          >
+                        </v-tooltip>
                       </template>
-                      <span>The generated keyword is the same or too similar to the original vocab term</span>
-                    </v-tooltip>
-                  </template>
-                </v-checkbox>
-                <v-checkbox
-                  style="margin-top: -15px;"
-                  v-model="mnemonicData.isBadKeywordExplanation"
-                >
-                  <template v-slot:label>
-                    <span>Bad Keyword Explanation</span>
-                    <v-tooltip right>
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-icon small class="ml-2" v-bind="attrs" v-on="on"
-                          >mdi-information</v-icon
-                        >
+                    </v-checkbox>
+                    <v-checkbox
+                      class="shrink my-2"
+                      density="compact"
+                      hide-details
+                      v-model="mnemonicData.isBadKeywordExplanation"
+                    >
+                      <template v-slot:label>
+                        <span>Bad Keyword Explanation</span>
+                        <v-tooltip right>
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-icon small class="ml-2" v-bind="attrs" v-on="on"
+                              >mdi-information</v-icon
+                            >
+                          </template>
+                          <span
+                            >The explanation linking the keyword and vocab term is
+                            poor</span
+                          >
+                        </v-tooltip>
                       </template>
-                      <span>The explanation linking the keyword and vocab term is poor</span>
-                    </v-tooltip>
-                  </template>
-                </v-checkbox>
-                <v-checkbox
-                  style="margin-top: -15px;"
-                  v-model="mnemonicData.isOffensive"
-                >
-                  <template v-slot:label>
-                    <span>Offensive</span>
-                    <v-tooltip right>
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-icon small class="ml-2" v-bind="attrs" v-on="on"
-                          >mdi-information</v-icon
-                        >
+                    </v-checkbox>
+                    <v-checkbox
+                      class="shrink my-2"
+                      density="compact"
+                      hide-details
+                      v-model="mnemonicData.isOffensive"
+                    >
+                      <template v-slot:label>
+                        <span>Offensive</span>
+                        <v-tooltip right>
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-icon small class="ml-2" v-bind="attrs" v-on="on"
+                              >mdi-information</v-icon
+                            >
+                          </template>
+                          <span>The mnemonic device is offensive or harmful</span>
+                        </v-tooltip>
                       </template>
-                      <span>The mnemonic device is offensive or harmful</span>
-                    </v-tooltip>
-                  </template>
-                </v-checkbox>
+                    </v-checkbox>
 
-                <v-text-field
-                  label="Other Feedback"
-                  v-model="mnemonicData.otherReason"
-                ></v-text-field>
-                <v-btn medium @click="submitFeedbackIndividualFeedback()">Submit</v-btn>
+                    <v-text-field
+                      label="Other Feedback"
+                      v-model="mnemonicData.otherReason"
+                    ></v-text-field>
+                    <v-btn medium @click="submitFeedbackIndividualFeedback()"
+                      >Submit</v-btn
+                    >
+                  </v-col>
+                </v-row>
               </v-container>
             </v-container>
             <v-container class="pl-0 pt-0" v-else>
@@ -521,7 +564,11 @@
             KAR³L Believes Your Response Was Correct
             <span class="hidden-xs-only">(Enter to Accept, Or Override Below)</span>
           </div>
-          <div v-else-if="!mnemonicData.cardHasMnemonic" class="title primary--text" :style="{ color: 'red !important' }">
+          <div
+            v-else-if="!mnemonicData.cardHasMnemonic"
+            class="title primary--text"
+            :style="{ color: 'red !important' }"
+          >
             KAR³L Believes Your Response Was Wrong
             <span class="hidden-xs-only">(Enter to Accept, Or Override Below)</span>
           </div>
@@ -1145,17 +1192,17 @@
 
     public async sendResponseNotification(response) {
       if (response) {
-          mainStore.addNotification({
-            content: "Your evaluation: Right",
-            color: "success",
-          });
-        } else {
-          studyStore.setRestudy();
-          mainStore.addNotification({
-            content: "Your evaluation: Wrong",
-            color: "error",
-          });
-        }
+        mainStore.addNotification({
+          content: "Your evaluation: Right",
+          color: "success",
+        });
+      } else {
+        studyStore.setRestudy();
+        mainStore.addNotification({
+          content: "Your evaluation: Wrong",
+          color: "error",
+        });
+      }
     }
 
     public async response(response) {
@@ -1206,7 +1253,7 @@
               is_offensive: this.mnemonicData.isOffensive,
               is_incorrect_definition: this.mnemonicData.isIncorrectDefinition,
               is_difficult_to_understand: this.mnemonicData.isDifficultToUnderstand,
-              is_bad_for_other_reason: (this.mnemonicData.otherReason != ""),
+              is_bad_for_other_reason: this.mnemonicData.otherReason != "",
               is_bad_phonetic_keyword: this.mnemonicData.isBadPhoneticKeyword,
               is_bad_circular_keyword: this.mnemonicData.isBadCircularKeyword,
               is_bad_keyword_explanation: this.mnemonicData.isBadPhoneticKeyword,
