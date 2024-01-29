@@ -282,7 +282,7 @@
                     @click="submitComparisonFeedback('a_better')"
                   >
                     <v-card-title class="title">
-                      Mnemonic A
+                      Mnemonic A ( [ )
                     </v-card-title>
                     <v-card-text class="body-1" style="color: black">
                       {{
@@ -309,7 +309,7 @@
                     @click="submitComparisonFeedback('b_better')"
                   >
                     <v-card-title class="title">
-                      Mnemonic B
+                      Mnemonic B (])
                     </v-card-title>
                     <v-card-text class="body-1" style="color: black">
                       {{
@@ -356,6 +356,7 @@
                 :model-value="5"
                 active-color="black"
                 v-model="mnemonicData.mnemonicRating"
+                @click.native="handleMnemonicRatingClick"
                 class="pb-5"
               />
               <v-subheader
@@ -374,38 +375,108 @@
                 <v-checkbox
                   style="margin-top: -15px;"
                   v-model="mnemonicData.isIncorrectDefinition"
-                  label="Incorrect Definition"
-                ></v-checkbox>
+                >
+                  <template v-slot:label>
+                    <span>Incorrect Definition</span>
+                    <v-tooltip right>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-icon small class="ml-2" v-bind="attrs" v-on="on"
+                          >mdi-information</v-icon
+                        >
+                      </template>
+                      <span>The definition in the mnemonic is not the definition of the vocab term</span>
+                    </v-tooltip>
+                  </template>
+                </v-checkbox>
                 <v-checkbox
                   style="margin-top: -15px;"
                   v-model="mnemonicData.isDifficultToUnderstand"
-                  label="Difficult to Understand"
-                ></v-checkbox>
+                >
+                  <template v-slot:label>
+                    <span>Difficult to Understand</span>
+                    <v-tooltip right>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-icon small class="ml-2" v-bind="attrs" v-on="on"
+                          >mdi-information</v-icon
+                        >
+                      </template>
+                      <span>The mnemonic is difficult to understand through grammar, word choice, etc.</span>
+                    </v-tooltip>
+                  </template>
+                </v-checkbox>
+                <v-checkbox
+                  style="margin-top: -15px;"
+                  v-model="mnemonicData.isBadPhoneticKeyword"
+                >
+                  <template v-slot:label>
+                    <span>Bad Phonetic Keyword</span>
+                    <v-tooltip right>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-icon small class="ml-2" v-bind="attrs" v-on="on"
+                          >mdi-information</v-icon
+                        >
+                      </template>
+                      <span>The generated keyword does not sound like the original vocab term</span>
+                    </v-tooltip>
+                  </template>
+                </v-checkbox>
                 <v-checkbox
                   style="margin-top: -15px;"
                   v-model="mnemonicData.isBadKeywordLink"
-                  label="Bad Keyword Link"
-                ></v-checkbox>
+                >
+                  <template v-slot:label>
+                    <span>Bad Equivalent Keyword</span>
+                    <v-tooltip right>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-icon small class="ml-2" v-bind="attrs" v-on="on"
+                          >mdi-information</v-icon
+                        >
+                      </template>
+                      <span>The generated keyword is essentially the same as the original vocab term</span>
+                    </v-tooltip>
+                  </template>
+                </v-checkbox>
+                <v-checkbox
+                  style="margin-top: -15px;"
+                  v-model="mnemonicData.isBadKeywordExplanation"
+                >
+                  <template v-slot:label>
+                    <span>Bad Keyword Explanation</span>
+                    <v-tooltip right>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-icon small class="ml-2" v-bind="attrs" v-on="on"
+                          >mdi-information</v-icon
+                        >
+                      </template>
+                      <span>The explanation linking the keyword and vocab term is poor</span>
+                    </v-tooltip>
+                  </template>
+                </v-checkbox>
                 <v-checkbox
                   style="margin-top: -15px;"
                   v-model="mnemonicData.isOffensive"
-                  label="Offensive"
-                ></v-checkbox>
-                <v-checkbox
-                  style="margin-top: -15px;"
-                  v-model="mnemonicData.isOther"
-                  label="Other Reason"
-                ></v-checkbox>
+                >
+                  <template v-slot:label>
+                    <span>Offensive</span>
+                    <v-tooltip right>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-icon small class="ml-2" v-bind="attrs" v-on="on"
+                          >mdi-information</v-icon
+                        >
+                      </template>
+                      <span>The mnemonic device is offensive or harmful</span>
+                    </v-tooltip>
+                  </template>
+                </v-checkbox>
+
                 <v-text-field
-                  v-show="mnemonicData.isOther"
-                  label="Please specify the reason"
+                  label="Other Feedback"
                   v-model="mnemonicData.otherReason"
                 ></v-text-field>
+                <v-btn medium @click="submitFeedbackIndividualFeedback()">Submit</v-btn>
               </v-container>
-
-              <v-btn medium @click="submitFeedbackIndividualFeedback()">Submit</v-btn>
             </v-container>
-            <v-container class="pl-0 pt-8" v-else>
+            <v-container class="pl-0 pt-0" v-else>
               <p class="primary--text"><i>Thank you for submitting feedback!</i></p>
             </v-container>
           </v-expansion-panel-content>
@@ -450,7 +521,7 @@
             KAR³L Believes Your Response Was Correct
             <span class="hidden-xs-only">(Enter to Accept, Or Override Below)</span>
           </div>
-          <div v-else class="title primary--text" :style="{ color: 'red !important' }">
+          <div v-else-if="!mnemonicData.cardHasMnemonic" class="title primary--text" :style="{ color: 'red !important' }">
             KAR³L Believes Your Response Was Wrong
             <span class="hidden-xs-only">(Enter to Accept, Or Override Below)</span>
           </div>
@@ -487,7 +558,7 @@
           >
             <v-btn
               ref="wrong"
-              :color="!recommendation ? 'red' : ''"
+              :color="!recommendation && !mnemonicData.cardHasMnemonic ? 'red' : ''"
               class="px-2"
               @click="
                 mnemonicData.cardHasMnemonic ? mnemonicResponse(false) : response(false)
@@ -587,6 +658,9 @@
       isIncorrectDefinition: false,
       isDifficultToUnderstand: false,
       isBadKeywordLink: false,
+      isBadPhoneticKeyword: false,
+      isBadCircularKeyword: false,
+      isBadKeywordExplanation: false,
       isOffensive: false,
       isOther: false,
       otherReason: "",
@@ -932,6 +1006,12 @@
       return this.show.fact && feedbackSet.has(this.show.fact.fact_id);
     }
 
+    public async handleMnemonicRatingClick() {
+      if ([3, 4, 5].includes(this.mnemonicData.mnemonicRating)) {
+        this.submitFeedbackIndividualFeedback();
+      }
+    }
+
     public async submitFeedbackIndividualFeedback() {
       if (this.mnemonicData.mnemonicRating == 0) {
         mainStore.addNotification({
@@ -968,6 +1048,9 @@
         isDifficultToUnderstand: false,
         isBadKeywordLink: false,
         isOffensive: false,
+        isBadPhoneticKeyword: false,
+        isBadCircularKeyword: false,
+        isBadKeywordExplanation: false,
         isOther: false,
         otherReason: "",
         mnemonicRating: 0,
@@ -1051,6 +1134,7 @@
       if (response && this.hasSubmittedFeedback()) {
         this.response(response);
       } else {
+        this.sendResponseNotification(response);
         this.mnemonicData.panelOpen = response ? 0 : -1;
         this.mnemonicData.isStudyingMnemonic = true;
         if (!response) {
@@ -1059,18 +1143,24 @@
       }
     }
 
-    public async response(response) {
+    public async sendResponseNotification(response) {
       if (response) {
-        mainStore.addNotification({
-          content: "Your evaluation: Right",
-          color: "success",
-        });
-      } else {
-        studyStore.setRestudy();
-        mainStore.addNotification({
-          content: "Your evaluation: Wrong",
-          color: "error",
-        });
+          mainStore.addNotification({
+            content: "Your evaluation: Right",
+            color: "success",
+          });
+        } else {
+          studyStore.setRestudy();
+          mainStore.addNotification({
+            content: "Your evaluation: Wrong",
+            color: "error",
+          });
+        }
+    }
+
+    public async response(response) {
+      if (!this.mnemonicData.isStudyingMnemonic) {
+        this.sendResponseNotification(response);
       }
 
       if (
