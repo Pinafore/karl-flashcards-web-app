@@ -1,4 +1,4 @@
-from random import shuffle
+from random import shuffle, uniform
 from typing import List, Optional, Union, Any, Tuple
 import time
 import math
@@ -290,9 +290,13 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                     facts = crud.helper.combine_two_fact_sets(new_facts=new_facts, old_facts=facts, return_limit=return_limit, proportion_new_facts=0.5)
 
                 if is_mnemonic_deck:
-                    if True: # TODO: replace with randomizer
-                        sanity_check_cards =  crud.deck.get_sanity_check_cards(db, decks, num_facts=1)    
-                        facts = sanity_check_cards + facts[len(sanity_check_cards):]  
+                    NUM_CARDS_UNTIL_SANITY_CHECK = 60
+                    NUM_SANITY_CARDS = 1
+                    prob_sanity_check = (1.0 * len(facts)) / NUM_CARDS_UNTIL_SANITY_CHECK # on average, this should have a sanity check 1 in every 3 decks (for decks of size 20)
+                    if uniform(0, 1) < prob_sanity_check:
+                        sanity_check_cards = crud.deck.get_sanity_check_cards(db, decks, num_facts=NUM_SANITY_CARDS) # select sanity check cards
+                        facts = sanity_check_cards + facts[:-len(sanity_check_cards)] # add them to the current list
+                        shuffle(facts) # shuffle the order
                     
             logger.info(f"Study set created of type {setType}")
             study_set_create = schemas.StudySetCreate(repetition_model=repetition_model, user_id=user.id, debug_id=debug_id, set_type=setType)
