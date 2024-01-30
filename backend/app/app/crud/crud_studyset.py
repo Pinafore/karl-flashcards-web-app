@@ -288,6 +288,11 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                     facts = new_facts + facts[:20-len(new_facts)]
                 else:
                     facts = crud.helper.combine_two_fact_sets(new_facts=new_facts, old_facts=facts, return_limit=return_limit, proportion_new_facts=0.5)
+
+                if is_mnemonic_deck:
+                    if True: # TODO: replace with randomizer
+                        sanity_check_cards =  crud.deck.get_sanity_check_cards(db, decks, num_facts=1)    
+                        facts = sanity_check_cards + facts[len(sanity_check_cards):]  
                     
             logger.info(f"Study set created of type {setType}")
             study_set_create = schemas.StudySetCreate(repetition_model=repetition_model, user_id=user.id, debug_id=debug_id, set_type=setType)

@@ -148,6 +148,7 @@ export interface IComponents {
     mnemonic_a: string;
     mnemonic_b: string;
     comparison_rating: string | null;
+    passed_sanity_check: boolean | null;
     correct: boolean;
   };
   MnemonicSearch: {

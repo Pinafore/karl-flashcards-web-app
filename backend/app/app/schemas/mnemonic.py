@@ -38,6 +38,7 @@ class MnemonicComparisonFeedbackLog(BaseModel):
     mnemonic_a: str
     mnemonic_b: str
     comparison_rating: Optional[MnemonicComparisonLog] = None
+    passed_sanity_check: Optional[bool] = None
     correct: bool
 
 class MnemonicFeedback(BaseModel):

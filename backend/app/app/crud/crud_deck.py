@@ -4,7 +4,7 @@ from typing import List, Optional, Set, Union, Dict, Any, Tuple
 from app.core.config import settings
 from app.crud.base import CRUDBase
 from app import crud, models
-from app.models import User, Deck
+from app.models import User, Deck, Fact
 from app.models.user_deck import User_Deck
 from app.schemas import Permission, DeckType, Repetition, SetType
 from app.schemas.deck import DeckCreate, DeckUpdate, SuperDeckCreate, SuperDeckUpdate
@@ -247,7 +247,19 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
         db.refresh(db_obj)
     
         return db_obj
+    
+    def get_sanity_check_cards(self, db: Session, db_obj_list: List[Deck], num_facts: int = 1) -> List[Fact]:
 
+        # for now, assume there is only one deck in the list
+        db_obj = db_obj_list[0]
+        sanity_deck_title = db_obj.title + ' Sanity'
+        sanity_deck = db.query(Deck).filter(Deck.deck_type == DeckType.sanity_check).filter(Deck.title == sanity_deck_title).first()
 
+        if sanity_deck == None:
+            print("Sanity deck not found")
+            raise HTTPException(status_code=404, detail=f"Sanity deck not found")
+
+        sanity_facts = db.query(Fact).filter(Fact.deck_id == sanity_deck.id).order_by(func.random()).limit(num_facts).all()
+        return sanity_facts
 
 deck = CRUDDeck(Deck)

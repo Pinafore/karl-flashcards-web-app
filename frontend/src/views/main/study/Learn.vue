@@ -288,7 +288,7 @@
                     @click="submitComparisonFeedback('a_better')"
                   >
                     <v-card-title class="title">
-                      Mnemonic A ( [ )
+                      Mnemonic A ([)
                     </v-card-title>
                     <v-card-text class="body-1" style="color: black">
                       {{
@@ -329,19 +329,19 @@
                   </v-card>
                 </v-col>
                 <v-col rows="12">
-                <v-row class="shrink pl-1" justify="start">
-                  <v-col cols="5" sm="auto" class="ma-1 pa-1 py-0">
-                    <v-btn medium @click="submitComparisonFeedback('')"
-                      >Skip (Enter)</v-btn
-                    ></v-col
-                  >
-                  <v-col cols="5" sm="auto" class="ma-1 pa-1 py-0">
-                    <v-btn medium @click="submitComparisonFeedback('equal')"
-                      >Equal (Shift-Enter)</v-btn
-                    ></v-col
-                  >
-                </v-row>
-              </v-col>
+                  <v-row class="shrink pl-1" justify="start">
+                    <v-col cols="5" sm="auto" class="ma-1 pa-1 py-0">
+                      <v-btn medium @click="submitComparisonFeedback('')"
+                        >Skip (Enter)</v-btn
+                      ></v-col
+                    >
+                    <v-col cols="5" sm="auto" class="ma-1 pa-1 py-0">
+                      <v-btn medium @click="submitComparisonFeedback('equal')"
+                        >Equal (Shift-Enter)</v-btn
+                      ></v-col
+                    >
+                  </v-row>
+                </v-col>
               </v-row>
             </v-container>
           </v-expansion-panel-content>
@@ -351,7 +351,7 @@
               {{
                 show.fact &&
                   show.fact.extra &&
-                  show.fact.extra[mnemonicData.mnemonicGroup]
+                  show.fact.extra[(show.fact.deck.deck_type == "sanity_check" ? "mnemonic_1" : mnemonicData.mnemonicGroup)]
               }}
             </p>
             <v-container v-if="show.fact && !hasSubmittedFeedback()" class="pl-0 pb-0">
@@ -794,6 +794,12 @@
       return false;
     }
 
+    public checkIfMnemonicDeck(facts) {
+      return facts.some(
+        (fact) => fact !== undefined && fact.deck.deck_type == "public_mnemonic",
+      );
+    }
+
     public async mounted() {
       studyStore.setStudySet(null);
       await mainStore.getUserProfile();
@@ -805,9 +811,9 @@
       window.addEventListener("keyup", this.resetKeyListener);
       studyStore.setResume(this.is_resume);
       await studyStore.getStudyFacts();
-      this.mnemonicData.cardHasMnemonic =
-        this.show.fact !== undefined &&
-        this.show.fact.deck.deck_type == "public_mnemonic";
+      this.mnemonicData.cardHasMnemonic = this.checkIfMnemonicDeck(this.facts);
+      console.log(this.facts);
+      console.log(this.mnemonicData.cardHasMnemonic);
       if (this.mnemonicData.cardHasMnemonic) {
         await this.setupMnemonicData();
       }
@@ -1084,6 +1090,19 @@
       this.response(true);
     }
 
+    public passedSanityCheck(selection: string) {
+      if (selection == "") {
+        return true;
+      }
+      if (selection == "equal") {
+        return false;
+      }
+      return (
+        (selection == "a_better" && this.mnemonicData.mnemonicComparisons[0] == "1") ||
+        (selection == "b_better" && this.mnemonicData.mnemonicComparisons[1] == "1")
+      );
+    }
+
     public async resetMnemonicData() {
       if (this.mnemonicData.mnemonicClick) {
         await this.toggleMnemonic();
@@ -1241,6 +1260,10 @@
                   ? null
                   : this.mnemonicData.comparisonChoice,
               correct: response,
+              passed_sanity_check:
+                this.show.fact.deck.deck_type == "sanity_check"
+                  ? this.passedSanityCheck(this.mnemonicData.comparisonChoice)
+                  : null,
             },
           });
         } else {
