@@ -294,6 +294,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                     NUM_SANITY_CARDS = 1
                     prob_sanity_check = (1.0 * len(facts)) / NUM_CARDS_UNTIL_SANITY_CHECK # on average, this should have a sanity check 1 in every 3 decks (for decks of size 20)
                     if uniform(0, 1) < prob_sanity_check:
+                        print("\n\nSanity Check Triggered!\n\n")
                         sanity_check_cards = crud.deck.get_sanity_check_cards(db, decks, num_facts=NUM_SANITY_CARDS) # select sanity check cards
                         facts = sanity_check_cards + facts[:-len(sanity_check_cards)] # add them to the current list
                         shuffle(facts) # shuffle the order

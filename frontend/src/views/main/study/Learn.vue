@@ -330,9 +330,7 @@
                 </v-col>
 
                 <v-col rows="12">
-                  <v-card-actions
-                    class="px-0 pt-3 pb-2 mx-0"
-                  >
+                  <v-card-actions class="px-0 pt-3 pb-2 mx-0">
                     <v-row class="shrink" justify="start">
                       <v-col cols="12" md="5" class="ma-1 pa-1 py-0 pl-2">
                         <v-btn medium @click="submitComparisonFeedback('')"
@@ -364,9 +362,17 @@
               }}
             </p>
             <v-container v-if="show.fact && !hasSubmittedFeedback()" class="pl-0 pb-0">
-              <v-subheader class="pl-0 pt-0 title"
-                >Give Feedback (Optional)</v-subheader
+              <v-subheader class="title pl-0 ml-0"
+                >Give Feedback (Optional)<v-tooltip right>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-icon small class="ml-2" v-bind="attrs" v-on="on"
+                      >mdi-information</v-icon
+                    >
+                  </template>
+                  <span>Type 1-5 to rate the mnemonic</span>
+                </v-tooltip></v-subheader
               >
+
               <v-rating
                 v-model="mnemonicData.mnemonicRating"
                 hover
@@ -522,7 +528,7 @@
                       v-model="mnemonicData.otherReason"
                     ></v-text-field>
                     <v-btn medium @click="submitFeedbackIndividualFeedback()"
-                      >Submit</v-btn
+                      >Submit (])</v-btn
                     >
                   </v-col>
                 </v-row>
@@ -694,6 +700,7 @@
     $refs!: {
       answerfield: HTMLInputElement;
       retype: HTMLInputElement;
+      retype_mnemonic: HTMLInputElement;
       right: HTMLButtonElement;
       wrong: HTMLButtonElement;
       mnemonicPaneTop: HTMLInputElement;
@@ -903,7 +910,11 @@
           !e.ctrlKey
         ) {
           this.$nextTick(() => {
-            this.$refs.answerfield.focus();
+            if (this.$refs.answerfield) {
+              this.$refs.answerfield.focus();
+            } else {
+              console.error("answerfield is not rendered yet");
+            }
           });
         }
       }
@@ -951,9 +962,7 @@
           this.mnemonicData.cardHasMnemonic &&
           this.mnemonicData.isStudyingMnemonic
         ) {
-          if (!this.mnemonicData.response) {
-            this.response(false);
-          } else {
+          if (this.mnemonicData.response) {
             this.submitComparisonFeedback("a_better");
           }
         }
@@ -972,10 +981,13 @@
         // when the card has a mnemonic and the user already sees the mnemonic => log the response as normal
         else if (
           this.mnemonicData.cardHasMnemonic &&
-          this.mnemonicData.isStudyingMnemonic &&
-          this.mnemonicData.response
+          this.mnemonicData.isStudyingMnemonic
         ) {
-          this.submitComparisonFeedback("b_better");
+          if (this.mnemonicData.response) {
+            this.submitComparisonFeedback("b_better");
+          } else if ([1, 2].includes(this.mnemonicData.mnemonicRating)) {
+            this.submitFeedbackIndividualFeedback();
+          }
         }
         // previous response logging logic
         else if (!this.mnemonicData.cardHasMnemonic && this.showResponseBtns) {
@@ -986,15 +998,32 @@
       else if (key == "escape" && this.mnemonicData.cardHasMnemonic) {
         this.toggleMnemonic();
       } else if (
+        this.mnemonicData.cardHasMnemonic &&
+        this.mnemonicData.isStudyingMnemonic &&
+        !this.hasSubmittedFeedback() &&
+        !this.mnemonicData.response &&
+        ["1", "2", "3", "4", "5"].includes(key)
+      ) {
+        this.mnemonicData.mnemonicRating = Number(key);
+        if (["3", "4", "5"].includes(key)) {
+          this.submitFeedbackIndividualFeedback();
+        }
+      }
+      else if (
         /^[a-z0-9]$/i.test(key) &&
         !e.altKey &&
         !e.metaKey &&
         !e.shiftKey &&
-        !e.ctrlKey &&
-        !this.mnemonicData.cardHasMnemonic
+        !e.ctrlKey
       ) {
         this.$nextTick(() => {
-          this.$refs.retype.focus();
+          if (!this.mnemonicData.cardHasMnemonic && this.$refs.retype) {
+            this.$refs.retype.focus();
+          } else if (this.mnemonicData.cardHasMnemonic && this.$refs.retype_mnemonic) {
+            this.$refs.retype_mnemonic.focus();
+          } else {
+            console.error("retype is not rendered yet");
+          }
         });
       } else if (
         e.shiftKey &&

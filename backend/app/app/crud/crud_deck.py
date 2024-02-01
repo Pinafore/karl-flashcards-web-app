@@ -252,7 +252,7 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
 
         # for now, assume there is only one deck in the list
         db_obj = db_obj_list[0]
-        sanity_deck_title = db_obj.title + ' Sanity'
+        sanity_deck_title = db_obj.title
         sanity_deck = db.query(Deck).filter(Deck.deck_type == DeckType.sanity_check).filter(Deck.title == sanity_deck_title).first()
 
         if sanity_deck == None:
