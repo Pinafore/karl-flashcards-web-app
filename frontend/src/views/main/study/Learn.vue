@@ -246,10 +246,10 @@
         class="px-5 pt-3 pb-2"
       >
         <v-row class="shrink" justify="start">
-          <v-col cols="5" sm="auto" class="ma-1 pa-1 py-0">
+          <v-col cols="12" md="5" class="ma-1 pa-1 py-0 pr-10">
             <v-btn @click="showAnswer">Show Answer (Enter)</v-btn>
           </v-col>
-          <v-col cols="5" sm="auto" class="ma-1 pa-1 py-0">
+          <v-col cols="12" md="5" class="ma-1 pa-1 py-0">
             <v-btn @click="dontKnow">Don't Know (Shift-Enter)</v-btn>
           </v-col>
         </v-row>
@@ -328,19 +328,24 @@
                     </v-card-text>
                   </v-card>
                 </v-col>
+
                 <v-col rows="12">
-                  <v-row class="shrink pl-1" justify="start">
-                    <v-col cols="5" sm="auto" class="ma-1 pa-1 py-0">
-                      <v-btn medium @click="submitComparisonFeedback('')"
-                        >Skip (Enter)</v-btn
-                      ></v-col
-                    >
-                    <v-col cols="5" sm="auto" class="ma-1 pa-1 py-0">
-                      <v-btn medium @click="submitComparisonFeedback('equal')"
-                        >Equal (Shift-Enter)</v-btn
-                      ></v-col
-                    >
-                  </v-row>
+                  <v-card-actions
+                    class="px-0 pt-3 pb-2 mx-0"
+                  >
+                    <v-row class="shrink" justify="start">
+                      <v-col cols="12" md="5" class="ma-1 pa-1 py-0 pl-2">
+                        <v-btn medium @click="submitComparisonFeedback('')"
+                          >Skip (Enter)</v-btn
+                        ></v-col
+                      >
+                      <v-col cols="12" md="5" class="ma-1 pa-1 pl-2 py-0">
+                        <v-btn medium @click="submitComparisonFeedback('equal')"
+                          >Equal (Shift-Enter)</v-btn
+                        ></v-col
+                      >
+                    </v-row>
+                  </v-card-actions>
                 </v-col>
               </v-row>
             </v-container>
@@ -351,7 +356,11 @@
               {{
                 show.fact &&
                   show.fact.extra &&
-                  show.fact.extra[(show.fact.deck.deck_type == "sanity_check" ? "mnemonic_1" : mnemonicData.mnemonicGroup)]
+                  show.fact.extra[
+                    show.fact.deck.deck_type == "sanity_check"
+                      ? "mnemonic_1"
+                      : mnemonicData.mnemonicGroup
+                  ]
               }}
             </p>
             <v-container v-if="show.fact && !hasSubmittedFeedback()" class="pl-0 pb-0">
@@ -596,7 +605,7 @@
         ></v-text-field>
       </v-card-text>
       <v-card-actions class="pt-3 pb-1 px-5">
-        <v-row class="shrink" justify="space-around">
+        <v-row class="shrink" justify="start">
           <v-col
             v-show="showResponseBtns && !mnemonicData.isStudyingMnemonic"
             cols="5"
