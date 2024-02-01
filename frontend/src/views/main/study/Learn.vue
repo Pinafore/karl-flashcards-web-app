@@ -821,8 +821,6 @@
       studyStore.setResume(this.is_resume);
       await studyStore.getStudyFacts();
       this.mnemonicData.cardHasMnemonic = this.checkIfMnemonicDeck(this.facts);
-      console.log(this.facts);
-      console.log(this.mnemonicData.cardHasMnemonic);
       if (this.mnemonicData.cardHasMnemonic) {
         await this.setupMnemonicData();
       }
