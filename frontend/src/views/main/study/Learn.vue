@@ -463,7 +463,7 @@
                       </template>
                     </v-checkbox>
                     <v-checkbox
-                      v-model="mnemonicData.isBadKeywordLink"
+                      v-model="mnemonicData.isBadCircularKeyword"
                       class="shrink my-2"
                       density="compact"
                       hide-details
@@ -1019,7 +1019,7 @@
         this.$nextTick(() => {
           if (!this.mnemonicData.cardHasMnemonic && this.$refs.retype) {
             this.$refs.retype.focus();
-          } else if (this.mnemonicData.cardHasMnemonic && this.$refs.retype_mnemonic) {
+          } else if (this.mnemonicData.cardHasMnemonic && this.$refs.retype_mnemonic && (this.mnemonicData.mnemonicRating > 2 || this.hasSubmittedFeedback())) {
             this.$refs.retype_mnemonic.focus();
           } else {
             console.error("retype is not rendered yet");
@@ -1315,7 +1315,7 @@
               is_bad_for_other_reason: this.mnemonicData.otherReason != "",
               is_bad_phonetic_keyword: this.mnemonicData.isBadPhoneticKeyword,
               is_bad_circular_keyword: this.mnemonicData.isBadCircularKeyword,
-              is_bad_keyword_explanation: this.mnemonicData.isBadPhoneticKeyword,
+              is_bad_keyword_explanation: this.mnemonicData.isBadKeywordExplanation,
               other_reason_text: this.mnemonicData.otherReason,
               correct: response,
             },

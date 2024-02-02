@@ -282,7 +282,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                 eligible_new_facts_query = crud.helper.filter_only_new_facts(query=base_facts_query, user_id=user.id, log_type=schemas.Log.study)
                 new_facts = crud.fact.get_eligible_facts(query=eligible_new_facts_query, limit=return_limit, randomize=True)
                 logger.info("new facts: " + str(new_facts))
-                print("=============\n\nnew facts: ", len(new_facts))
+                #print("=============\n\nnew facts: ", len(new_facts))
                 # prioritize newer facts for the mnemonic study
                 if is_mnemonic_deck and len(new_facts) > 0:
                     facts = new_facts + facts[:20-len(new_facts)]
