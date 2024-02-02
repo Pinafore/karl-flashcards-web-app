@@ -534,8 +534,14 @@
                 </v-row>
               </v-container>
             </v-container>
-            <v-container class="pl-0 pt-0" v-else>
-              <p class="primary--text"><i>Thank you for submitting feedback!</i></p>
+            <v-container class="pl-0 pt-2" v-else>
+              <p class="primary--text">
+                <i
+                  >Thank you for submitting feedback! Edit feedback
+                  <a @click="removeSubmittedFeedback"><u>here</u></a
+                  >.</i
+                >
+              </p>
             </v-container>
           </v-expansion-panel-content>
         </v-expansion-panel>
@@ -1008,8 +1014,7 @@
         if (["3", "4", "5"].includes(key)) {
           this.submitFeedbackIndividualFeedback();
         }
-      }
-      else if (
+      } else if (
         /^[a-z0-9]$/i.test(key) &&
         !e.altKey &&
         !e.metaKey &&
@@ -1019,7 +1024,11 @@
         this.$nextTick(() => {
           if (!this.mnemonicData.cardHasMnemonic && this.$refs.retype) {
             this.$refs.retype.focus();
-          } else if (this.mnemonicData.cardHasMnemonic && this.$refs.retype_mnemonic && (this.mnemonicData.mnemonicRating > 2 || this.hasSubmittedFeedback())) {
+          } else if (
+            this.mnemonicData.cardHasMnemonic &&
+            this.$refs.retype_mnemonic &&
+            (this.mnemonicData.mnemonicRating > 2 || this.hasSubmittedFeedback())
+          ) {
             this.$refs.retype_mnemonic.focus();
           } else {
             console.error("retype is not rendered yet");
@@ -1098,6 +1107,15 @@
     public async handleMnemonicRatingClick() {
       if ([3, 4, 5].includes(this.mnemonicData.mnemonicRating)) {
         this.submitFeedbackIndividualFeedback();
+      }
+    }
+
+    public async removeSubmittedFeedback() {
+      if (this.show.fact) {
+        this.mnemonicData.feedbackFactIdsLearning.delete(this.show.fact.fact_id);
+        this.mnemonicData.feedbackFactIdsLearning = new Set([
+          ...this.mnemonicData.feedbackFactIdsLearning,
+        ]);
       }
     }
 
@@ -1319,7 +1337,10 @@
               other_reason_text: this.mnemonicData.otherReason,
               correct: response,
               mnemonic_used_id: this.mnemonicData.mnemonicGroup,
-              mnemonic_used_text: this.show.fact && this.show.fact.extra && this.show.fact.extra[this.mnemonicData.mnemonicGroup]
+              mnemonic_used_text:
+                this.show.fact &&
+                this.show.fact.extra &&
+                this.show.fact.extra[this.mnemonicData.mnemonicGroup],
             },
           });
         }
