@@ -1318,6 +1318,8 @@
               is_bad_keyword_explanation: this.mnemonicData.isBadKeywordExplanation,
               other_reason_text: this.mnemonicData.otherReason,
               correct: response,
+              mnemonic_used_id: this.mnemonicData.mnemonicGroup,
+              mnemonic_used_text: this.show.fact && this.show.fact.extra && this.show.fact.extra[this.mnemonicData.mnemonicGroup]
             },
           });
         }

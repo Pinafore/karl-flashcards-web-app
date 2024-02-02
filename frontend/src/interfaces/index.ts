@@ -140,6 +140,8 @@ export interface IComponents {
     is_bad_for_other_reason: boolean;
     other_reason_text: string;
     correct: boolean;
+    mnemonic_used_id: string;
+    mnemonic_used_text: string;
   };
   MnemonicComparisonFeedbackLog: {
     study_id: number;

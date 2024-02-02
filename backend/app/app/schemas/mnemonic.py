@@ -25,6 +25,8 @@ class MnemonicLearningFeedbackLog(BaseModel):
     is_bad_for_other_reason: bool
     other_reason_text: str
     correct: bool
+    mnemonic_used_id: str
+    mnemonic_used_text: str
 
 class MnemonicComparisonLog(str, Enum):
     a_better = 'a_better'
