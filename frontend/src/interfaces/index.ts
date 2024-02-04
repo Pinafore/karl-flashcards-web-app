@@ -35,7 +35,7 @@ export interface IStatus {
   reported?: boolean;
 }
 export interface IComponents {
-  Deck: { title: string; public: boolean; id: number };
+  Deck: { title: string; public: boolean; id: number; deck_type: string };
   DeckCreate: { title: string };
   SuperDeckCreate: { title: string; public?: boolean };
   DeckUpdate: { title?: string };
@@ -126,6 +126,37 @@ export interface IComponents {
   HTTPValidationError: {
     detail?: IComponents["ValidationError"][];
   };
+  MnemonicLearningFeedbackLog: {
+    study_id: number;
+    fact_id: number;
+    user_id: number;
+    user_rating: number;
+    is_offensive: boolean;
+    is_incorrect_definition: boolean;
+    is_difficult_to_understand: boolean;
+    is_bad_phonetic_keyword: boolean;
+    is_bad_circular_keyword: boolean;
+    is_bad_keyword_explanation: boolean;
+    is_bad_for_other_reason: boolean;
+    other_reason_text: string;
+    correct: boolean;
+    mnemonic_used_id: string;
+    mnemonic_used_text: string;
+  };
+  MnemonicComparisonFeedbackLog: {
+    study_id: number;
+    fact_id: number;
+    user_id: number;
+    mnemonic_a: string;
+    mnemonic_b: string;
+    comparison_rating: string | null;
+    passed_sanity_check: boolean | null;
+    correct: boolean;
+  };
+  MnemonicSearch: {
+    user_id: number;
+    fact_ids: number[];
+  };
   Msg: { msg: string };
   Schedule: {
     fact_id: number;
@@ -135,6 +166,7 @@ export interface IComponents {
     elapsed_milliseconds_answer: number;
     recommendation: boolean;
     test_mode: number;
+    used_mnemonic?: boolean;
   };
   SuperUserCreate: {
     email: string;

@@ -1,5 +1,6 @@
 from .deck import Deck
 from .fact import Fact
+from .mnemonic import Mnemonic
 from .history import History
 from .marked import Marked
 from .suspended import Suspended

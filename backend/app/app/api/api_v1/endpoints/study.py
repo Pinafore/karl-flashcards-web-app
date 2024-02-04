@@ -58,7 +58,9 @@ def get_next_set(
     else:
         user = current_user
     study_set = crud.studyset.get_study_set(db, user=user, deck_ids=deck_ids, return_limit=limit, force_new=force_new, is_resume=is_resume)
-    print("\n\nSTUDY SET:", study_set.facts, len(study_set.facts), '\n\n')
+
+    if isinstance(study_set, HTTPException):
+        raise study_set
     if isinstance(study_set, requests.exceptions.RequestException):
         raise HTTPException(status_code=555, detail="Connection to scheduler is down")
     if isinstance(study_set, json.decoder.JSONDecodeError):

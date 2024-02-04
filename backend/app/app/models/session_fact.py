@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Optional, List
 from app.db.base_class import Base
 from sqlalchemy import Column, Integer, ForeignKey, String
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from app.schemas import Permission, FactReported
@@ -92,3 +93,7 @@ class Session_Fact(Base):
     @hybrid_property
     def deck(self) -> Deck:
         return self.fact.deck
+    
+    @hybrid_property
+    def extra(self) -> Deck:
+        return self.fact.extra

@@ -1,7 +1,7 @@
 <template>
   <div>
     <Onboard></Onboard>
-    <test-popup :shouldShow="true"></test-popup>
+    <test-popup :should-show="true"></test-popup>
     <!-- <RecallPopup></RecallPopup> -->
     <v-toolbar style="position: sticky; top: 0; z-index: 10;">
       <v-toolbar-title>
@@ -44,10 +44,24 @@
       item-key="id"
       :items="decks"
       :items-per-page="15"
-      show-select
       :style="{ cursor: 'pointer' }"
+      show-select
       @click:row="openDeck"
     >
+      <template v-slot:header.data-table-select>
+        <v-simple-checkbox
+          :value="areAllSelectedExceptMnemonic()"
+          @input="toggleAllExceptMnemonic"
+        ></v-simple-checkbox>
+      </template>
+
+      <template v-slot:item.data-table-select="{ item }">
+        <v-simple-checkbox
+          v-ripple
+          :value="isSelected(item)"
+          @input="updateSelection(item)"
+        ></v-simple-checkbox>
+      </template>
     </v-data-table>
   </div>
 </template>
@@ -58,7 +72,6 @@
   import { IComponents } from "@/interfaces";
   import Onboard from "@/views/Onboard.vue";
   import TestPopup from "@/views/main/TestPopup.vue";
-  // import RecallPopup from "@/views/main/RecallPopup.vue";
 
   @Component({
     components: { TestPopup, Onboard },
@@ -85,8 +98,19 @@
     }
 
     get decks() {
-      const userProfile = mainStore.userProfile;
-      return userProfile && userProfile.decks ? userProfile.decks : [];
+      if (!mainStore.userProfile || !mainStore.userProfile.decks) {
+        return [];
+      }
+      return mainStore.userProfile.decks.map((i) =>
+        i.deck_type == "public_mnemonic"
+          ? {
+              title: i.title + " (Mnemonic Deck—Can only be studied on its own!)",
+              id: i.id,
+              public: i.public,
+              deck_type: i.deck_type,
+            }
+          : i,
+      );
     }
 
     get resumeAvail() {
@@ -95,6 +119,47 @@
 
     public checkAllDecks() {
       return this.selected.length == 0 || this.selected.length == this.decks.length;
+    }
+
+    public areAllSelectedExceptMnemonic() {
+      return this.decks
+        .filter((i) => i.deck_type !== "public_mnemonic")
+        .every((i) => this.selected.map((j) => j.title).includes(i.title));
+    }
+
+    public toggleAllExceptMnemonic() {
+      if (this.areAllSelectedExceptMnemonic()) {
+        this.selected = [];
+      } else {
+        this.selected = this.decks.filter((i) => i.deck_type !== "public_mnemonic");
+      }
+    }
+
+    public isSelected(id) {
+      return this.selected.includes(id);
+    }
+
+    public updateSelection(id) {
+      if (id.deck_type == "public_mnemonic") {
+        if (this.isSelected(id)) {
+          this.selected = [];
+        } else {
+          this.selected = [id];
+        }
+      } else {
+        const specialIndex = this.selected
+          .map((i) => i.deck_type)
+          .indexOf("public_mnemonic");
+        if (specialIndex !== -1) {
+          this.selected.splice(specialIndex, 1);
+        }
+        const index = this.selected.indexOf(id);
+        if (index == -1) {
+          this.selected.push(id);
+        } else {
+          this.selected.splice(index, 1);
+        }
+      }
     }
 
     public openDecks() {

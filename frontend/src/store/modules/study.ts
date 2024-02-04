@@ -259,10 +259,6 @@ export default class StudyModule extends VuexModule {
 
   @Action
   async getNextShow() {
-    // console.log(this.studyset);
-    // if (this.studyset) {
-    //   console.log(this.studyset.unstudied_facts.length);
-    // }
     this.clearTimer();
     if (this.studyset) {
       if (this.studyset.unstudied_facts.length > 0) {
@@ -280,9 +276,7 @@ export default class StudyModule extends VuexModule {
     this.setStudySet(null);
     this.clearTimer();
     try {
-      const response = await api.checkIfInTestMode(
-        mainStore.token,
-      );
+      const response = await api.checkIfInTestMode(mainStore.token);
       this.setInTestMode(response.data);
       this.setForceNew(false);
       mainStore.setConnectionError(false);

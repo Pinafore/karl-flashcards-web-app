@@ -40,7 +40,7 @@ def read_open_decks(
     Retrieve decks.
     """
     decks = crud.deck.get_public(db, unowned=unowned, user=current_user)
-
+    print('\n\n', decks[0].deck_type, '\n\n')
     return decks
 
 
@@ -75,7 +75,7 @@ def assign_decks(
         if not deck:
             raise HTTPException(status_code=404, detail="Deck not found")
 
-        if deck.deck_type == DeckType.public:
+        if deck.deck_type in {DeckType.public, DeckType.public_mnemonic}:
             if deck not in current_user.decks:
                 deck = crud.deck.assign_viewer(db=db, db_obj=deck, user=current_user)
                 decks.append(deck)

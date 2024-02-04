@@ -4,7 +4,7 @@ from typing import List, Optional, Set, Union, Dict, Any, Tuple
 from app.core.config import settings
 from app.crud.base import CRUDBase
 from app import crud, models
-from app.models import User, Deck
+from app.models import User, Deck, Fact
 from app.models.user_deck import User_Deck
 from app.schemas import Permission, DeckType, Repetition, SetType
 from app.schemas.deck import DeckCreate, DeckUpdate, SuperDeckCreate, SuperDeckUpdate
@@ -92,7 +92,7 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
     def get_public(
             self, db: Session, unowned: bool, user: User
     ) -> List[Deck]:
-        query = db.query(self.model).filter(Deck.deck_type == DeckType.public,
+        query = db.query(self.model).filter(Deck.deck_type.in_([DeckType.public, DeckType.public_mnemonic]),
                                             Deck.id != 1)
         if unowned:
             query = query.filter(not_(Deck.users.any(id=user.id)))
@@ -187,10 +187,12 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
             self, db: Session, *, proposed_deck: str, user: User, deck_type: DeckType = DeckType.default
     ) -> Deck:
         user_decks = self.get_multi_by_owner(db, user=user)
-        owned_deck = [user_deck for user_deck in user_decks if user_deck.title == proposed_deck]
+        owned_deck = [user_deck for user_deck in user_decks if user_deck.title == proposed_deck and user_deck.deck_type == deck_type]
         if owned_deck:
             user_deck = owned_deck[0]
         else:
+            if not user.is_superuser and deck_type != DeckType.default:
+                raise HTTPException(status_code=423, detail="Only superusers may upload with this deck type")
             user_deck = self.create_with_owner(db=db, obj_in=SuperDeckCreate(title=proposed_deck, deck_type=deck_type),
                                                user=user)
         return user_deck
@@ -245,7 +247,19 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
         db.refresh(db_obj)
     
         return db_obj
+    
+    def get_sanity_check_cards(self, db: Session, db_obj_list: List[Deck], num_facts: int = 1) -> List[Fact]:
 
+        # for now, assume there is only one deck in the list
+        db_obj = db_obj_list[0]
+        sanity_deck_title = db_obj.title
+        sanity_deck = db.query(Deck).filter(Deck.deck_type == DeckType.sanity_check).filter(Deck.title == sanity_deck_title).first()
 
+        if sanity_deck == None:
+            print("Sanity deck not found")
+            raise HTTPException(status_code=404, detail=f"Sanity deck not found")
+
+        sanity_facts = db.query(Fact).filter(Fact.deck_id == sanity_deck.id).order_by(func.random()).limit(num_facts).all()
+        return sanity_facts
 
 deck = CRUDDeck(Deck)
