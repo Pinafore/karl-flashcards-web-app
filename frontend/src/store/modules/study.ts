@@ -276,8 +276,12 @@ export default class StudyModule extends VuexModule {
     this.setStudySet(null);
     this.clearTimer();
     try {
-      const response = await api.checkIfInTestMode(mainStore.token);
-      this.setInTestMode(response.data);
+      if (process.env.VUE_APP_TEST_MODE_ENABLED == '1') {
+        const response = await api.checkIfInTestMode(mainStore.token);
+        this.setInTestMode(response.data);
+      } else {
+        this.setInTestMode(false);
+      }
       this.setForceNew(false);
       mainStore.setConnectionError(false);
       mainStore.setSchedulerError(false);

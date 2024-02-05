@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     # "http://localhost:8080", "http://local.dockertoolbox.tiangolo.com"]'
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
     INTERFACE: str = "http://host.docker.internal:4000/"
+    TEST_MODE_ENABLED: bool = False
     TEST_MODE_FIRST_TRIGGER_SESSIONS: int = 5
     TEST_MODE_TRIGGER_DAYS: int = 10
     TEST_MODE_TRIGGER_SESSIONS: int = 7
