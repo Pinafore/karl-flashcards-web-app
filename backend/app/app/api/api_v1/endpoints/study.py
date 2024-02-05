@@ -18,10 +18,10 @@ def check_if_in_test_mode(
         current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
-    Get next set of facts for review using user's schedule.
-    Allows superusers to view anyone's future schedule.
-    A user's deck ids can be provided for filtering.
+    Checks if the current user is in test mode
     """
+    if not settings.TEST_MODE_ENABLED:
+        return False
     
     if user_id:
         user = crud.user.get(db=db, id=user_id)
