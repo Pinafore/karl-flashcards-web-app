@@ -55,12 +55,27 @@
         ></v-simple-checkbox>
       </template>
 
-      <template v-slot:item.data-table-select="{ item }">
-        <v-simple-checkbox
-          v-ripple
-          :value="isSelected(item)"
-          @input="updateSelection(item)"
-        ></v-simple-checkbox>
+      <template v-slot:item="{ item }">
+        <tr>
+          <td>
+            <v-simple-checkbox
+              v-ripple
+              :value="isSelected(item)"
+              @input="updateSelection(item)"
+            ></v-simple-checkbox>
+          </td>
+          <td>
+            {{ item.title }}
+            <v-tooltip color="#302f2f" top v-if="item.deck_type == 'public_mnemonic'">
+              <template v-slot:activator="{ on, attrs }">
+                <v-icon medium class="ml-0 mb-1" v-bind="attrs" v-on="on" color="#e0b310"
+                  >mdi-alert</v-icon
+                >
+              </template>
+              <span>This deck contains automatically generated mnemonic devices from a large language model, and can only be studied on its own!</span>
+            </v-tooltip>
+          </td>
+        </tr>
       </template>
     </v-data-table>
   </div>
@@ -104,7 +119,7 @@
       return mainStore.userProfile.decks.map((i) =>
         i.deck_type == "public_mnemonic"
           ? {
-              title: i.title + " (Mnemonic Deck—Can only be studied on its own!)",
+              title: i.title,
               id: i.id,
               public: i.public,
               deck_type: i.deck_type,
@@ -133,6 +148,10 @@
       } else {
         this.selected = this.decks.filter((i) => i.deck_type !== "public_mnemonic");
       }
+    }
+
+    public isMnemonicDeck(i) {
+      return i.deck_type == "public_menmonic";
     }
 
     public isSelected(id) {

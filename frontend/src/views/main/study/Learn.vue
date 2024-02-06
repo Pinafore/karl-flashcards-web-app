@@ -801,7 +801,7 @@
     }
 
     get shouldShowTestPopup() {
-      if (process.env.VUE_APP_TEST_MODE_ENABLED == '0') {
+      if (process.env.VUE_APP_TEST_MODE_ENABLED == "0") {
         return false;
       }
       if (studyStore.isContinuedSet) {
