@@ -66,7 +66,7 @@
           </td>
           <td>
             {{ item.title }}
-            <v-tooltip color="#302f2f" top v-if="item.deck_type == 'public_mnemonic'">
+            <v-tooltip color="#302f2f" right v-if="item.deck_type == 'public_mnemonic'">
               <template v-slot:activator="{ on, attrs }">
                 <v-icon medium class="ml-0 mb-1" v-bind="attrs" v-on="on" color="#e0b310"
                   >mdi-alert</v-icon
