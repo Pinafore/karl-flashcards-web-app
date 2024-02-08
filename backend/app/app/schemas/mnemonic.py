@@ -52,3 +52,7 @@ class MnemonicFeedbackDetailed(BaseModel):
     fact_ids_comparison: List[int]
     user_id: int
 
+class MnemonicStatistics(BaseModel):
+    user_id: int
+    num_vocab_studied: int
+    num_mnemonics_rated: int

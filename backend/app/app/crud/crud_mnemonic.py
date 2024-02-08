@@ -37,5 +37,43 @@ class CRUDMnemonic(CRUDBase[schemas.MnemonicFeedback, schemas.MnemonicFeedback, 
         return {'fact_ids_learning': [x.fact_id for x in db_obj if 'mnemonic_a' not in x.details.keys()],
                'fact_ids_comparison': [x.fact_id for x in db_obj if 'mnemonic_a' in x.details.keys()],
                 'user_id': obj_in.user_id}
+    
+    def get_mnemonic_stats(self, db: Session, parameters: Any) -> schemas.MnemonicStatistics:
+        
+        base_query = db.query(models.History.fact_id
+            ).join(models.Fact, models.Fact.fact_id == models.History.fact_id
+            ).filter(models.History.user_id == parameters['user_id']
+            ).filter(models.History.log_type.in_([Log.mnemonic_learning_feedback, Log.mnemonic_comparison_feedback])
+        )
 
+        if 'date_start' in parameters:
+            base_query = base_query.filter(parameters['date_start'] <= models.History.time)
+        if 'date_end' in parameters:
+            base_query = base_query.filter(models.History.time <= parameters['date_end'])
+        if 'deck_id' in parameters:
+            base_query = base_query.filter(models.Fact.deck_id == parameters['deck_id'])
+
+        overall_unique_fact_ids = base_query.distinct(models.History.fact_id).count()
+
+        comparison_rating_exists = base_query.filter(
+            and_(
+                models.History.details.has_key("comparison_rating"),
+                models.History.details["comparison_rating"].astext != None
+            )
+        ).distinct(models.History.fact_id).count()
+
+        user_rating_not_zero = base_query.filter(
+            and_(
+                models.History.details.has_key("user_rating"),
+                models.History.details["user_rating"].astext != "0"
+            )
+        ).distinct(models.History.fact_id).count()
+
+        return schemas.MnemonicStatistics(
+            user_id=parameters['user_id'],
+            num_vocab_studied=overall_unique_fact_ids,
+            num_mnemonics_rated=comparison_rating_exists + user_rating_not_zero
+        )
+
+    
 mnemonic = CRUDMnemonic(models.Mnemonic)

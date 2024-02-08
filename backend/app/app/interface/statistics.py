@@ -28,8 +28,14 @@ def get_user_stats(db: Session, user: models.user, *, date_start: datetime = Non
         logger.info(request.url)
         result_dict = request.json()
 
+        mnemonic_statistics = crud.mnemonic.get_mnemonic_stats(db, parameters)
+        print(mnemonic_statistics)
+        result_dict['num_vocab_studied'] = mnemonic_statistics.num_vocab_studied
+        result_dict['num_mnemonics_rated'] = mnemonic_statistics.num_mnemonics_rated
+
         name = create_name(db, date_start, date_end, deck_id)
         statistics = schemas.Statistics(**result_dict, user=user, name=name)
+        
         return statistics
     except requests.exceptions.RequestException as e:
         capture_exception(e)
@@ -93,7 +99,12 @@ def get_leaderboard(db: Session, rank_type: schemas.RankType, user: models.user,
             headers.append(schemas.DataTypeHeader(text="Minutes Spent on Front", value="value"))
         elif rank_type == schemas.RankType.n_days_studied:
             headers.append(schemas.DataTypeHeader(text="Days Studied", value="value"))
+        elif rank_type == schemas.RankType.num_vocab_studied:
+            headers.append(schemas.DataTypeHeader(text="Vocab Facts Studied", value="value"))
+        elif rank_type == schemas.RankType.num_mnemonics_rated:
+            headers.append(schemas.DataTypeHeader(text="Mnemonics Rated", value="value"))
         begin_overall_start = time.time()
+
         leaderboard = schemas.Leaderboard(
             leaderboard=[schemas.LeaderboardUser(user=crud.user.get(db=db, id=user["user_id"]), value=user["value"],
                                                  rank=user["rank"]) for

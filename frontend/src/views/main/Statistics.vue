@@ -38,7 +38,7 @@
                     >
                     <v-divider></v-divider>
                     <v-list dense>
-                      <v-list-item v-for="type in types" :key="type.value" class="pa-2">
+                      <v-list-item class="pa-2" v-for="type in types" :key="type.value">
                         <v-row no-gutters align="end">
                           <v-col cols="9">
                             <v-list-item-content>{{ type.text }} </v-list-item-content>

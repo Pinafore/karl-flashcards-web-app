@@ -11,3 +11,5 @@ class RankType(str, Enum):
     review_known_rate = "review_known_rate"
     known_rate = "known_rate"
     n_days_studied = "n_days_studied"
+    num_vocab_studied = "num_vocab_studied"
+    num_mnemonics_rated = "num_mnemonics_rated"
