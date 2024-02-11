@@ -8,7 +8,7 @@ from typing import List, Union, Dict, Any, Optional
 import pandas
 from fastapi.encoders import jsonable_encoder
 from pytz import timezone
-from sqlalchemy import or_, and_, func
+from sqlalchemy import or_, and_, func, distinct
 from sqlalchemy.orm import Session, Query
 
 from app import crud, models, schemas
@@ -37,6 +37,23 @@ class CRUDMnemonic(CRUDBase[schemas.MnemonicFeedback, schemas.MnemonicFeedback, 
         return {'fact_ids_learning': [x.fact_id for x in db_obj if 'mnemonic_a' not in x.details.keys()],
                'fact_ids_comparison': [x.fact_id for x in db_obj if 'mnemonic_a' in x.details.keys()],
                 'user_id': obj_in.user_id}
+    
+    def get_users_studying_mnemonics(self, db: Session):
+
+        results = db.query(
+                models.History.user_id, 
+                func.max(models.History.time).label('max_time')
+            ).filter(
+                models.History.log_type.in_([
+                    Log.mnemonic_learning_feedback, 
+                    Log.mnemonic_comparison_feedback
+                ])
+            ).group_by(
+                models.History.user_id
+            ).all()
+        
+        return results
+
     
     def get_mnemonic_stats(self, db: Session, parameters: Any) -> schemas.MnemonicStatistics:
         
@@ -74,6 +91,25 @@ class CRUDMnemonic(CRUDBase[schemas.MnemonicFeedback, schemas.MnemonicFeedback, 
             num_vocab_studied=overall_unique_fact_ids,
             num_mnemonics_rated=comparison_rating_exists + user_rating_not_zero
         )
-
     
+    def get_vocab_facts_studied_per_day(self, db: Session, user_id: int, threshold: int):
+
+        num_unique_days = db.query(
+                func.date(models.History.time).label('day'), 
+                func.count(distinct(models.History.fact_id)).label('fact_count')
+            ).filter(
+                models.History.user_id == user_id
+            ).filter(
+                models.History.log_type.in_([
+                    Log.mnemonic_learning_feedback, 
+                    Log.mnemonic_comparison_feedback
+                ])
+            ).group_by(
+                'day'
+            ).having(
+                func.count(distinct(models.History.fact_id)) > threshold
+            ).count()
+        
+        return {'num_unique_days': num_unique_days}
+            
 mnemonic = CRUDMnemonic(models.Mnemonic)

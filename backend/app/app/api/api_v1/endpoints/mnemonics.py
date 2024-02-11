@@ -1,4 +1,6 @@
 import logging
+import time
+import numpy as np
 from datetime import datetime
 from typing import Any, List, Optional, Union
 
@@ -11,6 +13,10 @@ from app import crud, models, schemas
 from app.api import deps
 from app.core.celery_app import celery_app
 from app.core.config import settings
+
+from app.utils.utils import (
+    send_vocab_reminder_email,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -61,3 +67,67 @@ def get_mnemonic_feedback_ids(
         'fact_ids_learning': [],
         'fact_ids_comparison': []
     }
+
+def ordinal(n: int):
+    if 11 <= (n % 100) <= 13:
+        suffix = "th"
+    else:
+        suffix = ["th", "st", "nd", "rd", "th"][min(n % 10, 4)]
+    return str(n) + suffix
+
+@router.post("/test_vocab_email")
+def test_mnemonic_email(
+        *,
+        db: Session = Depends(deps.get_db),
+        current_user: models.User = Depends(deps.get_current_active_user),
+) -> Any:
+    """
+    Send email with mnemonic stats
+    """
+    data = crud.mnemonic.get_users_studying_mnemonics(db)
+    email_data = {'num_days_studied_vocab': [], 'num_vocab_studied_total': [], 'num_mnemonics_rated': [], 'user_id': [], 'time_last_studied': [], 'email': [], 'username': []}
+    for i in range(len(data)):
+        print(f'{i} / {len(data)}')
+        user_id, last_time_studied = data[i]
+        base_stats = crud.mnemonic.get_mnemonic_stats(db, {'user_id': user_id})
+        num_days_studied_vocab = crud.mnemonic.get_vocab_facts_studied_per_day(db, user_id, 20)['num_unique_days']
+        user = crud.user.get(db, user_id)
+
+        for k, v in ({'num_days_studied_vocab': num_days_studied_vocab, 'num_vocab_studied_total': base_stats.num_vocab_studied, 'num_mnemonics_rated': base_stats.num_mnemonics_rated, 'user_id': user_id, 'time_last_studied': last_time_studied, 'email': user.email, 'username': user.username}).items():
+            email_data[k].append(v)
+            time.sleep(5)
+
+    base_reward_idx = np.argsort(-1 * np.array(email_data['num_days_studied_vocab']))
+    base_reward_rank = np.argsort(base_reward_idx) + 1
+
+    power_reward_idx = np.argsort(-1 * np.array(email_data['num_mnemonics_rated']))
+    power_reward_rank = np.argsort(power_reward_idx) + 1
+
+    email_data['base_reward_rank'] = base_reward_rank
+    email_data['power_reward_rank'] = power_reward_rank
+
+    for i in range(len(data)):
+        num_days_studied_vocab = email_data['num_days_studied_vocab'][i]
+        num_vocab_studied_total = email_data['num_vocab_studied_total'][i]
+        num_mnemonics_rated = email_data['num_mnemonics_rated'][i]
+        user_id = email_data['user_id'][i]
+        time_last_studied = email_data['time_last_studied'][i]
+        email = email_data['email'][i]
+        username = email_data['username'][i]
+        base_rank = email_data['base_reward_rank'][i]
+        power_rank = email_data['power_reward_rank'][i]
+
+
+        send_vocab_reminder_email(
+            email_to="nishantbalepur@gmail.com",
+            username=username,
+            num_days_studied_vocab=num_days_studied_vocab,
+            num_vocab_studied_total=num_vocab_studied_total,
+            num_mnemonics_rated=num_mnemonics_rated,
+            base_reward_rank=ordinal(base_rank),
+            power_reward_rank=ordinal(power_rank)
+        )
+        time.sleep(10)
+        break
+
+    return 1
