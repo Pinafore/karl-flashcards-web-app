@@ -40,6 +40,8 @@ export default class MainModule extends VuexModule {
     { text: "Review Recall %:", value: "review_known_rate" },
     { text: "Minutes Spent:", value: "total_minutes" },
     { text: "Minutes Spent (Front):", value: "elapsed_minutes_text" },
+    { text: "Vocab Facts Studied:", value: "num_vocab_studied" },
+    { text: "Mnemonics Rated", value: "num_mnemonics_rated" },
   ];
   rankTypes = [
     { text: "Total Studied", value: "total_seen" },

@@ -113,6 +113,40 @@ def send_test_mode_reminder_email(
         },
     )
 
+def send_vocab_reminder_email(
+    email_to: str,
+    username: str,
+    num_days_studied_vocab: int,
+    num_vocab_studied_total: int,
+    num_mnemonics_rated: int,
+    base_reward_rank: str,
+    power_reward_rank: str,
+
+) -> None:
+    project_name = settings.PROJECT_NAME
+    subject = f"{project_name} - GRE vocabulary reminder!"
+    with open(Path(settings.EMAIL_TEMPLATES_DIR) / "vocab_reminder.html") as f:
+        template_str = f.read()
+
+    print(email_to, username, num_days_studied_vocab, num_vocab_studied_total, num_mnemonics_rated, base_reward_rank, power_reward_rank)
+    send_email(
+        email_to=email_to,
+        subject_template=subject,
+        html_template=template_str,
+        environment={
+            "project_name": settings.PROJECT_NAME,
+            "email": email_to,
+            "username": username,
+            "link": "https://karl.qanta.org/",
+            "num_days_studied_vocab": num_days_studied_vocab,
+            "num_vocab_studied_total": num_vocab_studied_total,
+            "num_mnemonics_rated": num_mnemonics_rated,
+            "base_reward_rank": base_reward_rank,
+            "power_reward_rank": power_reward_rank,
+        },
+    )
+
+
 
 def send_reset_password_email(email_to: str, username: str, token: str) -> None:
     project_name = settings.PROJECT_NAME

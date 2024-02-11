@@ -2,6 +2,7 @@ import itertools
 import json
 import os
 import time
+import numpy as np
 import re
 
 import sentry_sdk
@@ -17,10 +18,8 @@ from fastapi import APIRouter, Body, Depends, HTTPException
 from typing import Any
 from sqlalchemy.orm import Session
 from app.utils.utils import (
-    generate_password_reset_token,
-    send_reset_password_email,
-    verify_password_reset_token,
     send_test_mode_reminder_email,
+    send_vocab_reminder_email
 )
 
 from app.schemas import DeckType
@@ -79,6 +78,62 @@ def remind_test_mode(num_to_send: int, db: Session = Depends(deps.get_db)) -> An
             break
 
     return {"msg": f"Number of test mode reminder emails sent: {num_emails_sent}"}
+
+@celery_app.task(acks_late=True)
+def remind_vocab_study(db: Session = Depends(deps.get_db)) -> Any:
+    """
+    Remind users about their current progress in studying vocab
+    """
+    db: Session = SessionLocal()
+    data = crud.mnemonic.get_users_studying_mnemonics(db)
+    email_data = {'num_days_studied_vocab': [], 'num_vocab_studied_total': [], 'num_mnemonics_rated': [], 'user_id': [], 'time_last_studied': [], 'email': [], 'username': []}
+    for i in range(len(data)):
+        print(f'{i} / {len(data)}')
+        user_id, last_time_studied = data[i]
+        base_stats = crud.mnemonic.get_mnemonic_stats(db, {'user_id': user_id})
+        num_days_studied_vocab = crud.mnemonic.get_vocab_facts_studied_per_day(db, user_id, 20)['num_unique_days']
+        user = crud.user.get(db, user_id)
+
+        for k, v in ({'num_days_studied_vocab': num_days_studied_vocab, 'num_vocab_studied_total': base_stats.num_vocab_studied, 'num_mnemonics_rated': base_stats.num_mnemonics_rated, 'user_id': user_id, 'time_last_studied': last_time_studied, 'email': user.email, 'username': user.username}).items():
+            email_data[k].append(v)
+            time.sleep(5)
+
+    base_reward_idx = np.argsort(-1 * np.array(email_data['num_days_studied_vocab']))
+    base_reward_rank = np.argsort(base_reward_idx) + 1
+
+    power_reward_idx = np.argsort(-1 * np.array(email_data['num_mnemonics_rated']))
+    power_reward_rank = np.argsort(power_reward_idx) + 1
+
+    email_data['base_reward_rank'] = base_reward_rank
+    email_data['power_reward_rank'] = power_reward_rank
+
+    num_emails_sent = 0
+
+    for i in range(len(data)):
+        num_days_studied_vocab = email_data['num_days_studied_vocab'][i]
+        num_vocab_studied_total = email_data['num_vocab_studied_total'][i]
+        num_mnemonics_rated = email_data['num_mnemonics_rated'][i]
+        user_id = email_data['user_id'][i]
+        time_last_studied = email_data['time_last_studied'][i]
+        email = email_data['email'][i]
+        username = email_data['username'][i]
+        base_rank = email_data['base_reward_rank'][i]
+        power_rank = email_data['power_reward_rank'][i]
+
+        send_vocab_reminder_email(
+            email_to="nishantbalepur@gmail.com",
+            username=username,
+            num_days_studied_vocab=num_days_studied_vocab,
+            num_vocab_studied_total=num_vocab_studied_total,
+            num_mnemonics_rated=num_mnemonics_rated,
+            base_reward_rank=ordinal(base_rank),
+            power_reward_rank=ordinal(power_rank)
+        )
+        num_emails_sent += 1
+        time.sleep(10)
+        break
+
+    return {"msg": f"Number of vocab reminder emails sent: {num_emails_sent}"}
 
 
 @celery_app.task()

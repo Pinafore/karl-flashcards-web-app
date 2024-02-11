@@ -46,7 +46,6 @@
       :items-per-page="15"
       :style="{ cursor: 'pointer' }"
       show-select
-      @click:row="openDeck"
     >
       <template v-slot:header.data-table-select>
         <v-simple-checkbox
@@ -56,7 +55,7 @@
       </template>
 
       <template v-slot:item="{ item }">
-        <tr>
+        <tr @click="openDeck(item)">
           <td>
             <v-simple-checkbox
               v-ripple
