@@ -91,7 +91,7 @@ def remind_vocab_study(
 ) -> Any:
     # Enqueue the task
     celery_app.send_task("app.worker.remind_vocab_study")
-    return {"msg": "Test mode reminder emails are being sent in the background"}
+    return {"msg": "Vocab reminder emails are being sent in the background"}
 
 
 @router.post("/reset-password/", response_model=schemas.Msg)

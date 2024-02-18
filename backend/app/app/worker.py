@@ -117,8 +117,6 @@ def remind_vocab_study(db: Session = Depends(deps.get_db)) -> Any:
         time_last_studied = email_data['time_last_studied'][i]
         email = email_data['email'][i]
 
-        print(email)
-
         username = email_data['username'][i]
         base_rank = email_data['base_reward_rank'][i]
         power_rank = email_data['power_reward_rank'][i]
