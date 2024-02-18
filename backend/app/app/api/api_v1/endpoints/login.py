@@ -84,6 +84,16 @@ def remind_test_mode(
     celery_app.send_task("app.worker.remind_test_mode", args=[num_to_send])
     return {"msg": "Test mode reminder emails are being sent in the background"}
 
+@router.post("/remind_vocab_study")
+def remind_test_mode(
+    num_to_send: int,
+    db: Session = Depends(deps.get_db),
+    current_user: models.User = Depends(deps.get_current_active_superuser),
+) -> Any:
+    # Enqueue the task
+    celery_app.send_task("app.worker.remind_vocab_study", args=[num_to_send])
+    return {"msg": "Test mode reminder emails are being sent in the background"}
+
 
 @router.post("/reset-password/", response_model=schemas.Msg)
 def reset_password(
