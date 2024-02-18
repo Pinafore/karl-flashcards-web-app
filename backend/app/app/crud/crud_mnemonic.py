@@ -107,7 +107,7 @@ class CRUDMnemonic(CRUDBase[schemas.MnemonicFeedback, schemas.MnemonicFeedback, 
             ).group_by(
                 'day'
             ).having(
-                func.count(distinct(models.History.fact_id)) > threshold
+                func.count(distinct(models.History.fact_id)) >= threshold
             ).count()
         
         return {'num_unique_days': num_unique_days}
