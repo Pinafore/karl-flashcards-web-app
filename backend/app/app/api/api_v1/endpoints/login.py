@@ -85,13 +85,12 @@ def remind_test_mode(
     return {"msg": "Test mode reminder emails are being sent in the background"}
 
 @router.post("/remind_vocab_study")
-def remind_test_mode(
-    num_to_send: int,
+def remind_vocab_study(
     db: Session = Depends(deps.get_db),
     current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     # Enqueue the task
-    celery_app.send_task("app.worker.remind_vocab_study", args=[num_to_send])
+    celery_app.send_task("app.worker.remind_vocab_study")
     return {"msg": "Test mode reminder emails are being sent in the background"}
 
 
