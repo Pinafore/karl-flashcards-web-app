@@ -256,6 +256,37 @@
       </v-card-actions>
     </v-card>
 
+    <v-dialog v-model="mnemonicData.mnemonicDialogue" scrollable>
+      <v-card>
+        <v-card-title>
+          <h2 class="headline">What makes a mnemonic good?</h2>
+        </v-card-title>
+        <v-card-text class="title">
+          Below, we define several criteria that can be considered to help you rate the quality of
+          mnemonic devices:
+          <ol>
+            <li>
+              <b>Correctness:</b> A good mnemonic should accurately capture
+              the definition of the vocabulary term
+            </li>
+            <li>
+              <b>Clarity:</b> A good mnemonic should be easy to understand and free of
+              mistakes in grammar, spelling, etc.
+            </li>
+            <li><b>Memorability:</b> A good mnemonic should be easy to remember</li>
+            <li>
+              <b>Keyword Quality:</b> A good mnemonic should link to keywords that sound
+              like the original term, and ideally should not be circular (e.g. the
+              keyword "memory" for "memorable" is circular)
+            </li>
+          </ol>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn @click="mnemonicData.mnemonicDialogue = false">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <div
       v-show="mnemonicData.isStudyingMnemonic && mnemonicData.cardHasMnemonic"
       class="my-2 mx-3 px-3 py-4"
@@ -265,9 +296,28 @@
         :readonly="mnemonicData.response"
       >
         <v-expansion-panel @click="updateMnemonicClick()">
-          <v-expansion-panel-header color="#e0f0ff" class="title py-1"
-            ><b v-if="mnemonicData.response">KAR³L-generated Mnemonic Devices</b>
-            <b v-else>KAR³L-generated Mnemonic Device</b>
+          <v-expansion-panel-header
+            color="#e0f0ff"
+            class="d-flex align-center justify-start py-1"
+          >
+            <div class="d-flex align-center justify-start title">
+              <b v-if="mnemonicData.response" class="mr-2"
+                >KAR³L-generated Mnemonic Devices</b
+              >
+              <b v-else class="mr-2">KAR³L-generated Mnemonic Device</b>
+              <v-tooltip right>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-icon
+                    icon
+                    v-bind="attrs"
+                    @click.stop="mnemonicData.mnemonicDialogue = true"
+                    v-on="on"
+                    >mdi-help-circle</v-icon
+                  >
+                </template>
+                <span>What makes a mnemonic good?</span>
+              </v-tooltip>
+            </div>
             <div ref="mnemonicPaneTop"></div>
           </v-expansion-panel-header>
 
@@ -719,6 +769,7 @@
     pressed = false;
     showResponseBtns = true;
     mnemonicData = {
+      mnemonicDialogue: false,
       mnemonicGroup: "",
       retypedMnemonic: "",
       mnemonicClick: false,
