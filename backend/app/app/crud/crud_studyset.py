@@ -247,8 +247,24 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
 
         print('Final repetition model:', repetition_model)
         
-        if repetition_model == schemas.Repetition.karl and not is_mnemonic_deck:
-            eligible_facts = crud.fact.get_eligible_facts(query=base_facts_query, limit=send_limit, randomize=True)
+        eligible_facts = []
+        if repetition_model == schemas.Repetition.karl:
+            if is_mnemonic_deck:
+                new_facts_query = crud.helper.filter_only_new_facts(query=base_facts_query, user_id=user.id, log_type=schemas.Log.study)
+                new_eligible_facts = crud.fact.get_eligible_facts(query=new_facts_query, limit=send_limit, randomize=True)
+                old_eligible_facts = []
+                if len(new_eligible_facts) < return_limit:
+                    old_facts_query = crud.helper.filter_only_reviewed_facts(query=base_facts_query, user_id=user.id, log_type=schemas.Log.study)
+                    old_eligible_facts = crud.fact.get_eligible_facts(query=old_facts_query, limit=send_limit, randomize=True)
+
+                if len(new_eligible_facts) == 0:
+                    eligible_facts = old_eligible_facts
+                # only in this study session will we force users to study certain old facts
+                else:
+                    eligible_facts = new_eligible_facts + old_eligible_facts[:return_limit-len(new_eligible_facts)]
+
+            else:
+                eligible_facts = crud.fact.get_eligible_facts(query=base_facts_query, limit=send_limit, randomize=True)
         else:
             eligible_old_facts_query = crud.helper.filter_only_reviewed_facts(query=base_facts_query, user_id=user.id, log_type=schemas.Log.study)
             print('Num old facts:', setType, len(eligible_old_facts_query.all()), '\n')
@@ -283,26 +299,26 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             logger.info("debug id: " + debug_id)
 
             old_facts = facts
-            if repetition_model != schemas.Repetition.karl or is_mnemonic_deck:
+            if repetition_model != schemas.Repetition.karl:
                 eligible_new_facts_query = crud.helper.filter_only_new_facts(query=base_facts_query, user_id=user.id, log_type=schemas.Log.study)
                 new_facts = crud.fact.get_eligible_facts(query=eligible_new_facts_query, limit=return_limit, randomize=True)
                 logger.info("new facts: " + str(new_facts))
                 #print("=============\n\nnew facts: ", len(new_facts))
                 # prioritize newer facts for the mnemonic study
                 if is_mnemonic_deck and len(new_facts) > 0:
-                    facts = new_facts + facts[:20-len(new_facts)]
+                    facts = new_facts + old_facts[:return_limit-len(new_facts)]
                 else:
-                    facts = crud.helper.combine_two_fact_sets(new_facts=new_facts, old_facts=facts, return_limit=return_limit, proportion_new_facts=0.5)
+                    facts = crud.helper.combine_two_fact_sets(new_facts=new_facts, old_facts=old_facts, return_limit=return_limit, proportion_new_facts=0.5)
 
-                if is_mnemonic_deck:
-                    NUM_CARDS_UNTIL_SANITY_CHECK = 60
-                    NUM_SANITY_CARDS = 1
-                    prob_sanity_check = (1.0 * len(facts)) / NUM_CARDS_UNTIL_SANITY_CHECK # on average, this should have a sanity check 1 in every 3 decks (for decks of size 20)
-                    if uniform(0, 1) < prob_sanity_check:
-                        print("\n\nSanity Check Triggered!\n\n")
-                        sanity_check_cards = crud.deck.get_sanity_check_cards(db, decks, num_facts=NUM_SANITY_CARDS) # select sanity check cards
-                        facts = sanity_check_cards + facts[:-len(sanity_check_cards)] # add them to the current list
-                        shuffle(facts) # shuffle the order
+            if is_mnemonic_deck:
+                NUM_CARDS_UNTIL_SANITY_CHECK = 60
+                NUM_SANITY_CARDS = 1
+                prob_sanity_check = (1.0 * len(facts)) / NUM_CARDS_UNTIL_SANITY_CHECK # on average, this should have a sanity check 1 in every 3 decks (for decks of size 20)
+                if uniform(0, 1) < prob_sanity_check:
+                    print("\n\nSanity Check Triggered!\n\n")
+                    sanity_check_cards = crud.deck.get_sanity_check_cards(db, decks, num_facts=NUM_SANITY_CARDS) # select sanity check cards
+                    facts = sanity_check_cards + facts[:-len(sanity_check_cards)] # add them to the current list
+                    shuffle(facts) # shuffle the order
                     
             logger.info(f"Study set created of type {setType}")
             study_set_create = schemas.StudySetCreate(repetition_model=repetition_model, user_id=user.id, debug_id=debug_id, set_type=setType)

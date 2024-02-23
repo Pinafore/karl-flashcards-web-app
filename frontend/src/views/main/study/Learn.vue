@@ -332,7 +332,7 @@
 
           <v-expansion-panel-content v-if="mnemonicData.response" color="#e0f0ff">
             <v-container>
-              <p class="title">Which mnemonic do you prefer?</p>
+              <p class="title">Which mnemonic do you think would help you learn better?</p>
               <v-row>
                 <v-col cols="6" class="d-flex">
                   <v-card
