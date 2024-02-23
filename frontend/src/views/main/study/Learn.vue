@@ -263,7 +263,7 @@
         </v-card-title>
         <v-card-text class="title">
           Determining what makes a mnemonic good is a highly subjective process. Below,
-          we define several criteria that can be considered to help you rate the quality
+          we define some  criteria and examples that can be considered to help you rate the quality
           of mnemonics:
           <ol>
             <li>
@@ -289,6 +289,11 @@
               themes, biases, etc.
             </li>
           </ol>
+          <br />
+          <v-img
+          width="100%"
+          :src="require('@/assets/mnemonic-examples-wide.svg')"
+        ></v-img>
         </v-card-text>
         <v-card-actions>
           <v-btn @click="mnemonicData.mnemonicDialogue = false">Close</v-btn>
