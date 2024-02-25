@@ -274,7 +274,7 @@
               <b>Clarity:</b> A good mnemonic should be easy to understand and free of
               mistakes in grammar, spelling, etc.
             </li>
-            <li><b>Memorability:</b> A good mnemonic should be easy to remember</li>
+            <li><b>Memorability:</b> A good mnemonic should be easy to remember and link to familiar concepts</li>
             <li>
               <b>Keyword Quality:</b> A good mnemonic should link to keywords that sound
               like the original term, and ideally should not be circular (e.g. the
