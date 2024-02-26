@@ -393,7 +393,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                 models.Session_Fact.fact_id == schedule.fact_id).first()
             if not session_fact:
                 raise HTTPException(status_code=404, detail="Fact not found")
-            history = self.record_study(db=db, user=user, session_fact=session_fact, schedule=schedule)
+            history = self.record_study(db=db, user=user, session_fact=session_fact, schedule=schedule, repetition_model=studyset.repetition_model)
 
             # Mark that the session fact has been studied most recently here
             session_fact.history_id = history.id
@@ -407,7 +407,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         return schemas.ScheduleResponse(session_complete=studyset_completed)
 
     def record_study(
-            self, db: Session, *, user: models.User, session_fact: models.Session_Fact, schedule: schemas.Schedule
+            self, db: Session, *, user: models.User, session_fact: models.Session_Fact, schedule: schemas.Schedule, repetition_model: schemas.Repetition
     ) -> models.History:
         try:
             response = schedule.response
@@ -415,7 +415,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             debug_id = session_fact.studyset.debug_id
             set_type = session_fact.studyset.set_type
 
-            repetition_model = user.repetition_model
+            # Below may be deprecated now that we pass in repetition_model, but keeping in case
             if set_type in {schemas.SetType.test, schemas.SetType.post_test}:
                 deck_id = session_fact.fact.deck_id
                 repetition_model = self.get_overriden_scheduler(db, user, deck_id)
