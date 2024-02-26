@@ -159,8 +159,33 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         elif next_set_type == schemas.SetType.normal:
             if active_set and not (not settings.TEST_MODE_ENABLED and active_set.set_type in {schemas.SetType.test, schemas.SetType.post_test}):
                 return active_set
-            db_obj = self.create_new_study_set(db, user=user, decks=decks, deck_ids=deck_ids, return_limit=return_limit,
-                                                   send_limit=send_limit)
+            try:
+                # Attempt to create a new study set with the default repetition model
+                db_obj = self.create_new_study_set(
+                    db, 
+                    user=user, 
+                    decks=decks, 
+                    deck_ids=deck_ids, 
+                    return_limit=return_limit,
+                    send_limit=send_limit
+                )
+            except Exception as e:
+                print("Initial attempt to create a new study set failed:", str(e))
+                try:
+                    # Retry with the fsrs repetition model
+                    db_obj = self.create_new_study_set(
+                        db, 
+                        user=user, 
+                        decks=decks, 
+                        deck_ids=deck_ids, 
+                        return_limit=return_limit,
+                        send_limit=send_limit, 
+                        repetition_model=schemas.Repetition.fsrs
+                    )
+                except Exception as retry_exception:
+                    # If the retry also fails, handle or re-raise the exception
+                    print("Retry with fsrs repetition model failed:", str(retry_exception))
+                    raise retry_exception  # or handle it as needed
         else:
             raise HTTPException(status_code=672, detail=f"Unknown study set type: {next_set_type}")
     
@@ -277,6 +302,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         if repetition_model == schemas.Repetition.karl:
             eligible_facts = self.get_karl_eligible_facts(is_mnemonic_deck, new_facts_query, old_facts_query, base_facts_query, return_limit, send_limit)
         else:
+            # Only send old facts to karl
             eligible_facts = crud.fact.get_eligible_facts(query=old_facts_query, limit=send_limit, randomize=True)
 
         logger.info(f"return limit {return_limit}")
