@@ -134,6 +134,7 @@ export interface IComponents {
     is_offensive: boolean;
     is_incorrect_definition: boolean;
     is_difficult_to_understand: boolean;
+    is_not_memorable: boolean;
     is_bad_phonetic_keyword: boolean;
     is_bad_circular_keyword: boolean;
     is_bad_keyword_explanation: boolean;

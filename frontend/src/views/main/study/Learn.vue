@@ -262,24 +262,38 @@
           <h2 class="headline">What makes a mnemonic good?</h2>
         </v-card-title>
         <v-card-text class="title">
-          Below, we define several criteria that can be considered to help you rate the quality of
-          mnemonic devices:
+          Determining what makes a mnemonic good is a highly subjective process. Below,
+          we define some  criteria and examples that can be considered to help you rate the quality
+          of mnemonics:
           <ol>
             <li>
-              <b>Correctness:</b> A good mnemonic should accurately capture
-              the definition of the vocabulary term
+              <b>Correctness:</b> A good mnemonic should accurately capture the
+              definition of the vocabulary term
             </li>
             <li>
               <b>Clarity:</b> A good mnemonic should be easy to understand and free of
               mistakes in grammar, spelling, etc.
             </li>
-            <li><b>Memorability:</b> A good mnemonic should be easy to remember</li>
+            <li><b>Memorability:</b> A good mnemonic should be easy to remember and link to familiar concepts</li>
             <li>
               <b>Keyword Quality:</b> A good mnemonic should link to keywords that sound
               like the original term, and ideally should not be circular (e.g. the
               keyword "memory" for "memorable" is circular)
             </li>
+            <li>
+              <b>Keyword Explanation:</b> A good mnemonic should have a reasonable
+              explanation for how the keyword and original vocab term are related
+            </li>
+            <li>
+              <b>Offensiveness:</b> A good mnemonic should not discuss inappropriate
+              themes, biases, etc.
+            </li>
           </ol>
+          <br />
+          <v-img
+          width="100%"
+          :src="require('@/assets/mnemonic-examples-wide.svg')"
+        ></v-img>
         </v-card-text>
         <v-card-actions>
           <v-btn @click="mnemonicData.mnemonicDialogue = false">Close</v-btn>
@@ -323,7 +337,7 @@
 
           <v-expansion-panel-content v-if="mnemonicData.response" color="#e0f0ff">
             <v-container>
-              <p class="title">Which mnemonic do you prefer?</p>
+              <p class="title">Which mnemonic do you think would help you learn better?</p>
               <v-row>
                 <v-col cols="6" class="d-flex">
                   <v-card
@@ -487,6 +501,27 @@
                           <span
                             >The mnemonic is difficult to understand through grammar,
                             word choice, etc.</span
+                          >
+                        </v-tooltip>
+                      </template>
+                    </v-checkbox>
+                    <v-checkbox
+                      class="shrink mb-2 mt-2"
+                      density="compact"
+                      hide-details
+                      v-model="mnemonicData.isNotMemorable"
+                    >
+                      <template v-slot:label>
+                        <span>Not Memorable</span>
+                        <v-tooltip right>
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-icon small class="ml-2" v-bind="attrs" v-on="on"
+                              >mdi-information</v-icon
+                            >
+                          </template>
+                          <span
+                            >The mnemonic is hard to remember, links to unfamiliar
+                            concepts, etc.</span
                           >
                         </v-tooltip>
                       </template>
@@ -776,6 +811,7 @@
       cardHasMnemonic: false,
       isStudyingMnemonic: false,
       isIncorrectDefinition: false,
+      isNotMemorable: false,
       isDifficultToUnderstand: false,
       isBadKeywordLink: false,
       isBadPhoneticKeyword: false,
@@ -1219,6 +1255,7 @@
         retypedMnemonic: "",
         isStudyingMnemonic: false,
         isIncorrectDefinition: false,
+        isNotMemorable: false,
         isDifficultToUnderstand: false,
         isBadKeywordLink: false,
         isOffensive: false,
@@ -1383,6 +1420,7 @@
               user_rating: this.mnemonicData.mnemonicRating,
               is_offensive: this.mnemonicData.isOffensive,
               is_incorrect_definition: this.mnemonicData.isIncorrectDefinition,
+              is_not_memorable: this.mnemonicData.isNotMemorable,
               is_difficult_to_understand: this.mnemonicData.isDifficultToUnderstand,
               is_bad_for_other_reason: this.mnemonicData.otherReason != "",
               is_bad_phonetic_keyword: this.mnemonicData.isBadPhoneticKeyword,

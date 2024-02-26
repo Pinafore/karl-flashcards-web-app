@@ -20,7 +20,7 @@ from datetime import datetime
 from sentry_sdk import capture_exception
 from sqlalchemy.sql.expression import true
 from sqlalchemy import and_, false, func, not_, or_
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, Query
 from datetime import datetime, timedelta
 from fastapi import HTTPException
 from sentry_sdk import capture_exception
@@ -216,6 +216,28 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         db.commit()
         
         return study_set
+    
+    def get_karl_eligible_facts(self, 
+                                is_mnemonic_deck: bool, 
+                                new_facts_query: Query, 
+                                old_facts_query: Query, 
+                                base_facts_query: Query, 
+                                return_limit: Optional[int] = None, 
+                                send_limit: Optional[int] = None):
+
+        # return the normal base query for non-mnemonic decks
+        if not is_mnemonic_deck:
+            return crud.fact.get_eligible_facts(query=base_facts_query, limit=send_limit, randomize=True)
+        
+        # for mnemonic decks, prioritize new facts and return the new facts if there are enough
+        new_eligible_facts = crud.fact.get_eligible_facts(query=new_facts_query, limit=send_limit, randomize=True)
+        if len(new_eligible_facts) >= return_limit:
+            return new_eligible_facts
+        
+        # otherwise, add old facts as well
+        old_eligible_facts = crud.fact.get_eligible_facts(query=old_facts_query, limit=send_limit, randomize=True)
+        return new_eligible_facts + old_eligible_facts[:return_limit-len(new_eligible_facts)]
+            
 
     def create_new_study_set(
             self,
@@ -236,8 +258,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         show_hidden = setType == schemas.SetType.post_test or setType == schemas.SetType.test
         is_mnemonic_deck = (decks[0].deck_type == schemas.DeckType.public_mnemonic) if decks else False
         filters = schemas.FactSearch(deck_ids=deck_ids, limit=send_limit, studyable=True, show_hidden=show_hidden)
-        base_facts_query = crud.fact.build_facts_query(db=db, user=user, filters=filters)
-        #logger.info(base_facts_query)
+        
         if repetition_model is None:
             if show_hidden:
                 overriden_model = self.get_overriden_scheduler(db, user, deck_ids[0])
@@ -246,23 +267,27 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                 repetition_model = user.repetition_model
 
         print('Final repetition model:', repetition_model)
+
+        # create all types of queries
+        base_facts_query = crud.fact.build_facts_query(db=db, user=user, filters=filters)
+        old_facts_query = crud.helper.filter_only_reviewed_facts(query=base_facts_query, user_id=user.id, log_type=schemas.Log.study)
+        new_facts_query = crud.helper.filter_only_new_facts(query=base_facts_query, user_id=user.id, log_type=schemas.Log.study)
         
-        if repetition_model == schemas.Repetition.karl and not is_mnemonic_deck:
-            eligible_facts = crud.fact.get_eligible_facts(query=base_facts_query, limit=send_limit, randomize=True)
+        eligible_facts = []
+        if repetition_model == schemas.Repetition.karl:
+            eligible_facts = self.get_karl_eligible_facts(is_mnemonic_deck, new_facts_query, old_facts_query, base_facts_query, return_limit, send_limit)
         else:
-            eligible_old_facts_query = crud.helper.filter_only_reviewed_facts(query=base_facts_query, user_id=user.id, log_type=schemas.Log.study)
-            print('Num old facts:', setType, len(eligible_old_facts_query.all()), '\n')
-            eligible_facts = crud.fact.get_eligible_facts(query=eligible_old_facts_query, limit=send_limit, randomize=True)
+            eligible_facts = crud.fact.get_eligible_facts(query=old_facts_query, limit=send_limit, randomize=True)
 
         logger.info(f"return limit {return_limit}")
         time_container = TimeContainer()
         with log_time(description="Scheduler query creation", container=time_container, label="eligible_fact_time"):
-            # TODO: ADD Post test
             if setType == schemas.SetType.test:
                 test_deck_id = deck_ids[0]
                 schedule_query = self.create_scheduler_query(db=db, facts=eligible_facts, user=user, repetition_model=repetition_model, set_type=setType, test_mode=test_deck_id)
             else:
                 schedule_query = self.create_scheduler_query(db=db, facts=eligible_facts, user=user, set_type=setType, repetition_model=repetition_model)
+        
         try:
             logger.info(schedule_query.dict())
             with log_time(description="Scheduler querying", container=time_container, label="scheduler_query_time"):
@@ -283,26 +308,23 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             logger.info("debug id: " + debug_id)
 
             old_facts = facts
-            if repetition_model != schemas.Repetition.karl or is_mnemonic_deck:
-                eligible_new_facts_query = crud.helper.filter_only_new_facts(query=base_facts_query, user_id=user.id, log_type=schemas.Log.study)
-                new_facts = crud.fact.get_eligible_facts(query=eligible_new_facts_query, limit=return_limit, randomize=True)
+            if repetition_model != schemas.Repetition.karl:
+                new_facts = crud.fact.get_eligible_facts(query=new_facts_query, limit=return_limit, randomize=True)
                 logger.info("new facts: " + str(new_facts))
-                #print("=============\n\nnew facts: ", len(new_facts))
+
                 # prioritize newer facts for the mnemonic study
                 if is_mnemonic_deck and len(new_facts) > 0:
-                    facts = new_facts + facts[:20-len(new_facts)]
+                    facts = new_facts + old_facts[:return_limit-len(new_facts)]
                 else:
-                    facts = crud.helper.combine_two_fact_sets(new_facts=new_facts, old_facts=facts, return_limit=return_limit, proportion_new_facts=0.5)
+                    facts = crud.helper.combine_two_fact_sets(new_facts=new_facts, old_facts=old_facts, return_limit=return_limit, proportion_new_facts=0.5)
 
-                if is_mnemonic_deck:
-                    NUM_CARDS_UNTIL_SANITY_CHECK = 60
-                    NUM_SANITY_CARDS = 1
-                    prob_sanity_check = (1.0 * len(facts)) / NUM_CARDS_UNTIL_SANITY_CHECK # on average, this should have a sanity check 1 in every 3 decks (for decks of size 20)
-                    if uniform(0, 1) < prob_sanity_check:
-                        print("\n\nSanity Check Triggered!\n\n")
-                        sanity_check_cards = crud.deck.get_sanity_check_cards(db, decks, num_facts=NUM_SANITY_CARDS) # select sanity check cards
-                        facts = sanity_check_cards + facts[:-len(sanity_check_cards)] # add them to the current list
-                        shuffle(facts) # shuffle the order
+            if is_mnemonic_deck:
+                prob_sanity_check = (1.0 * len(facts)) / settings.NUM_CARDS_UNTIL_SANITY_CHECK # on average, this should have a sanity check 1 in every 3 decks (for decks of size 20)
+                if uniform(0, 1) < prob_sanity_check:
+                    print("\n\nSanity Check Triggered!\n\n")
+                    sanity_check_cards = crud.deck.get_sanity_check_cards(db, decks, num_facts=settings.NUM_SANITY_CARDS) # select sanity check cards
+                    facts = sanity_check_cards + facts[:-len(sanity_check_cards)] # add them to the current list
+                    shuffle(facts) # shuffle the order
                     
             logger.info(f"Study set created of type {setType}")
             study_set_create = schemas.StudySetCreate(repetition_model=repetition_model, user_id=user.id, debug_id=debug_id, set_type=setType)
