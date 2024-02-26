@@ -263,8 +263,8 @@
         </v-card-title>
         <v-card-text class="title">
           Determining what makes a mnemonic good is a highly subjective process. Below,
-          we define some  criteria and examples that can be considered to help you rate the quality
-          of mnemonics:
+          we define some criteria and examples that can be considered to help you rate
+          the quality of mnemonics:
           <ol>
             <li>
               <b>Correctness:</b> A good mnemonic should accurately capture the
@@ -274,7 +274,10 @@
               <b>Clarity:</b> A good mnemonic should be easy to understand and free of
               mistakes in grammar, spelling, etc.
             </li>
-            <li><b>Memorability:</b> A good mnemonic should be easy to remember and link to familiar concepts</li>
+            <li>
+              <b>Memorability:</b> A good mnemonic should be easy to remember and link
+              to familiar concepts
+            </li>
             <li>
               <b>Keyword Quality:</b> A good mnemonic should link to keywords that sound
               like the original term, and ideally should not be circular (e.g. the
@@ -291,9 +294,9 @@
           </ol>
           <br />
           <v-img
-          width="100%"
-          :src="require('@/assets/mnemonic-examples-wide.svg')"
-        ></v-img>
+            width="100%"
+            :src="require('@/assets/mnemonic-examples-wide.svg')"
+          ></v-img>
         </v-card-text>
         <v-card-actions>
           <v-btn @click="mnemonicData.mnemonicDialogue = false">Close</v-btn>
@@ -337,7 +340,9 @@
 
           <v-expansion-panel-content v-if="mnemonicData.response" color="#e0f0ff">
             <v-container>
-              <p class="title">Which mnemonic do you think would help you learn better?</p>
+              <p class="title">
+                Which mnemonic do you think would help you learn better?
+              </p>
               <v-row>
                 <v-col cols="6" class="d-flex">
                   <v-card
@@ -913,13 +918,11 @@
     }
 
     public async mounted() {
-      this.resetMnemonicData();
       studyStore.setStudySet(null);
       await mainStore.getUserProfile();
       mainStore.setConnectionError(false);
       mainStore.setSchedulerError(false);
       this.updateSelectedNum(this.$router.currentRoute.query.num);
-      await mainStore.getPublicDecks();
       await this.determine_decks(this.$router.currentRoute.query.deck);
       window.addEventListener("keydown", this.handleKeyDown);
       window.addEventListener("keyup", this.resetKeyListener);
@@ -959,7 +962,9 @@
       } else {
         const user_decks = mainStore.userProfile?.decks;
         if (user_decks) {
-          var decks = user_decks.filter((deck) => deck.deck_type != "public_mnemonic" && deck.id != 1).map((deck) => deck.id);
+          let decks = user_decks
+            .filter((deck) => deck.deck_type != "public_mnemonic" && deck.id != 1)
+            .map((deck) => deck.id);
           if (decks.length == 0) {
             decks = user_decks.filter((deck) => deck.id != 1).map((deck) => deck.id);
           }
