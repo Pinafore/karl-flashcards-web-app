@@ -159,8 +159,33 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         elif next_set_type == schemas.SetType.normal:
             if active_set and not (not settings.TEST_MODE_ENABLED and active_set.set_type in {schemas.SetType.test, schemas.SetType.post_test}):
                 return active_set
-            db_obj = self.create_new_study_set(db, user=user, decks=decks, deck_ids=deck_ids, return_limit=return_limit,
-                                                   send_limit=send_limit)
+            try:
+                # Attempt to create a new study set with the default repetition model
+                db_obj = self.create_new_study_set(
+                    db, 
+                    user=user, 
+                    decks=decks, 
+                    deck_ids=deck_ids, 
+                    return_limit=return_limit,
+                    send_limit=send_limit
+                )
+            except Exception as e:
+                print("Initial attempt to create a new study set failed:", str(e))
+                try:
+                    # Retry with the fsrs repetition model
+                    db_obj = self.create_new_study_set(
+                        db, 
+                        user=user, 
+                        decks=decks, 
+                        deck_ids=deck_ids, 
+                        return_limit=return_limit,
+                        send_limit=send_limit, 
+                        repetition_model=schemas.Repetition.fsrs
+                    )
+                except Exception as retry_exception:
+                    # If the retry also fails, handle or re-raise the exception
+                    print("Retry with fsrs repetition model failed:", str(retry_exception))
+                    raise retry_exception  # or handle it as needed
         else:
             raise HTTPException(status_code=672, detail=f"Unknown study set type: {next_set_type}")
     
@@ -277,6 +302,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         if repetition_model == schemas.Repetition.karl:
             eligible_facts = self.get_karl_eligible_facts(is_mnemonic_deck, new_facts_query, old_facts_query, base_facts_query, return_limit, send_limit)
         else:
+            # Only send old facts to karl
             eligible_facts = crud.fact.get_eligible_facts(query=old_facts_query, limit=send_limit, randomize=True)
 
         logger.info(f"return limit {return_limit}")
@@ -393,7 +419,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                 models.Session_Fact.fact_id == schedule.fact_id).first()
             if not session_fact:
                 raise HTTPException(status_code=404, detail="Fact not found")
-            history = self.record_study(db=db, user=user, session_fact=session_fact, schedule=schedule)
+            history = self.record_study(db=db, user=user, session_fact=session_fact, schedule=schedule, repetition_model=studyset.repetition_model)
 
             # Mark that the session fact has been studied most recently here
             session_fact.history_id = history.id
@@ -407,7 +433,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         return schemas.ScheduleResponse(session_complete=studyset_completed)
 
     def record_study(
-            self, db: Session, *, user: models.User, session_fact: models.Session_Fact, schedule: schemas.Schedule
+            self, db: Session, *, user: models.User, session_fact: models.Session_Fact, schedule: schemas.Schedule, repetition_model: schemas.Repetition
     ) -> models.History:
         try:
             response = schedule.response
@@ -415,7 +441,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             debug_id = session_fact.studyset.debug_id
             set_type = session_fact.studyset.set_type
 
-            repetition_model = user.repetition_model
+            # Below may be deprecated now that we pass in repetition_model, but keeping in case
             if set_type in {schemas.SetType.test, schemas.SetType.post_test}:
                 deck_id = session_fact.fact.deck_id
                 repetition_model = self.get_overriden_scheduler(db, user, deck_id)
