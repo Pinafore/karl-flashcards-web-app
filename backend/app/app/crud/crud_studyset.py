@@ -231,11 +231,13 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         
         # for mnemonic decks, prioritize new facts and return the new facts if there are enough
         new_eligible_facts = crud.fact.get_eligible_facts(query=new_facts_query, limit=send_limit, randomize=True)
+        print('\n\nNew facts:', len(new_eligible_facts), '\n\n')
         if len(new_eligible_facts) >= return_limit:
             return new_eligible_facts
         
         # otherwise, add old facts as well
         old_eligible_facts = crud.fact.get_eligible_facts(query=old_facts_query, limit=send_limit, randomize=True)
+        print('\n\nNew facts:', len(new_eligible_facts), 'Old Facts:', len(old_eligible_facts), '\n\n')
         return new_eligible_facts + old_eligible_facts[:return_limit-len(new_eligible_facts)]
             
 

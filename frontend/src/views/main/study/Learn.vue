@@ -913,11 +913,13 @@
     }
 
     public async mounted() {
+      this.resetMnemonicData();
       studyStore.setStudySet(null);
       await mainStore.getUserProfile();
       mainStore.setConnectionError(false);
       mainStore.setSchedulerError(false);
       this.updateSelectedNum(this.$router.currentRoute.query.num);
+      await mainStore.getPublicDecks();
       await this.determine_decks(this.$router.currentRoute.query.deck);
       window.addEventListener("keydown", this.handleKeyDown);
       window.addEventListener("keyup", this.resetKeyListener);
@@ -955,10 +957,14 @@
           studyStore.setDeckIds(deckIds.map(Number));
         }
       } else {
-        const decks = mainStore.publicDecks
-          .filter((deck) => deck.deck_type === "public_mnemonic")
-          .map((deck) => deck.id);
-        studyStore.setDeckIds(decks);
+        const user_decks = mainStore.userProfile?.decks;
+        if (user_decks) {
+          var decks = user_decks.filter((deck) => deck.deck_type != "public_mnemonic" && deck.id != 1).map((deck) => deck.id);
+          if (decks.length == 0) {
+            decks = user_decks.filter((deck) => deck.id != 1).map((deck) => deck.id);
+          }
+          studyStore.setDeckIds(decks);
+        }
       }
     }
 
