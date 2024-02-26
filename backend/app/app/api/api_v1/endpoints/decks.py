@@ -40,7 +40,6 @@ def read_open_decks(
     Retrieve decks.
     """
     decks = crud.deck.get_public(db, unowned=unowned, user=current_user)
-    print('\n\n', decks[0].deck_type, '\n\n')
     return decks
 
 

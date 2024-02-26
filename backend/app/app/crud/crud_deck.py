@@ -96,7 +96,6 @@ class CRUDDeck(CRUDBase[Deck, DeckCreate, DeckUpdate]):
                                             Deck.id != 1)
         if unowned:
             query = query.filter(not_(Deck.users.any(id=user.id)))
-        print('\n\nGet Public:', unowned, query.all(), '\n\n')
         return query.all()
 
     def get_current_user_test_deck_id(self, db: Session, user: User) -> Optional[int]:
