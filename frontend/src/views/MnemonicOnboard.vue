@@ -38,7 +38,7 @@
               </li>
             </ol>
           </v-card-text>
-          <v-card-title>
+          <!-- <v-card-title>
             Notice on Accurate Ratings
           </v-card-title>
           <v-card-text>
@@ -46,7 +46,7 @@
             clearly worse) to ensure that you give accurate feedback. If you are found
             to be abusing our system, you will be notified and disqualified from
             receiving rewards
-          </v-card-text>
+          </v-card-text> -->
 
           <v-card-title>
             Contact
