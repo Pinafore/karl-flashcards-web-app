@@ -83,7 +83,8 @@ export default class StudyModule extends VuexModule {
     const popup = !(
       mainStore.recallPopup ||
       mainStore.onboarding ||
-      mainStore.testModePopup
+      mainStore.testModePopup ||
+      mainStore.mnemonicOnboarding
     );
     this.show = {
       text: payload.text,
@@ -101,7 +102,8 @@ export default class StudyModule extends VuexModule {
       mainStore.connectionPopup ||
       mainStore.testModePopup ||
       mainStore.recallPopup ||
-      mainStore.onboarding
+      mainStore.onboarding ||
+      mainStore.mnemonicOnboarding
     ) {
       this.show.enable_actions = false;
       this.show.enable_show_back = false;

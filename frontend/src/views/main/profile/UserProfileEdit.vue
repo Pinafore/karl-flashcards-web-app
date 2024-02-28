@@ -42,6 +42,7 @@
               </v-radio>
             </v-radio-group> -->
             <v-checkbox v-model="showTips" label="Show Tips"></v-checkbox>
+            <v-checkbox v-model="showMnemonicTips" label="Show Memonic Tips"></v-checkbox>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
@@ -84,6 +85,7 @@
     username = "";
     email = "";
     showTips = false;
+    showMnemonicTips = false;
     recallTarget = 0;
     recallTargetOptions: number[] = [50, 85];
 
@@ -93,6 +95,7 @@
         this.username = userProfile.username;
         this.email = userProfile.email;
         this.showTips = userProfile.show_help;
+        this.showMnemonicTips = userProfile.show_mnemonic_help;
         this.recallTarget = userProfile.recall_target;
       }
     }
@@ -107,6 +110,7 @@
         this.username = userProfile.username;
         this.email = userProfile.email;
         this.showTips = userProfile.show_help;
+        this.showMnemonicTips = userProfile.show_mnemonic_help;
         this.recallTarget = userProfile.recall_target;
       }
       this.$refs.observer.reset();
@@ -139,6 +143,10 @@
 
       if (userProfile && this.showTips != userProfile.show_help) {
         updatedProfile.show_help = this.showTips;
+      }
+
+      if (userProfile && this.showMnemonicTips != userProfile.show_mnemonic_help) {
+        updatedProfile.show_mnemonic_help = this.showMnemonicTips;
       }
 
       await mainStore.updateUserProfile(updatedProfile);

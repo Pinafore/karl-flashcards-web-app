@@ -56,6 +56,7 @@ export default class MainModule extends VuexModule {
   ];
   today = format(startOfDay(new Date()), "yyyy-MM-dd'T'HH:mm:ss.SSSxxxx");
   onboarding: boolean | null = null;
+  mnemonicOnboarding: boolean | null = null;
   recallPopup: boolean | null = null;
   connectionPopup: boolean | null = null;
   testModePopup: boolean | null = null;
@@ -113,6 +114,11 @@ export default class MainModule extends VuexModule {
   @Mutation
   setOnboarding(payload: boolean | null) {
     this.onboarding = payload;
+  }
+
+  @Mutation
+  setMnemonicOnboarding(payload: boolean | null) {
+    this.mnemonicOnboarding = payload;
   }
 
   @Mutation
@@ -299,6 +305,28 @@ export default class MainModule extends VuexModule {
       const response = (
         await Promise.all([
           api.updateMe(this.token, { show_help: payload }),
+          await new Promise((resolve, _reject) => setTimeout(() => resolve(), 500)),
+        ])
+      )[0];
+      this.setUserProfile(response.data);
+      this.removeNotification(loadingNotification);
+      this.addNotification({
+        content: "Profile successfully updated",
+        color: "success",
+      });
+    } catch (error) {
+      await this.checkApiError(error);
+    }
+  }
+
+  @Action
+  async updateUserHelpMnemonic(payload: boolean) {
+    try {
+      const loadingNotification = { content: "saving", showProgress: true };
+      this.addNotification(loadingNotification);
+      const response = (
+        await Promise.all([
+          api.updateMe(this.token, { show_mnemonic_help: payload }),
           await new Promise((resolve, _reject) => setTimeout(() => resolve(), 500)),
         ])
       )[0];

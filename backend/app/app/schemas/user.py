@@ -16,6 +16,7 @@ class UserBase(BaseModel):
     is_active: bool = True
     repetition_model: Optional[Repetition] = None
     show_help: Optional[bool] = None
+    show_mnemonic_help: Optional[bool] = None
     dark_mode: Optional[bool] = None
     pwa_tip: Optional[bool] = None
     beta_user: Optional[bool] = None
@@ -53,6 +54,7 @@ class UserInDBBase(UserBase):
     is_active: bool
     is_superuser: bool
     show_help: bool
+    show_mnemonic_help: bool
     dark_mode: bool
     pwa_tip: bool
     beta_user: bool

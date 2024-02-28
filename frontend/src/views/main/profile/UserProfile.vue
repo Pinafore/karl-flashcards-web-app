@@ -34,9 +34,21 @@
           <div v-if="userProfile && !userProfile.show_help" class="title primary--text">
             Disabled
           </div>
-          <div v-else class="title primary--text">
+          <!-- <div v-else class="title primary--text">
             -----
+          </div> -->
+        </div>
+        <div class="my-3">
+          <div class="subheading secondary--text">Mnemonic Tips</div>
+          <div v-if="userProfile && userProfile.show_mnemonic_help" class="title primary--text">
+            Shown
           </div>
+          <div v-if="userProfile && !userProfile.show_mnemonic_help" class="title primary--text">
+            Disabled
+          </div>
+          <!-- <div v-else class="title primary--text">
+            -----
+          </div> -->
         </div>
         <!-- <div class="my-3">
           <div class="subheading secondary--text">
