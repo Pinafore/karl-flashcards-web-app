@@ -37,6 +37,8 @@
                 <b>win one of 50 $25 gift cards</b>
               </li>
             </ol>
+            <br />
+            You can check out the "statistics" page to see your progress on these rewards! (see "Vocab Facts Studied" and "Mnemonics Rated")
           </v-card-text>
           <!-- <v-card-title>
             Notice on Accurate Ratings
