@@ -1,6 +1,7 @@
 <template>
   <v-container fluid style="max-width:1250px">
     <onboard></onboard>
+    <mnemonic-onboard :should-show="shouldShowMnemonicTips"></mnemonic-onboard>
     <connection-popup></connection-popup>
     <test-popup :should-show="shouldShowTestPopup"></test-popup>
     <!-- <RecallPopup></RecallPopup> -->
@@ -783,6 +784,7 @@
   import { Component, Vue } from "vue-property-decorator";
   import { studyStore, mainStore } from "@/utils/store-accessor";
   import Onboard from "@/views/Onboard.vue";
+  import MnemonicOnboard from "@/views/MnemonicOnboard.vue";
   import ConnectionPopup from "@/views/ConnectionPopup.vue";
   import RecallPopup from "@/views/main/RecallPopup.vue";
   import TestPopup from "@/views/main/TestPopup.vue";
@@ -790,7 +792,7 @@
   import { integer } from "vee-validate/dist/rules";
 
   @Component({
-    components: { TestPopup, ConnectionPopup, Onboard, RecallPopup, StudySet },
+    components: { TestPopup, ConnectionPopup, Onboard, MnemonicOnboard, RecallPopup, StudySet },
   })
   export default class Learn extends Vue {
     $refs!: {
@@ -907,6 +909,13 @@
           urlParams.get("show_test_mode") === "true" ||
           urlParams.get("resume") === "true"
         );
+      }
+      return false;
+    }
+
+    get shouldShowMnemonicTips() {
+      if (window) {
+        return this.mnemonicData.cardHasMnemonic;
       }
       return false;
     }

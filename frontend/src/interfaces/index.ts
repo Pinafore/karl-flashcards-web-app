@@ -219,6 +219,7 @@ export interface IComponents {
     id: number;
     is_superuser: boolean;
     show_help: boolean;
+    show_mnemonic_help: boolean,
     default_deck: IComponents["Deck"];
     decks?: IComponents["Deck"][];
     suspended_facts?: IComponents["Fact"][];
@@ -262,6 +263,7 @@ export interface IComponents {
     password?: string;
     default_deck_id?: number;
     show_help?: boolean;
+    show_mnemonic_help?: boolean;
     dark_mode?: boolean;
     pwa_tip?: boolean;
     recall_target?: number;

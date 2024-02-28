@@ -45,6 +45,7 @@ class User(Base):
     repetition_model = Column(Enum(Repetition), default=Repetition.karl, nullable=False)
     default_deck_id = Column(Integer, ForeignKey("deck.id"), default=1)
     show_help = Column(Boolean(), default=True, nullable=False)
+    show_mnemonic_help = Column(Boolean(), default=True, nullable=False)
     dark_mode = Column(Boolean(), default=False, nullable=False)
     pwa_tip = Column(Boolean(), default=False, nullable=False)
     create_date = Column(TIMESTAMP(timezone=True))
