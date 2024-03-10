@@ -121,9 +121,9 @@ def test_mnemonic_email(
 
         if time_last_studied.replace(tzinfo=None) < cutoff_datetime:
             continue
-        
+
         send_vocab_reminder_email(
-            email_to="nishantbalepur@gmail.com",
+            email_to=email,
             username=username,
             num_days_studied_vocab=num_days_studied_vocab,
             num_vocab_studied_total=num_vocab_studied_total,
@@ -132,6 +132,5 @@ def test_mnemonic_email(
             power_reward_rank=ordinal(power_rank)
         )
         time.sleep(10)
-        break
 
     return 1
