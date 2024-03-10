@@ -126,7 +126,7 @@ def remind_vocab_study(db: Session = Depends(deps.get_db)) -> Any:
             continue
 
         send_vocab_reminder_email(
-            email_to="nishantbalepur@gmail.com",
+            email_to=email,
             username=username,
             num_days_studied_vocab=num_days_studied_vocab,
             num_vocab_studied_total=num_vocab_studied_total,
@@ -136,7 +136,6 @@ def remind_vocab_study(db: Session = Depends(deps.get_db)) -> Any:
         )
         num_emails_sent += 1
         time.sleep(10)
-        break
 
     return {"msg": f"Number of vocab reminder emails sent: {num_emails_sent}"}
 
