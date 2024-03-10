@@ -1,7 +1,7 @@
 import logging
 import time
 import numpy as np
-from datetime import datetime
+from datetime import datetime, date
 from typing import Any, List, Optional, Union
 
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Form
@@ -95,7 +95,7 @@ def test_mnemonic_email(
 
         for k, v in ({'num_days_studied_vocab': num_days_studied_vocab, 'num_vocab_studied_total': base_stats.num_vocab_studied, 'num_mnemonics_rated': base_stats.num_mnemonics_rated, 'user_id': user_id, 'time_last_studied': last_time_studied, 'email': user.email, 'username': user.username}).items():
             email_data[k].append(v)
-            time.sleep(5)
+        time.sleep(5)
 
     base_reward_idx = np.argsort(-1 * np.array(email_data['num_days_studied_vocab']))
     base_reward_rank = np.argsort(base_reward_idx) + 1
@@ -105,6 +105,8 @@ def test_mnemonic_email(
 
     email_data['base_reward_rank'] = base_reward_rank
     email_data['power_reward_rank'] = power_reward_rank
+
+    cutoff_datetime = datetime(2024, 2, 26)
 
     for i in range(len(data)):
         num_days_studied_vocab = email_data['num_days_studied_vocab'][i]
@@ -117,7 +119,9 @@ def test_mnemonic_email(
         base_rank = email_data['base_reward_rank'][i]
         power_rank = email_data['power_reward_rank'][i]
 
-
+        if time_last_studied.replace(tzinfo=None) < cutoff_datetime:
+            continue
+        
         send_vocab_reminder_email(
             email_to="nishantbalepur@gmail.com",
             username=username,

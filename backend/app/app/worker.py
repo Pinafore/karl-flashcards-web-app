@@ -96,7 +96,7 @@ def remind_vocab_study(db: Session = Depends(deps.get_db)) -> Any:
 
         for k, v in ({'num_days_studied_vocab': num_days_studied_vocab, 'num_vocab_studied_total': base_stats.num_vocab_studied, 'num_mnemonics_rated': base_stats.num_mnemonics_rated, 'user_id': user_id, 'time_last_studied': last_time_studied, 'email': user.email, 'username': user.username}).items():
             email_data[k].append(v)
-            time.sleep(5)
+        time.sleep(5)
 
     base_reward_idx = np.argsort(-1 * np.array(email_data['num_days_studied_vocab']))
     base_reward_rank = np.argsort(base_reward_idx) + 1
@@ -107,6 +107,7 @@ def remind_vocab_study(db: Session = Depends(deps.get_db)) -> Any:
     email_data['base_reward_rank'] = base_reward_rank
     email_data['power_reward_rank'] = power_reward_rank
 
+    cutoff_datetime = datetime(2024, 2, 26)
     num_emails_sent = 0
 
     for i in range(len(data)):
@@ -120,6 +121,9 @@ def remind_vocab_study(db: Session = Depends(deps.get_db)) -> Any:
         username = email_data['username'][i]
         base_rank = email_data['base_reward_rank'][i]
         power_rank = email_data['power_reward_rank'][i]
+
+        if time_last_studied.replace(tzinfo=None) < cutoff_datetime:
+            continue
 
         send_vocab_reminder_email(
             email_to="nishantbalepur@gmail.com",
