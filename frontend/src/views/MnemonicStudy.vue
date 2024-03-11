@@ -1,13 +1,13 @@
 <template class="pa-0 ma-0">
-  <v-main class="pa-0 ma-0">
-    <v-dialog v-model="mnemonicOnboarding" width="1000">
-      <v-card>
+    <v-main class="pa-0 ma-0">
+      <v-dialog v-model="mnemonic_study_tip" width="1000" @click:outside="exit()">
+        <v-card>
         <v-card-title>
           <h2>Mnemonic Research Study</h2>
         </v-card-title>
         <div class="px-2">
           <v-card-text>
-            By studying this deck, you will be participating in our research study,
+            If you study our GRE Vocab deck in KAR³L, you will be participating in our research study,
             which spans from 02/26/2024 to 05/26/2024. In this research study, we will
             be collecting your feedback to improve our mnemonic device generation. None
             of your personal information will be collected or released. Users
@@ -69,91 +69,46 @@
         </v-card-text> -->
         <v-card-actions class="pt-0">
           <v-spacer></v-spacer>
-          <v-btn ref="begin" color="primary" text @click="noMoreHelp">
-            Stop Showing Popup
-          </v-btn>
-          <v-btn ref="begin" color="primary" text @click="hideTip">
+          <v-btn ref="begin" color="primary" text @click="exit">
             Got it!
           </v-btn>
         </v-card-actions>
       </v-card>
-    </v-dialog>
-  </v-main>
-</template>
+      </v-dialog>
+    </v-main>
+  </template>
+  
+  <script lang="ts">
+    import { Component, Vue } from "vue-property-decorator";
+    import { mainStore } from "@/store";
+  
+    @Component
+    export default class MnemonicStudy extends Vue {
+      mnemonic_study_tip = false;
 
-<script lang="ts">
-  import { Component, Vue, Watch, Prop } from "vue-property-decorator";
-  import { mainStore, studyStore } from "@/store";
-
-  @Component
-  export default class MnemonicOnboard extends Vue {
-    @Prop() readonly shouldShow!: boolean;
-    $refs!: {
-      begin: Vue;
-    };
-    mnemonicOnboard = false;
-
-    async mounted() {
-      await mainStore.getUserProfile();
-      this.getUpdate();
-    }
-
-    get mnemonicOnboarding() {
-      return mainStore.mnemonicOnboarding;
-    }
-
-    set mnemonicOnboarding(value) {
-      mainStore.setMnemonicOnboarding(value);
-    }
-
-    get testModePopup() {
-      return mainStore.testModePopup;
-    }
-
-    get currentRecallTarget() {
-      return mainStore.userProfile?.recall_target ?? -1;
-    }
-
-    getUpdate() {
-      if (this.shouldShow) {
-        mainStore.setMnemonicOnboarding(this.show_mnemonic_help);
-        if (this.mnemonicOnboarding) {
-          setTimeout(() => {
-            (this.$refs.begin.$el as HTMLInputElement).focus();
-          });
+      async mounted() {
+        await mainStore.getUserProfile();
+        this.mnemonic_study_tip =
+          (mainStore.userProfile?.show_mnemonic_help ?? false) ||
+          this.$router.currentRoute.name === "mnemonic-study";
+      }
+  
+      noMoreMnemonicStudy() {
+        if (this.$router.currentRoute.name === "mnemonic-study") {
+          this.$router.push("/landing");
         }
-      } else if (this.$router.currentRoute.name === 'mnemonic-study') {
-        setTimeout(() => {
-            (this.$refs.begin.$el as HTMLInputElement).focus();
-          });
+        mainStore.updateUserHelpMnemonic(false);
+        this.mnemonic_study_tip = false;
+      }
+  
+      exit() {
+        this.mnemonic_study_tip = false;
+        if (this.$router.currentRoute.name === "mnemonic-study") {
+          this.$router.push("/landing");
+        }
       }
     }
-
-    @Watch("shouldShow")
-    onShouldShowChange(newValue: boolean, oldValue: boolean) {
-      this.getUpdate();
-    }
-
-    get show_mnemonic_help() {
-      return mainStore.userProfile?.show_mnemonic_help ?? false;
-    }
-
-    @Watch("recallPopup")
-    recallPopupChanged() {
-      this.getUpdate();
-    }
-
-    async noMoreHelp() {
-      mainStore.updateUserHelpMnemonic(false);
-      await this.hideTip();
-    }
-
-    async hideTip() {
-      mainStore.setMnemonicOnboarding(false);
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      studyStore.setShowActions();
-    }
-  }
-</script>
-
-<style></style>
+  </script>
+  
+  <style></style>
+  

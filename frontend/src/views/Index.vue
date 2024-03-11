@@ -214,6 +214,10 @@
     public download() {
       this.$router.push("/pwa");
     }
+
+    public mnemonicStudy() {
+      this.$router.push("/mnemonic-study");
+    }
   }
 </script>
 

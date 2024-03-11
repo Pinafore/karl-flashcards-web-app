@@ -55,6 +55,17 @@ const router = new VueRouter({
           },
         },
         {
+          path: "mnemonic-study",
+          name: "mnemonic-study",
+          // route level code-splitting
+          // this generates a separate chunk (about.[hash].js) for this route
+          // which is lazy-loaded when the route is visited.
+          components: {
+            default: () => import(/* webpackChunkName: "index" */ "@/views/Index.vue"),
+            dialog: () => import(/* webpackChunkName: "privacy" */ "@/views/MnemonicStudy.vue"),
+          },
+        },
+        {
           path: "pwa",
           name: "pwa",
           // route level code-splitting
