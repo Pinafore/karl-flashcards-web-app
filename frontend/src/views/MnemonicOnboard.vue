@@ -122,10 +122,6 @@
             (this.$refs.begin.$el as HTMLInputElement).focus();
           });
         }
-      } else if (this.$router.currentRoute.name === 'mnemonic-study') {
-        setTimeout(() => {
-            (this.$refs.begin.$el as HTMLInputElement).focus();
-          });
       }
     }
 
