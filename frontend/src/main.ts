@@ -67,7 +67,7 @@ if (process.env.VUE_APP_ENV == "production") {
   Vue.use(
     VueGtag,
     {
-      config: { id: "UA-170799823-1" },
+      config: { id: "G-DTXRFTV9D2" },
     },
     router,
   );

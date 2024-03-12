@@ -19,7 +19,7 @@
       if (to.path === "/login" || to.path === "/" || to.path === "/landing") {
         mainStore.setisOnHomeScreenPopup(false);
         next("/main");
-      } else if (to.path === "/privacy-irb" || to.path === "/pwa") {
+      } else if (to.path === "/privacy-irb" || to.path === "/pwa" || to.path === "/mnemonic-study") {
         mainStore.setisOnHomeScreenPopup(true);
         next();
       } else {
@@ -28,16 +28,18 @@
       }
     } else if (mainStore.isLoggedIn === false) {
       const visited = getVisited();
-      if (visited === null && to.path !== "/privacy-irb" && to.path !== "/pwa") {
+      if (visited === null && to.path !== "/privacy-irb" && to.path !== "/pwa" && to.path !== "/mnemonic-study") {
         mainStore.setisOnHomeScreenPopup(true);
-        next("/privacy-irb");
+        // where to direct the user upon first visit
+        next(process.env.VUE_APP_UNVISITED_PAGE_DIRECT);
       } else if (to.path === "/" || (to.path as string).startsWith("/main")) {
         next("/landing");
       } else if (
         to.path === "/login" ||
         to.path === "/sign-up" ||
         to.path === "/privacy-irb" ||
-        to.path === "/pwa"
+        to.path === "/pwa" ||
+        to.path === "/mnemonic-study"
       ) {
         mainStore.setisOnHomeScreenPopup(true);
         next();
