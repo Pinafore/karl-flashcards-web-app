@@ -3,9 +3,23 @@
     <v-dialog v-model="mnemonicOnboarding" width="1000">
       <v-card>
         <v-card-title>
-          <h2>Mnemonic Research Study</h2>
+          <h2>University of Maryland: Mnemonic Research Study</h2>
         </v-card-title>
         <div class="px-2">
+
+          <v-card-text>
+              We are a team of researchers at the University of Maryland who have
+              recently developed KAR³L, the first flashcard scheduler powered by machine
+              learning and natural language processing. Our hope is that with these
+              advanced techniques, we can research and develop methods to help students learn more
+              effectively. If you are interested in learning more about our mission, you
+              can visit our <a href="https://nbalepur.github.io/assets/html/KARL">research project website</a>.
+              At this point, we are conducting a funded user study to see if
+              model-generated mnemonic devices can help students more effectively
+              (described below). Come join us to help us build the next generation of
+              NLP-powered adaptive learning tools!
+          </v-card-text>
+
           <v-card-text>
             By studying this deck, you will be participating in our research study,
             which spans from 02/26/2024 to 05/26/2024. In this research study, we will
