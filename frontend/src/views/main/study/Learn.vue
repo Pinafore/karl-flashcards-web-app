@@ -1175,6 +1175,11 @@
       }
     }
 
+    public coinflip() {
+      const random_n = Math.random();
+      return (random_n > 0.5);
+    }
+
     public async setupMnemonicData() {
       const user_id = mainStore.userProfile?.id;
       if (user_id) {
@@ -1194,9 +1199,9 @@
           );
         }
       }
-      const random_n = Math.random();
-      this.mnemonicData.mnemonicComparisons[0] = random_n > 0.5 ? "1" : "2";
-      this.mnemonicData.mnemonicComparisons[1] = random_n > 0.5 ? "2" : "1";
+      const rand_coinflip = this.coinflip();
+      this.mnemonicData.mnemonicComparisons[0] = rand_coinflip ? "1" : "2";
+      this.mnemonicData.mnemonicComparisons[1] = rand_coinflip ? "2" : "1";
     }
 
     public async updateMnemonicClick() {
@@ -1221,7 +1226,9 @@
     }
 
     public async removeSubmittedFeedback() {
-      if (this.show.fact) {
+      // sometimes mark the current feedback as completed to measure intra-annotator agreement
+      const rand_coinflip = this.coinflip();
+      if (this.show.fact && rand_coinflip) {
         this.mnemonicData.feedbackFactIdsLearning.delete(this.show.fact.fact_id);
         this.mnemonicData.feedbackFactIdsLearning = new Set([
           ...this.mnemonicData.feedbackFactIdsLearning,
@@ -1229,13 +1236,17 @@
       }
     }
 
+
+
     public async submitFeedbackIndividualFeedback() {
+      const rand_coinflip = this.coinflip();
       if (this.mnemonicData.mnemonicRating == 0) {
         mainStore.addNotification({
           content: "You must make a selection to submit feedback!",
           color: "error",
         });
-      } else if (this.show.fact) {
+      } else if (this.show.fact && rand_coinflip) {
+        // sometimes mark the current feedback as completed to measure intra-annotator agreement
         this.mnemonicData.feedbackFactIdsLearning.add(this.show.fact.fact_id);
         this.mnemonicData.feedbackFactIdsLearning = new Set([
           ...this.mnemonicData.feedbackFactIdsLearning,
