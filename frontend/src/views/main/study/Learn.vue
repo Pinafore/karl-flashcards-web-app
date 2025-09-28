@@ -19,14 +19,14 @@
           {{ studyset.short_description }}
         </div>
         <div
-          v-show="show.text !== `Loading...`"
+          v-show="show.text !== 'Loading...'"
           class="headline primary--text"
           style="margin-left: .5em"
         >
           ({{ current_study_num }} of {{ num_facts }})
         </div>
         <v-spacer></v-spacer>
-        <span v-show="!inTestMode">
+        <span v-show="False">
           <v-tooltip bottom>
             <template v-slot:activator="{ on, attrs }">
               <v-btn
@@ -312,6 +312,9 @@
       <v-expansion-panels
         v-model="mnemonicData.panelOpen"
         :readonly="mnemonicData.response"
+        :disabled="false"
+        :flat="true"
+        :tile="true"
       >
         <v-expansion-panel @click="updateMnemonicClick()">
           <v-expansion-panel-header
@@ -319,8 +322,13 @@
             class="d-flex align-center justify-start py-1"
           >
             <div class="d-flex align-center justify-start title">
-              <b v-if="mnemonicData.response" class="mr-2"
+              <b
+                v-if="mnemonicData.response && !mnemonicData.isInteractiveMnemonic"
+                class="mr-2"
                 >KAR³L-generated Mnemonic Devices</b
+              >
+              <b v-else-if="mnemonicData.isInteractiveMnemonic" class="mr-2"
+                >Mnemonic Device</b
               >
               <b v-else class="mr-2">KAR³L-generated Mnemonic Device</b>
               <v-tooltip right>
@@ -399,14 +407,9 @@
                   </v-card>
                 </v-col>
 
-                <v-col rows="12">
+                <v-col class="rows">
                   <v-card-actions class="px-0 pt-3 pb-2 mx-0">
-                    <v-row class="shrink" justify="start">
-                      <v-col cols="12" md="5" class="ma-1 pa-1 py-0 pl-2">
-                        <v-btn medium @click="submitComparisonFeedback('')"
-                          >Skip (Enter)</v-btn
-                        ></v-col
-                      >
+                    <v-row class="shrink" justify="center">
                       <v-col cols="12" md="5" class="ma-1 pa-1 pl-2 py-0">
                         <v-btn medium @click="submitComparisonFeedback('equal')"
                           >Equal (Shift-Enter)</v-btn
@@ -420,28 +423,140 @@
           </v-expansion-panel-content>
 
           <v-expansion-panel-content v-else color="#e0f0ff">
-            <p class="title pb-0">
-              {{
-                show.fact &&
-                  show.fact.extra &&
-                  show.fact.extra[
-                    show.fact.deck.deck_type == "sanity_check"
-                      ? "mnemonic_1"
-                      : mnemonicData.mnemonicGroup
-                  ]
-              }}
-            </p>
+            <div style="min-height: 120px;">
+              <p class="title pb-0">
+                <span
+                  v-if="
+                    mnemonicData.isGeneratingMnemonic &&
+                      mnemonicData.isInteractiveMnemonic
+                  "
+                >
+                  {{ mnemonicData.mnemonicDisplayText }}
+                </span>
+                <span
+                  v-else-if="
+                    mnemonicData.isInteractiveMnemonic && !mnemonicData.isBuildingMnemonic
+                  "
+                >
+                  {{ mnemonicData.mnemonicDisplayText }}
+                </span>
+                <span
+                  v-else-if="
+                    mnemonicData.isInteractiveMnemonic && mnemonicData.isBuildingMnemonic
+                  "
+                >
+                  {{ mnemonicData.mnemonicDisplayText }}
+                </span>
+                <span v-else>
+                  {{
+                    show.fact &&
+                      show.fact.extra &&
+                      show.fact.extra[
+                        show.fact.deck.deck_type == "sanity_check"
+                          ? "mnemonic_1"
+                          : mnemonicData.mnemonicGroup
+                      ]
+                  }}
+                </span>
+              </p>
+            </div>
+
+            <!-- Selection Interfaces Container -->
+            <div style="min-height: 400px;">
+              <!-- Keyword Selection Interface -->
+              <v-container
+                v-if="
+                  mnemonicData.showKeywordSelection && mnemonicData.currentMnemonicData
+                "
+                class="pl-0 pb-0"
+              >
+                <v-subheader class="title pl-0 ml-0">Choose a keyword:</v-subheader>
+                <v-row>
+                  <v-col
+                    v-for="(keyword, index) in mnemonicData.currentMnemonicData.keywords"
+                    :key="index"
+                    cols="12"
+                    class="pa-1"
+                  >
+                    <v-btn
+                      block
+                      outlined
+                      :style="{
+                        backgroundColor:
+                          mnemonicData.selectedKeywordIndex === index ? '#e3f2fd' : '',
+                        borderColor:
+                          mnemonicData.selectedKeywordIndex === index ? '#1976d2' : '',
+                      }"
+                      @click="selectKeyword(index)"
+                    >
+                      {{ keyword }}
+                    </v-btn>
+                  </v-col>
+                </v-row>
+              </v-container>
+
+              <!-- Explanation Selection Interface -->
+              <v-container
+                v-if="
+                  mnemonicData.showExplanationSelection &&
+                    mnemonicData.currentMnemonicData
+                "
+                class="pl-0 pb-0"
+              >
+                <v-subheader class="title pl-0 ml-0">Choose an explanation:</v-subheader>
+                <v-row>
+                  <v-col
+                    v-for="(explanation, index) in mnemonicData.currentMnemonicData
+                      .explanations[mnemonicData.selectedKeywordIndex]"
+                    :key="index"
+                    cols="12"
+                    class="pa-1"
+                  >
+                    <v-btn
+                      block
+                      outlined
+                      :style="{
+                        backgroundColor:
+                          mnemonicData.selectedExplanationIndex === index
+                            ? '#e3f2fd'
+                            : '',
+                        borderColor:
+                          mnemonicData.selectedExplanationIndex === index
+                            ? '#1976d2'
+                            : '',
+                      }"
+                      @click="selectExplanation(index)"
+                    >
+                      {{ explanation }}
+                    </v-btn>
+                  </v-col>
+                </v-row>
+              </v-container>
+            </div>
             <v-container v-if="show.fact && !hasSubmittedFeedback()" class="pl-0 pb-0">
-              <v-subheader class="title pl-0 ml-0"
-                >Give Feedback (Optional)<v-tooltip right>
+              <v-subheader class="title pl-0 ml-0">
+                {{
+                  mnemonicData.isInteractiveMnemonic
+                    ? "Rate this mnemonic"
+                    : "Give Feedback (Optional)"
+                }}
+                <v-tooltip v-if="!mnemonicData.isInteractiveMnemonic" right>
                   <template v-slot:activator="{ on, attrs }">
                     <v-icon small class="ml-2" v-bind="attrs" v-on="on"
                       >mdi-information</v-icon
                     >
                   </template>
                   <span>Type 1-5 to rate the mnemonic</span>
-                </v-tooltip></v-subheader
-              >
+                </v-tooltip>
+                <v-tooltip v-else right>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-icon small class="ml-2" v-bind="attrs" v-on="on"
+                      >mdi-information</v-icon
+                    >
+                  </template>
+                  <span>Required: Rate from 1 (poor) to 5 (excellent)</span>
+                </v-tooltip>
+              </v-subheader>
 
               <v-rating
                 v-model="mnemonicData.mnemonicRating"
@@ -450,19 +565,23 @@
                 :size="30"
                 :model-value="5"
                 active-color="black"
-                @click.native="handleMnemonicRatingClick"
                 class="pb-5"
+                @click.native="handleMnemonicRatingClick"
               />
               <v-subheader
                 v-show="
-                  mnemonicData.mnemonicRating === 1 || mnemonicData.mnemonicRating === 2
+                  (mnemonicData.mnemonicRating === 1 ||
+                    mnemonicData.mnemonicRating === 2) &&
+                    !mnemonicData.isInteractiveMnemonic
                 "
                 class="pl-0 pt-0 title"
                 >Why is this mnemonic bad? (Optional)</v-subheader
               >
               <v-container
                 v-show="
-                  mnemonicData.mnemonicRating === 1 || mnemonicData.mnemonicRating === 2
+                  (mnemonicData.mnemonicRating === 1 ||
+                    mnemonicData.mnemonicRating === 2) &&
+                    !mnemonicData.isInteractiveMnemonic
                 "
                 fluid
                 class="pa-0"
@@ -470,10 +589,10 @@
                 <v-row>
                   <v-col>
                     <v-checkbox
+                      v-model="mnemonicData.isIncorrectDefinition"
                       class="shrink mb-2 mt-2"
                       density="compact"
                       hide-details
-                      v-model="mnemonicData.isIncorrectDefinition"
                     >
                       <template v-slot:label>
                         <span>Incorrect Definition</span>
@@ -491,10 +610,10 @@
                       </template>
                     </v-checkbox>
                     <v-checkbox
+                      v-model="mnemonicData.isDifficultToUnderstand"
                       class="shrink my-2"
                       density="compact"
                       hide-details
-                      v-model="mnemonicData.isDifficultToUnderstand"
                     >
                       <template v-slot:label>
                         <span>Difficult to Understand</span>
@@ -512,10 +631,10 @@
                       </template>
                     </v-checkbox>
                     <v-checkbox
+                      v-model="mnemonicData.isNotMemorable"
                       class="shrink mb-2 mt-2"
                       density="compact"
                       hide-details
-                      v-model="mnemonicData.isNotMemorable"
                     >
                       <template v-slot:label>
                         <span>Not Memorable</span>
@@ -533,10 +652,10 @@
                       </template>
                     </v-checkbox>
                     <v-checkbox
+                      v-model="mnemonicData.isBadPhoneticKeyword"
                       class="shrink my-2"
                       density="compact"
                       hide-details
-                      v-model="mnemonicData.isBadPhoneticKeyword"
                     >
                       <template v-slot:label>
                         <span>Bad Phonetic Keyword</span>
@@ -575,10 +694,10 @@
                       </template>
                     </v-checkbox>
                     <v-checkbox
+                      v-model="mnemonicData.isBadKeywordExplanation"
                       class="shrink my-2"
                       density="compact"
                       hide-details
-                      v-model="mnemonicData.isBadKeywordExplanation"
                     >
                       <template v-slot:label>
                         <span>Bad Keyword Explanation</span>
@@ -596,10 +715,10 @@
                       </template>
                     </v-checkbox>
                     <v-checkbox
+                      v-model="mnemonicData.isOffensive"
                       class="shrink my-2"
                       density="compact"
                       hide-details
-                      v-model="mnemonicData.isOffensive"
                     >
                       <template v-slot:label>
                         <span>Offensive</span>
@@ -615,23 +734,30 @@
                     </v-checkbox>
 
                     <v-text-field
-                      label="Other Feedback"
                       v-model="mnemonicData.otherReason"
+                      label="Other Feedback"
                     ></v-text-field>
-                    <v-btn medium @click="submitFeedbackIndividualFeedback()"
-                      >Submit (])</v-btn
-                    >
+                    <v-btn medium @click="submitFeedbackIndividualFeedback()">{{
+                      mnemonicData.isInteractiveMnemonic
+                        ? "Submit Rating (Required)"
+                        : "Submit (])"
+                    }}</v-btn>
                   </v-col>
                 </v-row>
               </v-container>
             </v-container>
-            <v-container class="pl-0 pt-2" v-else>
+            <v-container v-else class="pl-0 pt-2">
               <p class="primary--text">
-                <i
-                  >Thank you for submitting feedback! Edit feedback
+                <i v-if="!mnemonicData.isInteractiveMnemonic">
+                  Thank you for submitting feedback! Edit feedback
                   <a @click="removeSubmittedFeedback"><u>here</u></a
-                  >.</i
-                >
+                  >.
+                </i>
+                <i v-else>
+                  Thank you for rating this mnemonic! Edit rating
+                  <a @click="removeSubmittedFeedback"><u>here</u></a
+                  >.
+                </i>
               </p>
             </v-container>
           </v-expansion-panel-content>
@@ -648,11 +774,9 @@
       class="my-2 mx-3 px-3 py-4"
     >
       <v-card-title v-if="mnemonicData.cardHasMnemonic" class="py-0">
-        <span
-          >Definition for
-          <a :href="'https://www.merriam-webster.com/dictionary/' + show.text"
-            ><b>{{ show.text }}</b></a
-          ></span
+        <span>Answer for
+            <b>{{ show.text }}</b>
+          </span
         >
       </v-card-title>
       <v-card-title v-else class="py-0">Answer</v-card-title>
@@ -748,7 +872,15 @@
             sm="auto"
             class="ma-1 pa-1 py-0 shrink"
           >
-            <v-btn ref="continue" class="px-2" @click="response(mnemonicData.response)"
+            <v-btn
+              ref="continue"
+              class="px-2"
+              :disabled="
+                mnemonicData.cardHasMnemonic &&
+                  mnemonicData.isStudyingMnemonic &&
+                  !hasSubmittedFeedback()
+              "
+              @click="response(mnemonicData.response)"
               >continue (Enter)</v-btn
             >
           </v-col>
@@ -789,10 +921,16 @@
   import RecallPopup from "@/views/main/RecallPopup.vue";
   import TestPopup from "@/views/main/TestPopup.vue";
   import StudySet from "@/views/main/StudySet.vue";
-  import { integer } from "vee-validate/dist/rules";
 
   @Component({
-    components: { TestPopup, ConnectionPopup, Onboard, MnemonicOnboard, RecallPopup, StudySet },
+    components: {
+      TestPopup,
+      ConnectionPopup,
+      Onboard,
+      MnemonicOnboard,
+      RecallPopup,
+      StudySet,
+    },
   })
   export default class Learn extends Vue {
     $refs!: {
@@ -816,6 +954,7 @@
       retypedMnemonic: "",
       mnemonicClick: false,
       cardHasMnemonic: false,
+      isInteractiveMnemonic: false,
       isStudyingMnemonic: false,
       isIncorrectDefinition: false,
       isNotMemorable: false,
@@ -836,6 +975,18 @@
       mnemonicComparisons: ["", ""],
       hoverA: false,
       hoverB: false,
+      mnemonicDisplayText: "",
+      mnemonicFullText: "",
+      isGeneratingMnemonic: false,
+      generationSpeed: 25, // milliseconds per character for streaming effect
+      // Interactive mnemonic builder properties
+      isBuildingMnemonic: false,
+      currentMnemonicData: null,
+      buildStep: "pre_keyword", // pre_keyword, keyword_selection, pre_explanation, explanation_selection, definition
+      selectedKeywordIndex: -1,
+      selectedExplanationIndex: -1,
+      showKeywordSelection: false,
+      showExplanationSelection: false,
     };
 
     fromQuickStudy = true;
@@ -922,8 +1073,188 @@
 
     public checkIfMnemonicDeck(facts) {
       return facts.some(
-        (fact) => fact !== undefined && fact.deck.deck_type == "public_mnemonic",
+        (fact) =>
+          fact !== undefined &&
+          (fact.deck.deck_type == "public_mnemonic" ||
+            fact.deck.deck_type == "interactive_mnemonic"),
       );
+    }
+
+    public isCurrentFactInteractiveMnemonic(): boolean {
+      return !!(
+        this.show.fact && this.show.fact.deck.deck_type == "interactive_mnemonic"
+      );
+    }
+
+    public async generateMnemonicCharacterByCharacter() {
+      if (this.mnemonicData.isGeneratingMnemonic) {
+        return; // Already generating
+      }
+
+      this.mnemonicData.isGeneratingMnemonic = true;
+      this.mnemonicData.mnemonicDisplayText = "";
+
+      const text = this.mnemonicData.mnemonicFullText;
+
+      for (let i = 0; i < text.length; i++) {
+        this.mnemonicData.mnemonicDisplayText += text[i];
+
+        // Add a small delay between characters for streaming effect
+        await new Promise((resolve) =>
+          setTimeout(resolve, this.mnemonicData.generationSpeed),
+        );
+      }
+
+      this.mnemonicData.isGeneratingMnemonic = false;
+    }
+
+    public async startInteractiveMnemonicBuilding() {
+      if (
+        !this.show.fact ||
+        !this.show.fact.extra ||
+        !this.show.fact.extra["interactive_mnemonic_data"]
+      ) {
+        return;
+      }
+
+      this.mnemonicData.isBuildingMnemonic = true;
+      this.mnemonicData.currentMnemonicData = this.show.fact.extra[
+        "interactive_mnemonic_data"
+      ];
+      this.mnemonicData.buildStep = "pre_keyword";
+      this.mnemonicData.mnemonicDisplayText = "";
+      this.mnemonicData.showKeywordSelection = false;
+      this.mnemonicData.showExplanationSelection = false;
+      this.mnemonicData.selectedKeywordIndex = -1;
+      this.mnemonicData.selectedExplanationIndex = -1;
+
+      // Start with pre_keyword generation
+      await this.generatePreKeyword();
+    }
+
+    public async generatePreKeyword() {
+      if (!this.mnemonicData.currentMnemonicData) return;
+
+      this.mnemonicData.isGeneratingMnemonic = true;
+      this.mnemonicData.mnemonicDisplayText = "";
+      const preKeyword = this.mnemonicData.currentMnemonicData!["pre_keyword"] as string;
+
+      if (!preKeyword) return;
+
+      for (let i = 0; i < preKeyword.length; i++) {
+        this.mnemonicData.mnemonicDisplayText += preKeyword[i];
+        await new Promise((resolve) =>
+          setTimeout(resolve, this.mnemonicData.generationSpeed),
+        );
+      }
+
+      this.mnemonicData.isGeneratingMnemonic = false;
+      this.mnemonicData.showKeywordSelection = true;
+    }
+
+    public async selectKeyword(keywordIndex: number) {
+      this.mnemonicData.selectedKeywordIndex = keywordIndex;
+      this.mnemonicData.showKeywordSelection = false;
+
+      // Continue building the mnemonic with the selected keyword
+      await this.generateWithSelectedKeyword();
+    }
+
+    public async generateWithSelectedKeyword() {
+      if (
+        !this.mnemonicData.currentMnemonicData ||
+        this.mnemonicData.selectedKeywordIndex === -1
+      )
+        return;
+
+      this.mnemonicData.isGeneratingMnemonic = true;
+      const keywords = this.mnemonicData.currentMnemonicData!["keywords"] as string[];
+      const preExplanation = this.mnemonicData.currentMnemonicData!["pre_explanation"] as string;
+      
+      if (!keywords || !preExplanation) return;
+      
+      const selectedKeyword = keywords[this.mnemonicData.selectedKeywordIndex];
+      
+      if (!selectedKeyword) return;
+
+      // Add the selected keyword to the display with streaming effect
+      for (let i = 0; i < selectedKeyword.length; i++) {
+        this.mnemonicData.mnemonicDisplayText += selectedKeyword[i];
+        await new Promise((resolve) =>
+          setTimeout(resolve, this.mnemonicData.generationSpeed),
+        );
+      }
+      this.mnemonicData.mnemonicDisplayText += " ";
+
+      // Generate pre_explanation
+      for (let i = 0; i < preExplanation.length; i++) {
+        this.mnemonicData.mnemonicDisplayText += preExplanation[i];
+        await new Promise((resolve) =>
+          setTimeout(resolve, this.mnemonicData.generationSpeed),
+        );
+      }
+
+      this.mnemonicData.isGeneratingMnemonic = false;
+      this.mnemonicData.showExplanationSelection = true;
+    }
+
+    public async selectExplanation(explanationIndex: number) {
+      this.mnemonicData.selectedExplanationIndex = explanationIndex;
+      this.mnemonicData.showExplanationSelection = false;
+
+      // Show the final definition
+      await this.generateFinalDefinition();
+    }
+
+    public async generateFinalDefinition() {
+      if (
+        !this.mnemonicData.currentMnemonicData ||
+        this.mnemonicData.selectedKeywordIndex === -1 ||
+        this.mnemonicData.selectedExplanationIndex === -1
+      )
+        return;
+
+      this.mnemonicData.isGeneratingMnemonic = true;
+
+      // Get the selected explanation and definition
+      const explanations = this.mnemonicData.currentMnemonicData!["explanations"] as string[][];
+      const definitions = this.mnemonicData.currentMnemonicData!["definitions"] as string[][];
+      
+      if (!explanations || !definitions) return;
+      
+      const selectedExplanation = explanations[
+        this.mnemonicData.selectedKeywordIndex
+      ]?.[this.mnemonicData.selectedExplanationIndex];
+      const selectedDefinition = definitions[
+        this.mnemonicData.selectedKeywordIndex
+      ]?.[this.mnemonicData.selectedExplanationIndex];
+
+      if (!selectedExplanation || !selectedDefinition) return;
+
+      // Add explanation with streaming effect
+      for (let i = 0; i < selectedExplanation.length; i++) {
+        this.mnemonicData.mnemonicDisplayText += selectedExplanation[i];
+        await new Promise((resolve) =>
+          setTimeout(resolve, this.mnemonicData.generationSpeed),
+        );
+      }
+      this.mnemonicData.mnemonicDisplayText += ". ";
+
+      // Build the final mnemonic from user's selections instead of using static definition
+      // The final mnemonic should end with the answer/fact being memorized
+      const factAnswer = this.show.fact?.answer || "";
+      const finalMnemonicText = `Thus, ${factAnswer}`;
+      
+      // Add the final conclusion character by character for streaming effect
+      for (let i = 0; i < finalMnemonicText.length; i++) {
+        this.mnemonicData.mnemonicDisplayText += finalMnemonicText[i];
+        await new Promise((resolve) =>
+          setTimeout(resolve, this.mnemonicData.generationSpeed),
+        );
+      }
+
+      this.mnemonicData.isGeneratingMnemonic = false;
+      this.mnemonicData.isBuildingMnemonic = false;
     }
 
     public async mounted() {
@@ -938,8 +1269,29 @@
       studyStore.setResume(this.is_resume);
       await studyStore.getStudyFacts();
       this.mnemonicData.cardHasMnemonic = this.checkIfMnemonicDeck(this.facts);
+      this.mnemonicData.isInteractiveMnemonic = this.isCurrentFactInteractiveMnemonic();
       if (this.mnemonicData.cardHasMnemonic) {
         await this.setupMnemonicData();
+        // Auto-open panel for interactive mnemonic mode
+        if (this.mnemonicData.isInteractiveMnemonic) {
+          this.mnemonicData.panelOpen = 0;
+          // Start interactive mnemonic building if interactive data is available
+          if (
+            this.show.fact &&
+            this.show.fact.extra &&
+            this.show.fact.extra["interactive_mnemonic_data"]
+          ) {
+            this.startInteractiveMnemonicBuilding();
+          } else if (
+            this.show.fact &&
+            this.show.fact.extra &&
+            this.show.fact.extra["mnemonic"]
+          ) {
+            // Fallback to simple streaming if no interactive data
+            this.mnemonicData.mnemonicFullText = this.show.fact.extra["mnemonic"];
+            this.generateMnemonicCharacterByCharacter();
+          }
+        }
       }
       studyStore.setResume(false);
     }
@@ -1054,9 +1406,24 @@
           this.mnemonicData.isStudyingMnemonic
         ) {
           if (this.mnemonicData.response) {
-            this.submitComparisonFeedback("");
+            // No skip option - user must choose between mnemonic A or B
+            mainStore.addNotification({
+              content: "Please choose between Mnemonic A ([) or Mnemonic B (])",
+              color: "error",
+            });
           } else {
-            this.response(this.mnemonicData.response && this.showResponseBtns);
+            // Check if user needs to complete rating before continuing
+            if (
+              this.mnemonicData.isInteractiveMnemonic &&
+              !this.hasSubmittedFeedback()
+            ) {
+              mainStore.addNotification({
+                content: "You must rate the mnemonic before continuing!",
+                color: "error",
+              });
+            } else {
+              this.response(this.mnemonicData.response && this.showResponseBtns);
+            }
           }
         } else {
           this.response(
@@ -1177,7 +1544,7 @@
 
     public coinflip() {
       const random_n = Math.random();
-      return (random_n > 0.5);
+      return random_n > 0.5;
     }
 
     public async setupMnemonicData() {
@@ -1236,13 +1603,13 @@
       }
     }
 
-
-
     public async submitFeedbackIndividualFeedback() {
       const rand_coinflip = this.coinflip();
       if (this.mnemonicData.mnemonicRating == 0) {
         mainStore.addNotification({
-          content: "You must make a selection to submit feedback!",
+          content: this.mnemonicData.isInteractiveMnemonic
+            ? "You must select a rating to continue!"
+            : "You must make a selection to submit feedback!",
           color: "error",
         });
       } else if (this.show.fact && rand_coinflip) {
@@ -1299,8 +1666,41 @@
         response: null,
         panelOpen: -1,
         comparisonChoice: "",
+        mnemonicDisplayText: "",
+        mnemonicFullText: "",
+        isGeneratingMnemonic: false,
+        isBuildingMnemonic: false,
+        currentMnemonicData: null,
+        buildStep: "pre_keyword",
+        selectedKeywordIndex: -1,
+        selectedExplanationIndex: -1,
+        showKeywordSelection: false,
+        showExplanationSelection: false,
       };
+      // Update interactive mnemonic flag for current fact
+      this.mnemonicData.isInteractiveMnemonic = this.isCurrentFactInteractiveMnemonic();
       this.mnemonicData = Object.assign({}, this.mnemonicData, defaultValues);
+
+      // Auto-open panel for interactive mnemonic mode
+      if (this.mnemonicData.isInteractiveMnemonic) {
+        this.mnemonicData.panelOpen = 0;
+        // Start interactive mnemonic building if interactive data is available
+        if (
+          this.show.fact &&
+          this.show.fact.extra &&
+          this.show.fact.extra["interactive_mnemonic_data"]
+        ) {
+          this.startInteractiveMnemonicBuilding();
+        } else if (
+          this.show.fact &&
+          this.show.fact.extra &&
+          this.show.fact.extra["mnemonic"]
+        ) {
+          // Fallback to simple streaming if no interactive data
+          this.mnemonicData.mnemonicFullText = this.show.fact.extra["mnemonic"];
+          this.generateMnemonicCharacterByCharacter();
+        }
+      }
     }
 
     public async dontKnow() {
@@ -1377,9 +1777,35 @@
         this.response(response);
       } else {
         this.sendResponseNotification(response);
-        this.mnemonicData.panelOpen = response ? 0 : -1;
+        // Always open panel for interactive mnemonic mode, or when response is true
+        if (this.mnemonicData.isInteractiveMnemonic) {
+          this.mnemonicData.panelOpen = 0;
+        } else {
+          this.mnemonicData.panelOpen = response ? 0 : -1;
+        }
         this.mnemonicData.isStudyingMnemonic = true;
-        if (!response) {
+
+        // Start interactive mnemonic building for interactive mnemonic mode
+        if (
+          this.mnemonicData.isInteractiveMnemonic &&
+          this.show.fact &&
+          this.show.fact.extra &&
+          this.show.fact.extra["interactive_mnemonic_data"]
+        ) {
+          this.startInteractiveMnemonicBuilding();
+        } else if (
+          this.mnemonicData.isInteractiveMnemonic &&
+          this.show.fact &&
+          this.show.fact.extra &&
+          this.show.fact.extra["mnemonic"]
+        ) {
+          // Fallback to simple streaming if no interactive data
+          this.mnemonicData.mnemonicFullText = this.show.fact.extra["mnemonic"];
+          this.generateMnemonicCharacterByCharacter();
+        }
+
+        // Only toggle for public mnemonic mode when response is false
+        if (!this.mnemonicData.isInteractiveMnemonic && !response) {
           this.toggleMnemonic();
         }
       }
@@ -1401,6 +1827,35 @@
     }
 
     public async response(response) {
+      // Check if user needs to complete mandatory rating before continuing
+      if (
+        this.mnemonicData.cardHasMnemonic &&
+        this.mnemonicData.isStudyingMnemonic &&
+        !this.mnemonicData.isInteractiveMnemonic &&
+        this.mnemonicData.response &&
+        !this.hasSubmittedFeedback()
+      ) {
+        // For public_mnemonic mode, user must submit feedback before continuing
+        mainStore.addNotification({
+          content: "You must complete the mnemonic feedback before continuing!",
+          color: "error",
+        });
+        return;
+      }
+
+      if (
+        this.mnemonicData.cardHasMnemonic &&
+        this.mnemonicData.isInteractiveMnemonic &&
+        !this.hasSubmittedFeedback()
+      ) {
+        // For interactive_mnemonic mode, user must submit rating before continuing
+        mainStore.addNotification({
+          content: "You must rate the mnemonic before continuing!",
+          color: "error",
+        });
+        return;
+      }
+
       if (!this.mnemonicData.isStudyingMnemonic) {
         this.sendResponseNotification(response);
       }

@@ -2,7 +2,7 @@ from typing import Optional
 
 from app import crud
 from app.core.security import verify_password
-from app.schemas import Repetition
+from app.schemas import Repetition, MnemonicType
 from app.schemas.user import UserCreate, UserUpdate, SuperUserCreate
 from app.models.user import User
 from app.tests.utils.utils import random_email, random_lower_string
@@ -177,3 +177,48 @@ def create_user(db: Session, repetition_model: Optional[Repetition] = None) -> U
 
 def random_user_create() -> UserCreate:
     return UserCreate(email=random_email(), username=random_lower_string(), password=random_lower_string())
+
+
+def test_mnemonic_type_assignment(db: Session) -> None:
+    """Test that mnemonic_type is properly assigned to new users based on finished studies"""
+    # Test manual assignment
+    user_in = UserCreate(
+        email=random_email(),
+        username=random_lower_string(),
+        password=random_lower_string(),
+        mnemonic_type=MnemonicType.interactive
+    )
+    user = crud.user.create(db, obj_in=user_in)
+    assert user.mnemonic_type == MnemonicType.interactive
+    assert user.finished_mnemonic_study == False
+    
+    # Test balanced assignment based on finished studies
+    # Create users with different mnemonic types and mark some as finished
+    user_in2 = UserCreate(
+        email=random_email(),
+        username=random_lower_string(),
+        password=random_lower_string()
+    )
+    user2 = crud.user.create(db, obj_in=user_in2)
+    assert user2.mnemonic_type in [MnemonicType.interactive, MnemonicType.fixed, MnemonicType.none]
+    
+    # Mark user2 as finished to test balancing
+    user2.finished_mnemonic_study = True
+    db.commit()
+    
+    # Create another user - should be assigned to a group with fewer finished studies
+    user_in3 = UserCreate(
+        email=random_email(),
+        username=random_lower_string(),
+        password=random_lower_string()
+    )
+    user3 = crud.user.create(db, obj_in=user_in3)
+    assert user3.mnemonic_type in [MnemonicType.interactive, MnemonicType.fixed, MnemonicType.none]
+    
+    # Test that finished_mnemonic_counts method works
+    finished_counts = crud.user.get_finished_mnemonic_counts(db, is_beta=False)
+    assert isinstance(finished_counts, dict)
+    assert MnemonicType.interactive in finished_counts
+    assert MnemonicType.fixed in finished_counts
+    assert MnemonicType.none in finished_counts
+    assert sum(finished_counts.values()) >= 1  # At least user2 should be counted

@@ -125,6 +125,160 @@ def get_leaderboard(db: Session, rank_type: schemas.RankType, user: models.user,
         return e
 
 
+def get_leaderboard_local(db: Session, rank_type: schemas.RankType, user: models.user, *, skip: int = None, limit: int = 10,
+                         min_studied: int = 10, deck_id: int = None, date_start: datetime = None,
+                         date_end: datetime = None) -> schemas.Leaderboard:
+    """
+    Local leaderboard implementation that doesn't rely on external scheduler service
+    """
+    from sqlalchemy import func, and_, or_
+    from app.models.history import History
+    from app.models.fact import Fact
+    from app.models.user import User
+    from app.schemas.log import Log
+    
+    # Base query for study history
+    query = db.query(History).filter(History.log_type == Log.study)
+    
+    # Apply date filters
+    if date_start:
+        query = query.filter(History.time >= date_start)
+    if date_end:
+        query = query.filter(History.time <= date_end)
+    
+    # Apply deck filter if specified
+    if deck_id:
+        query = query.join(Fact).filter(Fact.deck_id == deck_id)
+    
+    # Calculate different metrics based on rank_type
+    if rank_type == schemas.RankType.total_seen:
+        # Count total facts studied
+        user_stats = query.with_entities(
+            History.user_id,
+            func.count(History.fact_id.distinct()).label('value')
+        ).group_by(History.user_id).having(func.count(History.fact_id.distinct()) >= min_studied).all()
+        
+    elif rank_type == schemas.RankType.new_facts:
+        # Count new facts studied (first time studying each fact)
+        subquery = db.query(History.fact_id, History.user_id, func.min(History.time).label('first_study'))\
+            .filter(History.log_type == Log.study)\
+            .group_by(History.fact_id, History.user_id).subquery()
+        
+        user_stats = db.query(subquery.c.user_id, func.count(subquery.c.fact_id).label('value'))\
+            .group_by(subquery.c.user_id)\
+            .having(func.count(subquery.c.fact_id) >= min_studied).all()
+            
+    elif rank_type == schemas.RankType.reviewed_facts:
+        # Count reviewed facts (studied more than once)
+        subquery = db.query(History.fact_id, History.user_id, func.count(History.id).label('study_count'))\
+            .filter(History.log_type == Log.study)\
+            .group_by(History.fact_id, History.user_id)\
+            .having(func.count(History.id) > 1).subquery()
+        
+        user_stats = db.query(subquery.c.user_id, func.count(subquery.c.fact_id).label('value'))\
+            .group_by(subquery.c.user_id)\
+            .having(func.count(subquery.c.fact_id) >= min_studied).all()
+            
+    elif rank_type == schemas.RankType.known_rate:
+        # Calculate overall accuracy rate
+        user_stats = query.with_entities(
+            History.user_id,
+            func.count(History.id).label('total'),
+            func.sum(func.cast(History.correct, Integer)).label('correct')
+        ).group_by(History.user_id).having(func.count(History.id) >= min_studied).all()
+        
+        # Calculate percentage
+        user_stats = [(stat.user_id, (stat.correct / stat.total * 100) if stat.total > 0 else 0) 
+                      for stat in user_stats if stat.total >= min_studied]
+        
+    elif rank_type == schemas.RankType.total_minutes:
+        # Calculate total study time in minutes
+        user_stats = query.with_entities(
+            History.user_id,
+            func.sum(func.cast(History.details['elapsed_milliseconds_text'].astext, Integer) + 
+                    func.cast(History.details['elapsed_milliseconds_answer'].astext, Integer)).label('value')
+        ).group_by(History.user_id).having(func.count(History.id) >= min_studied).all()
+        
+        # Convert milliseconds to minutes
+        user_stats = [(stat.user_id, stat.value / 60000) for stat in user_stats if stat.value is not None]
+        
+    else:
+        # Default to total_seen for unsupported rank types
+        user_stats = query.with_entities(
+            History.user_id,
+            func.count(History.fact_id.distinct()).label('value')
+        ).group_by(History.user_id).having(func.count(History.fact_id.distinct()) >= min_studied).all()
+    
+    # Sort by value descending and apply pagination
+    user_stats.sort(key=lambda x: x[1], reverse=True)
+    
+    # Apply skip and limit
+    if skip:
+        user_stats = user_stats[skip:]
+    if limit:
+        user_stats = user_stats[:limit]
+    
+    # Get user objects and create leaderboard
+    leaderboard_users = []
+    for rank, (user_id, value) in enumerate(user_stats, 1):
+        user_obj = crud.user.get(db=db, id=user_id)
+        if user_obj:
+            leaderboard_users.append(schemas.LeaderboardUser(
+                user=user_obj,
+                value=value,
+                rank=rank
+            ))
+    
+    # Find current user's place
+    user_place = None
+    current_user_stats = None
+    for rank, (user_id, value) in enumerate(user_stats, 1):
+        if user_id == user.id:
+            user_place = rank
+            current_user_stats = (user_id, value)
+            break
+    
+    # Create headers
+    headers = [schemas.DataTypeHeader(text="Rank", value="rank", width="1%"),
+               schemas.DataTypeHeader(text="User", value="user.username", width="30%")]
+    
+    if rank_type == schemas.RankType.total_seen:
+        headers.append(schemas.DataTypeHeader(text="Total Studied", value="value"))
+    elif rank_type == schemas.RankType.new_facts:
+        headers.append(schemas.DataTypeHeader(text="New Facts Studied", value="value"))
+    elif rank_type == schemas.RankType.reviewed_facts:
+        headers.append(schemas.DataTypeHeader(text="Reviewed Facts Studied", value="value"))
+    elif rank_type == schemas.RankType.known_rate:
+        headers.append(schemas.DataTypeHeader(text="Total Recall (%)", value="value"))
+    elif rank_type == schemas.RankType.total_minutes:
+        headers.append(schemas.DataTypeHeader(text="Minutes Spent", value="value"))
+    else:
+        headers.append(schemas.DataTypeHeader(text="Value", value="value"))
+    
+    # Create name and details
+    name = create_name(db, date_start, date_end, deck_id)
+    details = create_details(min_studied, rank_type)
+    
+    # Create leaderboard
+    leaderboard = schemas.Leaderboard(
+        leaderboard=leaderboard_users,
+        total=len(user_stats),
+        name=name,
+        rank_type=rank_type,
+        headers=headers,
+        details=details,
+        user_place=user_place,
+        skip=skip or 0,
+        limit=limit
+    )
+    
+    # Add current user if they're in the leaderboard
+    if current_user_stats:
+        leaderboard.user = crud.user.get(db=db, id=current_user_stats[0])
+    
+    return leaderboard
+
+
 def create_name(db: Session, date_start: datetime = None, date_end: datetime = None, deck_id: int = None):
     name = ""
 

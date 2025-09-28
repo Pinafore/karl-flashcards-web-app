@@ -7,6 +7,7 @@ from .user import User, UserCreate, UserInDB, UserUpdate, SuperUserCreate, Super
 from .deck import Deck, DeckCreate, DeckUpdate, DeckInDB, SuperDeckCreate, SuperDeckUpdate
 from .history import History, HistoryCreate, HistoryUpdate, TestHistoryCreate, TestHistoryUpdate
 from .repetition import Repetition
+from .mnemonic_type import MnemonicType
 from .suspend_type import SuspendType
 from .permission import Permission
 from .log import Log

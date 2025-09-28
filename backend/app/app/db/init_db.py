@@ -40,6 +40,7 @@ def init_db(db: Session) -> None:
 
         crud.deck.assign_owner(db, db_obj=deck, user=user)
         logger.info("Sending celery task")
-        celery_app.send_task("app.worker.load_jeopardy_facts")
-        celery_app.send_task("app.worker.load_quizbowl_facts")
-        celery_app.send_task("app.worker.create_test_mode_facts", kwargs={"filename": settings.TEST_MODE_FILE})
+        # celery_app.send_task("app.worker.load_jeopardy_facts")
+        # celery_app.send_task("app.worker.load_quizbowl_facts")
+        # celery_app.send_task("app.worker.create_test_mode_facts", kwargs={"filename": settings.TEST_MODE_FILE})
+        celery_app.send_task("app.worker.create_interactive_mnemonic_deck")

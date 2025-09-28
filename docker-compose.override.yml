@@ -75,6 +75,8 @@ services:
         INSTALL_JUPYTER: ${INSTALL_JUPYTER-true}
 
   frontend:
+    env_file:
+      - ./frontend/.env
     build:
       context: ./frontend
       args:

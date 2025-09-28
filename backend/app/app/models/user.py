@@ -20,6 +20,7 @@ from app.db.base_class import Base
 
 # from .user_deck import user_deck
 from app.schemas import DeckType, Repetition
+from app.schemas.mnemonic_type import MnemonicType
 from app.core.config import settings
 from .deck import Deck  # noqa: F401
 from .studyset import StudySet
@@ -51,6 +52,8 @@ class User(Base):
     create_date = Column(TIMESTAMP(timezone=True))
     beta_user = Column(Boolean(), default=False, nullable=False)
     recall_target = Column(SmallInteger, default=-1, nullable=False)
+    mnemonic_type = Column(Enum(MnemonicType), default=MnemonicType.none, nullable=False)
+    finished_mnemonic_study = Column(Boolean(), default=False, nullable=False)
 
     default_deck = relationship("Deck", foreign_keys=default_deck_id)
     owned_facts = relationship("Fact", back_populates="owner")

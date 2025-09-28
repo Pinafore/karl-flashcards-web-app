@@ -108,14 +108,10 @@ def read_leaderboard(
     Retrieves leaderboard of users since the specified start time, or all time otherwise
     """
 
-    top_users = interface.statistics.get_leaderboard(db=db, user=current_user, rank_type=rank_type, skip=skip,
+    top_users = interface.statistics.get_leaderboard_local(db=db, user=current_user, rank_type=rank_type, skip=skip,
                                                      limit=limit,
                                                      min_studied=min_studied, deck_id=deck_id, date_start=date_start,
                                                      date_end=date_end)
-    if isinstance(top_users, requests.exceptions.RequestException):
-        raise HTTPException(status_code=555, detail="Connection to scheduler is down")
-    if isinstance(top_users, json.decoder.JSONDecodeError):
-        raise HTTPException(status_code=556, detail="Scheduler malfunction")
     return top_users
 
 

@@ -16,26 +16,28 @@
         </v-card-title>
         <div class="px-2">
           <v-card-text class="subtitle-1">
-              We are a team of researchers at the University of Maryland who have
-              recently developed KAR³L, the first flashcard scheduler powered by machine
-              learning and natural language processing (NLP). Our hope is that with these
-              advanced techniques, we can research and develop methods to help students learn more
-              effectively. If you are interested in learning more about our mission, you
-              can visit our <a target="_blank" href="https://nbalepur.github.io/assets/html/KARL">research project website</a>
-              .
-              At this point, we are conducting a funded user study to see if
-              model-generated mnemonic devices can help students more effectively
-              (described below). Come join us to help us build the next generation of
-              NLP-powered adaptive learning tools!
+            We are a team of researchers at the University of Maryland who have recently
+            developed KAR³L, the first flashcard scheduler powered by machine learning
+            and natural language processing (NLP). Our hope is that with these advanced
+            techniques, we can research and develop methods to help students learn more
+            effectively. If you are interested in learning more about our mission, you
+            can visit our
+            <a target="_blank" href="https://nbalepur.github.io/assets/html/KARL"
+              >research project website</a
+            >
+            . At this point, we are conducting a funded user study to see if
+            model-generated mnemonic devices can help students more effectively
+            (described below). Come join us to help us build the next generation of
+            NLP-powered adaptive learning tools!
           </v-card-text>
 
           <v-card-text class="subtitle-1">
-            If you study our deck titled "GRE Vocab" in KAR³L, you will be participating in our
-            research study with the University of Maryland, which spans from 02/26/2024
-            to 05/26/2024. In this research study, we will be collecting your feedback
-            to improve our mnemonic device generation. None of your personal information
-            will be collected or released. Users participating in our study are eligible
-            to receive
+            If you study our deck titled "GRE Vocab" in KAR³L, you will be participating
+            in our research study with the University of Maryland, which spans from
+            02/26/2024 to 05/26/2024. In this research study, we will be collecting your
+            feedback to improve our mnemonic device generation. None of your personal
+            information will be collected or released. Users participating in our study
+            are eligible to receive
             <b>monetary rewards</b>, summarized below. Full instructions for our user
             study can be found
             <a
@@ -119,7 +121,7 @@
     exit() {
       this.mnemonic_study_tip = false;
       if (this.$router.currentRoute.name === "mnemonic-study") {
-        console.log('pushing');
+        console.log("pushing");
         this.$router.push("/landing");
       }
     }

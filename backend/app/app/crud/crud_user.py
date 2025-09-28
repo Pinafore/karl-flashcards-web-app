@@ -1,6 +1,7 @@
 from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, Tuple, Union, List
+import random
 
 import requests
 import json
@@ -14,7 +15,7 @@ from app.crud.base import CRUDBase
 from app.interface.reassignment import change_assignment
 from app.interface.scheduler import set_user_settings
 from app.models.user import User
-from app.schemas import Repetition, Log
+from app.schemas import Repetition, MnemonicType, Log
 from app.schemas.user import UserCreate, UserUpdate, SuperUserCreate, SuperUserUpdate
 from app.schemas.history import HistoryCreate
 from sqlalchemy.orm import Session
@@ -41,8 +42,11 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
     def create(self, db: Session, *, obj_in: UserCreate) -> User:
         model, assignment_method = self.assign_scheduler_to_new_user(db, obj_in)
+        mnemonic_type, mnemonic_assignment_method = self.assign_mnemonic_type_to_new_user(db, obj_in)
         logger.info(f"model: {model}")
         logger.info(f"assignment_method: {assignment_method}")
+        logger.info(f"mnemonic_type: {mnemonic_type}")
+        logger.info(f"mnemonic_assignment_method: {mnemonic_assignment_method}")
         db_obj = User(
             email=obj_in.email,
             hashed_password=get_password_hash(obj_in.password),
@@ -50,14 +54,16 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             is_active=obj_in.is_active,
             repetition_model=model,
             recall_target=obj_in.recall_target,
+            mnemonic_type=mnemonic_type,
+            finished_mnemonic_study=False,
         )
         db.add(db_obj)
         db.commit()
         deck = crud.deck.get(db=db, id=settings.DEFAULT_DECK_ID)
         crud.deck.assign_viewer(db=db, db_obj=deck, user=db_obj)
-        db.refresh(db_obj)
+        #db.refresh(db_obj)
         # Assign test
-        crud.deck.assign_test_decks(db=db, user=db_obj)
+        #crud.deck.assign_test_decks(db=db, user=db_obj)
         db.refresh(db_obj)
         change_assignment(user=db_obj, repetition_model=model)
         return db_obj
@@ -75,6 +81,23 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
         return keys_list[int(np.argmax(np.random.dirichlet(params)))], "dirichlet"
 
+    def assign_mnemonic_type_to_new_user(self, db: Session, obj_in: UserCreate) -> Tuple[MnemonicType, str]:
+        if obj_in.mnemonic_type:
+            return obj_in.mnemonic_type, "assigned"
+        
+        # Get counts of finished studies by mnemonic type
+        finished_counts = self.get_finished_mnemonic_counts(db, is_beta=False)
+        
+        # Find the mnemonic type(s) with the least finished studies
+        min_finished = min(finished_counts.values())
+        least_finished_types = [mnemonic_type for mnemonic_type, count in finished_counts.items() if count == min_finished]
+        
+        # Randomly select from the tied least-finished types
+        selected_type = random.choice(least_finished_types)
+        
+        logger.info(f"Assigning mnemonic_type: {selected_type} (finished counts: {finished_counts})")
+        return selected_type, "balanced_by_finished"
+
     def super_user_create(self, db: Session, *, obj_in: SuperUserCreate) -> User:
         db_obj = User(
             email=obj_in.email,
@@ -85,6 +108,8 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             repetition_model=obj_in.repetition_model,
             beta_user=obj_in.beta_user,
             recall_target=obj_in.recall_target,
+            mnemonic_type=obj_in.mnemonic_type if hasattr(obj_in, 'mnemonic_type') and obj_in.mnemonic_type else MnemonicType.none,
+            finished_mnemonic_study=obj_in.finished_mnemonic_study if hasattr(obj_in, 'finished_mnemonic_study') and obj_in.finished_mnemonic_study is not None else False,
         )
         db.add(db_obj)
         db.commit()
@@ -192,6 +217,24 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         for found_user in all_users:
             scheduler_counts[found_user.repetition_model] += 1  # type: ignore
         return scheduler_counts
+
+    def get_mnemonic_counts(self, db: Session, is_beta: Optional[bool] = None) -> Dict[MnemonicType, int]:
+        all_users = self.get_all_with_status(db, is_beta)
+
+        mnemonic_counts = {mnemonic_type: 0 for mnemonic_type in MnemonicType}
+        for found_user in all_users:
+            mnemonic_counts[found_user.mnemonic_type] += 1  # type: ignore
+        return mnemonic_counts
+
+    def get_finished_mnemonic_counts(self, db: Session, is_beta: Optional[bool] = None) -> Dict[MnemonicType, int]:
+        """Get counts of users who have finished mnemonic studies by mnemonic type"""
+        all_users = self.get_all_with_status(db, is_beta)
+
+        finished_counts = {mnemonic_type: 0 for mnemonic_type in MnemonicType}
+        for found_user in all_users:
+            if found_user.finished_mnemonic_study:
+                finished_counts[found_user.mnemonic_type] += 1  # type: ignore
+        return finished_counts
 
     def make_current_users_beta_testers(self, db: Session):
         db.query(self.model).update({User.beta_user: True}, synchronize_session='evaluate')

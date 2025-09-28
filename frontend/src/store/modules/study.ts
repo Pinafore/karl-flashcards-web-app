@@ -278,7 +278,7 @@ export default class StudyModule extends VuexModule {
     this.setStudySet(null);
     this.clearTimer();
     try {
-      if (process.env.VUE_APP_TEST_MODE_ENABLED == '1') {
+      if (process.env.VUE_APP_TEST_MODE_ENABLED == "1") {
         const response = await api.checkIfInTestMode(mainStore.token);
         this.setInTestMode(response.data);
       } else {

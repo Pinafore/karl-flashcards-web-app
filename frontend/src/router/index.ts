@@ -62,7 +62,8 @@ const router = new VueRouter({
           // which is lazy-loaded when the route is visited.
           components: {
             default: () => import(/* webpackChunkName: "index" */ "@/views/Index.vue"),
-            dialog: () => import(/* webpackChunkName: "privacy" */ "@/views/MnemonicStudy.vue"),
+            dialog: () =>
+              import(/* webpackChunkName: "privacy" */ "@/views/MnemonicStudy.vue"),
           },
         },
         {

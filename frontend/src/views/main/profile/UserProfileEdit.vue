@@ -42,7 +42,10 @@
               </v-radio>
             </v-radio-group> -->
             <v-checkbox v-model="showTips" label="Show Tips"></v-checkbox>
-            <v-checkbox v-model="showMnemonicTips" label="Show Memonic Tips"></v-checkbox>
+            <v-checkbox
+              v-model="showMnemonicTips"
+              label="Show Memonic Tips"
+            ></v-checkbox>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>

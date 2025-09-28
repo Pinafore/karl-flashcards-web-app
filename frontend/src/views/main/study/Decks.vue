@@ -65,13 +65,21 @@
           </td>
           <td>
             {{ item.title }}
-            <v-tooltip color="#302f2f" right v-if="item.deck_type == 'public_mnemonic'">
+            <v-tooltip v-if="item.deck_type == 'public_mnemonic'" color="#302f2f" right>
               <template v-slot:activator="{ on, attrs }">
-                <v-icon medium class="ml-0 mb-1" v-bind="attrs" v-on="on" color="#e0b310"
+                <v-icon
+                  medium
+                  class="ml-0 mb-1"
+                  v-bind="attrs"
+                  color="#e0b310"
+                  v-on="on"
                   >mdi-alert</v-icon
                 >
               </template>
-              <span>This deck contains automatically generated mnemonic devices from a large language model, and can only be studied on its own!</span>
+              <span
+                >This deck contains automatically generated mnemonic devices from a
+                large language model, and can only be studied on its own!</span
+              >
             </v-tooltip>
           </td>
         </tr>

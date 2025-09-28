@@ -7,6 +7,7 @@ from pydantic.utils import GetterDict
 from .deck import Deck
 from .fact import Fact
 from .repetition import Repetition
+from .mnemonic_type import MnemonicType
 
 
 # Shared properties
@@ -21,6 +22,8 @@ class UserBase(BaseModel):
     pwa_tip: Optional[bool] = None
     beta_user: Optional[bool] = None
     recall_target: Optional[int] = None
+    mnemonic_type: Optional[MnemonicType] = None
+    finished_mnemonic_study: Optional[bool] = None
 
 
 # Properties to receive via API on creation
@@ -35,6 +38,7 @@ class UserCreate(UserBase):
 class SuperUserCreate(UserCreate):
     is_superuser: bool = False
     beta_user: bool = False
+    mnemonic_type: Optional[MnemonicType] = None
 
 
 # Properties to receive via API on update
@@ -59,6 +63,8 @@ class UserInDBBase(UserBase):
     pwa_tip: bool
     beta_user: bool
     recall_target: int
+    mnemonic_type: MnemonicType
+    finished_mnemonic_study: bool
 
     class Config:
         orm_mode = True

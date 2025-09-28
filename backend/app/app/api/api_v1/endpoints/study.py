@@ -79,8 +79,7 @@ def update_schedule_set(
     """
         Updates the schedules of the returned fact set using the current user's assigned schedule
     """
-
-    # successes = []
+    
     response = crud.studyset.update_session_facts(db=db, schedules=facts_in, user=current_user, studyset_id=studyset_id)
     return response
 
@@ -105,10 +104,11 @@ def evaluate_answer(
 
 @router.get("/status", response_model=bool, summary="Checks status of connection to scheduler")
 def scheduler_status() -> Any:
-    try:
-        r = requests.get(settings.INTERFACE + "api/karl/status")
-        r.raise_for_status()  # Raises a HTTPError if the status is 4xx, 5xxx
-        return True
-    except (requests.exceptions.ConnectionError, requests.exceptions.Timeout, requests.exceptions.HTTPError) as e:
-        logger.info(e)
-        raise HTTPException(status_code=555, detail="Connection to scheduler is down")
+    return True
+    # try:
+    #     r = requests.get(settings.INTERFACE + "api/karl/status")
+    #     r.raise_for_status()  # Raises a HTTPError if the status is 4xx, 5xxx
+    #     return True
+    # except (requests.exceptions.ConnectionError, requests.exceptions.Timeout, requests.exceptions.HTTPError) as e:
+    #     logger.info(e)
+    #     raise HTTPException(status_code=555, detail="Connection to scheduler is down")

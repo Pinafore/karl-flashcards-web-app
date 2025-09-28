@@ -287,3 +287,80 @@ def create_test_mode_facts(filename: str) -> str:
         return message
     db.close()
     return f"superuser does not exist yet"
+
+
+@celery_app.task()
+def create_interactive_mnemonic_deck(filename: str = "./data/interactive_mnemonic.json") -> str:
+    """
+    Load interactive mnemonic deck from JSON file.
+    """
+    db: Session = SessionLocal()
+    super_user = crud.user.get_by_email(db, email=settings.FIRST_SUPERUSER)
+    if super_user:
+        dirname = os.path.dirname(os.path.abspath(__file__))
+        filename = os.path.join(dirname, filename)
+        
+        try:
+            with open(filename, "r") as file:
+                json_data = json.load(file)
+        except FileNotFoundError:
+            db.close()
+            return f"File {filename} not found"
+        except json.JSONDecodeError as e:
+            db.close()
+            return f"Invalid JSON in {filename}: {str(e)}"
+        
+        fact_count = 0
+        deck_count = 0
+        created_decks = set()
+        
+        for fact_data in json_data:
+            # Validate required fields
+            if not all(key in fact_data for key in ["text", "answer", "deck"]):
+                continue
+                
+            # Create or find the deck
+            deck_name = fact_data["deck"]
+            deck = crud.deck.find_or_create(
+                db,
+                proposed_deck=deck_name,
+                user=super_user,
+                deck_type=DeckType.interactive_mnemonic,  # Use public_mnemonic for interactive mnemonic decks
+            )
+            
+            if deck_name not in created_decks:
+                created_decks.add(deck_name)
+                deck_count += 1
+            
+            # Prepare mnemonic data for extra field
+            mnemonic_data = fact_data.get("mnemonic", {})
+            extra_data = fact_data.get("extra", {})
+            
+            # Add mnemonic information to extra data
+            if mnemonic_data:
+                extra_data["mnemonic"] = {
+                    "text": mnemonic_data.get("text", ""),
+                    "keyword": mnemonic_data.get("keyword", ""),
+                    "explanation": mnemonic_data.get("explanation", ""),
+                    "type": mnemonic_data.get("type", "other")
+                }
+                extra_data["type"] = "interactive_mnemonic"
+            
+            # Create the fact
+            fact_in = schemas.FactCreate(
+                text=fact_data["text"],
+                answer=fact_data["answer"],
+                deck_id=deck.id,
+                answer_lines=fact_data.get("answer_lines", [fact_data["answer"]]),
+                identifier=fact_data.get("identifier", ""),
+                category=fact_data.get("category", ""),
+                extra=extra_data,
+            )
+            
+            crud.fact.create_with_owner(db, obj_in=fact_in, user=super_user)
+            fact_count += 1
+        
+        db.close()
+        return f"Interactive mnemonic deck loaded: {fact_count} facts across {deck_count} decks"
+    db.close()
+    return f"superuser does not exist yet"

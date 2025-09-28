@@ -25,6 +25,7 @@ from datetime import datetime, timedelta
 from fastapi import HTTPException
 from sentry_sdk import capture_exception
 from app.utils.utils import logger, log_time, time_it, TimeContainer
+import random
 
 
 class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.StudySetUpdate]):
@@ -136,7 +137,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         print('\n\nNum Test Studies:', num_test_deck_studies)
         
         # return early if test mode is disabled
-        if not settings.TEST_MODE_ENABLED:
+        if True:
             next_set_type = schemas.SetType.normal
         elif num_test_deck_studies > settings.POST_TEST_TRIGGER + 1:
             raise HTTPException(status_code=576, detail="USER STUDIED MORE TEST DECKS THAN THEY SHOULD HAVE")
@@ -281,7 +282,7 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         print('Deck IDs:', deck_ids)
 
         show_hidden = setType == schemas.SetType.post_test or setType == schemas.SetType.test
-        is_mnemonic_deck = (decks[0].deck_type == schemas.DeckType.public_mnemonic) if decks else False
+        is_mnemonic_deck = (decks[0].deck_type in {schemas.DeckType.public_mnemonic}) if decks else False
         filters = schemas.FactSearch(deck_ids=deck_ids, limit=send_limit, studyable=True, show_hidden=show_hidden)
         
         if repetition_model is None:
@@ -291,12 +292,22 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
             else:
                 repetition_model = user.repetition_model
 
-        print('Final repetition model:', repetition_model)
-
         # create all types of queries
         base_facts_query = crud.fact.build_facts_query(db=db, user=user, filters=filters)
         old_facts_query = crud.helper.filter_only_reviewed_facts(query=base_facts_query, user_id=user.id, log_type=schemas.Log.study)
         new_facts_query = crud.helper.filter_only_new_facts(query=base_facts_query, user_id=user.id, log_type=schemas.Log.study)
+
+        # for the interactive mnemonic deck, just do random shuffling
+        print(decks[0].deck_type, schemas.DeckType.interactive_mnemonic, decks and decks[0].deck_type == schemas.DeckType.interactive_mnemonic)
+        if decks and decks[0].deck_type == schemas.DeckType.interactive_mnemonic:
+            facts = base_facts_query.all()
+            shuffle(facts)
+            study_set_create = schemas.StudySetCreate(repetition_model=repetition_model, user_id=user.id, debug_id='', set_type=schemas.SetType.normal)
+            logger.info(f"Study set create: {study_set_create}")
+            study_set = self.create_with_facts(db, obj_in=study_set_create,
+                                        decks=decks,
+                                        facts=facts)
+            return study_set
         
         eligible_facts = []
         if repetition_model == schemas.Repetition.karl:
@@ -430,11 +441,19 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
         studyset_completed = studyset.completed
         if studyset.set_type == schemas.SetType.post_test and studyset.completed:
             crud.deck.mark_user_deck_completed(db=db, db_obj=studyset.decks[0], user=user)
+        
+        # Mark user as having completed the study if this is a completed study session
+        if studyset_completed and not user.finished_mnemonic_study:
+            user.finished_mnemonic_study = True
+            db.commit()
+            logger.info(f"Marked user {user.id} as having completed mnemonic study")
+        
         return schemas.ScheduleResponse(session_complete=studyset_completed)
 
     def record_study(
             self, db: Session, *, user: models.User, session_fact: models.Session_Fact, schedule: schemas.Schedule, repetition_model: schemas.Repetition
     ) -> models.History:
+
         try:
             response = schedule.response
             date_studied = datetime.now(timezone('UTC')).isoformat()
@@ -473,6 +492,11 @@ class CRUDStudySet(CRUDBase[models.StudySet, schemas.StudySetCreate, schemas.Stu
                     details=details,
                 )
             history = crud.history.create(db=db, obj_in=history_in)
+
+            # early exit for the interactive mnemonic deck --- scheduler is not working
+            if session_fact.deck.deck_type == schemas.DeckType.interactive_mnemonic:
+                return history
+
             payload_update = schemas.UpdateRequestV2(
                 user_id=user.id,
                 fact_id=fact.fact_id,
